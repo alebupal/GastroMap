@@ -60,9 +60,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Soporte PWA instalable en móviles y desktop (`manifest.json` y metadatos de aplicación).
   - Web Share Target para recibir enlaces compartidos directamente desde Google Maps, Instagram o navegador al formulario de alta rápida `/new`.
 - **Panel Administrativo Avanzado y Gestión de Sitios**:
-  - Pestaña de gestión de usuarios (`UsersManager`) con alta manual directa (nombre, @username, email, contraseña y rol).
+  - Pestaña de gestión de usuarios (`UsersManager`) con alta manual directa (nombre, @username, email, contraseña y rol), buscador en tiempo real y **eliminación múltiple masiva por checkboxes** con protección de cuenta propia.
   - Pestaña de tabla completa de sitios (`PlacesTableManager`) con buscador, filtros y eliminación masiva seleccionable por checkboxes.
-  - Seeder mundial de 20 restaurantes reales de prueba con comentarios, estados, ratings y favoritos inyectados automáticamente para el admin.
+  - Seeder mundial completo de 50 restaurantes reales de prueba (España y mundial: París, Tokio, Roma, Nueva York, Bangkok, Buenos Aires, Lima, etc.) con 8 usuarios comunitarios colaboradores, hilos de comentarios cruzados, estados personales, ratings y notas privadas.
 - **UX Adaptativa y Navegación Refinada**:
   - Scroll horizontal con ratón (`HorizontalScroll`) en categorías, estados y etiquetas.
   - Conmutador entre fila scrollable y vista cuadrícula para categorías cuando hay muchas.

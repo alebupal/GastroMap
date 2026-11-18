@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq, ne, and, sql } from "drizzle-orm";
+import { eq, ne, and, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { users, type User } from "@/db/schema";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
@@ -266,4 +266,25 @@ export async function createUserDirectlyAction(formData: FormData) {
 
   revalidatePath("/");
   return { success: true };
+}
+
+/**
+ * Elimina múltiples usuarios simultáneamente (solo admin)
+ * Asegura que el administrador actual no se elimine a sí mismo
+ */
+export async function deleteMultipleUsersAction(userIds: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden realizar esta acción." };
+  }
+
+  // Filtrar para evitar que el usuario actual se elimine a sí mismo
+  const validIds = userIds.filter((id) => id !== currentUser.id);
+  if (validIds.length === 0) {
+    return { error: "No se seleccionó ningún usuario válido para eliminar (no puedes eliminar tu propia cuenta)." };
+  }
+
+  await db.delete(users).where(inArray(users.id, validIds));
+  revalidatePath("/");
+  return { success: true, count: validIds.length };
 }

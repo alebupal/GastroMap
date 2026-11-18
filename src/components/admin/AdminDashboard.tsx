@@ -15,6 +15,7 @@ interface AdminDashboardProps {
   initialTags: { id: string; name: string; placesCount: number }[];
   allPlaces?: PlaceWithDetails[];
   cartoApiKey?: string | null;
+  currentUserId?: string;
 }
 
 export function AdminDashboard({
@@ -22,6 +23,7 @@ export function AdminDashboard({
   initialTags,
   allPlaces = [],
   cartoApiKey,
+  currentUserId,
 }: AdminDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
@@ -92,7 +94,7 @@ export function AdminDashboard({
           {/* Contenido de la pestaña activa */}
           <div className="pt-2">
             {activeTab === "places" && <PlacesTableManager places={allPlaces} />}
-            {activeTab === "users" && <UsersManager />}
+            {activeTab === "users" && <UsersManager currentUserId={currentUserId} />}
             {activeTab === "taxonomy" && (
               <TaxonomyManager initialOccasions={initialOccasions} initialTags={initialTags} />
             )}

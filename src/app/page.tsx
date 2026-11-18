@@ -66,6 +66,7 @@ export default async function Home() {
             initialTags={tagsList}
             allPlaces={places}
             cartoApiKey={cartoApiKey}
+            currentUserId={currentUser.id}
           />
         )}
       </div>

@@ -55,9 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Installable PWA support on mobile and desktop (`manifest.json` and web app metadata).
   - Web Share Target receiving links directly from Google Maps or social media to the `/new` ingestion form.
 - **Admin Dashboard Tools & Places Management**:
-  - Direct manual user creation (`UsersManager`) with name, @username, email, password, and role.
+  - Direct manual user creation (`UsersManager`) with name, @username, email, password, role, real-time search, and **batch/multiple deletion via checkboxes** with self-account protection.
   - Places table view (`PlacesTableManager`) with real-time filters and multi-select bulk delete.
-  - Worldwide 20-place demo dataset with comments, statuses, ratings, and favorites for the administrator.
+  - Worldwide 50-place demo dataset with 8 community contributors, multi-user comments thread, statuses, ratings, and private notes.
 - **Adaptive UX & Navigation**:
   - Horizontal mouse scroll (`HorizontalScroll`) across occasions, status filters, and popular tags.
   - Responsive grid/row toggle for occasions.
