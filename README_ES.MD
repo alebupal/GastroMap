@@ -34,8 +34,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **📱 Experiencia Móvil (PWA) y Modo Oscuro / Claro:**
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App.
-  * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente y sin parpadeo.
-  * Interfaz optimizada para uso táctil con una sola mano, alternador dinámico Mapa/Lista y carruseles con scroll fluido.
+  * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC) y con paletas cromáticas de alto contraste optimizadas para lectura diurna y nocturna.
+  * Interfaz optimizada para uso táctil con una sola mano, cabecera responsive ultra-compacta para teléfonos estrechos, alternador dinámico Mapa/Lista y carruseles con scroll fluido.
 
 * **🛠️ Panel de Administración y Limpieza:**
   * Tabla interactiva de gestión global de establecimientos con buscador y eliminación múltiple masiva.

@@ -67,10 +67,12 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Scroll horizontal con ratón (`HorizontalScroll`) en categorías, estados y etiquetas.
   - Conmutador entre fila scrollable y vista cuadrícula para categorías cuando hay muchas.
   - Panel expandible con buscador para etiquetas populares.
-- **Modo Oscuro y Modo Claro**:
+- **Modo Oscuro y Modo Claro Refinado**:
   - Conmutador interactivo de tema ☀️ / 🌙 en la cabecera con persistencia en `localStorage` y detección automática de preferencias del sistema.
   - Prevención de parpadeo (FOUC) mediante script inline en `<head>` y estilos adaptativos CSS / Tailwind `dark:`.
   - Adaptación visual completa en modo claro y modo oscuro para tarjetas de locales, explorador, mapas, tablas y modales.
+  - Rediseño del contraste y paleta de colores para etiquetas y categorías en modo claro: fondos blancos limpios sin pegotes oscuros, estados activos en ámbar cálido con tipografía de alto contraste (`text-amber-900 font-bold`).
+  - Restauración del degradado profundo y sombra interior original en la barra de búsqueda en modo oscuro.
 - **Borrado en Cascada e Integridad Referencial Estricta**:
   - Purga atómica garantizada al eliminar un establecimiento: eliminación en cascada de comentarios (`placeComments`), colecciones de usuario (`userPlaces`), ocasiones (`placeOccasions`) y etiquetas asociadas (`placeTags`).
   - Purga atómica total al eliminar usuarios (individual o masivamente): borrado completo de comentarios propios, colecciones, sesiones e invitaciones, así como de los locales creados por el usuario con todas sus dependencias relacionadas, impidiendo registros huérfanos o foráneos en la base de datos.
@@ -78,6 +80,7 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Eliminación masiva de categorías y etiquetas seleccionadas mediante checkboxes con conteo en tiempo real.
   - Botón «🧹 Eliminar vacías» con modal de confirmación detallado que enumera las categorías o etiquetas sin locales antes de eliminarlas.
 - **Optimización Móvil y Marcadores de Mapa**:
+  - Cabecera de usuario (`UserHeader`) optimizada para dispositivos móviles estrechos (320px–360px): avatar compacto con acceso a ajustes ⚙️, botón de salir responsive (`🚪` en móvil, texto en desktop) y ocultación de elementos secundarios.
   - Iconos de mapa Leaflet optimizados con silueta vectorial SVG y capa HTML nativa para emojis, garantizando visibilidad en todos los navegadores y sistemas móviles (Android/iOS).
   - Vistas adaptadas para smartphones: conmutador rápido «🗺️ Mapa» y «📋 Lista», `ResizeObserver` para recálculo de dimensiones del mapa sin pérdidas de tiles y scrolls táctiles fluidos.
 - **Donación PayPal y Enlaces al estilo TVSpy**:

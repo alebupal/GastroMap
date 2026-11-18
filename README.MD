@@ -36,8 +36,8 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **📱 Mobile Experience (PWA) & Dark/Light Mode:**
   * Installable on iOS and Android home screens as a Progressive Web App.
-  * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
-  * Single-hand touch optimization, mobile map/list split toggle, and smooth swipe carousels.
+  * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage and high-contrast color palettes tailored for day and night use.
+  * Single-hand touch optimization, ultra-compact header for narrow smartphone screens, mobile map/list split toggle, and smooth swipe carousels.
 
 * **🛠️ Admin Dashboard & Database Integrity:**
   * Interactive global places table manager with real-time search and multi-select bulk deletion.
