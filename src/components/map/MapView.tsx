@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { createPlaceMarkerIcon, createUserLocationIcon } from "@/lib/map-icons";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
@@ -71,7 +72,16 @@ export default function MapView({
 
     mapInstanceRef.current = map;
 
+    // Observador para redimensionamientos del contenedor (ej. cambio pestaña móvil o resize)
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    if (mapContainerRef.current) {
+      resizeObserver.observe(mapContainerRef.current);
+    }
+
     return () => {
+      resizeObserver.disconnect();
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -236,8 +246,18 @@ export default function MapView({
     const marker = markersRef.current.get(selectedPlaceId);
     if (marker) {
       const latLng = marker.getLatLng();
-      map.flyTo(latLng, 16, { animate: true, duration: 0.8 });
-      marker.openPopup();
+      map.invalidateSize();
+      map.flyTo(latLng, 16, { animate: true, duration: 0.6 });
+
+      map.once("moveend", () => {
+        marker.openPopup();
+      });
+
+      const timer = setTimeout(() => {
+        marker.openPopup();
+      }, 650);
+
+      return () => clearTimeout(timer);
     }
   }, [selectedPlaceId]);
 
