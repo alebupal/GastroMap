@@ -317,7 +317,7 @@ export function PlacesExplorer({
       {/* =========================================================================
           HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida
          ========================================================================= */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white/95 dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800 shadow-lg dark:shadow-xl backdrop-blur-md space-y-3.5 transition-colors duration-200">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-md dark:border-slate-800 dark:bg-slate-950 dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 dark:shadow-xl backdrop-blur-md space-y-3.5 transition-colors duration-200">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Buscador de texto en vivo */}
           <div className="relative flex-1">
@@ -325,11 +325,11 @@ export function PlacesExplorer({
               type="text"
               value={textSearch}
               onChange={(e) => setTextSearch(e.target.value)}
-              placeholder="🔍 Buscar restaurante, plato, ciudad (Roma, Tokio, Granada...)"
-              className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition shadow-inner"
+              placeholder="Buscar restaurante, plato, ciudad (Roma, Tokio, Granada...)"
+              className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 dark:focus:ring-amber-500/50 focus:border-amber-500 transition shadow-inner"
             />
             <span className="absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-500 text-sm pointer-events-none">
-              🔎
+              🔍
             </span>
             {textSearch && (
               <button
@@ -416,7 +416,7 @@ export function PlacesExplorer({
                 type="button"
                 onClick={handleRequestLocation}
                 disabled={isLocating}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-900/60 bg-blue-950/40 hover:bg-blue-900/40 text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
               >
                 <span>{isLocating ? "⏳" : "📍"}</span>
                 <span>{isLocating ? "Localizando..." : "Cerca de mí"}</span>
@@ -593,19 +593,19 @@ export function PlacesExplorer({
         {/* Buscador de categorías si está abierto */}
         {isOccasionSearchOpen && (
           <div className="relative animate-in fade-in duration-150">
-            <span className="absolute left-3 top-2 text-xs text-slate-500">🔍</span>
+            <span className="absolute left-3 top-2 text-xs text-slate-400 dark:text-slate-500">🔍</span>
             <input
               type="text"
               value={occasionSearchQuery}
               onChange={(e) => setOccasionSearchQuery(e.target.value)}
               placeholder="Buscar categoría o plan (ej. tapear, brunch, terraza...)"
-              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
             {occasionSearchQuery && (
               <button
                 type="button"
                 onClick={() => setOccasionSearchQuery("")}
-                className="absolute right-2.5 top-2 text-xs text-slate-500 hover:text-slate-300 cursor-pointer"
+                className="absolute right-2.5 top-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
               >
                 ✕
               </button>
@@ -614,7 +614,7 @@ export function PlacesExplorer({
         )}
 
         {isOccasionsWrapped ? (
-          <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 animate-in fade-in duration-150">
+          <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 animate-in fade-in duration-150">
             <button
               type="button"
               onClick={() => setSelectedOccasions([])}
@@ -717,21 +717,21 @@ export function PlacesExplorer({
           </div>
 
           {isTagsExpanded ? (
-            <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2 animate-in fade-in duration-150">
+            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 animate-in fade-in duration-150">
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-slate-500">🔍</span>
+                <span className="absolute left-3 top-2 text-xs text-slate-400 dark:text-slate-500">🔍</span>
                 <input
                   type="text"
                   value={tagSearchQuery}
                   onChange={(e) => setTagSearchQuery(e.target.value)}
                   placeholder="Filtrar etiquetas..."
-                  className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 {tagSearchQuery && (
                   <button
                     type="button"
                     onClick={() => setTagSearchQuery("")}
-                    className="absolute right-2.5 top-2 text-xs text-slate-500 hover:text-slate-300 cursor-pointer"
+                    className="absolute right-2.5 top-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
                   >
                     ✕
                   </button>
