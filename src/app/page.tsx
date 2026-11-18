@@ -64,6 +64,7 @@ export default async function Home() {
           <AdminDashboard
             initialOccasions={occasionsList}
             initialTags={tagsList}
+            allPlaces={places}
             cartoApiKey={cartoApiKey}
           />
         )}

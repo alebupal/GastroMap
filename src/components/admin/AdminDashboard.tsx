@@ -6,21 +6,27 @@ import { TaxonomyManager } from "./TaxonomyManager";
 import { InviteManager } from "@/components/InviteManager";
 import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
+import { PlacesTableManager } from "./PlacesTableManager";
 import type { Occasion } from "@/db/schema";
+import type { PlaceWithDetails } from "@/lib/actions/places";
 
 interface AdminDashboardProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: { id: string; name: string; placesCount: number }[];
+  allPlaces?: PlaceWithDetails[];
   cartoApiKey?: string | null;
 }
 
 export function AdminDashboard({
   initialOccasions,
   initialTags,
+  allPlaces = [],
   cartoApiKey,
 }: AdminDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"users" | "taxonomy" | "invites" | "settings" | "demo">("users");
+  const [activeTab, setActiveTab] = useState<
+    "places" | "users" | "taxonomy" | "invites" | "settings" | "demo"
+  >("places");
 
   return (
     <div className="w-full mt-10 rounded-3xl border border-slate-800 bg-slate-900/40 backdrop-blur-sm overflow-hidden text-left shadow-xl">
@@ -58,6 +64,7 @@ export function AdminDashboard({
           {/* Navegación por pestañas */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs border-b border-slate-800/60">
             {[
+              { id: "places", label: `📋 Tabla Sitios (${allPlaces.length})` },
               { id: "users", label: "👥 Usuarios" },
               { id: "taxonomy", label: "🏷️ Taxonomía" },
               { id: "invites", label: "🎟️ Invitaciones" },
@@ -84,6 +91,7 @@ export function AdminDashboard({
 
           {/* Contenido de la pestaña activa */}
           <div className="pt-2">
+            {activeTab === "places" && <PlacesTableManager places={allPlaces} />}
             {activeTab === "users" && <UsersManager />}
             {activeTab === "taxonomy" && (
               <TaxonomyManager initialOccasions={initialOccasions} initialTags={initialTags} />

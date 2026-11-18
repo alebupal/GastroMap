@@ -72,6 +72,11 @@ export function PlacesExplorer({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
+  // Estados de vista adaptativa para evitar problemas de espacio con muchas categorías o tags
+  const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false);
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+
   // Solicitar ubicación al navegador
   function handleRequestLocation() {
     if (!navigator.geolocation) {
@@ -472,70 +477,176 @@ export function PlacesExplorer({
         })}
       </HorizontalScroll>
 
-      {/* Filtros Horizontales por Planes / Ocasiones */}
-      <HorizontalScroll className="flex items-center gap-1.5 pb-1">
-        <button
-          type="button"
-          onClick={() => setSelectedOccasion(null)}
-          className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${
-            selectedOccasion === null && multiOccasions.length === 0
-              ? "bg-amber-500 text-slate-950 shadow-md font-black"
-              : "bg-slate-900/80 border border-slate-800 text-slate-400 hover:bg-slate-800"
-          }`}
-        >
-          🍽️ Todos los planes
-        </button>
-        {occasionsList.map((occ) => {
-          const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
-          return (
-            <button
-              key={occ.id}
-              type="button"
-              onClick={() => setSelectedOccasion(isSelected ? null : occ.id)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
-                isSelected
-                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                  : "bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-slate-800"
-              }`}
-            >
-              <span>{occ.icon}</span>
-              <span>{occ.name}</span>
-            </button>
-          );
-        })}
-      </HorizontalScroll>
-
-      {/* Filtro por Etiquetas Populares */}
-      {tagsList.length > 0 && (
-        <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
-          <span className="text-[11px] text-slate-500 font-semibold shrink-0">Etiquetas:</span>
-          {tagsList.slice(0, 12).map((t) => {
-            const isSelected = selectedTag === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setSelectedTag(isSelected ? null : t.id)}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${
-                  isSelected
-                    ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
-                    : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                }`}
-              >
-                #{t.name}
-              </button>
-            );
-          })}
-          {selectedTag && (
+      {/* Filtros por Planes / Ocasiones (conmutador entre fila scrollable y cuadrícula completa si hay muchas) */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5 px-0.5">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            Planes / Categorías ({occasionsList.length})
+          </span>
+          {occasionsList.length > 4 && (
             <button
               type="button"
-              onClick={() => setSelectedTag(null)}
-              className="text-[11px] text-red-400 font-bold px-1 hover:underline cursor-pointer shrink-0"
+              onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
+              className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 transition cursor-pointer flex items-center gap-1"
             >
-              Limpiar
+              <span>{isOccasionsWrapped ? "↔ Modo fila scroll" : "⊞ Ver todas en cuadrícula"}</span>
             </button>
           )}
-        </HorizontalScroll>
+        </div>
+
+        {isOccasionsWrapped ? (
+          <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 animate-in fade-in duration-150">
+            <button
+              type="button"
+              onClick={() => setSelectedOccasion(null)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                selectedOccasion === null && multiOccasions.length === 0
+                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:bg-slate-800"
+              }`}
+            >
+              🍽️ Todos los planes
+            </button>
+            {occasionsList.map((occ) => {
+              const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
+              return (
+                <button
+                  key={occ.id}
+                  type="button"
+                  onClick={() => setSelectedOccasion(isSelected ? null : occ.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
+                      ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                      : "bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{occ.icon}</span>
+                  <span>{occ.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <HorizontalScroll className="flex items-center gap-1.5 pb-1">
+            <button
+              type="button"
+              onClick={() => setSelectedOccasion(null)}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${
+                selectedOccasion === null && multiOccasions.length === 0
+                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                  : "bg-slate-900/80 border border-slate-800 text-slate-400 hover:bg-slate-800"
+              }`}
+            >
+              🍽️ Todos los planes
+            </button>
+            {occasionsList.map((occ) => {
+              const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
+              return (
+                <button
+                  key={occ.id}
+                  type="button"
+                  onClick={() => setSelectedOccasion(isSelected ? null : occ.id)}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
+                      ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                      : "bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{occ.icon}</span>
+                  <span>{occ.name}</span>
+                </button>
+              );
+            })}
+          </HorizontalScroll>
+        )}
+      </div>
+
+      {/* Filtro por Etiquetas Populares (con vista expandible y buscador si hay muchas) */}
+      {tagsList.length > 0 && (
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-[11px] px-0.5">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-400 uppercase tracking-wider">
+                Etiquetas ({tagsList.length})
+              </span>
+              {selectedTag && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTag(null)}
+                  className="text-red-400 hover:underline font-bold cursor-pointer"
+                >
+                  ✕ Quitar filtro #{selectedTag}
+                </button>
+              )}
+            </div>
+
+            {tagsList.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setIsTagsExpanded(!isTagsExpanded)}
+                className="font-semibold text-slate-400 hover:text-amber-400 transition cursor-pointer"
+              >
+                {isTagsExpanded ? "▲ Menos tags" : `+ Ver todos los ${tagsList.length} tags`}
+              </button>
+            )}
+          </div>
+
+          {isTagsExpanded ? (
+            <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2 animate-in fade-in duration-150">
+              <input
+                type="text"
+                value={tagSearchQuery}
+                onChange={(e) => setTagSearchQuery(e.target.value)}
+                placeholder="Filtrar etiquetas..."
+                className="w-full px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+              <div className="flex flex-wrap gap-1 max-h-40 overflow-y-auto pr-1 no-scrollbar">
+                {tagsList
+                  .filter((t) => !tagSearchQuery || t.name.toLowerCase().includes(tagSearchQuery.toLowerCase()))
+                  .map((t) => {
+                    const isSelected = selectedTag === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setSelectedTag(isSelected ? null : t.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
+                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                        }`}
+                      >
+                        #{t.name}
+                        {t.placesCount > 0 && (
+                          <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          ) : (
+            <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
+              {tagsList.slice(0, 16).map((t) => {
+                const isSelected = selectedTag === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setSelectedTag(isSelected ? null : t.id)}
+                    className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${
+                      isSelected
+                        ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
+                        : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                    }`}
+                  >
+                    #{t.name}
+                  </button>
+                );
+              })}
+            </HorizontalScroll>
+          )}
+        </div>
       )}
 
       {/* =========================================================================

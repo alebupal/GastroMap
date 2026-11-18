@@ -53,7 +53,7 @@ export function SetupAdminForm() {
             name="username"
             required
             pattern="[A-Za-z0-9_-]+"
-            placeholder="alebupal"
+            placeholder="admin"
             className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>

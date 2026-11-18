@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
+import { eq, desc, and, isNotNull, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   places,
@@ -177,6 +177,24 @@ export async function deletePlaceAction(placeId: string) {
   await db.delete(places).where(eq(places.id, placeId));
   revalidatePath("/");
   return { success: true };
+}
+
+/**
+ * Elimina múltiples establecimientos en bloque (Solo Administradores)
+ */
+export async function bulkDeletePlacesAction(placeIds: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden eliminar en bloque." };
+  }
+
+  if (!placeIds || placeIds.length === 0) {
+    return { error: "No se seleccionó ningún establecimiento para eliminar." };
+  }
+
+  await db.delete(places).where(inArray(places.id, placeIds));
+  revalidatePath("/");
+  return { success: true, count: placeIds.length };
 }
 
 export async function getAllPlaces(

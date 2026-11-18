@@ -160,7 +160,11 @@ export default function MapView({
     places.forEach((place) => {
       if (place.latitude == null || place.longitude == null) return;
 
-      const latLng: [number, number] = [place.latitude, place.longitude];
+      const lat = typeof place.latitude === "number" ? place.latitude : parseFloat(String(place.latitude));
+      const lng = typeof place.longitude === "number" ? place.longitude : parseFloat(String(place.longitude));
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const latLng: [number, number] = [lat, lng];
       bounds.push(latLng);
 
       const isSelected = selectedPlaceId === place.id;
@@ -171,7 +175,7 @@ export default function MapView({
       let marker = markersRef.current.get(place.id);
 
       // Contenido del popup enriquecido
-      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}`;
+      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
       const distanceLabel =
         typeof place.distanceMeters === "number"
           ? `<span style="font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 9999px;">📍 ${
@@ -210,7 +214,10 @@ export default function MapView({
       `;
 
       if (!marker) {
-        marker = L.marker(latLng, { icon })
+        marker = L.marker(latLng, {
+          icon,
+          zIndexOffset: isSelected ? 500 : 100,
+        })
           .addTo(map)
           .bindPopup(popupHtml)
           .on("click", () => {
@@ -220,6 +227,7 @@ export default function MapView({
       } else {
         marker.setLatLng(latLng);
         marker.setIcon(icon);
+        marker.setZIndexOffset(isSelected ? 500 : 100);
         marker.setPopupContent(popupHtml);
       }
 
