@@ -37,7 +37,7 @@ export function DemoPlacesSeeder() {
             Sitios de Demostración Mundiales
           </h3>
           <p className="text-xs text-slate-500">
-            Carga 20 restaurantes reales de España, Italia, Japón, EE. UU., Francia, etc.
+            Carga o actualiza 20 restaurantes reales de España y resto del mundo con comentarios, estados y favoritos
           </p>
         </div>
       </div>

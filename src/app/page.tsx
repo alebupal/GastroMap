@@ -69,21 +69,59 @@ export default async function Home() {
         )}
       </div>
 
-      {/* 4. Pie de página estilizado */}
-      <footer className="mt-12 py-6 border-t border-slate-900 bg-slate-950/80 text-center text-xs text-slate-500">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* 4. Pie de página estilizado (estilo TVSpy con donación PayPal y enlaces a repo) */}
+      <footer className="mt-12 py-6 border-t border-slate-900 bg-slate-950/80 text-xs text-slate-500">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400">GastroMap</span>
+            <span className="font-bold text-slate-300">GastroMap</span>
             <span>•</span>
             <span className="text-[11px] text-slate-500">Catálogo Gastronómico Colaborativo</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-900 border border-slate-800 text-slate-400">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 ml-1">
               v{version}
             </span>
-            <span>•</span>
-            <span className="text-slate-600">Self-Hosted en Docker</span>
+          </div>
+
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            {/* Botón de donación a PayPal estilo TVSpy */}
+            <a
+              href="https://www.paypal.me/alebupal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-xs transition"
+            >
+              <span>❤️</span>
+              <span>Donar con PayPal</span>
+            </a>
+
+            {/* Enlaces de repositorio y ecosistema */}
+            <div className="flex items-center gap-2.5 text-xs text-slate-400">
+              <a
+                href="https://github.com/alebupal/GastroMap"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-amber-400 transition"
+              >
+                GitHub
+              </a>
+              <span>•</span>
+              <a
+                href="https://hub.docker.com/r/alebupal/gastromap"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-amber-400 transition"
+              >
+                Docker
+              </a>
+              <span>•</span>
+              <a
+                href="https://www.paypal.me/alebupal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-amber-400 font-semibold transition"
+              >
+                PayPal
+              </a>
+            </div>
           </div>
         </div>
       </footer>

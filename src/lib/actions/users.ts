@@ -195,3 +195,75 @@ export async function updateMyProfileAction(formData: FormData) {
   revalidatePath("/");
   return { success: true };
 }
+
+/**
+ * Crea un nuevo usuario manualmente por un administrador
+ */
+export async function createUserDirectlyAction(formData: FormData) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden crear usuarios." };
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  const rawUsername = (formData.get("username") as string)?.trim().toLowerCase().replace(/^@/, "");
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+  const role = (formData.get("role") as string) === "admin" ? "admin" : "user";
+
+  if (!name || name.length < 2) {
+    return { error: "El nombre debe tener al menos 2 caracteres." };
+  }
+
+  const username = rawUsername || email?.split("@")[0]?.replace(/[^a-z0-9_-]/g, "");
+  if (!username || username.length < 3) {
+    return { error: "El nombre de usuario (@username) debe tener al menos 3 caracteres." };
+  }
+
+  if (!email || !email.includes("@")) {
+    return { error: "Introduce un correo electrónico válido." };
+  }
+
+  if (!password || password.length < 6) {
+    return { error: "La contraseña debe tener al menos 6 caracteres." };
+  }
+
+  // Comprobar existencia previa de email
+  const existingEmail = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (existingEmail.length > 0) {
+    return { error: "El correo electrónico ya está registrado en el sistema." };
+  }
+
+  // Comprobar existencia previa de username
+  const existingUsername = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.username, username))
+    .limit(1);
+
+  if (existingUsername.length > 0) {
+    return { error: `El nombre de usuario "@${username}" ya está ocupado.` };
+  }
+
+  const passwordHash = await hashPassword(password);
+  const id = crypto.randomUUID();
+
+  await db.insert(users).values({
+    id,
+    name,
+    username,
+    email,
+    passwordHash,
+    role,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}

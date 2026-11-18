@@ -8,6 +8,16 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.2.0] - 2026-11-18
 
 ### Añadido
+- **Scroll Horizontal de Categorías con Ratón (`HorizontalScroll`)**:
+  - Desplazamiento horizontal fluido en desktop con la rueda vertical del ratón (`wheel`) y arrastre sostenido (`drag-to-scroll`).
+  - Aplicado en la barra de planes/ocasiones, selector de estados de experiencia y etiquetas populares.
+- **Alta Manual de Usuarios para Administradores**:
+  - Formulario directo en el panel de administración (`UsersManager`) para dar de alta usuarios a mano indicando nombre, @username, correo, contraseña y rol (Usuario o Administrador).
+- **Datos de Demostración Enriquecidos (`DemoPlacesSeeder`)**:
+  - El seeder de 20 sitios mundiales añade automáticamente para el usuario administrador interacciones completas: favoritos (⭐), estados («Ya he ido» y «Quiero ir»), puntuaciones, notas privadas y comentarios comunitarios.
+- **Soporte de Donación PayPal y Repositorio Comunitario**:
+  - Botón sutil de donación «Donar con PayPal» (`paypal.me/alebupal`) con icono de corazón tanto en cabecera como en pie de página.
+  - Enlaces directos a GitHub, Docker Hub y PayPal al estilo de TVSpy, eliminando textos redundantes.
 - **Colección Personal y Estados de Usuario (Fase 4)**:
   - Sistema de favoritos (⭐ / 🤍) con persistencia individual en `user_places`.
   - Estados personales independientes: «Quiero ir (Pendiente 🕒)» y «Ya he ido (Visitado ✅)».

@@ -5,6 +5,7 @@ import { PlaceCard } from "./PlaceCard";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { RandomPickerModal } from "./RandomPickerModal";
 import { DecisionAssistantModal } from "./DecisionAssistantModal";
+import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
 interface PlacesExplorerProps {
@@ -418,7 +419,7 @@ export function PlacesExplorer({
       )}
 
       {/* Píldoras Rápidas de Colección y Experiencia */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+      <HorizontalScroll className="flex items-center gap-1.5 pb-1 text-xs">
         {[
           { key: "all", label: "Todos", icon: "🌐" },
           { key: "favorite", label: "Favoritos", icon: "⭐" },
@@ -469,10 +470,10 @@ export function PlacesExplorer({
             </button>
           );
         })}
-      </div>
+      </HorizontalScroll>
 
       {/* Filtros Horizontales por Planes / Ocasiones */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+      <HorizontalScroll className="flex items-center gap-1.5 pb-1">
         <button
           type="button"
           onClick={() => setSelectedOccasion(null)}
@@ -502,11 +503,11 @@ export function PlacesExplorer({
             </button>
           );
         })}
-      </div>
+      </HorizontalScroll>
 
       {/* Filtro por Etiquetas Populares */}
       {tagsList.length > 0 && (
-        <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
           <span className="text-[11px] text-slate-500 font-semibold shrink-0">Etiquetas:</span>
           {tagsList.slice(0, 12).map((t) => {
             const isSelected = selectedTag === t.id;
@@ -534,7 +535,7 @@ export function PlacesExplorer({
               Limpiar
             </button>
           )}
-        </div>
+        </HorizontalScroll>
       )}
 
       {/* =========================================================================

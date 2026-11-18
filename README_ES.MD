@@ -1,7 +1,8 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
+[![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **GastroMap** es una aplicación web privada y autohospedada diseñada para guardar, organizar, descubrir y decidir sitios donde comer, tapear o tomar algo con amigos, pareja o familia.
@@ -183,6 +184,16 @@ Explicación clara y concisa de lo que añade o soluciona esta Pull Request.
 ### 📸 Capturas de pantalla o logs (opcional)
 *(Añadir si hay cambios visuales en la interfaz)*
 ```
+
+---
+
+## ☕ Apoya el Proyecto
+
+Si GastroMap te resulta útil para descubrir y organizar tus sitios gastronómicos favoritos, considera apoyar su desarrollo continuo:
+
+- ☕ **Donar con PayPal**: [paypal.me/alebupal](https://www.paypal.me/alebupal)
+- ⭐ **Dar una estrella** al repositorio en GitHub.
+- 🐳 **Valorar la imagen** en Docker Hub: [alebupal/gastromap](https://hub.docker.com/r/alebupal/gastromap/)
 
 ---
 

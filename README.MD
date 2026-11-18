@@ -2,8 +2,9 @@
 
 [Versión en Español](README_ES.MD)
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
+[![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **GastroMap** is a private, self-hosted web application to save, organize, discover, and decide where to eat, have tapas, or grab drinks with friends, partner, or family.
@@ -181,6 +182,16 @@ Why is this change needed? What user scenario or issue does it address?
 ### 📸 Screenshots or Logs (optional)
 *(Add if there are UI or visual updates)*
 ```
+
+---
+
+## ☕ Support the Project
+
+If GastroMap helps you organize and discover delicious places, consider supporting its maintenance:
+
+- ☕ **Donate with PayPal**: [paypal.me/alebupal](https://www.paypal.me/alebupal)
+- ⭐ **Star the repository** on GitHub.
+- 🐳 **Rate the image** on Docker Hub: [alebupal/gastromap](https://hub.docker.com/r/alebupal/gastromap/)
 
 ---
 

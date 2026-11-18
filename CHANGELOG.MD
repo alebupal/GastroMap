@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-11-18
 
 ### Added
+- **Horizontal Mouse Scroll for Categories & Filters (`HorizontalScroll`)**:
+  - Smooth horizontal scrolling using the vertical mouse wheel and click-and-drag mechanics on desktop.
+  - Enabled on occasions/categories bar, experience status tabs, and popular tags.
+- **Direct User Creation for Administrators**:
+  - New form in the admin users dashboard (`UsersManager`) to manually create accounts with full name, @username, email, initial password, and role.
+- **Enriched Worldwide Demo Seeder (`DemoPlacesSeeder`)**:
+  - The 20-place demo dataset now seeds full admin interactions: favorites (⭐), experience status ('visited', 'pending'), ratings, private notes, and community comments.
+- **PayPal Donation & Repository Links (TVSpy style)**:
+  - Added subtle "Donate with PayPal" (`paypal.me/alebupal`) buttons and quick links to GitHub and Docker Hub in the footer and user header.
 - **Personal Collection & User Statuses (Phase 4)**:
   - Favorites system (⭐ / 🤍) persisted per user in `user_places`.
   - Independent personal statuses: "Want to go (Pending 🕒)" and "Been there (Visited ✅)".
