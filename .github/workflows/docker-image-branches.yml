@@ -32,6 +32,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/gastromap:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
         if: github.ref_name == 'main'
 
       - name: Build and push for other branches
@@ -41,4 +43,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/gastromap:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
         if: github.ref_name != 'main'

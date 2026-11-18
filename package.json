@@ -2,6 +2,7 @@
   "name": "gastromap",
   "version": "0.1.0",
   "private": true,
+  "license": "GPL-3.0-or-later",
   "scripts": {
     "dev": "docker compose up -d db && WATCHPACK_POLLING=true next dev",
     "dev:only": "WATCHPACK_POLLING=true next dev",

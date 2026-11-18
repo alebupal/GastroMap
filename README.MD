@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **GastroMap** is a private, self-hosted web application to save, organize, discover, and decide where to eat, have tapas, or grab drinks with friends, partner, or family.
 
@@ -98,6 +98,92 @@ docker compose up -d
 
 ---
 
+## 🤝 How to Contribute (Step-by-Step Guide for Humans & AI Assistants)
+
+Contributions are welcome! This guide is written with clear technical instructions so that **anyone can pass it directly to an AI coding assistant (Cursor, Claude Code, Copilot, ChatGPT, etc.) to perform the contribution end-to-end**.
+
+### 🤖 AI Agent Quick Context
+* **Architecture:** Full-stack monolith using Next.js 15 (App Router, strict TypeScript, Server Actions, and Server Components).
+* **Database:** PostgreSQL 16 with PostGIS managed via Drizzle ORM (`src/db/schema.ts`).
+* **UI:** Tailwind CSS with a mobile-first, touch-friendly design.
+* **Auth:** Native PostgreSQL sessions (`sessions`) with secure HttpOnly cookies and Argon2id password hashing.
+
+---
+
+### 📋 Contribution Workflow
+
+#### 1. Fork & Branch
+Fork the repository on GitHub, clone it locally, and create a descriptive branch:
+```bash
+git clone https://github.com/YOUR_USERNAME/GastroMap.git
+cd GastroMap
+
+# For a new feature:
+git checkout -b feature/short-description
+
+# For a bugfix:
+git checkout -b fix/short-description
+```
+
+#### 2. Start the Local Environment (1-Command Setup)
+Install dependencies and launch the dev server:
+```bash
+npm install
+npm run dev
+```
+*(This automatically boots the PostgreSQL/PostGIS container in Docker and starts Next.js on `http://localhost:3000`)*.
+
+#### 3. Coding & Commit Guidelines
+* **Strict Types:** All new code must be fully typed in TypeScript without unjustified `any`.
+* **Database Changes:** If you modify `src/db/schema.ts`, generate and apply migrations:
+  ```bash
+  npm run db:generate
+  npm run db:migrate
+  ```
+* **No Secrets or Private Files:** Never commit `.env` files or files inside `docs/`.
+* **Conventional Commits:** Use standard prefixes:
+  * `feat: ...` for new capabilities.
+  * `fix: ...` for bug fixes.
+  * `docs: ...` for documentation updates.
+  * `refactor: ...` for code refactoring without behavior changes.
+  * `style: ...` for UI/Tailwind polish.
+
+#### 4. Mandatory Pre-Flight Verification
+Before committing and pushing, ensure the build passes cleanly:
+```bash
+npm run build
+```
+
+---
+
+### 🚀 Pull Request Template
+
+1. Push your branch to GitHub:
+   ```bash
+   git push -u origin feature/short-description
+   ```
+2. Navigate to your fork on GitHub and click **Compare & pull request**.
+3. Fill in the PR description using this template:
+
+```markdown
+### 📝 Description of Changes
+A concise summary of what this PR introduces or fixes.
+
+### 🎯 Motivation & Context
+Why is this change needed? What user scenario or issue does it address?
+
+### 🧪 How Was This Tested?
+- [ ] Production build verified via `npm run build` without errors.
+- [ ] Tested locally on `http://localhost:3000`.
+- [ ] Verified on mobile/responsive viewport.
+- [ ] Drizzle migrations generated and applied (if DB changed).
+
+### 📸 Screenshots or Logs (optional)
+*(Add if there are UI or visual updates)*
+```
+
+---
+
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.

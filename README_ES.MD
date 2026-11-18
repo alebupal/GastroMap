@@ -2,7 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **GastroMap** es una aplicación web privada y autohospedada diseñada para guardar, organizar, descubrir y decidir sitios donde comer, tapear o tomar algo con amigos, pareja o familia.
 
@@ -15,7 +15,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **➕ Alta ultrarrápida de sitios:**
   * Compatible con **Web Share Target API**: Comparte un enlace desde Google Maps o redes sociales y abre la ficha al instante en el móvil.
   * Extracción y normalización automática de coordenadas y enlaces.
-  * Clasificación ágil por planes (*Tapear, Comer comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
+  * Clasificación ágil por planes (*Tapear, Comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
 * **🔍 Encontrar un sitio («Asistente de Decisión»):**
   * Filtros por distancia real (*Cerca de mí a 1, 5, 10 o 25 km*) impulsados por **PostGIS**.
@@ -96,6 +96,96 @@ docker compose up -d
 
 ---
 
+## 🤝 Cómo Colaborar (Guía paso a paso para Humanos y Asistentes de IA)
+
+¡Cualquier contribución es bienvenida! Esta guía está redactada con suficiente detalle y precisión técnica para que **cualquier persona pueda pasarla como instrucción a una IA (Cursor, Claude Code, Copilot, ChatGPT, etc.) y que el asistente realice todo el proceso de forma autónoma y correcta**.
+
+### 🤖 Contexto Rápido para Agentes de IA
+* **Arquitectura:** Monolito full-stack con Next.js 15 (App Router, TypeScript estricto, Server Actions y Server Components).
+* **Base de Datos:** PostgreSQL 16 con PostGIS gestionado mediante Drizzle ORM (`src/db/schema.ts`).
+* **Estilos:** Tailwind CSS con diseño mobile-first y componentes accesibles.
+* **Autenticación:** Sesiones en base de datos (`sessions`) con cookies HttpOnly seguras y contraseñas hasheadas con Argon2id.
+
+---
+
+### 📋 Flujo de Trabajo para Crear una Contribución
+
+#### 1. Clonar el repositorio y crear una rama
+Haz un fork del repositorio en GitHub y clónalo en tu equipo:
+```bash
+git clone https://github.com/TU_USUARIO/GastroMap.git
+cd GastroMap
+```
+Crea una rama descriptiva para tu cambio:
+```bash
+# Para una nueva funcionalidad:
+git checkout -b feature/nombre-de-la-mejora
+
+# Para corregir un error:
+git checkout -b fix/descripcion-del-error
+```
+
+#### 2. Levantar el entorno local (en 1 solo comando)
+Instala las dependencias y arranca el entorno de desarrollo:
+```bash
+npm install
+npm run dev
+```
+*(Este comando levanta automáticamente la base de datos PostGIS en Docker y arranca Next.js en `http://localhost:3000`)*.
+
+#### 3. Reglas de Código que la IA / Desarrollador debe cumplir
+* **Tipado estricto:** Todo el código nuevo debe estar en TypeScript con tipos explícitos. No usar `any` sin justificación.
+* **Cambios en base de datos:** Si modificas `src/db/schema.ts`, genera la migración correspondiente ejecutando:
+  ```bash
+  npm run db:generate
+  npm run db:migrate
+  ```
+* **No subir secretos ni documentación privada:** Nunca añadas archivos `.env`, tokens ni ficheros dentro de `docs/`.
+* **Formato de Commits (Conventional Commits):**
+  Usa mensajes claros con el prefijo adecuado:
+  * `feat: ...` para nuevas funcionalidades.
+  * `fix: ...` para corrección de fallos.
+  * `docs: ...` para cambios de documentación.
+  * `refactor: ...` para refactorizaciones sin cambio de comportamiento.
+  * `style: ...` para ajustes de interfaz o Tailwind.
+
+#### 4. Verificación obligatoria antes de enviar la PR
+Antes de hacer commit y push, comprueba que el proyecto compila sin errores:
+```bash
+npm run build
+```
+*(Si `npm run build` falla por tipos o rutas, corrígelo antes de continuar)*.
+
+---
+
+### 🚀 Cómo abrir la Pull Request (Plantilla Oficial)
+
+1. Sube tu rama a tu repositorio de GitHub:
+   ```bash
+   git push -u origin feature/nombre-de-la-mejora
+   ```
+2. Entra en tu repositorio en GitHub y pulsa en **Compare & pull request**.
+3. Rellena la descripción siguiendo esta plantilla exacta:
+
+```markdown
+### 📝 Descripción del cambio
+Explicación clara y concisa de lo que añade o soluciona esta Pull Request.
+
+### 🎯 Motivación y Contexto
+¿Por qué es necesario este cambio? ¿Qué problema resuelve o qué caso de uso cubre?
+
+### 🧪 ¿Cómo se ha probado?
+- [ ] Compilación verificada con `npm run build` sin errores ni advertencias.
+- [ ] Probado en entorno local (`http://localhost:3000`).
+- [ ] Verificado en vista móvil / responsive.
+- [ ] Migraciones de Drizzle generadas y aplicadas (si aplica cambios de BD).
+
+### 📸 Capturas de pantalla o logs (opcional)
+*(Añadir si hay cambios visuales en la interfaz)*
+```
+
+---
+
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia GNU GPL v3.0. Consulta el archivo [LICENSE](LICENSE) para más detalles.

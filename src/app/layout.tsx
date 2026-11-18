@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "GastroMap - Gestor Gastronómico",
   description: "App privada para guardar, descubrir y decidir sitios donde comer",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
