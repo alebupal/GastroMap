@@ -52,16 +52,16 @@ export function PlacesExplorer({
 }: PlacesExplorerProps) {
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
-  const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  // Filtros acumulables
+  const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
 
   // Asistente y filtros avanzados (Fase 4)
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const [multiOccasions, setMultiOccasions] = useState<string[]>([]);
-  const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const [experienceFilter, setExperienceFilter] = useState<
     "all" | "visited_by_me" | "visited_by_others" | "untried" | "favorite" | "pending"
   >("all");
@@ -78,6 +78,27 @@ export function PlacesExplorer({
   const [occasionSearchQuery, setOccasionSearchQuery] = useState("");
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+
+  // Alternar selección de ocasión acumulable
+  function toggleOccasion(occId: string) {
+    setSelectedOccasions((prev) =>
+      prev.includes(occId) ? prev.filter((id) => id !== occId) : [...prev, occId]
+    );
+  }
+
+  // Alternar selección de etiqueta acumulable
+  function toggleTag(tagId: string) {
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
+    );
+  }
+
+  // Alternar selección de precio acumulable
+  function togglePrice(price: string) {
+    setSelectedPrices((prev) =>
+      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price]
+    );
+  }
 
   // Solicitar ubicación al navegador
   function handleRequestLocation() {
@@ -117,14 +138,15 @@ export function PlacesExplorer({
   }
 
   function resetAllFilters() {
-    setSelectedOccasion(null);
-    setSelectedTag(null);
-    setMultiOccasions([]);
-    setSelectedPrice(null);
+    setSelectedOccasions([]);
+    setSelectedTags([]);
+    setSelectedPrices([]);
     setExperienceFilter("all");
     setTextSearch("");
     setUserLocation(null);
     setRadiusKm(null);
+    setOccasionSearchQuery("");
+    setTagSearchQuery("");
   }
 
   // Filtrado y cálculo de distancias
@@ -165,22 +187,24 @@ export function PlacesExplorer({
       );
     }
 
-    // 1. Filtro por Ocasión (individual o multiselección)
-    if (selectedOccasion) {
-      result = result.filter((p) => p.occasions.includes(selectedOccasion));
-    } else if (multiOccasions.length > 0) {
-      result = result.filter((p) => p.occasions.some((occ) => multiOccasions.includes(occ)));
+    // 1. Filtro por Ocasiones acumulables (OR entre ocasiones seleccionadas)
+    if (selectedOccasions.length > 0) {
+      result = result.filter((p) =>
+        p.occasions.some((occ) => selectedOccasions.includes(occ))
+      );
     }
 
-    // 2. Filtro por Etiqueta
-    if (selectedTag) {
-      result = result.filter((p) => p.tags.includes(selectedTag));
+    // 2. Filtro por Etiquetas acumulables (AND entre etiquetas para refinar búsqueda)
+    if (selectedTags.length > 0) {
+      result = result.filter((p) =>
+        selectedTags.every((t) => p.tags.includes(t))
+      );
     }
 
-    // 3. Filtro por Precio (manteniendo siempre los '???')
-    if (selectedPrice) {
+    // 3. Filtro por Precios acumulables (OR entre precios seleccionados, ej. € y €€)
+    if (selectedPrices.length > 0) {
       result = result.filter(
-        (p) => p.priceRange === selectedPrice || p.priceRange === "???"
+        (p) => selectedPrices.includes(p.priceRange) || p.priceRange === "???"
       );
     }
 
@@ -220,10 +244,9 @@ export function PlacesExplorer({
   }, [
     initialPlaces,
     textSearch,
-    selectedOccasion,
-    multiOccasions,
-    selectedTag,
-    selectedPrice,
+    selectedOccasions,
+    selectedTags,
+    selectedPrices,
     experienceFilter,
     userLocation,
     radiusKm,
@@ -271,18 +294,20 @@ export function PlacesExplorer({
   // Etiquetas mostradas por defecto (las más usadas, priorizando las que tienen locales)
   const defaultTags = useMemo(() => {
     const top = sortedTags.filter((t) => (t.placesCount || 0) > 0).slice(0, 18);
-    // Asegurar que la etiqueta actualmente seleccionada esté siempre visible al principio
-    if (selectedTag && !top.some((t) => t.id === selectedTag)) {
-      const current = sortedTags.find((t) => t.id === selectedTag);
-      if (current) top.unshift(current);
-    }
+    // Asegurar que las etiquetas actualmente seleccionadas estén siempre visibles al principio
+    selectedTags.forEach((st) => {
+      if (!top.some((t) => t.id === st)) {
+        const current = sortedTags.find((t) => t.id === st);
+        if (current) top.unshift(current);
+      }
+    });
     return top.length > 0 ? top : sortedTags.slice(0, 14);
-  }, [sortedTags, selectedTag]);
+  }, [sortedTags, selectedTags]);
 
   const activeFiltersCount =
-    (selectedOccasion ? 1 : multiOccasions.length) +
-    (selectedTag ? 1 : 0) +
-    (selectedPrice ? 1 : 0) +
+    selectedOccasions.length +
+    selectedTags.length +
+    selectedPrices.length +
     (experienceFilter !== "all" ? 1 : 0) +
     (userLocation ? 1 : 0) +
     (textSearch.trim() ? 1 : 0);
@@ -500,14 +525,14 @@ export function PlacesExplorer({
 
         <div className="h-4 w-px bg-slate-800 shrink-0 mx-1"></div>
 
-        {/* Filtro rápido de precio */}
+        {/* Filtro rápido de precio (acumulable) */}
         {["€", "€€", "€€€", "€€€€"].map((p) => {
-          const active = selectedPrice === p;
+          const active = selectedPrices.includes(p);
           return (
             <button
               key={p}
               type="button"
-              onClick={() => setSelectedPrice(active ? null : p)}
+              onClick={() => togglePrice(p)}
               className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${
                 active
                   ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
@@ -520,20 +545,20 @@ export function PlacesExplorer({
         })}
       </HorizontalScroll>
 
-      {/* Filtros por Planes / Ocasiones (con buscador y conmutador entre fila y cuadrícula) */}
+      {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11px] px-0.5">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-400 uppercase tracking-wider">
               Planes / Categorías ({occasionsList.length})
             </span>
-            {selectedOccasion && (
+            {selectedOccasions.length > 0 && (
               <button
                 type="button"
-                onClick={() => setSelectedOccasion(null)}
+                onClick={() => setSelectedOccasions([])}
                 className="text-red-400 hover:underline font-bold cursor-pointer"
               >
-                ✕ Quitar filtro
+                ✕ Quitar {selectedOccasions.length === 1 ? "filtro" : `filtros (${selectedOccasions.length})`}
               </button>
             )}
           </div>
@@ -592,9 +617,9 @@ export function PlacesExplorer({
           <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 animate-in fade-in duration-150">
             <button
               type="button"
-              onClick={() => setSelectedOccasion(null)}
+              onClick={() => setSelectedOccasions([])}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                selectedOccasion === null && multiOccasions.length === 0
+                selectedOccasions.length === 0
                   ? "bg-amber-500 text-slate-950 shadow-md font-black"
                   : "bg-slate-900 border border-slate-800 text-slate-400 hover:bg-slate-800"
               }`}
@@ -602,15 +627,15 @@ export function PlacesExplorer({
               🍽️ Todos los planes
             </button>
             {filteredOccasions.map((occ) => {
-              const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
+              const isSelected = selectedOccasions.includes(occ.id);
               return (
                 <button
                   key={occ.id}
                   type="button"
-                  onClick={() => setSelectedOccasion(isSelected ? null : occ.id)}
+                  onClick={() => toggleOccasion(occ.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
                       : "bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800"
                   }`}
                 >
@@ -627,9 +652,9 @@ export function PlacesExplorer({
           <HorizontalScroll className="flex items-center gap-1.5 pb-1">
             <button
               type="button"
-              onClick={() => setSelectedOccasion(null)}
+              onClick={() => setSelectedOccasions([])}
               className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${
-                selectedOccasion === null && multiOccasions.length === 0
+                selectedOccasions.length === 0
                   ? "bg-amber-500 text-slate-950 shadow-md font-black"
                   : "bg-slate-900/80 border border-slate-800 text-slate-400 hover:bg-slate-800"
               }`}
@@ -637,15 +662,15 @@ export function PlacesExplorer({
               🍽️ Todos los planes
             </button>
             {filteredOccasions.map((occ) => {
-              const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
+              const isSelected = selectedOccasions.includes(occ.id);
               return (
                 <button
                   key={occ.id}
                   type="button"
-                  onClick={() => setSelectedOccasion(isSelected ? null : occ.id)}
+                  onClick={() => toggleOccasion(occ.id)}
                   className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
                     isSelected
-                      ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
                       : "bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-slate-800"
                   }`}
                 >
@@ -661,7 +686,7 @@ export function PlacesExplorer({
         )}
       </div>
 
-      {/* Filtro por Etiquetas Populares (ordenadas por uso, con vista expandible y buscador) */}
+      {/* Filtro por Etiquetas Populares (acumulables, ordenadas por uso, con vista expandible y buscador) */}
       {sortedTags.length > 0 && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -669,13 +694,13 @@ export function PlacesExplorer({
               <span className="font-bold text-slate-400 uppercase tracking-wider">
                 Etiquetas ({sortedTags.length})
               </span>
-              {selectedTag && (
+              {selectedTags.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => setSelectedTag(null)}
+                  onClick={() => setSelectedTags([])}
                   className="text-red-400 hover:underline font-bold cursor-pointer"
                 >
-                  ✕ Quitar filtro #{selectedTag}
+                  ✕ Quitar {selectedTags.length === 1 ? "filtro" : `filtros (${selectedTags.length})`}
                 </button>
               )}
             </div>
@@ -714,15 +739,15 @@ export function PlacesExplorer({
               </div>
               <div className="flex flex-wrap gap-1 max-h-44 overflow-y-auto pr-1 no-scrollbar">
                 {filteredTags.map((t) => {
-                  const isSelected = selectedTag === t.id;
+                  const isSelected = selectedTags.includes(t.id);
                   return (
                     <button
                       key={t.id}
                       type="button"
-                      onClick={() => setSelectedTag(isSelected ? null : t.id)}
+                      onClick={() => toggleTag(t.id)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
                         isSelected
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold ring-1 ring-amber-400/40"
                           : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
                       }`}
                     >
@@ -738,15 +763,15 @@ export function PlacesExplorer({
           ) : (
             <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
               {defaultTags.map((t) => {
-                const isSelected = selectedTag === t.id;
+                const isSelected = selectedTags.includes(t.id);
                 return (
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => setSelectedTag(isSelected ? null : t.id)}
+                    onClick={() => toggleTag(t.id)}
                     className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${
                       isSelected
-                        ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
+                        ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold ring-1 ring-amber-400/40"
                         : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
                     }`}
                   >
@@ -847,13 +872,10 @@ export function PlacesExplorer({
         isOpen={isAssistantOpen}
         onClose={() => setIsAssistantOpen(false)}
         occasions={occasionsList}
-        selectedOccasions={multiOccasions}
-        onSelectOccasions={(occs) => {
-          setMultiOccasions(occs);
-          setSelectedOccasion(null);
-        }}
-        selectedPrice={selectedPrice}
-        onSelectPrice={(p) => setSelectedPrice(p)}
+        selectedOccasions={selectedOccasions}
+        onSelectOccasions={(occs) => setSelectedOccasions(occs)}
+        selectedPrice={selectedPrices[0] || null}
+        onSelectPrice={(p) => setSelectedPrices(p ? [p] : [])}
         experienceFilter={experienceFilter}
         onSelectExperience={(exp) => setExperienceFilter(exp)}
         nearMeActive={userLocation !== null}
