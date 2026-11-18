@@ -78,8 +78,8 @@ export async function resetUserPasswordAction(userId: string, newPassword: strin
     return { error: "No autorizado." };
   }
 
-  if (!newPassword || newPassword.length < 6) {
-    return { error: "La nueva contraseña debe tener al menos 6 caracteres." };
+  if (!newPassword || newPassword.length < 4) {
+    return { error: "La nueva contraseña debe tener al menos 4 caracteres." };
   }
 
   const passwordHash = await hashPassword(newPassword);
@@ -224,8 +224,8 @@ export async function createUserDirectlyAction(formData: FormData) {
     return { error: "Introduce un correo electrónico válido." };
   }
 
-  if (!password || password.length < 6) {
-    return { error: "La contraseña debe tener al menos 6 caracteres." };
+  if (!password || password.length < 4) {
+    return { error: "La contraseña debe tener al menos 4 caracteres." };
   }
 
   // Comprobar existencia previa de email

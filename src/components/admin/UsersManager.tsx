@@ -351,10 +351,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <input
                     type="password"
                     required
-                    minLength={6}
+                    minLength={4}
                     value={addPassword}
                     onChange={(e) => setAddPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 4 caracteres (ej. 1234)"
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
@@ -568,10 +568,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             <input
               type="password"
               required
-              minLength={6}
+              minLength={4}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Nueva contraseña (mín. 6 caracteres)"
+              placeholder="Nueva contraseña (mín. 4 caracteres, ej. 1234)"
               className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-4"
             />
 

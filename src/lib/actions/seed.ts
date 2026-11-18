@@ -1132,12 +1132,12 @@ export async function seedDemoPlacesAction() {
     return { error: "Debes iniciar sesión para ejecutar la carga de demostración." };
   }
 
-  // 1. Crear usuarios de la comunidad demo si no existen
+  // 1. Crear usuarios de la comunidad demo si no existen, o actualizar su contraseña a 1234
   const userMap: Record<string, string> = {
     [currentUser.username || "admin"]: currentUser.id,
   };
 
-  const defaultPasswordHash = await hashPassword("Demo1234");
+  const defaultPasswordHash = await hashPassword("1234");
 
   for (const demoUser of DEMO_USERS) {
     const [existing] = await db
@@ -1148,6 +1148,11 @@ export async function seedDemoPlacesAction() {
 
     if (existing) {
       userMap[demoUser.username] = existing.id;
+      // Actualizar siempre la contraseña a 1234 para que puedan iniciar sesión
+      await db
+        .update(users)
+        .set({ passwordHash: defaultPasswordHash, updatedAt: new Date() })
+        .where(eq(users.id, existing.id));
     } else {
       const [newUser] = await db
         .insert(users)
@@ -1163,6 +1168,9 @@ export async function seedDemoPlacesAction() {
       userMap[demoUser.username] = newUser.id;
     }
   }
+
+  // Limpiar cualquier comentario previo con texto vacío o corrupto
+  await db.delete(placeComments).where(eq(placeComments.content, ""));
 
   let insertedCount = 0;
 

@@ -173,13 +173,16 @@ export async function getPlaceCommentsAction(
       authorUsername: users.username,
     })
     .from(placeComments)
-    .innerJoin(users, eq(placeComments.userId, users.id))
+    .leftJoin(users, eq(placeComments.userId, users.id))
     .where(eq(placeComments.placeId, placeId))
     .orderBy(desc(placeComments.createdAt));
 
   return rows.map((r) => ({
     ...r,
-    authorUsername: r.authorUsername || r.authorName.toLowerCase().replace(/\s+/g, ""),
+    authorName: r.authorName || "Miembro de GastroMap",
+    authorUsername:
+      r.authorUsername ||
+      (r.authorName ? r.authorName.toLowerCase().replace(/\s+/g, "") : "comunidad"),
   }));
 }
 

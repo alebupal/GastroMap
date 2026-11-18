@@ -41,7 +41,7 @@ export function DemoPlacesSeeder() {
             Carga de Demostración Completa (50 sitios + Comunidad)
           </h3>
           <p className="text-xs text-slate-500">
-            Genera 50 restaurantes reales mundiales y nacionales con usuarios colaboradores, hilos de comentarios, estados personales, favoritos y notas privadas.
+            Genera 50 restaurantes reales mundiales y nacionales con usuarios colaboradores (contraseña de todos: <strong className="text-amber-400 font-mono">1234</strong>), hilos de comentarios, estados personales, favoritos y notas privadas.
           </p>
         </div>
       </div>
