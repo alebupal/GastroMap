@@ -36,3 +36,6 @@ next-env.d.ts
 
 # Drizzle
 /drizzle
+
+# Documentación privada local
+/docs

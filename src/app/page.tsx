@@ -1,4 +1,8 @@
+import { versionService } from "@/services/versionService";
+
 export default function Home() {
+  const version = versionService.getLocalVersion();
+
   return (
     <main className="flex-1 flex flex-col items-center justify-center p-6 max-w-lg mx-auto w-full text-center">
       <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-3xl mb-6 shadow-sm border border-amber-500/20">
@@ -33,8 +37,12 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="mt-8 text-xs text-slate-400">
-        Estado del sistema: <span className="text-emerald-600 dark:text-emerald-400 font-medium">Fase 0 (Cimientos)</span>
+      <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+        <span>Fase 0 (Cimientos)</span>
+        <span>•</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+          v{version}
+        </span>
       </div>
     </main>
   );
