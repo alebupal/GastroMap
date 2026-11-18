@@ -40,7 +40,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       {/* Contenedor principal responsive */}
       <div className="max-w-6xl xl:max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex-1">
         {/* 1. Barra de navegación y usuario */}
@@ -72,13 +72,13 @@ export default async function Home() {
       </div>
 
       {/* 4. Pie de página estilizado (estilo TVSpy con donación PayPal y enlaces a repo) */}
-      <footer className="mt-12 py-6 border-t border-slate-900 bg-slate-950/80 text-xs text-slate-500">
+      <footer className="mt-12 py-6 border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-300">GastroMap</span>
+            <span className="font-bold text-slate-800 dark:text-slate-300">GastroMap</span>
             <span>•</span>
-            <span className="text-[11px] text-slate-500">Catálogo Gastronómico Colaborativo</span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-900 border border-slate-800 text-slate-400 ml-1">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Catálogo Gastronómico Colaborativo</span>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 ml-1">
               v{version}
             </span>
           </div>
@@ -89,19 +89,19 @@ export default async function Home() {
               href="https://www.paypal.me/alebupal"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-xs transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-semibold text-xs transition"
             >
               <span>❤️</span>
               <span>Donar con PayPal</span>
             </a>
 
             {/* Enlaces de repositorio y ecosistema */}
-            <div className="flex items-center gap-2.5 text-xs text-slate-400">
+            <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
               <a
                 href="https://github.com/alebupal/GastroMap"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-amber-400 transition"
+                className="hover:text-amber-500 transition"
               >
                 GitHub
               </a>
@@ -110,7 +110,7 @@ export default async function Home() {
                 href="https://hub.docker.com/r/alebupal/gastromap"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-amber-400 transition"
+                className="hover:text-amber-500 transition"
               >
                 Docker
               </a>
@@ -119,7 +119,7 @@ export default async function Home() {
                 href="https://www.paypal.me/alebupal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-amber-400 font-semibold transition"
+                className="hover:text-amber-500 font-semibold transition"
               >
                 PayPal
               </a>

@@ -32,9 +32,15 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Acceso por invitación para tu círculo cercano (familia, pareja, amigos).
   * Espacios para notas personales privadas y comentarios colaborativos compartidos en cada ficha.
 
-* **📱 Experiencia App Móvil (PWA):**
-  * Instalable en la pantalla de inicio de iOS y Android.
-  * Interfaz optimizada para uso táctil con una sola mano.
+* **📱 Experiencia Móvil (PWA) y Modo Oscuro / Claro:**
+  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App.
+  * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente y sin parpadeo.
+  * Interfaz optimizada para uso táctil con una sola mano, alternador dinámico Mapa/Lista y carruseles con scroll fluido.
+
+* **🛠️ Panel de Administración y Limpieza:**
+  * Tabla interactiva de gestión global de establecimientos con buscador y eliminación múltiple masiva.
+  * Limpieza estricta de taxonomía: borrado masivo de categorías/tags y botón «🧹 Eliminar vacías» con confirmación.
+  * Integridad referencial con borrado en cascada: al eliminar un usuario o local se purgan de forma atómica todos sus comentarios, reseñas y referencias sin dejar registros huérfanos.
 
 ---
 

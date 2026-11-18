@@ -3,7 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { eq, ne, and, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
-import { users, type User } from "@/db/schema";
+import {
+  users,
+  sessions,
+  invitations,
+  places,
+  placeComments,
+  userPlaces,
+  placeOccasions,
+  placeTags,
+  type User,
+} from "@/db/schema";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
 
 export interface SafeUser {
@@ -106,6 +116,28 @@ export async function deleteUserAction(userId: string) {
     return { error: "No puedes eliminar tu propia cuenta de administrador." };
   }
 
+  // 1. Limpiar comentarios y reseñas escritos por el usuario en cualquier local
+  await db.delete(placeComments).where(eq(placeComments.userId, userId));
+  await db.delete(userPlaces).where(eq(userPlaces.userId, userId));
+  await db.delete(sessions).where(eq(sessions.userId, userId));
+  await db.delete(invitations).where(eq(invitations.createdById, userId));
+
+  // 2. Limpiar locales creados por el usuario con todas sus relaciones
+  const userPlacesCreated = await db
+    .select({ id: places.id })
+    .from(places)
+    .where(eq(places.createdById, userId));
+  const placeIds = userPlacesCreated.map((p) => p.id);
+
+  if (placeIds.length > 0) {
+    await db.delete(placeComments).where(inArray(placeComments.placeId, placeIds));
+    await db.delete(userPlaces).where(inArray(userPlaces.placeId, placeIds));
+    await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
+    await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
+    await db.delete(places).where(inArray(places.id, placeIds));
+  }
+
+  // 3. Eliminar usuario de forma segura
   await db.delete(users).where(eq(users.id, userId));
   revalidatePath("/");
   return { success: true };
@@ -284,6 +316,28 @@ export async function deleteMultipleUsersAction(userIds: string[]) {
     return { error: "No se seleccionó ningún usuario válido para eliminar (no puedes eliminar tu propia cuenta)." };
   }
 
+  // 1. Limpiar comentarios y reseñas escritos por los usuarios
+  await db.delete(placeComments).where(inArray(placeComments.userId, validIds));
+  await db.delete(userPlaces).where(inArray(userPlaces.userId, validIds));
+  await db.delete(sessions).where(inArray(sessions.userId, validIds));
+  await db.delete(invitations).where(inArray(invitations.createdById, validIds));
+
+  // 2. Limpiar locales creados por los usuarios y todas sus dependencias
+  const userPlacesCreated = await db
+    .select({ id: places.id })
+    .from(places)
+    .where(inArray(places.createdById, validIds));
+  const placeIds = userPlacesCreated.map((p) => p.id);
+
+  if (placeIds.length > 0) {
+    await db.delete(placeComments).where(inArray(placeComments.placeId, placeIds));
+    await db.delete(userPlaces).where(inArray(userPlaces.placeId, placeIds));
+    await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
+    await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
+    await db.delete(places).where(inArray(places.id, placeIds));
+  }
+
+  // 3. Eliminar los usuarios seleccionados
   await db.delete(users).where(inArray(users.id, validIds));
   revalidatePath("/");
   return { success: true, count: validIds.length };

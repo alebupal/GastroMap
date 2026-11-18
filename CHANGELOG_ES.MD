@@ -67,5 +67,18 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Scroll horizontal con ratón (`HorizontalScroll`) en categorías, estados y etiquetas.
   - Conmutador entre fila scrollable y vista cuadrícula para categorías cuando hay muchas.
   - Panel expandible con buscador para etiquetas populares.
+- **Modo Oscuro y Modo Claro**:
+  - Conmutador interactivo de tema ☀️ / 🌙 en la cabecera con persistencia en `localStorage` y detección automática de preferencias del sistema.
+  - Prevención de parpadeo (FOUC) mediante script inline en `<head>` y estilos adaptativos CSS / Tailwind `dark:`.
+  - Adaptación visual completa en modo claro y modo oscuro para tarjetas de locales, explorador, mapas, tablas y modales.
+- **Borrado en Cascada e Integridad Referencial Estricta**:
+  - Purga atómica garantizada al eliminar un establecimiento: eliminación en cascada de comentarios (`placeComments`), colecciones de usuario (`userPlaces`), ocasiones (`placeOccasions`) y etiquetas asociadas (`placeTags`).
+  - Purga atómica total al eliminar usuarios (individual o masivamente): borrado completo de comentarios propios, colecciones, sesiones e invitaciones, así como de los locales creados por el usuario con todas sus dependencias relacionadas, impidiendo registros huérfanos o foráneos en la base de datos.
+- **Gestión Avanzada de Taxonomía y Limpieza Masiva**:
+  - Eliminación masiva de categorías y etiquetas seleccionadas mediante checkboxes con conteo en tiempo real.
+  - Botón «🧹 Eliminar vacías» con modal de confirmación detallado que enumera las categorías o etiquetas sin locales antes de eliminarlas.
+- **Optimización Móvil y Marcadores de Mapa**:
+  - Iconos de mapa Leaflet optimizados con silueta vectorial SVG y capa HTML nativa para emojis, garantizando visibilidad en todos los navegadores y sistemas móviles (Android/iOS).
+  - Vistas adaptadas para smartphones: conmutador rápido «🗺️ Mapa» y «📋 Lista», `ResizeObserver` para recálculo de dimensiones del mapa sin pérdidas de tiles y scrolls táctiles fluidos.
 - **Donación PayPal y Enlaces al estilo TVSpy**:
   - Enlaces a GitHub, Docker Hub y botón de donación con PayPal (`paypal.me/alebupal`).

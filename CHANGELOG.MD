@@ -62,5 +62,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Horizontal mouse scroll (`HorizontalScroll`) across occasions, status filters, and popular tags.
   - Responsive grid/row toggle for occasions.
   - Searchable expandable tags panel for large taxonomies.
+- **Dark Mode & Light Mode**:
+  - Interactive ☀️ / 🌙 theme toggle in header with `localStorage` persistence and automatic system preference detection.
+  - Zero-flicker (anti-FOUC) rendering via inline script in `<head>` and adaptive Tailwind `dark:` classes.
+  - Full UI theme consistency across places cards, explorer view, interactive maps, admin tables, and modals.
+- **Strict Referential Integrity & Cascade Deletion**:
+  - Guaranteed atomic cascade deletion for establishments: purges comments (`placeComments`), user collection records (`userPlaces`), occasions (`placeOccasions`), and associated tags (`placeTags`).
+  - Total atomic purge when deleting users (individually or in batch): deletes author comments, user collections, sessions, invites, and all places created by the user along with their complete relational dependencies, ensuring zero orphaned records in the database.
+- **Advanced Taxonomy Management & Bulk Cleanup**:
+  - Multi-selection and bulk deletion of categories and tags via checkboxes.
+  - «🧹 Delete empty» action for occasions and tags without linked places, including a detailed pre-confirmation modal listing target items.
+- **Mobile Experience & Map Markers Optimization**:
+  - Refined Leaflet map markers combining clean SVG pin teardrops with native HTML emoji layers for universal cross-platform rendering (Android, iOS, desktop).
+  - Mobile split-view with fluid switching between «🗺️ Map» and «📋 List», touch-friendly scroll carousels, and responsive map layout recalculations with `ResizeObserver`.
 - **PayPal Support & TVSpy-style Ecosystem Links**:
   - Subtle PayPal donation button (`paypal.me/alebupal`), GitHub repository, and Docker Hub links.

@@ -34,9 +34,15 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Invitation-only access for your inner circle.
   * Space for private personal notes as well as collaborative shared comments on each place.
 
-* **📱 Mobile App Experience (PWA):**
-  * Installable on iOS and Android home screens.
-  * Touch-optimized interface designed for single-hand usage.
+* **📱 Mobile Experience (PWA) & Dark/Light Mode:**
+  * Installable on iOS and Android home screens as a Progressive Web App.
+  * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
+  * Single-hand touch optimization, mobile map/list split toggle, and smooth swipe carousels.
+
+* **🛠️ Admin Dashboard & Database Integrity:**
+  * Interactive global places table manager with real-time search and multi-select bulk deletion.
+  * Strict taxonomy management: bulk delete categories/tags and «🧹 Delete empty» with pre-confirmation modals.
+  * Cascade deletion integrity: removing a place or user atomically purges all comments, notes, and relational dependencies without leaving orphaned records.
 
 ---
 

@@ -174,6 +174,11 @@ export async function deletePlaceAction(placeId: string) {
     return { error: "No tienes permiso para eliminar este establecimiento." };
   }
 
+  // Limpieza en cascada explícita de registros dependientes para garantizar integridad total
+  await db.delete(placeComments).where(eq(placeComments.placeId, placeId));
+  await db.delete(userPlaces).where(eq(userPlaces.placeId, placeId));
+  await db.delete(placeOccasions).where(eq(placeOccasions.placeId, placeId));
+  await db.delete(placeTags).where(eq(placeTags.placeId, placeId));
   await db.delete(places).where(eq(places.id, placeId));
   revalidatePath("/");
   return { success: true };
@@ -192,6 +197,11 @@ export async function bulkDeletePlacesAction(placeIds: string[]) {
     return { error: "No se seleccionó ningún establecimiento para eliminar." };
   }
 
+  // Limpieza en cascada explícita de registros dependientes para garantizar integridad total
+  await db.delete(placeComments).where(inArray(placeComments.placeId, placeIds));
+  await db.delete(userPlaces).where(inArray(userPlaces.placeId, placeIds));
+  await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
+  await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
   await db.delete(places).where(inArray(places.id, placeIds));
   revalidatePath("/");
   return { success: true, count: placeIds.length };
