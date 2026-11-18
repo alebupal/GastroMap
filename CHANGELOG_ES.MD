@@ -32,6 +32,16 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
     - Fusión/combinación de categorías y etiquetas duplicadas (`mergeOccasionsAction`, `mergeTagsAction`).
     - Eliminación segura con asistente para reasignar lugares asociados o desvincularlos limpiamente.
   - Categoría predeterminada renombrada a "Comer".
+- **Geoposicionamiento y Mapa Interactivo (Fase 3)**:
+  - Mapa interactivo integrado con Leaflet y tiles CartoDB Voyager (`MapView.tsx` y `MapContainerWrapper.tsx` con carga dinámica SSR-safe).
+  - Pines gastronómicos vectoriales temáticos con `L.divIcon`, colores distintivos por ocasión y emojis centrales (`createPlaceMarkerIcon`).
+  - Popups informativos flotantes con nombre, zona, rango de precio, notas y botón directo de indicaciones GPS («Cómo llegar ↗»).
+  - Modo «Cerca de mí» con geolocalización en navegador y selector de radio dinámico (1 km, 2 km, 5 km, 10 km o sin límite).
+  - Consultas espaciales en PostGIS con cálculo de distancia real (`ST_Distance`) y filtrado geodésico (`ST_DWithin`).
+  - Indicador de distancia relativa en metros y kilómetros en tarjetas y popups (`📍 350 m`, `📍 1.4 km`).
+  - Explorador unificado (`PlacesExplorer.tsx`) con alternador de vistas («🗺️ Mapa» / «📋 Lista») y sincronización bidireccional (botón «Ver en mapa»).
+  - Selector jerárquico de ubicaciones cerradas (Provincia ➔ Población) en `LocationPicker.tsx` con catálogo precargado (`spanishLocations.ts`, ej. Granada ➔ Santa Fe, Armilla, Capital).
+  - Buscador inteligente de direcciones con autocompletado en tiempo real mediante la API de OpenStreetMap / Nominatim (`geocoding.ts`) que resuelve calle, población, provincia y coordenadas con un clic.
 - **Licencia, Identidad Visual y Guía para IAs**:
   - Licencia GNU General Public License v3.0 ([LICENSE](LICENSE)).
   - Favicon vectorial en formato SVG ([public/icon.svg](public/icon.svg)).

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createPlaceAction, parseUrlAction } from "@/lib/actions/places";
 import { TagInput } from "@/components/places/TagInput";
+import { LocationPicker } from "@/components/places/LocationPicker";
 import type { Occasion } from "@/db/schema";
 
 const PRICE_OPTIONS = [
@@ -58,6 +59,18 @@ export function NewPlaceForm({
       }
       if (parsed.resolvedUrl) {
         setUrl(parsed.resolvedUrl);
+      }
+      // Geocodificación inversa automática desde coordenadas
+      if (parsed.locationDetails) {
+        if (parsed.locationDetails.road) {
+          setAddress(parsed.locationDetails.road);
+        }
+        if (parsed.locationDetails.city) {
+          setCity(parsed.locationDetails.city);
+        }
+        if (!name && parsed.locationDetails.name) {
+          setName(parsed.locationDetails.name);
+        }
       }
     } catch {
       // Ignorar fallo de parseo
@@ -124,7 +137,7 @@ export function NewPlaceForm({
         </p>
       </div>
 
-      {/* 2. Datos principales */}
+      {/* 2. Nombre del sitio */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
           Nombre del sitio *
@@ -140,40 +153,21 @@ export function NewPlaceForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Ciudad / Población
-          </label>
-          <input
-            type="text"
-            name="city"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Ej. Sevilla, Madrid..."
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Dirección / Zona
-          </label>
-          <input
-            type="text"
-            name="address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Ej. Triana, Calle Sierpes..."
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          />
-        </div>
-      </div>
+      {/* 3. Selector estructurado de Ubicación con buscador Nominatim */}
+      <LocationPicker
+        initialCity={city}
+        initialAddress={address}
+        initialLat={lat}
+        initialLng={lng}
+        onLocationChange={(loc) => {
+          setCity(loc.city);
+          setAddress(loc.address);
+          setLat(loc.latitude);
+          setLng(loc.longitude);
+        }}
+      />
 
-      {/* Coordenadas */}
-      <input type="hidden" name="latitude" value={lat} />
-      <input type="hidden" name="longitude" value={lng} />
-
-      {/* 3. Para qué plan es (Ocasiones dinámicas en BD con multiselección) */}
+      {/* 4. Para qué plan es (Ocasiones dinámicas en BD con multiselección) */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">

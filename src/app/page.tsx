@@ -3,10 +3,12 @@ import { countUsers, getCurrentUser } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions/auth";
 import { getAllPlaces } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
+import { getSetting } from "@/lib/actions/settings";
 import { versionService } from "@/services/versionService";
 import { InviteManager } from "@/components/InviteManager";
 import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
-import { PlaceCard } from "@/components/places/PlaceCard";
+import { SettingsManager } from "@/components/admin/SettingsManager";
+import { PlacesExplorer } from "@/components/places/PlacesExplorer";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +23,11 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList] = await Promise.all([
+  const [places, occasionsList, tagsList, cartoApiKey] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
+    getSetting("carto_api_key"),
   ]);
 
   const version = versionService.getLocalVersion();
@@ -39,7 +42,7 @@ export default async function Home() {
   );
 
   return (
-    <main className="min-h-screen flex flex-col justify-between p-4 sm:p-6 max-w-xl mx-auto w-full">
+    <main className="min-h-screen flex flex-col justify-between p-4 sm:p-6 lg:p-8 max-w-6xl xl:max-w-7xl mx-auto w-full">
       {/* 1. Cabecera de usuario */}
       <div>
         <div className="w-full flex items-center justify-between py-2 mb-4 border-b border-slate-100 dark:border-slate-800">
@@ -50,6 +53,9 @@ export default async function Home() {
             <div className="text-left">
               <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                 <span>{currentUser.name}</span>
+                {currentUser.username && (
+                  <span className="text-slate-400 font-normal">@{currentUser.username}</span>
+                )}
                 {currentUser.role === "admin" && (
                   <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
                     ADMIN
@@ -89,7 +95,7 @@ export default async function Home() {
           </a>
         </div>
 
-        {/* 3. Catálogo de Establecimientos */}
+        {/* 3. Catálogo de Establecimientos (Mapa interactivo y Lista sincronizada) */}
         <section id="catalogo" className="w-full space-y-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -107,7 +113,7 @@ export default async function Home() {
                 Aún no hay sitios guardados
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs mx-auto">
-                Pulsa en «Añadir sitio» o comparte un enlace desde Google Maps o redes sociales para estrenar tu catálogo.
+                Pulsa en «Añadir sitio» o comparte un enlace desde Google Maps para estrenar tu catálogo en el mapa.
               </p>
               <a
                 href="/new"
@@ -117,26 +123,25 @@ export default async function Home() {
               </a>
             </div>
           ) : (
-            <div className="space-y-3">
-              {places.map((place) => (
-                <PlaceCard
-                  key={place.id}
-                  place={place}
-                  currentUserId={currentUser.id}
-                  isAdmin={currentUser.role === "admin"}
-                  occasionMap={occasionMap}
-                />
-              ))}
-            </div>
+            <PlacesExplorer
+              initialPlaces={places}
+              occasionsList={occasionsList}
+              tagsList={tagsList}
+              currentUserId={currentUser.id}
+              isAdmin={currentUser.role === "admin"}
+              occasionMap={occasionMap}
+              cartoApiKey={cartoApiKey}
+            />
           )}
         </section>
 
         {/* 4. Módulos de Administración (solo para admin) */}
         {currentUser.role === "admin" && (
-          <div className="mt-8 space-y-3">
+          <div className="mt-8 space-y-3 max-w-xl">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Herramientas de Administración
             </h2>
+            <SettingsManager initialCartoApiKey={cartoApiKey} />
             <TaxonomyManager initialOccasions={occasionsList} initialTags={tagsList} />
             <InviteManager />
           </div>

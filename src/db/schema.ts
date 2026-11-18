@@ -10,6 +10,7 @@ import {
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
+  username: varchar("username", { length: 50 }).unique(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: text("password_hash").notNull(),
@@ -107,6 +108,12 @@ export const placeTags = pgTable(
   ]
 );
 
+export const appSettings = pgTable("app_settings", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -117,3 +124,4 @@ export type Place = typeof places.$inferSelect;
 export type NewPlace = typeof places.$inferInsert;
 export type PlaceOccasion = typeof placeOccasions.$inferSelect;
 export type PlaceTag = typeof placeTags.$inferSelect;
+export type AppSetting = typeof appSettings.$inferSelect;

@@ -32,6 +32,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Category and tag merging functionality (`mergeOccasionsAction`, `mergeTagsAction`).
     - Safe deletion with prompt to reassign associated places or unlink cleanly.
   - Renamed default category to "Comer".
+- **Geopositioning & Interactive Map (Phase 3)**:
+  - Interactive Leaflet map with CartoDB Voyager tiles (`MapView.tsx` and `MapContainerWrapper.tsx` using SSR-safe dynamic loading).
+  - Thematic vector map pins using `L.divIcon` with occasion-based color coding and category emojis (`createPlaceMarkerIcon`).
+  - Informative floating popups displaying venue name, location, price level, notes, and direct GPS navigation link ("Cómo llegar ↗").
+  - "Near Me" location mode using browser Geolocation API with dynamic radius selector (1 km, 2 km, 5 km, 10 km, or unlimited).
+  - Spatial PostGIS queries utilizing geodesic distance calculations (`ST_Distance`) and radius filtering (`ST_DWithin`).
+  - Relative distance badges displayed on place cards and map popups (`📍 350 m`, `📍 1.4 km`).
+  - Unified explorer component (`PlacesExplorer.tsx`) featuring a seamless mobile view toggle ("🗺️ Mapa" / "📋 Lista") and bidirectional card-to-map focus.
+  - Hierarchical location selector (Province ➔ Municipality) in `LocationPicker.tsx` with preloaded dataset (`spanishLocations.ts`, e.g. Granada ➔ Santa Fe, Armilla, Capital).
+  - Smart address search with real-time autocompletion powered by OpenStreetMap / Nominatim API (`geocoding.ts`), auto-populating street, city, province, and exact GPS coordinates with a single click.
 - **Licensing, Branding & AI Collaboration Guidelines**:
   - GNU General Public License v3.0 ([LICENSE](LICENSE)).
   - Clean vector SVG favicon ([public/icon.svg](public/icon.svg)).

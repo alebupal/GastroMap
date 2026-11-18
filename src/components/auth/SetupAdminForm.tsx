@@ -31,15 +31,35 @@ export function SetupAdminForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Nombre
+          Nombre completo
         </label>
         <input
           type="text"
           name="name"
           required
-          placeholder="Ej. Alejandro"
+          placeholder="Ej. Alejandro Bueno"
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
         />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+          Nombre de usuario (@username único)
+        </label>
+        <div className="relative">
+          <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">@</span>
+          <input
+            type="text"
+            name="username"
+            required
+            pattern="[A-Za-z0-9_-]+"
+            placeholder="alebupal"
+            className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
+        <p className="text-[11px] text-slate-400 mt-1">
+          Tu identificador público para firmar sitios y recomendaciones.
+        </p>
       </div>
 
       <div>

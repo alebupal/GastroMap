@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import crypto from "crypto";
-import { eq, and, isNull, gt } from "drizzle-orm";
+import { eq, and, or, isNull, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { users, invitations } from "@/db/schema";
 import {
@@ -32,12 +32,20 @@ export async function setupAdminAction(formData: FormData): Promise<ActionResult
   }
 
   const name = (formData.get("name") as string)?.trim();
+  const rawUsername = (formData.get("username") as string)?.trim().toLowerCase().replace(/^@/, "");
   const email = (formData.get("email") as string)?.trim().toLowerCase();
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!name || name.length < 2) {
     return { error: "El nombre debe tener al menos 2 caracteres." };
+  }
+  const username = rawUsername || email.split("@")[0].replace(/[^a-z0-9_-]/g, "");
+  if (!username || username.length < 3) {
+    return { error: "El nombre de usuario debe tener al menos 3 caracteres." };
+  }
+  if (!/^[a-z0-9_-]+$/.test(username)) {
+    return { error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos." };
   }
   if (!email || !email.includes("@")) {
     return { error: "Por favor, introduce un correo electrónico válido." };
@@ -55,6 +63,7 @@ export async function setupAdminAction(formData: FormData): Promise<ActionResult
     .insert(users)
     .values({
       name,
+      username,
       email,
       passwordHash,
       role: "admin",
@@ -68,20 +77,22 @@ export async function setupAdminAction(formData: FormData): Promise<ActionResult
 }
 
 /**
- * Inicia sesión con correo y contraseña.
+ * Inicia sesión con usuario o correo y contraseña.
  */
 export async function loginAction(formData: FormData): Promise<ActionResult> {
-  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const identifier = (
+    (formData.get("identifier") || formData.get("email")) as string
+  )?.trim().toLowerCase().replace(/^@/, "");
   const password = formData.get("password") as string;
 
-  if (!email || !password) {
-    return { error: "Introduce tu correo y contraseña." };
+  if (!identifier || !password) {
+    return { error: "Introduce tu usuario o correo y contraseña." };
   }
 
   const [user] = await db
     .select()
     .from(users)
-    .where(eq(users.email, email))
+    .where(or(eq(users.email, identifier), eq(users.username, identifier)))
     .limit(1);
 
   if (!user) {
@@ -169,12 +180,20 @@ export async function registerWithInvitationAction(
   }
 
   const name = (formData.get("name") as string)?.trim();
+  const rawUsername = (formData.get("username") as string)?.trim().toLowerCase().replace(/^@/, "");
   const email = (formData.get("email") as string)?.trim().toLowerCase();
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
   if (!name || name.length < 2) {
     return { error: "El nombre debe tener al menos 2 caracteres." };
+  }
+  const username = rawUsername || email.split("@")[0].replace(/[^a-z0-9_-]/g, "");
+  if (!username || username.length < 3) {
+    return { error: "El nombre de usuario debe tener al menos 3 caracteres." };
+  }
+  if (!/^[a-z0-9_-]+$/.test(username)) {
+    return { error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos." };
   }
   if (!email || !email.includes("@")) {
     return { error: "Introduce un correo válido." };
@@ -189,15 +208,15 @@ export async function registerWithInvitationAction(
     return { error: "Las contraseñas no coinciden." };
   }
 
-  // Comprobar si el email ya existe
+  // Comprobar si el email o username ya existen
   const [existingUser] = await db
     .select({ id: users.id })
     .from(users)
-    .where(eq(users.email, email))
+    .where(or(eq(users.email, email), eq(users.username, username)))
     .limit(1);
 
   if (existingUser) {
-    return { error: "Ya existe una cuenta con este correo electrónico." };
+    return { error: "Ya existe una cuenta con este correo o nombre de usuario." };
   }
 
   const passwordHash = await hashPassword(password);
@@ -206,6 +225,7 @@ export async function registerWithInvitationAction(
     .insert(users)
     .values({
       name,
+      username,
       email,
       passwordHash,
       role: invitation.role,
