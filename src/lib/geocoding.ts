@@ -25,7 +25,7 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "GastroMap/0.2.0 (self-hosted gastronomic tracker)",
+        "User-Agent": "GastroMap/0.1.0 (self-hosted gastronomic tracker)",
         "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
       },
       signal: AbortSignal.timeout(4500),

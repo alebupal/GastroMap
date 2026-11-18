@@ -33,7 +33,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                 GastroMap
               </span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-800/90 text-slate-400 border border-slate-700/60">
-                v0.2.0
+                v0.1.0
               </span>
             </div>
             <p className="text-[11px] text-slate-400 hidden sm:block">
