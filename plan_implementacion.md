@@ -29,18 +29,19 @@ Documento vivo de seguimiento del proyecto **GastroMap**. Aquí se registran las
 
 ## 3. Hoja de Ruta por Fases
 
-### Fase 0: Cimientos y Entorno Docker (En curso)
+### Fase 0: Cimientos y Entorno Docker (Completada ✅)
 - [x] Configuración de repositorio Git local y remoto.
 - [x] Definición del stack tecnológico y plan de implementación.
-- [ ] Inicialización del proyecto Next.js con TypeScript y Tailwind CSS.
-- [ ] Configuración de `docker-compose.yml` (PostGIS 16 + App).
-- [ ] Configuración inicial de Drizzle ORM y conexión a base de datos.
-- [ ] Verificación de arranque en contenedor y healthcheck (`/api/health`).
+- [x] Inicialización del proyecto Next.js 15 con TypeScript y Tailwind CSS.
+- [x] Configuración de `docker-compose.yml` (PostGIS 16 + App en standalone).
+- [x] Configuración de Drizzle ORM, schema inicial y conexión a base de datos.
+- [x] Creación de contenedor `gastromap_db` con PostGIS 3.4 y aplicación de migración inicial.
+- [x] Verificación de compilación de producción y healthcheck (`/api/health`).
 
-### Fase 1: Autenticación, Usuarios e Invitaciones
-- [ ] Esquema Drizzle para usuarios, roles (`admin`, `user`) y sesiones.
+### Fase 1: Autenticación, Usuarios e Invitaciones (Próxima)
+- [ ] Helpers de sesión y hashing de contraseñas (`argon2`).
 - [ ] Flujo de inicialización / creación del primer usuario Administrador.
-- [ ] Sistema de login/logout con cookies seguras.
+- [ ] Formulario y acción de login/logout con cookies seguras `HttpOnly`.
 - [ ] Generación y consumo de enlaces de invitación para amigos y familiares.
 
 ### Fase 2: Catálogo Básico y Alta Rápida de Sitios
@@ -77,3 +78,9 @@ Documento vivo de seguimiento del proyecto **GastroMap**. Aquí se registran las
 * **Análisis de requerimientos:** Revisada la especificación técnica completa (`gestor_gastronomico_especificacion.md`) y el resumen funcional (`gestor_gastronomico_resumen_amigos.md`).
 * **Decisión de arquitectura:** Acordado stack tecnológico simplificando la autenticación a sesiones en base de datos para máxima fiabilidad en despliegue privado.
 * **Documentación:** Creado `plan_implementacion.md` para seguimiento continuo.
+* **Fase 0 (Cimientos completada):**
+  * Estructurado el proyecto en Next.js 15 (App Router, TypeScript, Tailwind CSS, Autoprefixer).
+  * Creado `docker-compose.yml` con `postgis/postgis:16-3.4-alpine` y `Dockerfile` multi-stage optimizado para standalone.
+  * Configurado Drizzle ORM (`schema.ts`, `drizzle.config.ts`), generada y aplicada la primera migración `0000_mixed_bedlam.sql` con las tablas `users`, `sessions` e `invitations`.
+  * Verificada la compilación (`next build`) y la conectividad real con PostgreSQL 16.4 y PostGIS 3.4.3.
+  * Implementado endpoint de comprobación de salud `/api/health`.
