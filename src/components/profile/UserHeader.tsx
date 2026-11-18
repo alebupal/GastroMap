@@ -22,18 +22,18 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
   return (
     <>
-      <header className="w-full flex items-center justify-between py-3 mb-6 border-b border-slate-200 dark:border-slate-800/80">
+      <header className="w-full flex items-center justify-between py-2.5 sm:py-3 mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-800/80 gap-2">
         {/* Brand / Logo */}
-        <a href="/" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-xl shadow-md shadow-amber-500/20 group-hover:scale-105 transition">
+        <a href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-lg sm:text-xl shadow-md shadow-amber-500/20 group-hover:scale-105 transition shrink-0">
             🍽️
           </div>
           <div className="text-left">
             <div className="flex items-center gap-1.5">
-              <span className="font-black text-lg tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 dark:from-amber-400 dark:via-orange-400 dark:to-amber-500 bg-clip-text text-transparent">
+              <span className="font-black text-base sm:text-lg tracking-tight bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 dark:from-amber-400 dark:via-orange-400 dark:to-amber-500 bg-clip-text text-transparent">
                 GastroMap
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60">
+              <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60">
                 v0.1.0
               </span>
             </div>
@@ -44,7 +44,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         </a>
 
         {/* User profile pill & controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Selector de modo claro / modo oscuro */}
           <ThemeToggle />
 
@@ -73,20 +73,20 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             </a>
           </div>
 
-          <div className="flex items-center gap-2.5 p-1 pl-2 pr-3 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none transition">
-            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-black">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 p-1 pl-1.5 sm:pl-2 pr-1.5 sm:pr-3 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none transition shrink-0">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs font-black shrink-0">
               {displayUsername.charAt(0).toUpperCase()}
             </div>
-            <div className="flex flex-col text-left">
+            <div className="hidden sm:flex flex-col text-left">
               <div className="flex items-center gap-1">
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">@{displayUsername}</span>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[100px]">@{displayUsername}</span>
                 {currentUser.role === "admin" && (
                   <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500 text-white dark:text-slate-950 uppercase tracking-wider">
                     ADMIN
                   </span>
                 )}
               </div>
-              <span className="text-[10px] text-slate-400 truncate max-w-[120px] hidden sm:block">
+              <span className="text-[10px] text-slate-400 truncate max-w-[120px]">
                 {currentUser.email}
               </span>
             </div>
@@ -94,7 +94,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             <button
               type="button"
               onClick={() => setIsEditProfileOpen(true)}
-              className="ml-1 p-1 text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer"
+              className="p-1 text-slate-400 hover:text-amber-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition cursor-pointer text-xs"
               title="Editar mi perfil"
             >
               ⚙️
@@ -104,10 +104,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
           <form action={logoutAction}>
             <button
               type="submit"
-              className="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition cursor-pointer active:scale-95"
+              className="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition cursor-pointer active:scale-95 flex items-center gap-1 shrink-0"
               title="Cerrar sesión"
             >
-              Salir
+              <span className="sm:hidden text-xs">🚪</span>
+              <span className="hidden sm:inline">Salir</span>
             </button>
           </form>
         </div>
