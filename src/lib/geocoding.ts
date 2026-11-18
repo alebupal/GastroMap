@@ -4,27 +4,29 @@ export interface GeocodingResult {
   houseNumber?: string;
   city?: string;
   province?: string;
+  country?: string;
   name?: string;
   latitude: number;
   longitude: number;
 }
 
 /**
- * Busca direcciones y establecimientos en España usando la API abierta de Nominatim (OpenStreetMap)
+ * Busca direcciones y establecimientos a nivel mundial usando la API abierta de Nominatim (OpenStreetMap)
  */
 export async function searchAddressNominatim(query: string): Promise<GeocodingResult[]> {
   const trimmed = query.trim();
   if (trimmed.length < 3) return [];
 
-  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&countrycodes=es&q=${encodeURIComponent(
+  // Búsqueda mundial sin restricción de país
+  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(
     trimmed
   )}`;
 
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "GastroMap/0.1.0 (self-hosted gastronomic tracker)",
-        "Accept-Language": "es-ES,es;q=0.9",
+        "User-Agent": "GastroMap/0.2.0 (self-hosted gastronomic tracker)",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
       },
       signal: AbortSignal.timeout(4500),
       next: { revalidate: 3600 }, // Cachear búsquedas idénticas 1 hora
@@ -55,6 +57,7 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
         houseNumber,
         city,
         province,
+        country: addr.country,
         latitude: parseFloat(item.lat),
         longitude: parseFloat(item.lon),
       };
@@ -109,6 +112,7 @@ export async function reverseGeocodeNominatim(
       houseNumber,
       city,
       province,
+      country: addr.country,
       latitude: parseFloat(item.lat),
       longitude: parseFloat(item.lon),
     };

@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { countUsers, getCurrentUser } from "@/lib/auth";
-import { logoutAction } from "@/lib/actions/auth";
 import { getAllPlaces } from "@/lib/actions/places";
+import { seedDemoPlacesAction } from "@/lib/actions/seed";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getSetting } from "@/lib/actions/settings";
 import { versionService } from "@/services/versionService";
+import { UserHeader } from "@/components/profile/UserHeader";
+import { UsersManager } from "@/components/admin/UsersManager";
+import { DemoPlacesSeeder } from "@/components/admin/DemoPlacesSeeder";
 import { InviteManager } from "@/components/InviteManager";
 import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
 import { SettingsManager } from "@/components/admin/SettingsManager";
@@ -23,12 +26,22 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, cartoApiKey] = await Promise.all([
+  let [places, occasionsList, tagsList, cartoApiKey] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
     getSetting("carto_api_key"),
   ]);
+
+  // Si el catálogo está vacío, sembramos los 20 sitios de demostración mundiales automáticamente
+  if (places.length === 0) {
+    try {
+      await seedDemoPlacesAction();
+      places = await getAllPlaces();
+    } catch {
+      // Ignorar fallback
+    }
+  }
 
   const version = versionService.getLocalVersion();
 
@@ -43,37 +56,9 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen flex flex-col justify-between p-4 sm:p-6 lg:p-8 max-w-6xl xl:max-w-7xl mx-auto w-full">
-      {/* 1. Cabecera de usuario */}
+      {/* 1. Cabecera de usuario con edición de perfil */}
       <div>
-        <div className="w-full flex items-center justify-between py-2 mb-4 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-lg font-bold border border-amber-500/20">
-              {(currentUser.username || currentUser.name).charAt(0).toUpperCase()}
-            </div>
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <span className="font-bold text-amber-600 dark:text-amber-400">
-                  @{currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "")}
-                </span>
-                {currentUser.role === "admin" && (
-                  <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
-                    ADMIN
-                  </span>
-                )}
-              </div>
-              <div className="text-[11px] text-slate-400">{currentUser.email}</div>
-            </div>
-          </div>
-
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 font-medium transition cursor-pointer"
-            >
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
+        <UserHeader currentUser={currentUser} />
 
         {/* 2. Barra de acciones rápidas */}
         <div className="grid grid-cols-2 gap-2 mb-6">
@@ -140,6 +125,8 @@ export default async function Home() {
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Herramientas de Administración
             </h2>
+            <UsersManager />
+            <DemoPlacesSeeder />
             <SettingsManager initialCartoApiKey={cartoApiKey} />
             <TaxonomyManager initialOccasions={occasionsList} initialTags={tagsList} />
             <InviteManager />
