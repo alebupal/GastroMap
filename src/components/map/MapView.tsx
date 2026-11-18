@@ -191,7 +191,7 @@ export default function MapView({
               : ""
           }
           <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 10px; color: #94a3b8;">Por ${place.createdByName}</span>
+            <span style="font-size: 10px; color: #94a3b8;">Por @${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}</span>
             <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 600; color: #2563eb; text-decoration: none;">
               Cómo llegar ↗
             </a>

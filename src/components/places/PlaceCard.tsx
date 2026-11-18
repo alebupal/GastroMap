@@ -252,7 +252,7 @@ export function PlaceCard({
       {/* Pie de tarjeta: Autor, comentarios, Maps y Borrar */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
         <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate max-w-[130px]">
-          Por {place.createdByUsername ? `@${place.createdByUsername}` : place.createdByName}
+          Por @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
         </span>
 
         <div className="flex items-center gap-2">

@@ -102,7 +102,7 @@ export function PlaceCommentsThread({
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-slate-900 dark:text-slate-200 text-[11px]">
-                    {c.authorUsername ? `@${c.authorUsername}` : c.authorName}
+                    @{c.authorUsername || c.authorName.toLowerCase().replace(/\s+/g, "")}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] text-slate-400">

@@ -48,14 +48,13 @@ export default async function Home() {
         <div className="w-full flex items-center justify-between py-2 mb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-lg font-bold border border-amber-500/20">
-              {currentUser.name.charAt(0).toUpperCase()}
+              {(currentUser.username || currentUser.name).charAt(0).toUpperCase()}
             </div>
             <div className="text-left">
               <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <span>{currentUser.name}</span>
-                {currentUser.username && (
-                  <span className="text-slate-400 font-normal">@{currentUser.username}</span>
-                )}
+                <span className="font-bold text-amber-600 dark:text-amber-400">
+                  @{currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "")}
+                </span>
                 {currentUser.role === "admin" && (
                   <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
                     ADMIN

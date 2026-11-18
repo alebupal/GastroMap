@@ -309,7 +309,9 @@ export async function getAllPlaces(
       return {
         ...place,
         createdByName,
-        createdByUsername,
+        createdByUsername:
+          createdByUsername ||
+          (createdByName ? createdByName.toLowerCase().replace(/\s+/g, "") : null),
         occasions: occs.map((o) => o.occasion),
         tags: tags.map((t) => t.tag),
         distanceMeters:

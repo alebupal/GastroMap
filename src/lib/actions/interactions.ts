@@ -177,7 +177,10 @@ export async function getPlaceCommentsAction(
     .where(eq(placeComments.placeId, placeId))
     .orderBy(desc(placeComments.createdAt));
 
-  return rows;
+  return rows.map((r) => ({
+    ...r,
+    authorUsername: r.authorUsername || r.authorName.toLowerCase().replace(/\s+/g, ""),
+  }));
 }
 
 /**
@@ -209,7 +212,7 @@ export async function addCommentAction(placeId: string, content: string) {
       content: created.content,
       createdAt: created.createdAt,
       authorName: user.name,
-      authorUsername: user.username,
+      authorUsername: user.username || user.name.toLowerCase().replace(/\s+/g, ""),
     },
   };
 }
