@@ -17,6 +17,47 @@ interface MapViewProps {
   cartoApiKey?: string | null;
 }
 
+// Función auxiliar para construir el contenido HTML enriquecido del popup
+function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const distanceLabel =
+    typeof place.distanceMeters === "number"
+      ? `<span style="font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 9999px;">📍 ${
+          place.distanceMeters < 1000
+            ? `${place.distanceMeters} m`
+            : `${(place.distanceMeters / 1000).toFixed(1)} km`
+        }</span>`
+      : "";
+
+  return `
+    <div style="padding: 12px; min-width: 200px; max-width: 260px; font-family: system-ui, sans-serif;">
+      <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
+        <strong style="font-size: 14px; color: #0f172a; line-height: 1.2;">${place.name}</strong>
+        <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${place.priceRange}</span>
+      </div>
+      ${
+        place.city || place.address
+          ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">${place.city ? place.city : ""}${
+              place.city && place.address ? " • " : ""
+            }${place.address || ""}</p>`
+          : ""
+      }
+      ${distanceLabel ? `<div style="margin-top: 6px;">${distanceLabel}</div>` : ""}
+      ${
+        place.notes
+          ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 6px; border-radius: 6px;">«${place.notes}»</p>`
+          : ""
+      }
+      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 10px; color: #94a3b8;">Por @${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}</span>
+        <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 600; color: #2563eb; text-decoration: none;">
+          Cómo llegar ↗
+        </a>
+      </div>
+    </div>
+  `;
+}
+
 export default function MapView({
   places,
   selectedPlaceId,
@@ -184,45 +225,7 @@ export default function MapView({
       const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, isSelected);
 
       let marker = markersRef.current.get(place.id);
-
-      // Contenido del popup enriquecido
-      const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-      const distanceLabel =
-        typeof place.distanceMeters === "number"
-          ? `<span style="font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 9999px;">📍 ${
-              place.distanceMeters < 1000
-                ? `${place.distanceMeters} m`
-                : `${(place.distanceMeters / 1000).toFixed(1)} km`
-            }</span>`
-          : "";
-
-      const popupHtml = `
-        <div style="padding: 12px; min-width: 200px; max-width: 260px; font-family: system-ui, sans-serif;">
-          <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
-            <strong style="font-size: 14px; color: #0f172a; line-height: 1.2;">${place.name}</strong>
-            <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${place.priceRange}</span>
-          </div>
-          ${
-            place.city || place.address
-              ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">${place.city ? place.city : ""}${
-                  place.city && place.address ? " • " : ""
-                }${place.address || ""}</p>`
-              : ""
-          }
-          ${distanceLabel ? `<div style="margin-top: 6px;">${distanceLabel}</div>` : ""}
-          ${
-            place.notes
-              ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 6px; border-radius: 6px;">«${place.notes}»</p>`
-              : ""
-          }
-          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 10px; color: #94a3b8;">Por @${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}</span>
-            <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 600; color: #2563eb; text-decoration: none;">
-              Cómo llegar ↗
-            </a>
-          </div>
-        </div>
-      `;
+      const popupHtml = getPlacePopupHtml(place, lat, lng);
 
       if (!marker || !map.hasLayer(marker)) {
         if (marker) marker.remove();
@@ -274,10 +277,16 @@ export default function MapView({
           const primaryOccasion = place.occasions[0];
           const occasionInfo = primaryOccasion ? occasionMap[primaryOccasion] : undefined;
           const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, true);
+          const popupHtml = getPlacePopupHtml(place, lat, lng);
           marker = L.marker([lat, lng], {
             icon,
             zIndexOffset: 500,
-          }).addTo(map);
+          })
+            .addTo(map)
+            .bindPopup(popupHtml)
+            .on("click", () => {
+              if (onSelectPlace) onSelectPlace(place.id);
+            });
           markersRef.current.set(place.id, marker);
         }
       }

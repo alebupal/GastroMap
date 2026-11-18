@@ -10,13 +10,19 @@ const OCCASION_COLORS: Record<string, { bg: string; text: string; border: string
   cafe: { bg: "#92400e", text: "#ffffff", border: "#78350f" }, // Ámbar tostado
   copas: { bg: "#7c3aed", text: "#ffffff", border: "#6d28d9" }, // Morado
   postureo: { bg: "#ca8a04", text: "#ffffff", border: "#a16207" }, // Dorado
+  desayuno: { bg: "#f59e0b", text: "#ffffff", border: "#d97706" }, // Ámbar cálido
+  casual: { bg: "#059669", text: "#ffffff", border: "#047857" }, // Esmeralda
+  cita: { bg: "#e11d48", text: "#ffffff", border: "#be123c" }, // Rosa carmesí
+  terraza: { bg: "#0284c7", text: "#ffffff", border: "#0369a1" }, // Celeste cielo
 };
 
-const DEFAULT_COLOR = { bg: "#d97706", text: "#ffffff", border: "#b45309" }; // Ámbar oscuro por defecto
+const DEFAULT_COLOR = { bg: "#ea580c", text: "#ffffff", border: "#c2410c" }; // Naranja vibrante por defecto
 
 /**
- * Genera un marcador tipo pin gastronómico en SVG puro
- * Diseñado para garantizar renderizado nítido y consistente en todos los navegadores
+ * Genera un marcador tipo pin gastronómico ultra-nítido y compatible.
+ * Combina un pin vectorial SVG para la forma de gota invertida con una capa
+ * HTML absoluta para el emoji nativo del sistema, garantizando visibilidad total
+ * en Linux, Windows, macOS, Android e iOS.
  */
 export function createPlaceMarkerIcon(
   occasionId?: string,
@@ -33,23 +39,25 @@ export function createPlaceMarkerIcon(
   const r = w / 2 - 4;
 
   const html = `
-    <div style="width: ${w}px; height: ${h}px; filter: drop-shadow(0 4px 8px rgba(0,0,0,${
-    isSelected ? 0.45 : 0.28
+    <div style="position: relative; width: ${w}px; height: ${h}px; filter: drop-shadow(0 4px 10px rgba(0,0,0,${
+    isSelected ? 0.5 : 0.3
   })); cursor: pointer; transform: ${
-    isSelected ? "scale(1.15)" : "scale(1)"
+    isSelected ? "scale(1.18)" : "scale(1)"
   }; transition: transform 0.2s ease;">
-      <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; overflow: visible;">
-        <!-- Forma de gota del pin invertida -->
+      <!-- Pin SVG con forma de gota invertida -->
+      <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; position: absolute; left: 0; top: 0; overflow: visible;">
         <path d="M${cx} ${h} C${cx} ${h} 2 ${cy + 12} 2 ${cy} C2 ${cy - r} ${cx - r} 2 ${cx} 2 C${
     cx + r
   } 2 ${w - 2} ${cy - r} ${w - 2} ${cy} C${w - 2} ${cy + 12} ${cx} ${h} ${cx} ${h} Z" fill="${
     colors.bg
   }" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Círculo interior de contraste -->
-        <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" fill-opacity="0.25"/>
-        <!-- Emoji centrado -->
-        <text x="${cx}" y="${cy + 1}" font-size="${emojiSize}" text-anchor="middle" dominant-baseline="central">${iconEmoji}</text>
+        <!-- Círculo interior de contraste para destacar el emoji -->
+        <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" fill-opacity="0.3"/>
       </svg>
+      <!-- Capa HTML nativa para emoji siempre visible y a todo color -->
+      <div style="position: absolute; left: 0; top: 0; width: ${w}px; height: ${w}px; display: flex; align-items: center; justify-content: center; font-size: ${emojiSize}px; line-height: 1; pointer-events: none; user-select: none;">
+        ${iconEmoji}
+      </div>
     </div>
   `;
 
@@ -74,7 +82,7 @@ export function createUserLocationIcon(): L.DivIcon {
         width: ${size}px;
         height: ${size}px;
         border-radius: 50%;
-        background: rgba(59, 130, 246, 0.4);
+        background: rgba(59, 130, 246, 0.45);
         animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
       "></div>
       <div style="
@@ -84,7 +92,7 @@ export function createUserLocationIcon(): L.DivIcon {
         border-radius: 50%;
         background: #2563eb;
         border: 2px solid #ffffff;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
       "></div>
     </div>
   `;

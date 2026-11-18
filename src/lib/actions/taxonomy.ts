@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq, and, sql, notInArray, desc } from "drizzle-orm";
+import { eq, and, sql, notInArray, inArray, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { occasions, tags, placeOccasions, placeTags, type Occasion } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -357,4 +357,106 @@ export async function getPopularTags(limit = 20): Promise<string[]> {
   } catch {
     return [];
   }
+}
+
+/**
+ * Elimina múltiples ocasiones simultáneamente.
+ */
+export async function deleteMultipleOccasionsAction(ids: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado." };
+  }
+
+  if (ids.length === 0) return { success: true, count: 0 };
+
+  // 1. Desvincular de todos los sitios asociados
+  await db.delete(placeOccasions).where(inArray(placeOccasions.occasion, ids));
+
+  // 2. Eliminar categorías
+  await db.delete(occasions).where(inArray(occasions.id, ids));
+
+  revalidatePath("/");
+  revalidatePath("/new");
+  return { success: true, count: ids.length };
+}
+
+/**
+ * Elimina múltiples etiquetas simultáneamente.
+ */
+export async function deleteMultipleTagsAction(tagIds: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado." };
+  }
+
+  if (tagIds.length === 0) return { success: true, count: 0 };
+
+  // 1. Desvincular de todos los sitios
+  await db.delete(placeTags).where(inArray(placeTags.tag, tagIds));
+
+  // 2. Borrar de tabla tags
+  await db.delete(tags).where(inArray(tags.id, tagIds));
+
+  revalidatePath("/");
+  revalidatePath("/new");
+  return { success: true, count: tagIds.length };
+}
+
+/**
+ * Elimina todas las categorías vacías (sin locales asociados).
+ */
+export async function deleteEmptyOccasionsAction(emptyIds?: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado." };
+  }
+
+  let targetsToDelete: string[] = [];
+
+  if (emptyIds && emptyIds.length > 0) {
+    targetsToDelete = emptyIds;
+  } else {
+    const allOccs = await getOccasions();
+    targetsToDelete = allOccs.filter((o) => o.placesCount === 0).map((o) => o.id);
+  }
+
+  if (targetsToDelete.length === 0) {
+    return { success: true, count: 0, deleted: [] };
+  }
+
+  await db.delete(occasions).where(inArray(occasions.id, targetsToDelete));
+
+  revalidatePath("/");
+  revalidatePath("/new");
+  return { success: true, count: targetsToDelete.length, deleted: targetsToDelete };
+}
+
+/**
+ * Elimina todas las etiquetas vacías (sin locales asociados).
+ */
+export async function deleteEmptyTagsAction(emptyTags?: string[]) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado." };
+  }
+
+  let targetsToDelete: string[] = [];
+
+  if (emptyTags && emptyTags.length > 0) {
+    targetsToDelete = emptyTags;
+  } else {
+    const allTags = await getTagsWithCount();
+    targetsToDelete = allTags.filter((t) => t.placesCount === 0).map((t) => t.id);
+  }
+
+  if (targetsToDelete.length === 0) {
+    return { success: true, count: 0, deleted: [] };
+  }
+
+  await db.delete(tags).where(inArray(tags.id, targetsToDelete));
+
+  revalidatePath("/");
+  revalidatePath("/new");
+  return { success: true, count: targetsToDelete.length, deleted: targetsToDelete };
 }
