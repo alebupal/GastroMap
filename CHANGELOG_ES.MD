@@ -5,6 +5,27 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-11-18
+
+### Añadido
+- **Colección Personal y Estados de Usuario (Fase 4)**:
+  - Sistema de favoritos (⭐ / 🤍) con persistencia individual en `user_places`.
+  - Estados personales independientes: «Quiero ir (Pendiente 🕒)» y «Ya he ido (Visitado ✅)».
+  - Puntuaciones personales de 0 a 10 con decimales e insignias visuales en tarjetas.
+  - Notas privadas personales («🔒 Mi nota») editables en modal interactivo, visibles únicamente para su autor.
+- **Asistente de Decisión y Selector Aleatorio (Fase 4)**:
+  - Asistente guiado «🎯 Encontrar un sitio» (`DecisionAssistantModal`) con 4 ejes de decisión: Plan/Ocasión, Rango de precio (manteniendo `???`), Distancia/Ubicación y Experiencia del grupo.
+  - Selector aleatorio interactivo con botón **«🎲 Elegir al azar»** y modal con animación de ruleta (`RandomPickerModal`) sobre el subconjunto de sitios filtrados.
+  - Filtro dinámico de Experiencia: «Visitados por mí», «Probados por amigos» y «✨ Sin estrenar».
+- **Comentarios Colaborativos y Grupos de Compartición (Fase 5)**:
+  - Hilo de recomendaciones y comentarios en cada tarjeta de establecimiento (`PlaceCommentsThread`).
+  - Posibilidad de comentar en tiempo real con fecha, autor (`@username`) y control de borrado.
+  - Ámbitos de visibilidad: selector en alta rápida entre `🌍 Comunidad (Todos)` y `🔒 Privado (Solo yo)` con control de acceso estricto en servidor.
+  - Tablas relacionales para grupos de compartición (`sharing_groups`, `sharing_group_members`).
+- **PWA & Web Share Target**:
+  - Soporte PWA instalable en móviles y desktop (`manifest.json` y metadatos de aplicación).
+  - Web Share Target para recibir enlaces compartidos directamente desde Google Maps, Instagram o navegador al formulario de alta rápida `/new`.
+
 ## [0.1.0] - 2026-11-18
 
 ### Añadido

@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-18
+
+### Added
+- **Personal Collection & User Statuses (Phase 4)**:
+  - Favorites system (⭐ / 🤍) persisted per user in `user_places`.
+  - Independent personal statuses: "Want to go (Pending 🕒)" and "Been there (Visited ✅)".
+  - 0-10 personal ratings with decimal precision and visual badges on cards.
+  - Private notes («🔒 My note») with dedicated interactive modal, visible only to their author.
+- **Decision Assistant & Random Picker (Phase 4)**:
+  - Guided assistant «🎯 Find a place» (`DecisionAssistantModal`) covering Occasion, Price Range, Location/Radius, and Group Experience.
+  - Interactive random picker with **«🎲 Pick at random»** button and spinning roulette modal (`RandomPickerModal`).
+  - Dynamic Experience filtering: "Visited by me", "Tried by friends", and "✨ Untried".
+- **Collaborative Comments & Sharing Groups (Phase 5)**:
+  - Recommendations and comments thread on each establishment card (`PlaceCommentsThread`).
+  - Real-time commenting with timestamp, author (`@username`), and deletion controls.
+  - Visibility scopes: quick toggle between `🌍 Community (All)` and `🔒 Private (Only me)` with server-side authorization.
+  - Relational schema for sharing groups (`sharing_groups`, `sharing_group_members`).
+- **PWA & Web Share Target**:
+  - Installable PWA support (`manifest.json` and application metadata).
+  - Web Share Target to receive links shared directly from Google Maps, Instagram, or mobile browsers into `/new`.
+
 ## [0.1.0] - 2026-11-18
 
 ### Added

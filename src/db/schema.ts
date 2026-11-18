@@ -5,7 +5,9 @@ import {
   uuid,
   varchar,
   doublePrecision,
+  boolean,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -66,6 +68,9 @@ export const places = pgTable(
     googleMapsUrl: text("google_maps_url"),
     priceRange: varchar("price_range", { length: 10 }).notNull().default("???"), // '€' | '€€' | '€€€' | '€€€€' | '???'
     notes: text("notes"),
+    communityPublished: boolean("community_published").notNull().default(true),
+    website: text("website"),
+    phone: varchar("phone", { length: 50 }),
     createdById: uuid("created_by_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -114,6 +119,77 @@ export const appSettings = pgTable("app_settings", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const userPlaces = pgTable(
+  "user_places",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    favorite: boolean("favorite").notNull().default(false),
+    personalStatus: varchar("personal_status", { length: 20 }), // 'pending' | 'visited' | null
+    rating: doublePrecision("rating"), // 0.0 - 10.0
+    privateNotes: text("private_notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("user_places_user_place_idx").on(table.userId, table.placeId),
+    index("user_places_user_idx").on(table.userId),
+    index("user_places_place_idx").on(table.placeId),
+  ]
+);
+
+export const placeComments = pgTable(
+  "place_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("place_comments_place_idx").on(table.placeId),
+    index("place_comments_user_idx").on(table.userId),
+  ]
+);
+
+export const sharingGroups = pgTable("sharing_groups", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  ownerUserId: uuid("owner_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const sharingGroupMembers = pgTable(
+  "sharing_group_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => sharingGroups.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("sharing_group_members_unique_idx").on(table.groupId, table.userId),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -125,3 +201,7 @@ export type NewPlace = typeof places.$inferInsert;
 export type PlaceOccasion = typeof placeOccasions.$inferSelect;
 export type PlaceTag = typeof placeTags.$inferSelect;
 export type AppSetting = typeof appSettings.$inferSelect;
+export type UserPlace = typeof userPlaces.$inferSelect;
+export type PlaceComment = typeof placeComments.$inferSelect;
+export type SharingGroup = typeof sharingGroups.$inferSelect;
+export type SharingGroupMember = typeof sharingGroupMembers.$inferSelect;

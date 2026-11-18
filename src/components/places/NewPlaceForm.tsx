@@ -38,6 +38,7 @@ export function NewPlaceForm({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
+  const [isCommunityPublished, setIsCommunityPublished] = useState(true);
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -243,6 +244,45 @@ export function NewPlaceForm({
           rows={2}
           placeholder="Ej. Pedir la tarta de queso. Reservar con antelación..."
           className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+        />
+      </div>
+
+      {/* 7. Ámbito de compartición (Fase 4 & 5) */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+          Visibilidad de la ficha
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setIsCommunityPublished(true)}
+            className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
+              isCommunityPublished
+                ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold"
+                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            <span>🌍</span>
+            <span>Comunidad (Todos)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsCommunityPublished(false)}
+            className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
+              !isCommunityPublished
+                ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold"
+                : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            <span>🔒</span>
+            <span>Privado (Solo yo)</span>
+          </button>
+        </div>
+        <input
+          type="hidden"
+          name="communityPublished"
+          value={isCommunityPublished ? "true" : "false"}
         />
       </div>
 

@@ -4,7 +4,15 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { eq, desc, and, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { places, placeOccasions, placeTags, users, type Place } from "@/db/schema";
+import {
+  places,
+  placeOccasions,
+  placeTags,
+  users,
+  userPlaces,
+  placeComments,
+  type Place,
+} from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveGoogleMapsUrl, parseGoogleMapsUrl } from "@/lib/maps";
 import {
@@ -19,6 +27,13 @@ export interface PlaceWithDetails extends Place {
   occasions: string[];
   tags: string[];
   distanceMeters?: number | null;
+  // Colección personal (Fase 4)
+  isFavorite?: boolean;
+  personalStatus?: "pending" | "visited" | null;
+  rating?: number | null;
+  privateNotes?: string | null;
+  commentsCount?: number;
+  experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
 }
 
 export interface UserCoordinates {
@@ -74,6 +89,9 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
   const googleMapsUrl = (formData.get("googleMapsUrl") as string)?.trim() || null;
   const priceRange = (formData.get("priceRange") as string) || "???";
   const notes = (formData.get("notes") as string)?.trim() || null;
+  const communityPublished = formData.get("communityPublished") !== "false";
+  const website = (formData.get("website") as string)?.trim() || null;
+  const phone = (formData.get("phone") as string)?.trim() || null;
 
   const latStr = formData.get("latitude") as string;
   const lngStr = formData.get("longitude") as string;
@@ -98,6 +116,9 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
       googleMapsUrl,
       priceRange,
       notes,
+      communityPublished,
+      website,
+      phone,
       createdById: currentUser.id,
     })
     .returning();
@@ -180,6 +201,16 @@ export async function getAllPlaces(
     : sql<null>`NULL`.as("distance_meters");
 
   const whereConditions = [];
+  const currentUser = await getCurrentUser();
+
+  // Regla de privacidad: mostrar si es público en la comunidad o si pertenece al usuario logueado
+  if (currentUser) {
+    whereConditions.push(
+      sql`(${places.communityPublished} = true OR ${places.createdById} = ${currentUser.id})`
+    );
+  } else {
+    whereConditions.push(sql`${places.communityPublished} = true`);
+  }
 
   if (hasCoords && userCoords.radiusKm && userCoords.radiusKm > 0) {
     const radiusMeters = userCoords.radiusKm * 1000;
@@ -212,7 +243,7 @@ export async function getAllPlaces(
     hasCoords ? sql`distance_meters ASC NULLS LAST` : desc(places.createdAt)
   );
 
-  // Para cada lugar, recuperar ocasiones y etiquetas
+  // Para cada lugar, recuperar ocasiones, etiquetas, interacciones personales y comentarios
   const placesWithDetails = await Promise.all(
     rows.map(async ({ place, createdByName, createdByUsername, distanceMeters }) => {
       const occs = await db
@@ -225,6 +256,56 @@ export async function getAllPlaces(
         .from(placeTags)
         .where(eq(placeTags.placeId, place.id));
 
+      // Comentarios
+      const comments = await db
+        .select({ id: placeComments.id })
+        .from(placeComments)
+        .where(eq(placeComments.placeId, place.id));
+
+      // Interacción del usuario actual
+      let isFavorite = false;
+      let personalStatus: "pending" | "visited" | null = null;
+      let rating: number | null = null;
+      let privateNotes: string | null = null;
+
+      if (currentUser) {
+        const [myInteraction] = await db
+          .select()
+          .from(userPlaces)
+          .where(and(eq(userPlaces.placeId, place.id), eq(userPlaces.userId, currentUser.id)))
+          .limit(1);
+
+        if (myInteraction) {
+          isFavorite = myInteraction.favorite;
+          personalStatus = myInteraction.personalStatus as "pending" | "visited" | null;
+          rating = myInteraction.rating;
+          privateNotes = myInteraction.privateNotes;
+        }
+      }
+
+      // Cálculo de experiencia: 'visited_by_me' | 'visited_by_others' | 'untried'
+      let experienceStatus: "visited_by_me" | "visited_by_others" | "untried" = "untried";
+
+      if (personalStatus === "visited" || (rating !== null && rating > 0)) {
+        experienceStatus = "visited_by_me";
+      } else {
+        // Verificar si algún otro usuario lo ha visitado
+        const otherVisits = await db
+          .select({ id: userPlaces.id })
+          .from(userPlaces)
+          .where(
+            and(
+              eq(userPlaces.placeId, place.id),
+              sql`(${userPlaces.personalStatus} = 'visited' OR ${userPlaces.rating} IS NOT NULL)`
+            )
+          )
+          .limit(1);
+
+        if (otherVisits.length > 0) {
+          experienceStatus = "visited_by_others";
+        }
+      }
+
       return {
         ...place,
         createdByName,
@@ -235,9 +316,17 @@ export async function getAllPlaces(
           distanceMeters !== null && distanceMeters !== undefined
             ? Math.round(Number(distanceMeters))
             : null,
+        isFavorite,
+        personalStatus,
+        rating,
+        privateNotes,
+        commentsCount: comments.length,
+        experienceStatus,
       };
     })
   );
+
+  return placesWithDetails;
 
   return placesWithDetails;
 }
