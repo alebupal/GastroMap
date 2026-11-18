@@ -3,6 +3,7 @@ import crypto from "crypto";
 import argon2 from "argon2";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
+import { runMigrations } from "@/db/migrate";
 import { users, sessions, type User, type Session } from "@/db/schema";
 
 const SESSION_COOKIE_NAME = "gastromap_session";
@@ -36,10 +37,21 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
  * Útil para determinar si la aplicación está en modo de inicialización inicial (/setup).
  */
 export async function countUsers(): Promise<number> {
-  const result = await db
-    .select({ count: sql<number>`cast(count(*) as integer)` })
-    .from(users);
-  return result[0]?.count ?? 0;
+  try {
+    await runMigrations();
+  } catch (err) {
+    console.error("[Auth] No se pudieron aplicar migraciones automáticas:", err);
+  }
+
+  try {
+    const result = await db
+      .select({ count: sql<number>`cast(count(*) as integer)` })
+      .from(users);
+    return result[0]?.count ?? 0;
+  } catch (error) {
+    console.error("[Auth] Error en countUsers (base de datos sin tablas?):", error);
+    return 0;
+  }
 }
 
 /**
@@ -116,7 +128,7 @@ export async function setSessionCookie(sessionId: string, expiresAt: Date): Prom
   cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.COOKIE_SECURE === "true",
     expires: expiresAt,
     path: "/",
   });
@@ -130,7 +142,7 @@ export async function deleteSessionCookie(): Promise<void> {
   cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.COOKIE_SECURE === "true",
     maxAge: 0,
     path: "/",
   });
