@@ -1,0 +1,41 @@
+import { redirect } from "next/navigation";
+import { countUsers, getCurrentUser } from "@/lib/auth";
+import { LoginForm } from "@/components/auth/LoginForm";
+
+export const dynamic = "force-dynamic";
+
+export default async function LoginPage() {
+  const userCount = await countUsers();
+  if (userCount === 0) {
+    redirect("/setup");
+  }
+
+  const currentUser = await getCurrentUser();
+  if (currentUser) {
+    redirect("/");
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-slate-50 dark:bg-slate-950">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
+        <div className="text-center mb-6">
+          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-3xl shadow-sm border border-amber-500/20">
+            🍽️
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Iniciar Sesión
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Accede a tu catálogo gastronómico privado.
+          </p>
+        </div>
+
+        <LoginForm />
+
+        <p className="mt-6 text-center text-xs text-slate-400">
+          Esta es una aplicación privada. Si no tienes cuenta, solicita una invitación a un administrador.
+        </p>
+      </div>
+    </div>
+  );
+}
