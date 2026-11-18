@@ -82,6 +82,16 @@ export default function MapView({
 
     return () => {
       resizeObserver.disconnect();
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current.clear();
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      if (radiusCircleRef.current) {
+        radiusCircleRef.current.remove();
+        radiusCircleRef.current = null;
+      }
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -95,7 +105,8 @@ export default function MapView({
     if (userLocation) {
       const userLatLng: [number, number] = [userLocation.latitude, userLocation.longitude];
 
-      if (!userMarkerRef.current) {
+      if (!userMarkerRef.current || !map.hasLayer(userMarkerRef.current)) {
+        if (userMarkerRef.current) userMarkerRef.current.remove();
         userMarkerRef.current = L.marker(userLatLng, {
           icon: createUserLocationIcon(),
           zIndexOffset: 1000,
@@ -213,7 +224,8 @@ export default function MapView({
         </div>
       `;
 
-      if (!marker) {
+      if (!marker || !map.hasLayer(marker)) {
+        if (marker) marker.remove();
         marker = L.marker(latLng, {
           icon,
           zIndexOffset: isSelected ? 500 : 100,
@@ -251,23 +263,42 @@ export default function MapView({
     const map = mapInstanceRef.current;
     if (!map || !selectedPlaceId) return;
 
-    const marker = markersRef.current.get(selectedPlaceId);
+    let marker = markersRef.current.get(selectedPlaceId);
+    if (!marker || !map.hasLayer(marker)) {
+      // Si el marcador no estaba en el mapa, buscar el lugar y forzar su creación
+      const place = places.find((p) => p.id === selectedPlaceId);
+      if (place && place.latitude != null && place.longitude != null) {
+        const lat = typeof place.latitude === "number" ? place.latitude : parseFloat(String(place.latitude));
+        const lng = typeof place.longitude === "number" ? place.longitude : parseFloat(String(place.longitude));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const primaryOccasion = place.occasions[0];
+          const occasionInfo = primaryOccasion ? occasionMap[primaryOccasion] : undefined;
+          const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, true);
+          marker = L.marker([lat, lng], {
+            icon,
+            zIndexOffset: 500,
+          }).addTo(map);
+          markersRef.current.set(place.id, marker);
+        }
+      }
+    }
+
     if (marker) {
       const latLng = marker.getLatLng();
       map.invalidateSize();
       map.flyTo(latLng, 16, { animate: true, duration: 0.6 });
 
       map.once("moveend", () => {
-        marker.openPopup();
+        marker?.openPopup();
       });
 
       const timer = setTimeout(() => {
-        marker.openPopup();
+        marker?.openPopup();
       }, 650);
 
       return () => clearTimeout(timer);
     }
-  }, [selectedPlaceId]);
+  }, [selectedPlaceId, places, occasionMap]);
 
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>

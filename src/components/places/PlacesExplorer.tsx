@@ -10,7 +10,7 @@ import type { PlaceWithDetails } from "@/lib/actions/places";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
-  occasionsList: { id: string; name: string; icon: string }[];
+  occasionsList: Array<{ id: string; name: string; icon: string; placesCount?: number }>;
   tagsList: { id: string; name: string; placesCount: number }[];
   currentUserId: string;
   isAdmin: boolean;
@@ -74,6 +74,8 @@ export function PlacesExplorer({
 
   // Estados de vista adaptativa para evitar problemas de espacio con muchas categorías o tags
   const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
+  const [isOccasionSearchOpen, setIsOccasionSearchOpen] = useState(false);
+  const [occasionSearchQuery, setOccasionSearchQuery] = useState("");
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
 
@@ -235,6 +237,47 @@ export function PlacesExplorer({
       window.scrollTo({ top: 180, behavior: "smooth" });
     }
   }
+
+  // Categorías ordenadas por frecuencia de locales asociados (las más usadas primero)
+  const sortedOccasions = useMemo(() => {
+    return [...occasionsList].sort(
+      (a, b) => (b.placesCount || 0) - (a.placesCount || 0) || a.name.localeCompare(b.name)
+    );
+  }, [occasionsList]);
+
+  // Filtrado de categorías por texto de búsqueda
+  const filteredOccasions = useMemo(() => {
+    const q = occasionSearchQuery.toLowerCase().trim();
+    if (!q) return sortedOccasions;
+    return sortedOccasions.filter(
+      (occ) => occ.name.toLowerCase().includes(q) || occ.id.toLowerCase().includes(q)
+    );
+  }, [sortedOccasions, occasionSearchQuery]);
+
+  // Etiquetas ordenadas por frecuencia de uso (las más usadas primero)
+  const sortedTags = useMemo(() => {
+    return [...tagsList].sort(
+      (a, b) => (b.placesCount || 0) - (a.placesCount || 0) || a.name.localeCompare(b.name)
+    );
+  }, [tagsList]);
+
+  // Filtrado de etiquetas por texto de búsqueda
+  const filteredTags = useMemo(() => {
+    const q = tagSearchQuery.toLowerCase().trim();
+    if (!q) return sortedTags;
+    return sortedTags.filter((t) => t.name.toLowerCase().includes(q));
+  }, [sortedTags, tagSearchQuery]);
+
+  // Etiquetas mostradas por defecto (las más usadas, priorizando las que tienen locales)
+  const defaultTags = useMemo(() => {
+    const top = sortedTags.filter((t) => (t.placesCount || 0) > 0).slice(0, 18);
+    // Asegurar que la etiqueta actualmente seleccionada esté siempre visible al principio
+    if (selectedTag && !top.some((t) => t.id === selectedTag)) {
+      const current = sortedTags.find((t) => t.id === selectedTag);
+      if (current) top.unshift(current);
+    }
+    return top.length > 0 ? top : sortedTags.slice(0, 14);
+  }, [sortedTags, selectedTag]);
 
   const activeFiltersCount =
     (selectedOccasion ? 1 : multiOccasions.length) +
@@ -477,22 +520,73 @@ export function PlacesExplorer({
         })}
       </HorizontalScroll>
 
-      {/* Filtros por Planes / Ocasiones (conmutador entre fila scrollable y cuadrícula completa si hay muchas) */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5 px-0.5">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Planes / Categorías ({occasionsList.length})
-          </span>
-          {occasionsList.length > 4 && (
-            <button
-              type="button"
-              onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
-              className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 transition cursor-pointer flex items-center gap-1"
-            >
-              <span>{isOccasionsWrapped ? "↔ Modo fila scroll" : "⊞ Ver todas en cuadrícula"}</span>
-            </button>
-          )}
+      {/* Filtros por Planes / Ocasiones (con buscador y conmutador entre fila y cuadrícula) */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[11px] px-0.5">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-400 uppercase tracking-wider">
+              Planes / Categorías ({occasionsList.length})
+            </span>
+            {selectedOccasion && (
+              <button
+                type="button"
+                onClick={() => setSelectedOccasion(null)}
+                className="text-red-400 hover:underline font-bold cursor-pointer"
+              >
+                ✕ Quitar filtro
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {occasionsList.length > 4 && (
+              <button
+                type="button"
+                onClick={() => setIsOccasionSearchOpen(!isOccasionSearchOpen)}
+                className={`font-semibold transition cursor-pointer flex items-center gap-1 ${
+                  isOccasionSearchOpen || occasionSearchQuery ? "text-amber-400" : "text-slate-400 hover:text-slate-200"
+                }`}
+                title="Buscar categorías"
+              >
+                <span>🔍</span>
+                <span className="hidden sm:inline">Buscar</span>
+              </button>
+            )}
+
+            {occasionsList.length > 4 && (
+              <button
+                type="button"
+                onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
+                className="font-semibold text-amber-400 hover:text-amber-300 transition cursor-pointer flex items-center gap-1"
+              >
+                <span>{isOccasionsWrapped ? "↔ Modo fila" : "⊞ Cuadrícula"}</span>
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Buscador de categorías si está abierto */}
+        {isOccasionSearchOpen && (
+          <div className="relative animate-in fade-in duration-150">
+            <span className="absolute left-3 top-2 text-xs text-slate-500">🔍</span>
+            <input
+              type="text"
+              value={occasionSearchQuery}
+              onChange={(e) => setOccasionSearchQuery(e.target.value)}
+              placeholder="Buscar categoría o plan (ej. tapear, brunch, terraza...)"
+              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            {occasionSearchQuery && (
+              <button
+                type="button"
+                onClick={() => setOccasionSearchQuery("")}
+                className="absolute right-2.5 top-2 text-xs text-slate-500 hover:text-slate-300 cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        )}
 
         {isOccasionsWrapped ? (
           <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 animate-in fade-in duration-150">
@@ -507,7 +601,7 @@ export function PlacesExplorer({
             >
               🍽️ Todos los planes
             </button>
-            {occasionsList.map((occ) => {
+            {filteredOccasions.map((occ) => {
               const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
               return (
                 <button
@@ -522,6 +616,9 @@ export function PlacesExplorer({
                 >
                   <span>{occ.icon}</span>
                   <span>{occ.name}</span>
+                  {(occ.placesCount || 0) > 0 && (
+                    <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+                  )}
                 </button>
               );
             })}
@@ -539,7 +636,7 @@ export function PlacesExplorer({
             >
               🍽️ Todos los planes
             </button>
-            {occasionsList.map((occ) => {
+            {filteredOccasions.map((occ) => {
               const isSelected = selectedOccasion === occ.id || multiOccasions.includes(occ.id);
               return (
                 <button
@@ -554,6 +651,9 @@ export function PlacesExplorer({
                 >
                   <span>{occ.icon}</span>
                   <span>{occ.name}</span>
+                  {(occ.placesCount || 0) > 0 && (
+                    <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+                  )}
                 </button>
               );
             })}
@@ -561,13 +661,13 @@ export function PlacesExplorer({
         )}
       </div>
 
-      {/* Filtro por Etiquetas Populares (con vista expandible y buscador si hay muchas) */}
-      {tagsList.length > 0 && (
+      {/* Filtro por Etiquetas Populares (ordenadas por uso, con vista expandible y buscador) */}
+      {sortedTags.length > 0 && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] px-0.5">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-400 uppercase tracking-wider">
-                Etiquetas ({tagsList.length})
+                Etiquetas ({sortedTags.length})
               </span>
               {selectedTag && (
                 <button
@@ -580,54 +680,64 @@ export function PlacesExplorer({
               )}
             </div>
 
-            {tagsList.length > 10 && (
+            {sortedTags.length > 10 && (
               <button
                 type="button"
                 onClick={() => setIsTagsExpanded(!isTagsExpanded)}
                 className="font-semibold text-slate-400 hover:text-amber-400 transition cursor-pointer"
               >
-                {isTagsExpanded ? "▲ Menos tags" : `+ Ver todos los ${tagsList.length} tags`}
+                {isTagsExpanded ? "▲ Menos tags" : `+ Ver todos los ${sortedTags.length} tags`}
               </button>
             )}
           </div>
 
           {isTagsExpanded ? (
             <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2 animate-in fade-in duration-150">
-              <input
-                type="text"
-                value={tagSearchQuery}
-                onChange={(e) => setTagSearchQuery(e.target.value)}
-                placeholder="Filtrar etiquetas..."
-                className="w-full px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-              <div className="flex flex-wrap gap-1 max-h-40 overflow-y-auto pr-1 no-scrollbar">
-                {tagsList
-                  .filter((t) => !tagSearchQuery || t.name.toLowerCase().includes(tagSearchQuery.toLowerCase()))
-                  .map((t) => {
-                    const isSelected = selectedTag === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setSelectedTag(isSelected ? null : t.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
-                          isSelected
-                            ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
-                            : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                        }`}
-                      >
-                        #{t.name}
-                        {t.placesCount > 0 && (
-                          <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
-                        )}
-                      </button>
-                    );
-                  })}
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-xs text-slate-500">🔍</span>
+                <input
+                  type="text"
+                  value={tagSearchQuery}
+                  onChange={(e) => setTagSearchQuery(e.target.value)}
+                  placeholder="Filtrar etiquetas..."
+                  className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+                {tagSearchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setTagSearchQuery("")}
+                    className="absolute right-2.5 top-2 text-xs text-slate-500 hover:text-slate-300 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1 max-h-44 overflow-y-auto pr-1 no-scrollbar">
+                {filteredTags.map((t) => {
+                  const isSelected = selectedTag === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedTag(isSelected ? null : t.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
+                        isSelected
+                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold"
+                          : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                      }`}
+                    >
+                      #{t.name}
+                      {t.placesCount > 0 && (
+                        <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : (
             <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
-              {tagsList.slice(0, 16).map((t) => {
+              {defaultTags.map((t) => {
                 const isSelected = selectedTag === t.id;
                 return (
                   <button
@@ -640,7 +750,10 @@ export function PlacesExplorer({
                         : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
                     }`}
                   >
-                    #{t.name}
+                    <span>#{t.name}</span>
+                    {t.placesCount > 0 && (
+                      <span className="ml-1 text-[10px] opacity-60">({t.placesCount})</span>
+                    )}
                   </button>
                 );
               })}

@@ -47,34 +47,27 @@ body {
   height: 100%;
 }
 
-/* Posicionamiento absoluto y visibilidad garantizada para capas de Leaflet */
-.leaflet-pane,
-.leaflet-tile,
-.leaflet-marker-icon,
-.leaflet-marker-shadow,
-.leaflet-tile-container,
-.leaflet-pane > svg,
-.leaflet-pane > canvas,
-.leaflet-zoom-box,
-.leaflet-image-layer,
-.leaflet-layer {
-  position: absolute !important;
-  left: 0;
-  top: 0;
-}
-
+/* Estilos y visibilidad para marcadores e interactividad de Leaflet */
 .leaflet-marker-icon {
   display: block !important;
   overflow: visible !important;
 }
 
-/* Marcadores personalizados sin fondo blanco residual de Leaflet */
+/* Marcadores personalizados sin fondo blanco residual de Leaflet y con SVG visible */
 .custom-gastromap-pin,
 .user-location-pin {
   background: transparent !important;
   border: none !important;
   pointer-events: auto !important;
   overflow: visible !important;
+}
+
+.custom-gastromap-pin svg,
+.user-location-pin svg {
+  display: block !important;
+  overflow: visible !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 
 /* Forzar apilamiento visible de Leaflet en contenedores oscuros */
