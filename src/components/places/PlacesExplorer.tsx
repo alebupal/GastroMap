@@ -621,7 +621,7 @@ export function PlacesExplorer({
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
                 selectedOccasions.length === 0
                   ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                  : "bg-slate-900 border border-slate-800 text-slate-400 hover:bg-slate-800"
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
               🍽️ Todos los planes
@@ -636,7 +636,7 @@ export function PlacesExplorer({
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                     isSelected
                       ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
-                      : "bg-slate-900 border border-slate-800 text-slate-300 hover:bg-slate-800"
+                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
                   }`}
                 >
                   <span>{occ.icon}</span>
@@ -656,7 +656,7 @@ export function PlacesExplorer({
               className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${
                 selectedOccasions.length === 0
                   ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                  : "bg-slate-900/80 border border-slate-800 text-slate-400 hover:bg-slate-800"
+                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
               }`}
             >
               🍽️ Todos los planes
@@ -671,7 +671,7 @@ export function PlacesExplorer({
                   className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
                     isSelected
                       ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
-                      : "bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-slate-800"
+                      : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
                   }`}
                 >
                   <span>{occ.icon}</span>
@@ -691,14 +691,14 @@ export function PlacesExplorer({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] px-0.5">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-400 uppercase tracking-wider">
+              <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Etiquetas ({sortedTags.length})
               </span>
               {selectedTags.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setSelectedTags([])}
-                  className="text-red-400 hover:underline font-bold cursor-pointer"
+                  className="text-red-500 hover:underline font-bold cursor-pointer"
                 >
                   ✕ Quitar {selectedTags.length === 1 ? "filtro" : `filtros (${selectedTags.length})`}
                 </button>
@@ -709,7 +709,7 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setIsTagsExpanded(!isTagsExpanded)}
-                className="font-semibold text-slate-400 hover:text-amber-400 transition cursor-pointer"
+                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
               >
                 {isTagsExpanded ? "▲ Menos tags" : `+ Ver todos los ${sortedTags.length} tags`}
               </button>
@@ -747,8 +747,8 @@ export function PlacesExplorer({
                       onClick={() => toggleTag(t.id)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
                         isSelected
-                          ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold ring-1 ring-amber-400/40"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                          : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
                       }`}
                     >
                       #{t.name}
@@ -771,8 +771,8 @@ export function PlacesExplorer({
                     onClick={() => toggleTag(t.id)}
                     className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${
                       isSelected
-                        ? "bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold ring-1 ring-amber-400/40"
-                        : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                        ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                        : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
                     }`}
                   >
                     <span>#{t.name}</span>
