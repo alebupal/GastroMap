@@ -272,12 +272,12 @@ const DEMO_PLACES: DemoPlace[] = [
 ];
 
 /**
- * Inserta 20 restaurantes de demostración reales y variados
+ * Inserta 20 restaurantes de demostración reales y variados (Solo disponible para Administradores)
  */
 export async function seedDemoPlacesAction() {
   const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    return { error: "Debes iniciar sesión para cargar sitios de prueba." };
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "Solo los administradores pueden cargar sitios de demostración." };
   }
 
   let insertedCount = 0;
