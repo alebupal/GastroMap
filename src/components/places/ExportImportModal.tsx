@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
+import { useT } from "@/lib/i18n/client";
 
 interface ExportImportModalProps {
   isOpen: boolean;
@@ -214,6 +215,7 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
 }
 
 export function ExportImportModal({ isOpen, onClose, places }: ExportImportModalProps) {
+  const { t } = useT();
   const [tab, setTab] = useState<"export" | "import">("export");
   const [previewItems, setPreviewItems] = useState<ImportPlacePayload[]>([]);
   const [fileName, setFileName] = useState<string>("");
@@ -299,8 +301,8 @@ export function ExportImportModal({ isOpen, onClose, places }: ExportImportModal
         (p) => `    <Placemark>
       <name>${escapeXml(p.name)}</name>
       <description>${escapeXml(
-        [p.city, p.address, p.priceRange, p.notes].filter(Boolean).join(" • ")
-      )}</description>
+          [p.city, p.address, p.priceRange, p.notes].filter(Boolean).join(" • ")
+        )}</description>
       <Point>
         <coordinates>${p.longitude},${p.latitude},0</coordinates>
       </Point>
@@ -353,7 +355,7 @@ ${wpts}
         setPreviewItems([]);
         setMessage({
           type: "error",
-          text: "No se encontraron establecimientos válidos en el archivo.",
+          text: t("export_import.error_invalid_file"),
         });
       } else {
         setPreviewItems(parsed);
@@ -362,7 +364,7 @@ ${wpts}
       setPreviewItems([]);
       setMessage({
         type: "error",
-        text: "Error al leer el archivo. Comprueba que es un JSON, GeoJSON o CSV válido.",
+        text: t("export_import.error_read"),
       });
     }
   }
@@ -378,9 +380,7 @@ ${wpts}
     } else {
       setMessage({
         type: "success",
-        text: `¡Importación completada! ${res.importedCount} sitios añadidos${
-          res.skippedCount ? ` (${res.skippedCount} omitidos)` : ""
-        }.`,
+        text: t("export_import.success_msg", { count: String(res.importedCount) }),
       });
       setPreviewItems([]);
       setTimeout(() => {
@@ -397,10 +397,10 @@ ${wpts}
             <span className="text-xl">📦</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Importar / Exportar Catálogo
+                {t("export_import.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                JSON, CSV, GeoJSON, KML, GPX y Google Takeout
+                {t("export_import.subtitle")}
               </p>
             </div>
           </div>
@@ -418,24 +418,22 @@ ${wpts}
             <button
               type="button"
               onClick={() => setTab("export")}
-              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                tab === "export"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
+              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${tab === "export"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                : "text-slate-500 dark:text-slate-400"
+                }`}
             >
-              ⬇️ Exportar ({places.length})
+              ⬇️ {t("export_import.tab_export")} ({places.length})
             </button>
             <button
               type="button"
               onClick={() => setTab("import")}
-              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                tab === "import"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                  : "text-slate-500 dark:text-slate-400"
-              }`}
+              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${tab === "import"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                : "text-slate-500 dark:text-slate-400"
+                }`}
             >
-              ⬆️ Importar
+              ⬆️ {t("export_import.tab_import")}
             </button>
           </div>
         </div>
@@ -443,11 +441,10 @@ ${wpts}
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {message && (
             <div
-              className={`p-3 rounded-xl text-xs font-semibold ${
-                message.type === "success"
-                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50"
-                  : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50"
-              }`}
+              className={`p-3 rounded-xl text-xs font-semibold ${message.type === "success"
+                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50"
+                : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50"
+                }`}
             >
               {message.text}
             </div>
@@ -456,8 +453,7 @@ ${wpts}
           {tab === "export" ? (
             <div className="space-y-3">
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Descarga los <strong>{places.length} establecimientos</strong> visibles en tu catálogo
-                actual en el formato que necesites:
+                {t("export_import.export_desc")}
               </p>
               <div className="grid grid-cols-2 gap-2.5">
                 <button
@@ -470,7 +466,7 @@ ${wpts}
                     📄 JSON
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    Copia completa con tags y planes
+                    {t("export_import.json_desc")}
                   </div>
                 </button>
 
@@ -484,7 +480,7 @@ ${wpts}
                     📊 CSV
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    Ideal para Excel / Google Sheets
+                    {t("export_import.csv_desc")}
                   </div>
                 </button>
 
@@ -498,7 +494,7 @@ ${wpts}
                     🌍 GeoJSON
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    Puntos geoespaciales estándar
+                    {t("export_import.geojson_desc")}
                   </div>
                 </button>
 
@@ -512,7 +508,7 @@ ${wpts}
                     🗺️ KML
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    Google Earth / Google My Maps
+                    {t("export_import.kml_desc")}
                   </div>
                 </button>
 
@@ -526,7 +522,7 @@ ${wpts}
                     🧭 GPX
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    GPS, Garmin, Komoot, OsmAnd
+                    {t("export_import.gpx_desc")}
                   </div>
                 </button>
               </div>
@@ -534,15 +530,13 @@ ${wpts}
           ) : (
             <div className="space-y-3.5">
               <p className="text-xs text-slate-600 dark:text-slate-400">
-                Sube un archivo <strong>.json</strong>, <strong>.geojson</strong> (compatible con{" "}
-                <em>Google Takeout — Saved Places.json</em>) o <strong>.kml</strong>, <strong>.gpx</strong> o <strong>.csv</strong> (con columna{" "}
-                <code>name</code> o <code>nombre</code>).
+                {t("export_import.import_desc")}
               </p>
 
               <label className="block p-5 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 text-center cursor-pointer transition bg-slate-50 dark:bg-slate-800/30">
                 <div className="text-2xl mb-1">📂</div>
                 <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                  {fileName || "Seleccionar archivo (.json, .geojson, .csv, .kml, .gpx)"}
+                  {fileName || t("export_import.select_file")}
                 </div>
                 <input
                   type="file"
@@ -555,8 +549,8 @@ ${wpts}
               {previewItems.length > 0 && (
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200">
-                    Se detectaron <strong>{previewItems.length} establecimientos</strong> listos para
-                    importar (ej. {previewItems.slice(0, 3).map((i) => i.name).join(", ")}
+                    {t("export_import.detected", { count: String(previewItems.length) })} (ej.{" "}
+                    {previewItems.slice(0, 3).map((i) => i.name).join(", ")}
                     {previewItems.length > 3 ? "..." : ""}).
                   </div>
 
@@ -564,24 +558,22 @@ ${wpts}
                     <button
                       type="button"
                       onClick={() => setImportPublic(true)}
-                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${
-                        importPublic
-                          ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
-                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
-                      }`}
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${importPublic
+                        ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
+                        }`}
                     >
-                      🌍 Comunidad
+                      🌍 {t("export_import.community")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setImportPublic(false)}
-                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${
-                        !importPublic
-                          ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
-                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
-                      }`}
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${!importPublic
+                        ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
+                        }`}
                     >
-                      🔒 Privado
+                      🔒 {t("export_import.private")}
                     </button>
                   </div>
 
@@ -592,8 +584,8 @@ ${wpts}
                     className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer disabled:opacity-50"
                   >
                     {importing
-                      ? "Importando..."
-                      : `⬆️ Importar ${previewItems.length} establecimientos`}
+                      ? t("export_import.importing")
+                      : `⬆️ ${t("export_import.import_btn", { count: String(previewItems.length) })}`}
                   </button>
                 </div>
               )}

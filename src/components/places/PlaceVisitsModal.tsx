@@ -7,6 +7,7 @@ import {
   deletePlaceVisitAction,
   type PlaceVisitItem,
 } from "@/lib/actions/visits";
+import { useT } from "@/lib/i18n/client";
 
 interface PlaceVisitsModalProps {
   placeId: string;
@@ -23,6 +24,7 @@ export function PlaceVisitsModal({
   onClose,
   onVisitAdded,
 }: PlaceVisitsModalProps) {
+  const { t } = useT();
   const [visits, setVisits] = useState<PlaceVisitItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [visitedAt, setVisitedAt] = useState(() => new Date().toISOString().slice(0, 10));
@@ -81,7 +83,7 @@ export function PlaceVisitsModal({
           <div className="min-w-0">
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span>📅</span>
-              <span>Mis visitas</span>
+              <span>{t("notes_visits.visits_title")}</span>
               <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
                 {visits.length}
               </span>
@@ -110,12 +112,12 @@ export function PlaceVisitsModal({
             className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2.5"
           >
             <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              ➕ Registrar nueva visita
+              ➕ {t("notes_visits.register_visit")}
             </h4>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                  Fecha
+                  {t("notes_visits.visit_date")}
                 </label>
                 <input
                   type="date"
@@ -127,7 +129,7 @@ export function PlaceVisitsModal({
               </div>
               <div>
                 <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
-                  Nota (0–10, opc.)
+                  {t("notes_visits.rating_label")}
                 </label>
                 <input
                   type="number"
@@ -153,7 +155,7 @@ export function PlaceVisitsModal({
               disabled={saving}
               className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-50"
             >
-              {saving ? "Guardando..." : "Guardar visita"}
+              {saving ? t("common.loading") : t("common.save")}
             </button>
           </form>
 

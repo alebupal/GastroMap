@@ -13,12 +13,14 @@ import {
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { useT } from "@/lib/i18n/client";
 
 interface UsersManagerProps {
   currentUserId?: string;
 }
 
 export function UsersManager({ currentUserId }: UsersManagerProps) {
+  const { t } = useT();
   const [isOpen, setIsOpen] = useState(true);
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -223,8 +225,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const newRole = user.role === "admin" ? "user" : "admin";
     if (
       !confirm(
-        `¿Cambiar el rol de @${user.username || user.name} a ${
-          newRole === "admin" ? "Administrador" : "Usuario"
+        `¿Cambiar el rol de @${user.username || user.name} a ${newRole === "admin" ? "Administrador" : "Usuario"
         }?`
       )
     )
@@ -314,10 +315,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
           <span className="text-lg">👥</span>
           <div>
             <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-              Gestión de Usuarios
+              {t("admin_users.title")}
             </h3>
             <p className="text-xs text-slate-500">
-              Administra roles, accesos, alta directa y eliminación individual o masiva
+              {t("admin_users.subtitle")}
             </p>
           </div>
         </div>
@@ -325,7 +326,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
           onClick={() => setIsOpen(!isOpen)}
           className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 transition active:scale-95 cursor-pointer"
         >
-          {isOpen ? "Ocultar" : "Gestionar"}
+          {isOpen ? t("common.collapse") : t("common.manage")}
         </button>
       </div>
 
@@ -351,7 +352,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 type="text"
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                placeholder="Buscar por @usuario, nombre o email..."
+                placeholder={t("admin_users.search_placeholder")}
                 className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
               {filterQuery && (
@@ -370,7 +371,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               onClick={() => setIsAddUserOpen(!isAddUserOpen)}
               className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition cursor-pointer shrink-0"
             >
-              <span>{isAddUserOpen ? "✕ Cerrar formulario" : "➕ Añadir usuario a mano"}</span>
+              <span>{isAddUserOpen ? "✕" : `➕ ${t("admin_users.add_user")}`}</span>
             </button>
           </div>
 
@@ -466,14 +467,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   onClick={() => setIsAddUserOpen(false)}
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition cursor-pointer"
                 >
-                  Cancelar
+                  {t("admin_users.cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={addingUser}
                   className="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
                 >
-                  {addingUser ? "Creando usuario..." : "Guardar usuario"}
+                  {addingUser ? t("common.loading") : t("admin_users.create_user")}
                 </button>
               </div>
             </form>
@@ -491,13 +492,13 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer w-4 h-4"
                 />
                 <span>
-                  Seleccionar visibles ({selectableUsers.length})
+                  {t("admin_places.col_select_all")} ({selectableUsers.length})
                 </span>
               </label>
 
               {selectedUserIds.size > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">
-                  {selectedUserIds.size} seleccionados
+                  {selectedUserIds.size} {t("admin_places.delete_selected")}
                 </span>
               )}
             </div>
@@ -509,7 +510,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   onClick={() => setSelectedUserIds(new Set())}
                   className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-300 transition cursor-pointer"
                 >
-                  Desmarcar
+                  {t("places.reset_filters")}
                 </button>
                 <button
                   type="button"
@@ -520,8 +521,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <span>🗑️</span>
                   <span>
                     {deletingMultiple
-                      ? "Eliminando..."
-                      : `Eliminar (${selectedUserIds.size}) seleccionados`}
+                      ? t("common.loading")
+                      : `${t("admin_users.delete_selected")} (${selectedUserIds.size})`}
                   </span>
                 </button>
               </div>
@@ -543,11 +544,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 return (
                   <div
                     key={u.id}
-                    className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 text-xs ${
-                      isSelected
-                        ? "border-amber-500/60 bg-amber-500/10"
-                        : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40"
-                    }`}
+                    className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 text-xs ${isSelected
+                      ? "border-amber-500/60 bg-amber-500/10"
+                      : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       {/* Checkbox para borrado masivo (deshabilitado para el propio usuario admin) */}
@@ -557,9 +557,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         onChange={() => handleToggleUser(u.id)}
                         disabled={isMe}
                         title={isMe ? "No puedes seleccionarte a ti mismo" : "Seleccionar usuario"}
-                        className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4 ${
-                          isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
-                        }`}
+                        className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                          }`}
                       />
 
                       <div className="min-w-0">
@@ -573,11 +572,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                             </span>
                           )}
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                              u.role === "admin"
-                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
-                                : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                            }`}
+                            className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${u.role === "admin"
+                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                              : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                              }`}
                           >
                             {u.role.toUpperCase()}
                           </span>
@@ -598,11 +596,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         type="button"
                         onClick={() => handleToggleRole(u)}
                         disabled={isMe}
-                        className={`px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition ${
-                          isMe
-                            ? "opacity-40 cursor-not-allowed text-slate-500"
-                            : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
-                        }`}
+                        className={`px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition ${isMe
+                          ? "opacity-40 cursor-not-allowed text-slate-500"
+                          : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
+                          }`}
                         title={isMe ? "No puedes cambiar tu propio rol" : "Cambiar rol"}
                       >
                         {u.role === "admin" ? "Hacer User" : "Hacer Admin"}
@@ -612,19 +609,18 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         type="button"
                         onClick={() => handleToggleStatus(u)}
                         disabled={isMe}
-                        className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition ${
-                          isMe
-                            ? "opacity-30 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
-                            : u.status === "disabled"
+                        className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition ${isMe
+                          ? "opacity-30 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
+                          : u.status === "disabled"
                             ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 cursor-pointer"
                             : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer"
-                        }`}
+                          }`}
                         title={
                           isMe
                             ? "No puedes desactivar tu propia cuenta"
                             : u.status === "disabled"
-                            ? "Reactivar cuenta"
-                            : "Desactivar cuenta"
+                              ? "Reactivar cuenta"
+                              : "Desactivar cuenta"
                         }
                       >
                         {u.status === "disabled" ? "▶️" : "⏸️"}
@@ -655,11 +651,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         type="button"
                         onClick={() => handleDeleteUser(u)}
                         disabled={isMe}
-                        className={`px-2 py-1 rounded-lg text-xs transition ${
-                          isMe
-                            ? "opacity-30 cursor-not-allowed text-slate-600"
-                            : "text-slate-400 hover:text-red-500 cursor-pointer"
-                        }`}
+                        className={`px-2 py-1 rounded-lg text-xs transition ${isMe
+                          ? "opacity-30 cursor-not-allowed text-slate-600"
+                          : "text-slate-400 hover:text-red-500 cursor-pointer"
+                          }`}
                         title={isMe ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario"}
                       >
                         🗑️

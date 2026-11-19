@@ -8,8 +8,10 @@ import {
   deleteInvitationAction,
   type SafeInvitation,
 } from "@/lib/actions/auth";
+import { useT } from "@/lib/i18n/client";
 
 export function InviteManager() {
+  const { t } = useT();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -103,13 +105,13 @@ export function InviteManager() {
           <span className="text-xl">🎟️</span>
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <span>Invitaciones privadas</span>
+              <span>{t("invites.title")}</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                {invitations.length} {invitations.length === 1 ? "enlace" : "enlaces"}
+                {invitations.length}
               </span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Genera enlaces de acceso exclusivo para amigos, pareja o familia y revócalos en cualquier momento.
+              {t("invites.subtitle")}
             </p>
           </div>
         </div>
@@ -119,7 +121,7 @@ export function InviteManager() {
           onClick={() => setIsFormOpen(!isFormOpen)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
         >
-          <span>{isFormOpen ? "✕ Cerrar formulario" : "➕ Crear nueva invitación"}</span>
+          <span>{isFormOpen ? "✕" : `➕ ${t("invites.generate_btn")}`}</span>
         </button>
       </div>
 

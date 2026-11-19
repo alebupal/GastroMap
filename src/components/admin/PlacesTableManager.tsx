@@ -8,12 +8,14 @@ import {
   type PlaceWithDetails,
 } from "@/lib/actions/places";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { useT } from "@/lib/i18n/client";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
 }
 
 export function PlacesTableManager({ places: initialPlaces }: PlacesTableManagerProps) {
+  const { t } = useT();
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,7 +81,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
 
   // Eliminación individual
   async function handleDeleteSingle(place: PlaceWithDetails) {
-    if (!confirm(`¿Eliminar definitivamente «${place.name}»?`)) return;
+    if (!confirm(t("admin_places.delete_confirm", { name: place.name }))) return;
 
     setLoading(true);
     setStatusMessage(null);
@@ -95,7 +97,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
         next.delete(place.id);
         return next;
       });
-      setStatusMessage({ type: "success", text: `Sitio «${place.name}» eliminado.` });
+      setStatusMessage({ type: "success", text: t("admin_places.delete_success", { name: place.name }) });
     }
   }
 
@@ -104,7 +106,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
     const count = selectedIds.size;
     if (count === 0) return;
 
-    if (!confirm(`¿Eliminar DEFINITIVAMENTE los ${count} sitios seleccionados? Esta acción es irreversible.`)) {
+    if (!confirm(t("admin_places.delete_bulk_confirm", { count: String(count) }))) {
       return;
     }
 
@@ -120,7 +122,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
     } else {
       setPlacesList((prev) => prev.filter((p) => !selectedIds.has(p.id)));
       setSelectedIds(new Set());
-      setStatusMessage({ type: "success", text: `Se han eliminado ${count} sitios con éxito.` });
+      setStatusMessage({ type: "success", text: t("admin_places.delete_bulk_confirm", { count: String(count) }) });
     }
   }
 
@@ -192,7 +194,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Filtrar por nombre, ciudad, tag o autor..."
+              placeholder={t("admin_places.search_placeholder")}
               className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
           </div>
@@ -206,7 +208,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
               }}
               className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
             >
-              <option value="all">Todas las ciudades ({cities.length})</option>
+              <option value="all">{t("admin_places.all_cities")} ({cities.length})</option>
               {cities.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -226,12 +228,12 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition cursor-pointer disabled:opacity-50 shadow-md shadow-red-600/20"
             >
               <span>🗑️</span>
-              <span>Eliminar seleccionados ({selectedIds.size})</span>
+              <span>{t("admin_places.delete_selected")} ({selectedIds.size})</span>
             </button>
           )}
 
           <span className="text-xs text-slate-400 font-medium">
-            Mostrando {filteredPlaces.length} de {placesList.length}
+            {t("admin_places.showing_of", { filtered: String(filteredPlaces.length), total: String(placesList.length) })}
           </span>
         </div>
       </div>
@@ -239,11 +241,10 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
       {/* Mensajes de estado */}
       {statusMessage && (
         <div
-          className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${
-            statusMessage.type === "success"
-              ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/50"
-              : "bg-red-950/40 text-red-400 border border-red-900/50"
-          }`}
+          className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${statusMessage.type === "success"
+            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/50"
+            : "bg-red-950/40 text-red-400 border border-red-900/50"
+            }`}
         >
           <span>{statusMessage.text}</span>
           <button
@@ -268,23 +269,23 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                     checked={allSelected}
                     onChange={toggleSelectAll}
                     className="rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
-                    title="Seleccionar todos los visibles"
+                    title={t("admin_places.col_select_all")}
                   />
                 </th>
-                <th className="p-3">Establecimiento</th>
-                <th className="p-3">Ciudad</th>
-                <th className="p-3">Precio</th>
-                <th className="p-3">Planes / Ocasiones</th>
-                <th className="p-3">GPS / Mapa</th>
-                <th className="p-3">Autor</th>
-                <th className="p-3 text-right">Acción</th>
+                <th className="p-3">{t("admin_places.col_place")}</th>
+                <th className="p-3">{t("admin_places.col_city")}</th>
+                <th className="p-3">{t("admin_places.col_price")}</th>
+                <th className="p-3">{t("admin_places.col_occasions")}</th>
+                <th className="p-3">{t("admin_places.col_gps")}</th>
+                <th className="p-3">{t("admin_places.col_author")}</th>
+                <th className="p-3 text-right">{t("admin_places.col_action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-medium">
               {paginatedPlaces.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
-                    No se encontraron establecimientos que coincidan con la búsqueda.
+                    {t("admin_places.empty_search")}
                   </td>
                 </tr>
               ) : (
@@ -295,9 +296,8 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                   return (
                     <tr
                       key={place.id}
-                      className={`hover:bg-slate-800/40 transition ${
-                        isChecked ? "bg-amber-500/5" : ""
-                      }`}
+                      className={`hover:bg-slate-800/40 transition ${isChecked ? "bg-amber-500/5" : ""
+                        }`}
                     >
                       <td className="p-3 text-center">
                         <input
@@ -345,7 +345,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                             <span>{place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}</span>
                           </span>
                         ) : (
-                          <span className="text-slate-600 text-[11px]">Sin coords</span>
+                          <span className="text-slate-600 text-[11px]">{t("admin_places.no_coords")}</span>
                         )}
                       </td>
 
@@ -361,7 +361,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-slate-400 hover:text-blue-400 text-xs transition"
-                              title="Abrir en Google Maps"
+                              title={t("admin_places.open_maps")}
                             >
                               ↗
                             </a>
@@ -375,7 +375,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                             }}
                             disabled={loading || placesList.length < 2}
                             className="text-slate-400 hover:text-amber-400 text-xs transition cursor-pointer disabled:opacity-40"
-                            title="Fusionar este sitio duplicado dentro de otro"
+                            title={t("admin_places.merge_title")}
                           >
                             🔀
                           </button>
@@ -384,7 +384,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                             onClick={() => handleDeleteSingle(place)}
                             disabled={loading}
                             className="text-slate-500 hover:text-red-400 text-xs transition cursor-pointer disabled:opacity-40"
-                            title="Eliminar sitio"
+                            title={t("admin_places.delete_title")}
                           >
                             🗑️
                           </button>
@@ -406,7 +406,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
         pageSize={pageSize}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
-        itemLabel="sitios"
+        itemLabel={t("pagination.places")}
       />
 
       {/* Modal de fusión administrativa de duplicados */}
@@ -417,10 +417,10 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
               <div>
                 <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <span>🔀</span>
-                  <span>Fusionar establecimiento duplicado</span>
+                  <span>{t("admin_places.merge_modal_title")}</span>
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Se absorberá y eliminará:{" "}
+                  {t("admin_places.merge_modal_subtitle")}{" "}
                   <strong className="text-red-600 dark:text-red-400">{mergeSource.name}</strong>
                   {mergeSource.city ? ` (${mergeSource.city})` : ""}
                 </p>
@@ -435,25 +435,24 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
             </div>
 
             <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-amber-300">
-              Todos los comentarios, favoritos, estados personales, valoraciones, notas, ocasiones y etiquetas de{" "}
-              <strong>{mergeSource.name}</strong> se transferirán a la ficha principal que elijas abajo.
+              {t("admin_places.merge_modal_desc")}
             </div>
 
             <div className="space-y-2 flex-1 overflow-hidden flex flex-col">
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Elige la ficha principal que sobrevivirá:
+                {t("admin_places.merge_modal_target_label")}
               </label>
               <input
                 type="text"
                 value={mergeSearch}
                 onChange={(e) => setMergeSearch(e.target.value)}
-                placeholder="🔍 Buscar establecimiento destino..."
+                placeholder={t("admin_places.merge_modal_search")}
                 className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
               <div className="overflow-y-auto max-h-52 space-y-1.5 pr-1">
                 {mergeCandidates.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">
-                    No hay establecimientos coincidentes.
+                    {t("admin_places.merge_modal_no_candidates")}
                   </p>
                 ) : (
                   mergeCandidates.map((cand) => {
@@ -463,16 +462,15 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                         key={cand.id}
                         type="button"
                         onClick={() => setMergeTargetId(cand.id)}
-                        className={`w-full text-left p-2.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-2 ${
-                          selected
-                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold"
-                            : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400"
-                        }`}
+                        className={`w-full text-left p-2.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-2 ${selected
+                          ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold"
+                          : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400"
+                          }`}
                       >
                         <div className="min-w-0">
                           <div className="truncate font-bold">{cand.name}</div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                            {cand.city || "Sin ciudad"}
+                            {cand.city || "—"}
                             {cand.address ? ` • ${cand.address}` : ""}
                           </div>
                         </div>
@@ -490,7 +488,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                 onClick={() => setMergeSource(null)}
                 className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
-                Cancelar
+                {t("admin_places.cancel")}
               </button>
               <button
                 type="button"
@@ -498,7 +496,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                 disabled={loading || !mergeTargetId}
                 className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black transition cursor-pointer disabled:opacity-40"
               >
-                {loading ? "Fusionando..." : "🔀 Fusionar fichas"}
+                {loading ? t("admin_places.merging") : `🔀 ${t("admin_places.merge_btn")}`}
               </button>
             </div>
           </div>

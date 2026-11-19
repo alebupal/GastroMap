@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { registerWithInvitationAction } from "@/lib/actions/auth";
+import { useT } from "@/lib/i18n/client";
 
 interface RegisterInviteFormProps {
   token: string;
@@ -9,6 +10,7 @@ interface RegisterInviteFormProps {
 }
 
 export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormProps) {
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +38,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Tu Nombre
+          {t("admin_users.name")}
         </label>
         <input
           type="text"
@@ -49,7 +51,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Nombre de usuario (@username)
+          {t("admin_users.username")}
         </label>
         <div className="relative">
           <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">@</span>
@@ -66,7 +68,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Correo Electrónico
+          {t("admin_users.email")}
         </label>
         <input
           type="email"
@@ -83,7 +85,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Contraseña (mínimo 8 caracteres)
+          {t("admin_users.password")}
         </label>
         <input
           type="password"
@@ -97,7 +99,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Confirmar Contraseña
+          {t("profile.confirm_new_password")}
         </label>
         <input
           type="password"
@@ -114,7 +116,7 @@ export function RegisterInviteForm({ token, defaultEmail }: RegisterInviteFormPr
         disabled={loading}
         className="w-full mt-2 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
       >
-        {loading ? "Creando cuenta..." : "Aceptar Invitación y Crear Cuenta"}
+        {loading ? t("auth.registering") : t("auth.register_btn")}
       </button>
     </form>
   );

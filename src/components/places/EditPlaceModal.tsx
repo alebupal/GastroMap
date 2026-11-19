@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
 import { getMyGroupsAction } from "@/lib/actions/groups";
+import { useT } from "@/lib/i18n/client";
 import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
@@ -36,6 +37,7 @@ export function EditPlaceModal({
   isOpen,
   onClose,
 }: EditPlaceModalProps) {
+  const { t } = useT();
   const [name, setName] = useState(place.name);
   const [googleMapsUrl, setGoogleMapsUrl] = useState(place.googleMapsUrl || "");
   const [website, setWebsite] = useState(place.website || "");
@@ -139,7 +141,7 @@ export function EditPlaceModal({
             <span className="text-xl">✏️</span>
             <div className="min-w-0">
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
-                Editar establecimiento
+                {t("form.edit_title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                 {place.name}
@@ -150,7 +152,7 @@ export function EditPlaceModal({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-sm font-bold"
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           >
             ✕
           </button>
@@ -167,7 +169,7 @@ export function EditPlaceModal({
           {/* Nombre */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Nombre del establecimiento *
+              {t("form.name_label")}
             </label>
             <input
               type="text"
@@ -181,10 +183,14 @@ export function EditPlaceModal({
           {/* Estado del establecimiento */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Estado del local
+              {t("form.edit_status")}
             </label>
             <div className="grid grid-cols-3 gap-1.5">
-              {STATUS_OPTIONS.map((opt) => {
+              {[
+                { id: "active", label: t("form.status_active"), icon: "🟢" },
+                { id: "temporarily_closed", label: t("form.status_temp_closed"), icon: "⏸️" },
+                { id: "permanently_closed", label: t("form.status_perm_closed"), icon: "🚫" },
+              ].map((opt) => {
                 const active = status === opt.id;
                 return (
                   <button
@@ -212,7 +218,7 @@ export function EditPlaceModal({
           {/* Enlace Google Maps */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Enlace de Google Maps
+              {t("form.import_label")}
             </label>
             <div className="flex gap-2">
               <input
@@ -228,7 +234,7 @@ export function EditPlaceModal({
                 disabled={resolving || !googleMapsUrl.trim()}
                 className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition cursor-pointer disabled:opacity-40 shrink-0"
               >
-                {resolving ? "⏳" : "✨ Leer"}
+                {resolving ? "⏳" : `✨ ${t("form.import_button")}`}
               </button>
             </div>
           </div>
@@ -251,7 +257,7 @@ export function EditPlaceModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Página web (opcional)
+                {t("form.website_label")}
               </label>
               <input
                 type="url"
@@ -263,7 +269,7 @@ export function EditPlaceModal({
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Teléfono (opcional)
+                {t("form.phone_label")}
               </label>
               <input
                 type="tel"
@@ -280,13 +286,13 @@ export function EditPlaceModal({
             occasions={occasionsList}
             selectedOccasions={selectedOccasions}
             onToggle={toggleOccasion}
-            label="Planes / Ocasiones"
+            label={t("places.plans_title")}
           />
 
           {/* Precio */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Rango de precio
+              {t("form.price_label")}
             </label>
             <div className="flex gap-1.5">
               {PRICE_OPTIONS.map((p) => {
@@ -315,13 +321,13 @@ export function EditPlaceModal({
           {/* Notas públicas */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Notas / Recomendación pública
+              {t("form.notes_label")}
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ej. Pedir la tarta de queso. Reservar con antelación..."
+              placeholder={t("form.notes_placeholder")}
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
             />
           </div>
@@ -329,7 +335,7 @@ export function EditPlaceModal({
           {/* Visibilidad */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Visibilidad de la ficha
+              {t("form.visibility_label")}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -345,7 +351,7 @@ export function EditPlaceModal({
                 }`}
               >
                 <span>🌍</span>
-                <span>Comunidad (Todos)</span>
+                <span>{t("form.visibility_community")}</span>
               </button>
               <button
                 type="button"
@@ -357,14 +363,14 @@ export function EditPlaceModal({
                 }`}
               >
                 <span>🔒</span>
-                <span>Privado (Solo yo / Grupos)</span>
+                <span>{t("form.visibility_private")}</span>
               </button>
             </div>
 
             {!communityPublished && availableGroups.length > 0 && (
               <div className="mt-2.5 space-y-1.5">
                 <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  👥 Compartir con grupos privados:
+                  {t("form.share_groups_title")}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {availableGroups.map((g) => {
@@ -403,14 +409,14 @@ export function EditPlaceModal({
               onClick={onClose}
               className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
-              {saving ? "Guardando..." : "Guardar cambios"}
+              {saving ? t("common.loading") : t("form.save_changes")}
             </button>
           </div>
         </form>

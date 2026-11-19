@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { copyText } from "@/lib/clipboard";
+import { useT } from "@/lib/i18n/client";
 import {
   getMyGroupsAction,
   createGroupAction,
@@ -22,6 +23,7 @@ interface GroupsModalProps {
 }
 
 export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps) {
+  const { t } = useT();
   const [groups, setGroups] = useState<SharingGroupWithMembers[]>([]);
   const [loading, setLoading] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -180,7 +182,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
             <span className="text-xl">👥</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Mis Grupos Privados
+                {t("groups.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir
@@ -225,15 +227,15 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="Nombre del nuevo grupo (ej. Tapeo con amigos)..."
+              placeholder={`${t("groups.name")}...`}
               className="flex-1 px-3.5 py-2 rounded-2xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
             <button
               type="submit"
               disabled={creating || !newGroupName.trim()}
-              className="px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-40 shadow-xs"
+              className="px-4 py-2 rounded-2xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
             >
-              {creating ? "Creando..." : "+ Crear grupo"}
+              {creating ? t("common.loading") : t("groups.create")}
             </button>
           </form>
 

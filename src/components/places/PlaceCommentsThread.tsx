@@ -9,6 +9,7 @@ import {
   type CommentWithAuthor,
 } from "@/lib/actions/interactions";
 import { CommentSkeleton } from "@/components/ui/Skeleton";
+import { useT } from "@/lib/i18n/client";
 
 interface PlaceCommentsThreadProps {
   placeId: string;
@@ -160,6 +161,7 @@ function RichTextarea({
   submitLabel?: string;
   onCancel?: () => void;
 }) {
+  const { t } = useT();
   const [tab, setTab] = useState<"write" | "preview">("write");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -259,7 +261,7 @@ function RichTextarea({
                 : "text-slate-600 dark:text-slate-400"
             }`}
           >
-            Escribir
+            {t ? t("comments.write") : "Escribir"}
           </button>
           <button
             type="button"
@@ -270,7 +272,7 @@ function RichTextarea({
                 : "text-slate-600 dark:text-slate-400"
             }`}
           >
-            Vista previa
+            {t ? t("comments.preview") : "Vista previa"}
           </button>
         </div>
       </div>
@@ -290,7 +292,7 @@ function RichTextarea({
           {value.trim() ? (
             <FormattedCommentContent content={value} />
           ) : (
-            <p className="text-slate-400 italic text-[11px]">Escribe algo para ver la vista previa con formato.</p>
+            <p className="text-slate-400 italic text-[11px]">{t ? t("comments.preview_empty") : "Escribe algo para ver la vista previa con formato."}</p>
           )}
         </div>
       )}
@@ -298,7 +300,7 @@ function RichTextarea({
       {/* Botones de acción */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-50/60 dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-800">
         <span className="text-[10px] text-slate-400">
-          Usa **negrita**, *cursiva*, &gt; citas o - viñetas
+          {t ? t("comments.markdown_hint") : "Usa **negrita**, *cursiva*, > citas o - viñetas"}
         </span>
         <div className="flex items-center gap-1.5">
           {onCancel && (
@@ -307,7 +309,7 @@ function RichTextarea({
               onClick={onCancel}
               className="px-2.5 py-1 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
             >
-              Cancelar
+              {t ? t("comments.cancel") : "Cancelar"}
             </button>
           )}
           <button
@@ -316,7 +318,7 @@ function RichTextarea({
             disabled={isSubmitting || !value.trim()}
             className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs transition cursor-pointer disabled:opacity-40"
           >
-            {isSubmitting ? "Guardando..." : submitLabel}
+            {isSubmitting ? (t ? t("comments.saving") : "Guardando...") : submitLabel}
           </button>
         </div>
       </div>
@@ -332,6 +334,7 @@ export function PlaceCommentsThread({
   onClose,
   onCommentsCountChange,
 }: PlaceCommentsThreadProps) {
+  const { t } = useT();
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [loading, setLoading] = useState(false);
   const [newContent, setNewContent] = useState("");
@@ -367,7 +370,7 @@ export function PlaceCommentsThread({
   }
 
   async function handleDeleteComment(commentId: string) {
-    if (!confirm("¿Eliminar este comentario?")) return;
+    if (!confirm(t("comments.delete_confirm"))) return;
     const res = await deleteCommentAction(commentId);
     if (res.success) {
       const updated = comments.filter((c) => c.id !== commentId);
@@ -396,14 +399,14 @@ export function PlaceCommentsThread({
     <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 text-left">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-          💬 Recomendaciones y comentarios ({comments.length})
+          💬 {t("comments.title")} ({comments.length})
         </h4>
         <button
           type="button"
           onClick={onClose}
           className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
         >
-          Ocultar ✕
+          {t("comments.hide")}
         </button>
       </div>
 
@@ -416,7 +419,7 @@ export function PlaceCommentsThread({
           </div>
         ) : comments.length === 0 ? (
           <p className="text-slate-400 italic py-2 text-[11px] text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-xl">
-            Aún no hay comentarios. ¡Sé el primero en compartir qué pedir, reservas o consejos!
+            {t("comments.empty")}
           </p>
         ) : (
           comments.map((c) => {
@@ -450,7 +453,7 @@ export function PlaceCommentsThread({
                           setEditingContent(c.content);
                         }}
                         className="text-slate-400 hover:text-amber-500 text-xs cursor-pointer px-1 py-0.5 rounded hover:bg-slate-200/60 dark:hover:bg-slate-700"
-                        title="Editar comentario"
+                        title={t("comments.edit_title")}
                       >
                         ✏️
                       </button>
@@ -460,7 +463,7 @@ export function PlaceCommentsThread({
                         type="button"
                         onClick={() => handleDeleteComment(c.id)}
                         className="text-slate-400 hover:text-red-500 text-xs cursor-pointer px-1 py-0.5 rounded hover:bg-slate-200/60 dark:hover:bg-slate-700"
-                        title="Eliminar comentario"
+                        title={t("comments.delete_title")}
                       >
                         ✕
                       </button>
@@ -473,11 +476,11 @@ export function PlaceCommentsThread({
                     <RichTextarea
                       value={editingContent}
                       onChange={setEditingContent}
-                      placeholder="Edita tu comentario..."
+                      placeholder={t("comments.edit_placeholder")}
                       rows={3}
                       onSubmit={() => handleSaveEdit(c.id)}
                       isSubmitting={savingEdit}
-                      submitLabel="Guardar cambios"
+                      submitLabel={t("comments.save")}
                       onCancel={() => setEditingCommentId(null)}
                     />
                   </div>
@@ -497,11 +500,11 @@ export function PlaceCommentsThread({
         <RichTextarea
           value={newContent}
           onChange={setNewContent}
-          placeholder="Escribe una recomendación detallada (platos imprescindibles, consejos de reserva, ambiente...)"
+          placeholder={t("comments.placeholder")}
           rows={3}
           onSubmit={handleAddComment}
           isSubmitting={submitting}
-          submitLabel="Publicar comentario"
+          submitLabel={t("comments.publish")}
         />
       </div>
     </div>

@@ -200,7 +200,7 @@ export function NewPlaceForm({
       {/* 2. Nombre del sitio */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          Nombre del sitio *
+          {t("form.name_label")}
         </label>
         <input
           type="text"
@@ -208,7 +208,7 @@ export function NewPlaceForm({
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ej. Casa Paco, Restaurante El Mirador..."
+          placeholder={t("form.name_placeholder")}
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
         />
 
@@ -220,8 +220,8 @@ export function NewPlaceForm({
                 <span>⚠️</span>
                 <span>
                   {duplicates.length === 1
-                    ? "Ya existe un sitio muy parecido en el catálogo"
-                    : `Hemos encontrado ${duplicates.length} sitios parecidos en el catálogo`}
+                    ? t("form.duplicate_single")
+                    : t("form.duplicate_multiple", { count: duplicates.length })}
                 </span>
               </div>
               <button
@@ -229,7 +229,7 @@ export function NewPlaceForm({
                 onClick={() => setDismissedDuplicates(true)}
                 className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:underline shrink-0 cursor-pointer"
               >
-                Es distinto ✕
+                {t("form.duplicate_dismiss")}
               </button>
             </div>
             <div className="space-y-1.5">
@@ -255,7 +255,7 @@ export function NewPlaceForm({
                     href="/"
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] shrink-0 transition"
                   >
-                    Ver catálogo
+                    {t("form.duplicate_view_catalog")}
                   </Link>
                 </div>
               ))}
@@ -283,14 +283,14 @@ export function NewPlaceForm({
         occasions={availableOccasions}
         selectedOccasions={selectedOccasions}
         onToggle={toggleOccasion}
-        label="¿Para qué plan es? (Puedes marcar varios)"
+        label={t("form.occasions_label")}
         renderHiddenInputs
       />
 
       {/* 4. Precio estimado */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-          Presupuesto aproximado
+          {t("form.price_label")}
         </label>
         <div className="flex gap-1.5">
           {PRICE_OPTIONS.map((p) => {
@@ -320,12 +320,12 @@ export function NewPlaceForm({
       {/* 6. Notas */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          Notas / Recomendación
+          {t("form.notes_label")}
         </label>
         <textarea
           name="notes"
           rows={2}
-          placeholder="Ej. Pedir la tarta de queso. Reservar con antelación..."
+          placeholder={t("form.notes_placeholder")}
           className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
         />
       </div>
@@ -333,7 +333,7 @@ export function NewPlaceForm({
       {/* 7. Ámbito de compartición (Fase 4 & 5) */}
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-          Visibilidad de la ficha
+          {t("form.visibility_label")}
         </label>
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -349,7 +349,7 @@ export function NewPlaceForm({
             }`}
           >
             <span>🌍</span>
-            <span>Comunidad (Todos)</span>
+            <span>{t("form.visibility_community")}</span>
           </button>
 
           <button
@@ -362,7 +362,7 @@ export function NewPlaceForm({
             }`}
           >
             <span>🔒</span>
-            <span>Privado (Solo yo / Grupos)</span>
+            <span>{t("form.visibility_private")}</span>
           </button>
         </div>
         <input
@@ -375,7 +375,7 @@ export function NewPlaceForm({
         {!isCommunityPublished && availableGroups.length > 0 && (
           <div className="mt-2.5 space-y-1.5">
             <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-              👥 Compartir con grupos privados (opcional):
+              {t("form.share_groups_title")}
             </span>
             <div className="flex flex-wrap gap-1.5">
               {availableGroups.map((g) => {
@@ -414,14 +414,14 @@ export function NewPlaceForm({
           href="/"
           className="flex-1 py-3 px-4 rounded-xl text-center border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition"
         >
-          Cancelar
+          {t("common.cancel")}
         </Link>
         <button
           type="submit"
           disabled={submitting}
           className="flex-2 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
         >
-          {submitting ? "Guardando..." : "Guardar Sitio"}
+          {submitting ? t("form.saving_button") : t("form.save_button")}
         </button>
       </div>
     </form>

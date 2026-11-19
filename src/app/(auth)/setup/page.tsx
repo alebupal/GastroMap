@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { countUsers } from "@/lib/auth";
 import { SetupAdminForm } from "@/components/auth/SetupAdminForm";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,7 @@ export default async function SetupPage() {
   if (userCount > 0) {
     redirect("/login");
   }
+  const t = await getT();
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-slate-50 dark:bg-slate-950">
@@ -18,10 +20,10 @@ export default async function SetupPage() {
             👑
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Bienvenido a GastroMap
+            {t("auth.setup_title")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Configuración inicial: crea la cuenta del Administrador principal.
+            {t("auth.setup_subtitle")}
           </p>
         </div>
 

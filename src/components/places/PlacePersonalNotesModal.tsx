@@ -5,6 +5,7 @@ import {
   setPersonalRatingAction,
   savePrivateNotesAction,
 } from "@/lib/actions/interactions";
+import { useT } from "@/lib/i18n/client";
 
 interface PlacePersonalNotesModalProps {
   placeId: string;
@@ -25,6 +26,7 @@ export function PlacePersonalNotesModal({
   onClose,
   onSave,
 }: PlacePersonalNotesModalProps) {
+  const { t } = useT();
   const [rating, setRating] = useState<number | "">(
     initialRating !== null && initialRating !== undefined ? initialRating : ""
   );
@@ -50,7 +52,7 @@ export function PlacePersonalNotesModal({
       <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-            🔒 Notas y valoración privada
+            🔒 {t("notes_visits.personal_notes_title")}
           </h3>
           <button
             type="button"
@@ -61,12 +63,12 @@ export function PlacePersonalNotesModal({
           </button>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-          Solo tú puedes ver esta nota y puntuación para <strong>{placeName}</strong>.
+          {t("notes_visits.personal_notes_hint")} (<strong>{placeName}</strong>).
         </p>
 
         {/* Puntuación 0 a 10 */}
         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          Tu nota personal (0 - 10)
+          {t("notes_visits.rating_label")}
         </label>
         <div className="flex items-center gap-2 mb-4">
           <input
@@ -86,21 +88,21 @@ export function PlacePersonalNotesModal({
             placeholder="Ej. 8.5"
             className="w-24 px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-bold text-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
-          <span className="text-xs text-slate-400">sobre 10 ⭐</span>
+          <span className="text-xs text-slate-400">/ 10 ⭐</span>
           {rating !== "" && (
             <button
               type="button"
               onClick={() => setRating("")}
               className="text-[11px] text-slate-400 hover:text-slate-200 underline ml-auto cursor-pointer"
             >
-              Borrar nota
+              {t("notes_visits.no_rating")}
             </button>
           )}
         </div>
 
         {/* Notas privadas */}
         <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-          Apuntes privados
+          {t("cards.private_note")}
         </label>
         <textarea
           rows={3}
@@ -116,7 +118,7 @@ export function PlacePersonalNotesModal({
             onClick={onClose}
             className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
           >
-            Cancelar
+            {t("common.cancel")}
           </button>
           <button
             type="button"
@@ -124,7 +126,7 @@ export function PlacePersonalNotesModal({
             disabled={saving}
             className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
           >
-            {saving ? "Guardando..." : "Guardar"}
+            {saving ? t("common.loading") : t("common.save")}
           </button>
         </div>
       </div>

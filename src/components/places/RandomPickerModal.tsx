@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
+import { useT } from "@/lib/i18n/client";
 
 interface RandomPickerModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export function RandomPickerModal({
   places,
   onSelectOnMap,
 }: RandomPickerModalProps) {
+  const { t } = useT();
   const [selectedPlace, setSelectedPlace] = useState<PlaceWithDetails | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
 
@@ -54,10 +56,10 @@ export function RandomPickerModal({
           🎲
         </div>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-          ¿Dónde vamos hoy?
+          {t("random.title")}
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Elección al azar entre los {places.length} sitios de tus filtros
+          {t("random.subtitle", { count: places.length })}
         </p>
 
         {/* Tarjeta del sitio elegido */}
@@ -68,7 +70,7 @@ export function RandomPickerModal({
             }`}
           >
             <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-              {selectedPlace.priceRange !== "???" ? selectedPlace.priceRange : "Precio libre"}
+              {selectedPlace.priceRange !== "???" ? selectedPlace.priceRange : t("random.free_price")}
             </span>
             <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 mt-1">
               {selectedPlace.name}
@@ -101,7 +103,7 @@ export function RandomPickerModal({
             )}
           </div>
         ) : (
-          <p className="my-6 text-sm text-slate-400">No hay sitios que coincidan.</p>
+          <p className="my-6 text-sm text-slate-400">{t("random.no_places")}</p>
         )}
 
         {/* Acciones */}
@@ -112,7 +114,7 @@ export function RandomPickerModal({
             disabled={isSpinning || places.length === 0}
             className="w-full py-3 px-4 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/20 transition cursor-pointer disabled:opacity-50"
           >
-            {isSpinning ? "Girando la ruleta... 🌀" : "🔄 Volver a tirar"}
+            {isSpinning ? t("random.spinning") : t("random.spin_button")}
           </button>
 
           <div className="flex gap-2">
@@ -123,7 +125,7 @@ export function RandomPickerModal({
                 rel="noopener noreferrer"
                 className="flex-1 py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition text-center"
               >
-                Abrir en Maps ↗
+                {t("random.open_maps")}
               </a>
             )}
 
@@ -136,7 +138,7 @@ export function RandomPickerModal({
                 }}
                 className="flex-1 py-2.5 px-3 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer"
               >
-                Ver en mapa 🗺️
+                {t("random.view_on_map")}
               </button>
             )}
           </div>
@@ -146,7 +148,7 @@ export function RandomPickerModal({
             onClick={onClose}
             className="mt-2 text-xs font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer"
           >
-            Cerrar
+            {t("common.close")}
           </button>
         </div>
       </div>

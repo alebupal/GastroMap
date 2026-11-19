@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { getAuditLogsAction, type AuditLogRow } from "@/lib/actions/audit";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { useT } from "@/lib/i18n/client";
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   place_updated: { label: "Sitio editado", color: "bg-blue-500/15 text-blue-500 border-blue-500/30" },
@@ -13,6 +14,7 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export function AuditLogViewer() {
+  const { t } = useT();
   const [logs, setLogs] = useState<AuditLogRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [entityFilter, setEntityFilter] = useState("all");
@@ -51,10 +53,10 @@ export function AuditLogViewer() {
         <div>
           <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
             <span>📜</span>
-            <span>Registro de Auditoría ({filtered.length})</span>
+            <span>{t("admin_audit.title")} ({filtered.length})</span>
           </h4>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Historial inmutable de ediciones, fusiones, eliminaciones y cambios de estado
+            {t("admin_audit.subtitle")}
           </p>
         </div>
 
@@ -67,9 +69,9 @@ export function AuditLogViewer() {
             }}
             className="px-2.5 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
-            <option value="all">Todas las entidades</option>
-            <option value="place">Establecimientos</option>
-            <option value="user">Usuarios</option>
+            <option value="all">{t("admin_audit.filter_all")}</option>
+            <option value="place">{t("admin_places.col_place")}</option>
+            <option value="user">{t("admin_users.col_user")}</option>
           </select>
 
           <button
@@ -78,16 +80,16 @@ export function AuditLogViewer() {
             disabled={loading}
             className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer disabled:opacity-50"
           >
-            ↻ Actualizar
+            ↻ {t("admin_audit.refresh")}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-xs text-slate-400 text-center py-6">Cargando auditoría...</p>
+        <p className="text-xs text-slate-400 text-center py-6">{t("admin_stats.loading")}</p>
       ) : paginated.length === 0 ? (
         <div className="p-8 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400">
-          Aún no hay eventos registrados en el historial de auditoría.
+          {t("admin_audit.empty")}
         </div>
       ) : (
         <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 overflow-hidden">
@@ -95,10 +97,10 @@ export function AuditLogViewer() {
             <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="p-3">Fecha</th>
-                  <th className="p-3">Actor</th>
-                  <th className="p-3">Acción</th>
-                  <th className="p-3">Detalles</th>
+                  <th className="p-3">{t("admin_audit.col_date")}</th>
+                  <th className="p-3">{t("admin_audit.col_user")}</th>
+                  <th className="p-3">{t("admin_audit.col_action")}</th>
+                  <th className="p-3">{t("admin_audit.col_details")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -145,7 +147,7 @@ export function AuditLogViewer() {
         pageSize={pageSize}
         onPageChange={setCurrentPage}
         onPageSizeChange={setPageSize}
-        itemLabel="eventos"
+        itemLabel={t("pagination.records")}
       />
     </div>
   );

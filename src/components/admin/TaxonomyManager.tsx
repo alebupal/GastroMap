@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions/taxonomy";
 import type { Occasion } from "@/db/schema";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { useT } from "@/lib/i18n/client";
 
 interface TaxonomyManagerProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
@@ -29,6 +30,7 @@ const EMOJI_SUGGESTIONS = [
 ];
 
 export function TaxonomyManager({ initialOccasions, initialTags, section }: TaxonomyManagerProps) {
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<"occasions" | "tags">(section || "occasions");
   const [isOpen, setIsOpen] = useState(true);
   const currentTab = section ?? activeTab;
@@ -377,16 +379,14 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
     section === "occasions" ? "🍽️" : section === "tags" ? "🏷️" : "🏷️";
   const headerTitle =
     section === "occasions"
-      ? `Categorías / Planes (${initialOccasions.length})`
+      ? `${t("admin_taxonomy.title_occasions")} (${initialOccasions.length})`
       : section === "tags"
-      ? `Etiquetas / Especialidades (${initialTags.length})`
-      : "Taxonomía y Clasificaciones";
+      ? `${t("admin_taxonomy.title_tags")} (${initialTags.length})`
+      : `${t("admin_taxonomy.title_occasions")} / ${t("admin_taxonomy.title_tags")}`;
   const headerDesc =
     section === "occasions"
-      ? "Crea, renombra, combina, elimina varias y limpia categorías vacías"
-      : section === "tags"
-      ? "Renombra, combina, elimina varias y limpia etiquetas vacías"
-      : "Administra, renombra, combina, elimina varias y limpia categorías y etiquetas vacías";
+      ? t("admin_taxonomy.subtitle_occasions")
+      : t("admin_taxonomy.subtitle_tags");
 
   return (
     <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs text-left">
@@ -407,7 +407,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
           onClick={() => setIsOpen(!isOpen)}
           className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition active:scale-95 cursor-pointer shrink-0"
         >
-          {isOpen ? "Ocultar" : "Gestionar"}
+          {isOpen ? t("common.collapse") : t("common.manage")}
         </button>
       </div>
 
@@ -436,7 +436,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                Categorías / Planes ({initialOccasions.length})
+                {t("admin_taxonomy.title_occasions")} ({initialOccasions.length})
               </button>
               <button
                 onClick={() => setActiveTab("tags")}
@@ -446,7 +446,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 }`}
               >
-                Etiquetas / Especialidades ({initialTags.length})
+                {t("admin_taxonomy.title_tags")} ({initialTags.length})
               </button>
             </div>
           )}

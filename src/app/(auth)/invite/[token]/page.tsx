@@ -2,6 +2,7 @@ import { eq, and, isNull, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { invitations } from "@/db/schema";
 import { RegisterInviteForm } from "@/components/auth/RegisterInviteForm";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ interface InvitePageProps {
 
 export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
+  const t = await getT();
 
   const [invitation] = await db
     .select()
@@ -30,16 +32,16 @@ export default async function InvitePage({ params }: InvitePageProps) {
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
           <div className="text-4xl mb-4">⚠️</div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Invitación no válida o expirada
+            {t("auth.invalid_invite")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            Este enlace de invitación ya ha sido utilizado o ha superado su fecha límite de validez.
+            {t("auth.invalid_invite")}
           </p>
           <a
             href="/login"
             className="inline-block py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm transition"
           >
-            Ir al inicio de sesión
+            {t("auth.login_title")}
           </a>
         </div>
       </div>
@@ -54,10 +56,10 @@ export default async function InvitePage({ params }: InvitePageProps) {
             🎟️
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            ¡Has sido invitado!
+            {t("auth.invite_title")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Crea tu cuenta para unirte al GastroMap de tu círculo.
+            {t("auth.invite_subtitle")}
           </p>
         </div>
 

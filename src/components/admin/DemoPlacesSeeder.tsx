@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { seedDemoPlacesAction } from "@/lib/actions/seed";
+import { useT } from "@/lib/i18n/client";
 
 export function DemoPlacesSeeder() {
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -25,7 +27,7 @@ export function DemoPlacesSeeder() {
     if (res.error) {
       setMessage(`❌ ${res.error}`);
     } else {
-      setMessage(`✓ Catálogo actualizado con éxito (50 sitios y usuarios de la comunidad).`);
+      setMessage(`✓ ${t("admin_demo.success")}`);
       setTimeout(() => {
         window.location.reload();
       }, 1200);
@@ -38,10 +40,10 @@ export function DemoPlacesSeeder() {
         <span className="text-xl">🌱</span>
         <div>
           <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-            Carga de Demostración Completa (50 sitios + Comunidad)
+            {t("admin_demo.title")}
           </h3>
           <p className="text-xs text-slate-500">
-            Genera 50 restaurantes reales mundiales y nacionales con usuarios colaboradores (contraseña de todos: <strong className="text-amber-400 font-mono">1234</strong>), hilos de comentarios, estados personales, favoritos y notas privadas.
+            {t("admin_demo.desc")}
           </p>
         </div>
       </div>
@@ -58,7 +60,7 @@ export function DemoPlacesSeeder() {
           disabled={loading}
           className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition active:scale-95 cursor-pointer disabled:opacity-50 shadow-sm"
         >
-          {loading ? "Cargando catálogo..." : "Cargar 50 sitios y usuarios"}
+          {loading ? t("admin_demo.seeding") : t("admin_demo.seed_btn")}
         </button>
       </div>
     </div>

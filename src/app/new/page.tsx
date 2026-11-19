@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { NewPlaceForm } from "@/components/places/NewPlaceForm";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -21,11 +22,12 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     redirect("/login");
   }
 
-  const [occasions, allTags, myGroups, params] = await Promise.all([
+  const [occasions, allTags, myGroups, params, t] = await Promise.all([
     getOccasions(),
     getTagsWithCount(),
     getMyGroupsAction(),
     searchParams,
+    getT(),
   ]);
   const popularTags = allTags.map((t) => t.name);
   const availableGroups = myGroups.map((g) => ({ id: g.id, name: g.name }));
@@ -57,10 +59,10 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
           </Link>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              Añadir nuevo sitio
+              {t("places.add_new")}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Guarda en 10 segundos tu próximo descubrimiento
+              {t("app.subtitle")}
             </p>
           </div>
         </div>

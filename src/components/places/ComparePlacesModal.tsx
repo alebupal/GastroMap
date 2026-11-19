@@ -1,6 +1,7 @@
 "use client";
 
 import type { PlaceWithDetails } from "@/lib/actions/places";
+import { useT } from "@/lib/i18n/client";
 
 interface ComparePlacesModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export function ComparePlacesModal({
   onRemovePlace,
   onSelectOnMap,
 }: ComparePlacesModalProps) {
+  const { t } = useT();
+
   if (!isOpen || places.length === 0) return null;
 
   return (
@@ -29,10 +32,10 @@ export function ComparePlacesModal({
             <span className="text-xl">⚖️</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Comparador de Establecimientos ({places.length})
+                {t("compare.title")} ({places.length})
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Compara tus opciones lado a lado para decidir dónde ir
+                {t("compare.subtitle")}
               </p>
             </div>
           </div>
@@ -67,7 +70,7 @@ export function ComparePlacesModal({
                       type="button"
                       onClick={() => onRemovePlace(p.id)}
                       className="text-xs text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
-                      title="Quitar de la comparativa"
+                      title={t("compare.remove_title")}
                     >
                       ✕
                     </button>
@@ -75,14 +78,14 @@ export function ComparePlacesModal({
 
                   <div className="space-y-1.5 text-xs">
                     <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                      <span className="text-slate-500">Precio</span>
+                      <span className="text-slate-500">{t("compare.price")}</span>
                       <span className="font-black text-emerald-700 dark:text-emerald-300">
                         {p.priceRange}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                      <span className="text-slate-500">Ciudad</span>
+                      <span className="text-slate-500">{t("compare.city")}</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
                         {p.city || "—"}
                       </span>
@@ -90,7 +93,7 @@ export function ComparePlacesModal({
 
                     {typeof p.distanceMeters === "number" && (
                       <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                        <span className="text-slate-500">Distancia</span>
+                        <span className="text-slate-500">{t("compare.distance")}</span>
                         <span className="font-bold text-blue-600 dark:text-blue-400">
                           {p.distanceMeters < 1000
                             ? `${p.distanceMeters} m`
@@ -100,25 +103,25 @@ export function ComparePlacesModal({
                     )}
 
                     <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                      <span className="text-slate-500">Mi valoración</span>
+                      <span className="text-slate-500">{t("compare.my_rating")}</span>
                       <span className="font-bold text-amber-600 dark:text-amber-400">
-                        {p.rating !== null && p.rating !== undefined ? `⭐ ${p.rating}/10` : "Sin puntuar"}
+                        {p.rating !== null && p.rating !== undefined ? `⭐ ${p.rating}/10` : t("compare.not_rated")}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                      <span className="text-slate-500">Experiencia</span>
+                      <span className="text-slate-500">{t("compare.experience")}</span>
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
                         {p.experienceStatus === "visited_by_me"
-                          ? "✅ Ya he ido"
+                          ? `✅ ${t("cards.visited_badge")}`
                           : p.experienceStatus === "visited_by_others"
-                          ? "👥 De amigos"
-                          : "✨ Sin estrenar"}
+                          ? `👥 ${t("cards.friends_badge")}`
+                          : `✨ ${t("cards.untried_badge")}`}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between py-1 border-b border-slate-200/70 dark:border-slate-700/60">
-                      <span className="text-slate-500">Comentarios</span>
+                      <span className="text-slate-500">{t("compare.comments")}</span>
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
                         💬 {p.commentsCount || 0}
                       </span>
@@ -145,12 +148,12 @@ export function ComparePlacesModal({
                   {/* Tags */}
                   {p.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {p.tags.slice(0, 6).map((t) => (
+                      {p.tags.slice(0, 6).map((tTag) => (
                         <span
-                          key={t}
+                          key={tTag}
                           className="px-1.5 py-0.5 rounded text-[10px] bg-slate-200/70 dark:bg-slate-700/70 text-slate-700 dark:text-slate-300"
                         >
-                          #{t}
+                          #{tTag}
                         </span>
                       ))}
                     </div>
@@ -173,7 +176,7 @@ export function ComparePlacesModal({
                       }}
                       className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer transition"
                     >
-                      🗺️ Ver en mapa
+                      🗺️ {t("compare.view_on_map")}
                     </button>
                   )}
                   {p.googleMapsUrl && (
@@ -183,7 +186,7 @@ export function ComparePlacesModal({
                       rel="noopener noreferrer"
                       className="flex-1 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-center text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                     >
-                      Maps ↗
+                      {t("compare.open_maps")}
                     </a>
                   )}
                 </div>

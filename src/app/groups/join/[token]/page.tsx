@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getGroupInviteInfoAction } from "@/lib/actions/groups";
 import { JoinGroupClient } from "./JoinGroupClient";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ interface JoinGroupPageProps {
 export default async function JoinGroupPage({ params }: JoinGroupPageProps) {
   const { token } = await params;
   const currentUser = await getCurrentUser();
+  const t = await getT();
 
   if (!currentUser) {
     // Redirigir a login pasando el callbackUrl
@@ -27,16 +29,16 @@ export default async function JoinGroupPage({ params }: JoinGroupPageProps) {
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
           <div className="text-4xl mb-4">⚠️</div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Invitación no válida o expirada
+            {t("groups.join_invalid")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-            {info.error || "Este enlace de invitación ha superado su fecha límite de validez."}
+            {info.error || t("groups.join_invalid")}
           </p>
           <Link
             href="/"
             className="inline-block py-2.5 px-5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition"
           >
-            Volver al mapa
+            {t("groups.join_go_to_map")}
           </Link>
         </div>
       </div>
@@ -50,10 +52,10 @@ export default async function JoinGroupPage({ params }: JoinGroupPageProps) {
           👥
         </div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-          Invitación a Grupo Privado
+          {t("groups.join_title")}
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-          <strong className="text-slate-800 dark:text-slate-200">{info.ownerName}</strong> te ha invitado a unirte a:
+          {t("groups.join_invited_by", { owner: info.ownerName || "" })}
         </p>
         <div className="my-5 p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/30">
           <h2 className="text-xl font-extrabold text-amber-600 dark:text-amber-400">

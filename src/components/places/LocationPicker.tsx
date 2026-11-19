@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { SPANISH_PROVINCES } from "@/data/spanishLocations";
 import { searchAddressAction } from "@/lib/actions/places";
 import type { GeocodingResult } from "@/lib/geocoding";
+import { useT } from "@/lib/i18n/client";
 
 interface LocationPickerProps {
   initialCity?: string;
@@ -25,6 +26,7 @@ export function LocationPicker({
   initialLng = "",
   onLocationChange,
 }: LocationPickerProps) {
+  const { t } = useT();
   // Modo: 'global' (cualquier ciudad del mundo) o 'ine' (selector por provincias de España)
   const [mode, setMode] = useState<"global" | "ine">("global");
 
@@ -157,7 +159,7 @@ export function LocationPicker({
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
           <span>📍</span>
-          <span>Localización y Coordenadas</span>
+          <span>{t("location.title")}</span>
         </label>
         <div className="inline-flex p-0.5 rounded-lg bg-slate-200 dark:bg-slate-700/60 text-[10px] font-bold">
           <button
@@ -169,7 +171,7 @@ export function LocationPicker({
                 : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            🌍 Cualquier país
+            {t("location.any_country")}
           </button>
           <button
             type="button"
@@ -180,7 +182,7 @@ export function LocationPicker({
                 : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
           >
-            🇪🇸 España (INE)
+            {t("location.spain_ine")}
           </button>
         </div>
       </div>
@@ -195,7 +197,7 @@ export function LocationPicker({
             onFocus={() => {
               if (searchResults.length > 0) setShowResults(true);
             }}
-            placeholder="🔎 Buscar calle, barrio, restaurante o ciudad del mundo..."
+            placeholder={t("location.search_placeholder")}
             className="w-full px-3 py-2 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
           <span className="absolute left-2.5 top-2.5 text-xs text-slate-400 pointer-events-none">
@@ -234,13 +236,13 @@ export function LocationPicker({
       {mode === "global" ? (
         <div>
           <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-            Ciudad / Población / País
+            {t("location.city_label")}
           </label>
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="Ej. Tokio, Roma, Nueva York, Granada, París..."
+            placeholder={t("location.city_placeholder")}
             className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
           />
         </div>
@@ -248,7 +250,7 @@ export function LocationPicker({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Provincia
+              {t("location.province_label")}
             </label>
             <select
               value={selectedProvinceId}
@@ -271,7 +273,7 @@ export function LocationPicker({
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Municipio ({currentProvince.municipalities.length})
+              {t("location.municipality_label")} ({currentProvince.municipalities.length})
             </label>
             <select
               value={selectedMunicipality}
@@ -291,14 +293,14 @@ export function LocationPicker({
       {/* 3. Dirección / Calle / Zona */}
       <div>
         <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-          Dirección / Calle o Barrio (ej. Shibuya, Trastevere, Calle Navas...)
+          {t("location.address_label")}
         </label>
         <input
           type="text"
           name="address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="Ej. Calle Navas 28, Times Square..."
+          placeholder={t("location.address_placeholder")}
           className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
         />
       </div>
@@ -306,7 +308,10 @@ export function LocationPicker({
       {/* Coordenadas en texto pequeño */}
       {lat && lng && (
         <p className="text-[10px] text-slate-400">
-          Coordenadas: {parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}
+          {t("location.coords_label", {
+            lat: parseFloat(lat).toFixed(4),
+            lng: parseFloat(lng).toFixed(4),
+          })}
         </p>
       )}
 

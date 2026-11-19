@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { loginAction } from "@/lib/actions/auth";
+import { useT } from "@/lib/i18n/client";
 
 export function LoginForm() {
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +33,7 @@ export function LoginForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Usuario o Correo Electrónico
+          {t("auth.email")}
         </label>
         <input
           type="text"
@@ -44,7 +46,7 @@ export function LoginForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Contraseña
+          {t("auth.password")}
         </label>
         <input
           type="password"
@@ -60,7 +62,7 @@ export function LoginForm() {
         disabled={loading}
         className="w-full mt-2 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
       >
-        {loading ? "Entrando..." : "Entrar"}
+        {loading ? t("auth.loading") : t("auth.enter")}
       </button>
     </form>
   );

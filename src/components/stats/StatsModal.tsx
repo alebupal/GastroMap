@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getUserStatsAction, type UserStatsData, type CountItem } from "@/lib/actions/stats";
+import { useT } from "@/lib/i18n/client";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -55,6 +56,7 @@ function MiniBarList({
 }
 
 export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<"overview" | "wrapped">("overview");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [stats, setStats] = useState<UserStatsData | null>(null);
@@ -80,10 +82,10 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
             <span className="text-xl">📊</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Mis Estadísticas Gastronómicas
+                {t("stats.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Tu actividad personal en GastroMap (@{username})
+                @{username}
               </p>
             </div>
           </div>
@@ -108,7 +110,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   : "text-slate-500 dark:text-slate-400"
               }`}
             >
-              📈 Mi Resumen
+              {t("stats.overview_tab")}
             </button>
             <button
               type="button"
@@ -119,7 +121,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   : "text-slate-500 dark:text-slate-400"
               }`}
             >
-              ✨ Wrapped {selectedYear}
+              {t("stats.wrapped_tab", { year: selectedYear })}
             </button>
           </div>
         </div>
@@ -127,14 +129,14 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
         {/* Contenido */}
         <div className="p-5 overflow-y-auto flex-1 space-y-4">
           {loading || !stats ? (
-            <p className="text-xs text-slate-400 text-center py-10">Calculando tus estadísticas...</p>
+            <p className="text-xs text-slate-400 text-center py-10">{t("common.loading")}</p>
           ) : activeTab === "overview" ? (
             <>
               {/* KPIs principales */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50">
                   <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                    ✅ Visitados
+                    ✅ {t("cards.visited")}
                   </div>
                   <div className="text-2xl font-black text-emerald-900 dark:text-emerald-200 mt-0.5">
                     {stats.visitedCount}
@@ -143,7 +145,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
                 <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
                   <div className="text-[11px] font-semibold text-amber-700 dark:text-amber-400">
-                    ⭐ Favoritos
+                    ⭐ {t("places.favorites")}
                   </div>
                   <div className="text-2xl font-black text-amber-900 dark:text-amber-200 mt-0.5">
                     {stats.favoritesCount}
@@ -152,7 +154,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
                 <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50">
                   <div className="text-[11px] font-semibold text-blue-700 dark:text-blue-400">
-                    🕒 Quiero ir
+                    🕒 {t("places.want_to_go")}
                   </div>
                   <div className="text-2xl font-black text-blue-900 dark:text-blue-200 mt-0.5">
                     {stats.pendingCount}
@@ -194,22 +196,22 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               {/* Gráficas de barras */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <MiniBarList
-                  title="🏙️ Tus ciudades top"
+                  title={`🏙️ ${t("stats.top_cities")}`}
                   items={stats.topCities}
                   colorClass="bg-blue-500"
                 />
                 <MiniBarList
-                  title="🍽️ Tus planes favoritos"
+                  title={`🍽️ ${t("stats.top_occasions")}`}
                   items={stats.topOccasions}
                   colorClass="bg-amber-500"
                 />
                 <MiniBarList
-                  title="💶 Distribución por precio"
+                  title={`💶 ${t("stats.price_distribution")}`}
                   items={stats.priceDistribution}
                   colorClass="bg-emerald-500"
                 />
                 <MiniBarList
-                  title="🏷️ Tus etiquetas más repetidas"
+                  title={`🏷️ ${t("stats.top_tags")}`}
                   items={stats.topTags}
                   prefix="#"
                   colorClass="bg-violet-500"

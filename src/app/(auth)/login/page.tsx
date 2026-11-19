@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { countUsers, getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,8 @@ export default async function LoginPage() {
     redirect("/");
   }
 
+  const t = await getT();
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-slate-50 dark:bg-slate-950">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
@@ -23,10 +26,10 @@ export default async function LoginPage() {
             🍽️
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            Iniciar Sesión
+            {t("auth.login_title")}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Accede a tu catálogo gastronómico privado.
+            {t("auth.login_subtitle")}
           </p>
         </div>
 

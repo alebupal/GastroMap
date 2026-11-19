@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useT } from "@/lib/i18n/client";
 
 interface DecisionAssistantModalProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ export function DecisionAssistantModal({
   onChangeRadius,
   onReset,
 }: DecisionAssistantModalProps) {
+  const { t } = useT();
   if (!isOpen) return null;
 
   function toggleOccasion(id: string) {
@@ -54,10 +55,10 @@ export function DecisionAssistantModal({
             <span className="text-2xl">🎯</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Asistente: Encontrar un sitio
+                {t("assistant.title")}
               </h3>
               <p className="text-xs text-slate-400">
-                Filtra por plan, precio, distancia o novedades del grupo
+                {t("assistant.subtitle")}
               </p>
             </div>
           </div>
@@ -73,7 +74,7 @@ export function DecisionAssistantModal({
         {/* 1. ¿Qué plan te apetece hoy? */}
         <div className="mt-4">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-            1. Plan o Momento
+            {t("assistant.step1_title")}
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {occasions.map((occ) => {
@@ -99,7 +100,7 @@ export function DecisionAssistantModal({
         {/* 2. Rango de precio */}
         <div className="mt-5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-            2. Rango de precio
+            {t("assistant.step2_title")}
           </label>
           <div className="flex gap-2">
             {[
@@ -125,14 +126,14 @@ export function DecisionAssistantModal({
             })}
           </div>
           <p className="text-[11px] text-slate-400 mt-1 italic">
-            * Los sitios sin precio asignado (???) se mostrarán siempre para no descartar opciones.
+            {t("assistant.step2_hint")}
           </p>
         </div>
 
         {/* 3. Localización */}
         <div className="mt-5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-            3. Localización
+            {t("assistant.step3_title")}
           </label>
           <div className="flex items-center gap-2">
             <button
@@ -144,7 +145,7 @@ export function DecisionAssistantModal({
                 }`}
             >
               <span>📍</span>
-              <span>{nearMeActive ? "Cerca de mí (Activo)" : "Activar Cerca de mí"}</span>
+              <span>{nearMeActive ? t("assistant.step3_active") : t("assistant.step3_inactive")}</span>
             </button>
 
             {nearMeActive && (
@@ -165,7 +166,7 @@ export function DecisionAssistantModal({
         {/* 4. Experiencia y Novedades del grupo */}
         <div className="mt-5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-            4. Experiencia del grupo
+            {t("assistant.step4_title")}
           </label>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
@@ -177,7 +178,7 @@ export function DecisionAssistantModal({
                 }`}
             >
               <span>✨</span>
-              <span>Sin estrenar (nuevo)</span>
+              <span>{t("assistant.untried")}</span>
             </button>
 
             <button
@@ -189,7 +190,7 @@ export function DecisionAssistantModal({
                 }`}
             >
               <span>👥</span>
-              <span>Probado por amigos</span>
+              <span>{t("assistant.friends")}</span>
             </button>
 
             <button
@@ -201,7 +202,7 @@ export function DecisionAssistantModal({
                 }`}
             >
               <span>✅</span>
-              <span>Probado por mí</span>
+              <span>{t("assistant.visited_by_me")}</span>
             </button>
 
             <button
@@ -213,7 +214,7 @@ export function DecisionAssistantModal({
                 }`}
             >
               <span>⭐</span>
-              <span>Solo Mis Favoritos</span>
+              <span>{t("assistant.favorites_only")}</span>
             </button>
           </div>
         </div>
@@ -225,14 +226,14 @@ export function DecisionAssistantModal({
             onClick={onReset}
             className="py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
           >
-            Restablecer filtros
+            {t("assistant.reset")}
           </button>
           <button
             type="button"
             onClick={onClose}
             className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer shadow-md shadow-amber-500/20"
           >
-            Ver resultados
+            {t("assistant.view_results")}
           </button>
         </div>
       </div>

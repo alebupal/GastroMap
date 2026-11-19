@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateMyProfileAction } from "@/lib/actions/users";
+import { useT } from "@/lib/i18n/client";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function EditProfileModal({
   onClose,
   currentUser,
 }: EditProfileModalProps) {
+  const { t } = useT();
   const [username, setUsername] = useState(currentUser.username || "");
   const [name, setName] = useState(currentUser.name || "");
   const [email, setEmail] = useState(currentUser.email || "");
@@ -61,9 +63,9 @@ export function EditProfileModal({
             <span className="text-xl">⚙️</span>
             <div>
               <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                Editar mi perfil
+                {t("profile.title")}
               </h3>
-              <p className="text-xs text-slate-400">Modifica tus datos de acceso o nombre de usuario</p>
+              <p className="text-xs text-slate-400">{t("profile.subtitle")}</p>
             </div>
           </div>
           <button
@@ -84,14 +86,14 @@ export function EditProfileModal({
 
           {success && (
             <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-xs">
-              ✓ {success}
+              ✓ {t("profile.success")}
             </div>
           )}
 
           {/* Nombre de usuario (@username) */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Nombre de usuario (@)
+              {t("profile.username_label")}
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold select-none">
@@ -117,14 +119,14 @@ export function EditProfileModal({
               />
             </div>
             <p className="text-[10px] text-slate-400 mt-0.5">
-              Es el identificador público con el que firmarás tus sitios y comentarios.
+              {t("profile.username_hint")}
             </p>
           </div>
 
           {/* Nombre completo */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Nombre completo
+              {t("profile.name_label")}
             </label>
             <input
               type="text"
@@ -140,7 +142,7 @@ export function EditProfileModal({
           {/* Correo electrónico */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Correo electrónico
+              {t("profile.email_label")}
             </label>
             <input
               type="email"
@@ -160,27 +162,27 @@ export function EditProfileModal({
               className="text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 cursor-pointer"
             >
               <span>{showPasswordFields ? "▼" : "▶"}</span>
-              <span>Cambiar contraseña (opcional)</span>
+              <span>{t("profile.change_password")}</span>
             </button>
 
             {showPasswordFields && (
               <div className="mt-3 space-y-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                 <div>
                   <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Contraseña actual
+                    {t("profile.current_password")}
                   </label>
                   <input
                     type="password"
                     name="currentPassword"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    placeholder="Tu contraseña actual"
+                    placeholder={t("profile.current_password")}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
                   />
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Nueva contraseña
+                    {t("profile.new_password")}
                   </label>
                   <input
                     type="password"
@@ -188,13 +190,13 @@ export function EditProfileModal({
                     minLength={6}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={t("profile.new_password_hint")}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
                   />
                 </div>
                 <div>
                   <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
-                    Confirmar nueva contraseña
+                    {t("profile.confirm_password")}
                   </label>
                   <input
                     type="password"
@@ -202,7 +204,7 @@ export function EditProfileModal({
                     minLength={6}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repite la nueva contraseña"
+                    placeholder={t("profile.confirm_password")}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
                   />
                 </div>
@@ -216,14 +218,14 @@ export function EditProfileModal({
               onClick={onClose}
               className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
             >
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50 shadow-md shadow-amber-500/20"
             >
-              {saving ? "Guardando..." : "Guardar cambios"}
+              {saving ? t("common.loading") : t("form.save_changes")}
             </button>
           </div>
         </form>

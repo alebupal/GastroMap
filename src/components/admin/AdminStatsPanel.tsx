@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getAdminStatsAction, type AdminStatsData, type CountItem } from "@/lib/actions/stats";
+import { useT } from "@/lib/i18n/client";
 
 function AdminBarCard({
   title,
@@ -49,6 +50,7 @@ function AdminBarCard({
 }
 
 export function AdminStatsPanel() {
+  const { t } = useT();
   const [stats, setStats] = useState<AdminStatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,13 +69,13 @@ export function AdminStatsPanel() {
   }, []);
 
   if (loading) {
-    return <p className="text-xs text-slate-400 text-center py-8">Calculando métricas globales...</p>;
+    return <p className="text-xs text-slate-400 text-center py-8">{t("admin_stats.loading")}</p>;
   }
 
   if (!stats) {
     return (
       <p className="text-xs text-red-400 text-center py-8">
-        No se pudieron cargar las estadísticas de administración.
+        {t("admin_stats.error")}
       </p>
     );
   }
@@ -84,10 +86,10 @@ export function AdminStatsPanel() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-            📊 Analítica Global de GastroMap
+            📊 {t("admin_stats.title")}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Métricas completas de uso, comunidad, catálogo y tendencias (respetando notas y fichas privadas)
+            {t("admin_stats.subtitle")}
           </p>
         </div>
         <button
@@ -95,35 +97,35 @@ export function AdminStatsPanel() {
           onClick={loadStats}
           className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer shrink-0"
         >
-          ↻ Actualizar
+          ↻ {t("admin_stats.refresh")}
         </button>
       </div>
 
       {/* KPIs Globales */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">👥 Usuarios</div>
+          <div className="text-[11px] font-semibold text-slate-500">👥 {t("admin_stats.kpi_users")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalUsers}
           </div>
           <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-            {stats.activeUsers} activos
-            {stats.disabledUsers > 0 ? ` • ${stats.disabledUsers} inact.` : ""}
+            {stats.activeUsers} {t("admin_stats.kpi_users_active")}
+            {stats.disabledUsers > 0 ? ` • ${stats.disabledUsers} ${t("admin_stats.kpi_users_inact")}` : ""}
           </div>
         </div>
 
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">🍽️ Sitios</div>
+          <div className="text-[11px] font-semibold text-slate-500">🍽️ {t("admin_stats.kpi_places")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalPlaces}
           </div>
           <div className="text-[10px] text-slate-500">
-            {stats.communityPlaces} com. • {stats.privatePlaces} priv.
+            {stats.communityPlaces} {t("admin_stats.kpi_places_com")} • {stats.privatePlaces} {t("admin_stats.kpi_places_priv")}
           </div>
         </div>
 
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">💬 Comentarios</div>
+          <div className="text-[11px] font-semibold text-slate-500">💬 {t("admin_stats.kpi_comments")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalComments}
           </div>
@@ -133,7 +135,7 @@ export function AdminStatsPanel() {
         </div>
 
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">📅 Visitas</div>
+          <div className="text-[11px] font-semibold text-slate-500">📅 {t("admin_stats.kpi_visits")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalVisits}
           </div>
@@ -143,20 +145,20 @@ export function AdminStatsPanel() {
         </div>
 
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">🏷️ Taxonomía</div>
+          <div className="text-[11px] font-semibold text-slate-500">🏷️ {t("admin_stats.kpi_taxonomy")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalOccasions}/{stats.totalTags}
           </div>
-          <div className="text-[10px] text-slate-500">Planes / Tags</div>
+          <div className="text-[10px] text-slate-500">{t("admin_stats.kpi_taxonomy_sub")}</div>
         </div>
 
         <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-          <div className="text-[11px] font-semibold text-slate-500">🔒 Grupos / Cerr.</div>
+          <div className="text-[11px] font-semibold text-slate-500">🔒 {t("admin_stats.kpi_groups_closed")}</div>
           <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
             {stats.totalGroups}
           </div>
           <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
-            {stats.closedPlaces} sitios cerrados
+            {stats.closedPlaces} {t("admin_stats.kpi_closed_places")}
           </div>
         </div>
       </div>
@@ -164,13 +166,13 @@ export function AdminStatsPanel() {
       {/* Actividad últimos 30 días */}
       <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-wrap items-center justify-between gap-3 text-xs">
         <span className="font-bold text-amber-800 dark:text-amber-300">
-          ⚡ Pulso de los últimos 30 días:
+          ⚡ {t("admin_stats.pulse_title")}
         </span>
         <div className="flex items-center gap-4 flex-wrap font-semibold text-slate-700 dark:text-slate-200">
-          <span>+{stats.last30Days.places} sitios</span>
-          <span>+{stats.last30Days.comments} comentarios</span>
-          <span>+{stats.last30Days.visits} visitas</span>
-          <span>+{stats.last30Days.users} usuarios nuevos</span>
+          <span>+{stats.last30Days.places} {t("admin_stats.pulse_places")}</span>
+          <span>+{stats.last30Days.comments} {t("admin_stats.pulse_comments")}</span>
+          <span>+{stats.last30Days.visits} {t("admin_stats.pulse_visits")}</span>
+          <span>+{stats.last30Days.users} {t("admin_stats.pulse_users")}</span>
         </div>
       </div>
 
@@ -179,10 +181,10 @@ export function AdminStatsPanel() {
         {/* Top Contribuidores */}
         <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-2.5">
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            🏅 Top Contribuidores
+            🏅 {t("admin_stats.top_contributors")}
           </h4>
           {stats.topContributors.length === 0 ? (
-            <p className="text-xs text-slate-400 italic">Sin actividad registrada todavía.</p>
+            <p className="text-xs text-slate-400 italic">{t("admin_stats.no_data")}</p>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800/70">
               {stats.topContributors.map((c, idx) => (
@@ -216,10 +218,10 @@ export function AdminStatsPanel() {
         {/* Top Sitios Comunitarios Populares */}
         <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-2.5">
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            🔥 Top Sitios Populares (Comunidad)
+            🔥 {t("admin_stats.top_places")}
           </h4>
           {stats.topPopularPlaces.length === 0 ? (
-            <p className="text-xs text-slate-400 italic">Sin interacciones todavía.</p>
+            <p className="text-xs text-slate-400 italic">{t("admin_stats.no_data")}</p>
           ) : (
             <div className="divide-y divide-slate-100 dark:divide-slate-800/70">
               {stats.topPopularPlaces.map((p, idx) => (
@@ -234,7 +236,7 @@ export function AdminStatsPanel() {
                         {p.name}
                       </div>
                       <div className="text-[10px] text-slate-400 truncate">
-                        {p.city || "Sin ciudad"} • {p.priceRange}
+                        {p.city || "—"} • {p.priceRange}
                       </div>
                     </div>
                   </div>
@@ -261,22 +263,22 @@ export function AdminStatsPanel() {
       {/* Distribuciones Globales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <AdminBarCard
-          title="🏙️ Top Ciudades"
+          title={`🏙️ ${t("admin_stats.by_city")}`}
           items={stats.topCitiesGlobal}
           barColor="bg-blue-500"
         />
         <AdminBarCard
-          title="🍽️ Top Planes"
+          title={`🍽️ ${t("admin_stats.by_occasion")}`}
           items={stats.topOccasionsGlobal}
           barColor="bg-amber-500"
         />
         <AdminBarCard
-          title="💶 Precios"
+          title={`💶 ${t("admin_stats.by_price")}`}
           items={stats.priceDistributionGlobal}
           barColor="bg-emerald-500"
         />
         <AdminBarCard
-          title="🏷️ Top Etiquetas"
+          title={`🏷️ ${t("admin_stats.top_tags")}`}
           items={stats.topTagsGlobal}
           prefix="#"
           barColor="bg-violet-500"

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { setupAdminAction } from "@/lib/actions/auth";
+import { useT } from "@/lib/i18n/client";
 
 export function SetupAdminForm() {
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +33,7 @@ export function SetupAdminForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Nombre completo
+          {t("admin_users.name")}
         </label>
         <input
           type="text"
@@ -44,7 +46,7 @@ export function SetupAdminForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Nombre de usuario (@username único)
+          {t("admin_users.username")}
         </label>
         <div className="relative">
           <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">@</span>
@@ -57,14 +59,11 @@ export function SetupAdminForm() {
             className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
-        <p className="text-[11px] text-slate-400 mt-1">
-          Tu identificador público para firmar sitios y recomendaciones.
-        </p>
       </div>
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Correo Electrónico
+          {t("admin_users.email")}
         </label>
         <input
           type="email"
@@ -77,7 +76,7 @@ export function SetupAdminForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Contraseña (mínimo 8 caracteres)
+          {t("admin_users.password")}
         </label>
         <input
           type="password"
@@ -91,7 +90,7 @@ export function SetupAdminForm() {
 
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
-          Confirmar Contraseña
+          {t("profile.confirm_new_password")}
         </label>
         <input
           type="password"
@@ -108,7 +107,7 @@ export function SetupAdminForm() {
         disabled={loading}
         className="w-full mt-2 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
       >
-        {loading ? "Creando administrador..." : "Crear Administrador y Comenzar"}
+        {loading ? t("auth.registering") : t("auth.setup_title")}
       </button>
     </form>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
+
 interface PaginationBarProps {
   currentPage: number;
   totalItems: number;
@@ -17,31 +19,33 @@ export function PaginationBar({
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [10, 25, 50],
-  itemLabel = "registros",
+  itemLabel,
 }: PaginationBarProps) {
+  const { t } = useT();
   if (totalItems === 0) return null;
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
   const startIndex = (safePage - 1) * pageSize + 1;
   const endIndex = Math.min(safePage * pageSize, totalItems);
+  const label = itemLabel || t("pagination.records");
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 pt-3 px-1 text-xs text-slate-500 dark:text-slate-400">
       <div className="flex items-center gap-2.5 flex-wrap justify-center sm:justify-start">
         <span className="text-[11px] font-medium">
-          Mostrando{" "}
+          {t("pagination.showing")}{" "}
           <strong className="text-slate-700 dark:text-slate-200">
             {startIndex}–{endIndex}
           </strong>{" "}
-          de{" "}
+          {t("pagination.of")}{" "}
           <strong className="text-slate-700 dark:text-slate-200">{totalItems}</strong>{" "}
-          {itemLabel}
+          {label}
         </span>
 
         {onPageSizeChange && (
           <label className="inline-flex items-center gap-1 text-[11px]">
-            <span>Ver:</span>
+            <span>{t("pagination.view")}</span>
             <select
               value={pageSize}
               onChange={(e) => {
@@ -67,7 +71,7 @@ export function PaginationBar({
             onClick={() => onPageChange(1)}
             disabled={safePage <= 1}
             className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
-            title="Primera página"
+            title="«"
           >
             «
           </button>
@@ -77,7 +81,7 @@ export function PaginationBar({
             disabled={safePage <= 1}
             className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
           >
-            ← Anterior
+            ← {t("places.previous")}
           </button>
 
           <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[11px] font-bold">
@@ -90,14 +94,14 @@ export function PaginationBar({
             disabled={safePage >= totalPages}
             className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
           >
-            Siguiente →
+            {t("places.next")} →
           </button>
           <button
             type="button"
             onClick={() => onPageChange(totalPages)}
             disabled={safePage >= totalPages}
             className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
-            title="Última página"
+            title="»"
           >
             »
           </button>

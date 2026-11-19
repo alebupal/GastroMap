@@ -10,6 +10,7 @@ import { UserHeader } from "@/components/profile/UserHeader";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
 import { APP_VERSION } from "@/lib/version";
+import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -24,12 +25,13 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, cartoApiKey, savedFiltersList] = await Promise.all([
+  const [places, occasionsList, tagsList, cartoApiKey, savedFiltersList, t] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
     getSetting("carto_api_key"),
     getSavedFiltersAction(),
+    getT(),
   ]);
 
   const version = APP_VERSION;
@@ -95,7 +97,7 @@ export default async function Home() {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-semibold text-xs transition"
             >
               <span>❤️</span>
-              <span>Donar con PayPal</span>
+              <span>{t("nav.donate_paypal")}</span>
             </a>
 
             {/* Enlaces de repositorio, ecosistema y documentación estilo TVSPY */}
@@ -103,10 +105,10 @@ export default async function Home() {
               <Link
                 href="/docs"
                 className="hover:text-amber-500 font-semibold transition flex items-center gap-1"
-                title="Documentación"
+                title={t("nav.documentation")}
               >
                 <span>📘</span>
-                <span>Documentación</span>
+                <span>{t("nav.documentation")}</span>
               </Link>
               <span>•</span>
               <a
