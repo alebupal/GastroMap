@@ -5,9 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-11-18
+## [0.1.0] - 2026-11-19
 
 ### Added
+- **Worldwide Country & City Selector with Integrated Search**:
+  - Comprehensive list of 195+ world countries with emoji flags, localized names in English and Spanish, and instant text filtering (`CountrySelect.tsx`).
+  - Searchable dropdown select (`SearchableSelect.tsx`) with fixed-position popover preventing vertical clipping inside horizontal scrolling containers.
+  - Country and city filter controls integrated in both the main places explorer and the admin places table.
+  - User language preference persistence stored in the database (`users.locale`) and editable in the user profile modal.
+- **Enriched Demo Data & Seed Expansion**:
+  - Full realistic websites, phone numbers, and operational statuses (such as seasonal temporary closure for El Campero) across all 50 demo places.
+  - Pre-seeded private sharing group ("Tapeo & Amigos") and demo saved filters ("Tapas en Granada" and "Alta Cocina Internacional").
 - **Multi-language System & Internationalization (TVSpy-style i18n)**:
   - Extensible translation engine based on JSON dictionaries (`src/locales/es.json`, `src/locales/en.json`) synchronized with a centralized spreadsheet (`translations.csv`).
   - Dynamic language selector in header persisted via cookies (`gastromap_lang`).
@@ -150,3 +158,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Comprehensive user editing modal for administrators (`updateUserByAdminAction`, `UsersManager`) allowing direct modification of name, @username, email, role, status, and new password.
   - Full invitation registry view in `InviteManager` listing all issued tokens with status badges (Active 🟢, Used ✓, Expired ⏳), recipient info, creation date, and expiration tracking.
   - Ability to copy active invite links on demand and revoke/delete invitations before their expiration date.
+
+### Changed
+- **Unified Two-Row Filter Layout (Mobile & PC)**:
+  - Reorganized filters into two cohesive horizontal rows: Row 1 for collections/experience (`All`, `Favorites`, `Want to go`, `Visited`, `From friends`, `Unexplored`), and Row 2 for scope, location, and budget (`Groups`, `Countries`, `Cities`, price ranges).
+  - Integrated the private groups button inside the same horizontal scroll bar, eliminating the isolated orphan row on mobile viewports.
+  - Added subtle amber highlight badge on country and city selectors when an active filter is engaged.
+
+### Fixed
+- **Eliminated Unwanted Orange Focus Rings**:
+  - Replaced Tailwind's `focus:ring-amber-500` outline across all inputs, dropdown triggers, and select controls with clean, subtle neutral borders (`focus:border-slate-400 dark:focus:border-slate-500`).
+- **Dark Mode Leaflet Map Container Background & Zoom Limits**:
+  - Set Leaflet map container background to dark navy (`#090d16`) in dark mode to prevent light gray voids below polar coordinates when zooming out.
+  - Added `minZoom: 2` and `worldCopyJump: true` to prevent map letterbox gaps on tall viewport displays.
+- **Cross-Language Tooltip & Accessibility Translations**:
+  - Fully localized remaining hardcoded strings in place card action buttons (favorite toggle, notes, visits, website, phone call, edit, and delete).

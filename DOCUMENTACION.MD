@@ -94,16 +94,20 @@ Al acceder por primera vez a una instancia limpia:
 
 ### 🍽️ Explorador Gastronómico (Vista Principal)
 - **Buscador Instantáneo**: Búsqueda en vivo por nombre de establecimiento, plato estrella, notas, ciudad o dirección.
-- **Filtros por Experiencia**:
+- **Filtros por Experiencia (Fila 1)**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
   - `🕒 Quiero ir`: Establecimientos pendientes en tu lista de deseos.
   - `✅ Ya he ido`: Locales que ya has visitado.
   - `👥 De amigos`: Recomendaciones aportadas por otros miembros de la comunidad o grupos.
   - `✨ Sin estrenar`: Sitios que nadie en tu círculo ha visitado todavía.
+- **Filtros de Segmentación (Fila 2)**:
+  - `👥 Grupos`: Selector desplegable con soporte para filtrar por uno o varios grupos privados.
+  - `🌍 Países (+195)`: Selector con buscador integrado de todos los países del mundo.
+  - `🏙️ Ciudades`: Selector con buscador de las ciudades con locales en tu catálogo.
+  - `💶 Rangos de Precio Numéricos`: Clasificación por rangos explícitos (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
 - **Filtros por Categorías / Planes**: Multi-selección de ocasiones (*Comer, Tapear, Postureo, Copas, Dulce/Café, etc.*) con buscador en tiempo real y contador de sitios.
 - **Etiquetas Gastronómicas**: Filtro acumulable con nube de etiquetas (*#marisco, #altacocina, #granada, #michelin, #pizza, etc.*).
-- **Rangos de Precio Numéricos**: Clasificación por rangos explícitos (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
 - **Modos de Vista**: Alternancia fluida entre **Mapa interactivo** y **Lista de fichas**.
 
 ### 📱 Experiencia Móvil Optimizada
@@ -174,7 +178,7 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 GastroMap cuenta con un sistema de traducción dinámico y extensible inspirado en el flujo de trabajo de TVSpy:
 
 - **Idiomas Soportados**: Español (`es`) e Inglés (`en`).
-- **Selector en la Cabecera**: Menú desplegable en la barra superior con persistencia de preferencia mediante cookie segura (`gastromap_lang`).
+- **Selector en la Cabecera y Perfil**: Menú desplegable en la barra superior y selector en la edición de perfil, con persistencia tanto en cookie segura (`gastromap_lang`) como en la base de datos de usuario (`users.locale`).
 - **Sincronización Bidireccional por Hoja de Cálculo**:
   - `src/locales/es.json` y `src/locales/en.json`: Diccionarios estructurados consumidos por la aplicación.
   - `src/locales/translations.csv`: Hoja de cálculo tabular donde cada columna representa un idioma.

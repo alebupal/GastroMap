@@ -94,16 +94,20 @@ When launching on a clean database:
 
 ### 🍽️ Gastronomic Explorer (Main View)
 - **Instant Search**: Real-time filter across place names, signature dishes, city, address, or custom notes.
-- **Experience Filters**:
+- **Experience Filters (Row 1)**:
   - `🌐 All`: Global catalog filtered by user access.
   - `⭐ Favorites`: Starred places for instant recall.
   - `🕒 Want to go`: Wishlist of restaurants to visit.
   - `✅ Visited`: Places you have already attended.
   - `👥 From friends`: Community and group recommendations.
   - `✨ Unexplored`: Hidden gems that nobody in your circle has tested yet.
+- **Segmentation Filters (Row 2)**:
+  - `👥 Groups`: Dropdown selector with multi-group support for private clusters.
+  - `🌍 Countries (195+)`: Searchable dropdown selector with all world countries and emoji flags.
+  - `🏙️ Cities`: Searchable dropdown selector with available cities in your catalog.
+  - `💶 Explicit Price Ranges`: Numbered price brackets (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
 - **Plans & Categories**: Multi-select tags (*Dine, Tapas, Posh/Trendy, Drinks, Coffee/Dessert*) with live counters.
 - **Gastronomic Tags**: Cumulative cloud tagging (*#seafood, #haute-cuisine, #michelin, #pizza*).
-- **Explicit Price Ranges**: Classified into numbered price brackets (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
 - **Dual Display Modes**: Seamless toggling between **Leaflet Map** and **List Cards**.
 
 ### 📱 Optimized Mobile Experience
@@ -169,7 +173,7 @@ In the **Import / Export** modal (`📦`):
 ## 8. Multi-language System (i18n)
 
 - **Supported Languages**: Spanish (`es`) and English (`en`).
-- **Header Selector**: Switch languages on the fly, persisted via secure cookie (`gastromap_lang`).
+- **Header & Profile Selector**: Switch languages on the fly, persisted via secure cookie (`gastromap_lang`) and saved in user profile database (`users.locale`).
 - **Spreadsheet Two-Way Sync**:
   - `src/locales/es.json` & `src/locales/en.json`.
   - `src/locales/translations.csv` (adding a language = adding a column).

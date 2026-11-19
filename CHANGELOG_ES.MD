@@ -5,9 +5,17 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
-## [0.1.0] - 2026-11-18
+## [0.1.0] - 2026-11-19
 
 ### Añadido
+- **Selector Mundial de Países y Ciudades con Buscador Integrado**:
+  - Catálogo de más de 195 países del mundo con banderas emoji, nombres en español e inglés y filtrado de texto instantáneo (`CountrySelect.tsx`).
+  - Componente de selección con buscador desplegable (`SearchableSelect.tsx`) con posicionamiento flotante fijo que previene recortes por overflow en contenedores scrolleables.
+  - Filtros de país y ciudad integrados tanto en el explorador principal como en la tabla de administración.
+  - Persistencia del idioma de preferencia de usuario en base de datos (`users.locale`), editable desde el modal de perfil de usuario.
+- **Datos de Demostración y Seed Enriquecidos**:
+  - Teléfonos, sitios web reales y estados operativos (incluyendo cierre estacional para El Campero) en los 50 establecimientos de la demo.
+  - Grupo privado compartido precargado («Tapeo & Amigos») y combinaciones de filtros guardados de ejemplo («Tapas en Granada» y «Alta Cocina Internacional»).
 - **Sistema Multi-idioma e Internacionalización (i18n estilo TVSpy)**:
   - Motor de traducción extensible basado en diccionarios JSON (`src/locales/es.json`, `src/locales/en.json`) sincronizados con hoja de cálculo centralizada (`translations.csv`).
   - Selector de idioma dinámico en la cabecera de la aplicación persistente en cookies (`gastromap_lang`).
@@ -156,3 +164,18 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Modal interactivo de edición de usuarios para administradores (`updateUserByAdminAction`, `UsersManager`) que permite modificar en caliente nombre, @username, email, rol, estado y nueva contraseña.
   - Registro y listado completo de invitaciones en `InviteManager` con insignias de estado (Activa 🟢, Utilizada ✓, Caducada ⏳), email de destino, autor y fecha de caducidad.
   - Posibilidad de copiar enlaces de invitación activos en cualquier momento y revocar o eliminar invitaciones antes de su vencimiento.
+
+### Modificado
+- **Reorganización Unificada de Filtros en Dos Filas (Móvil y PC)**:
+  - Reestructuración de los filtros en dos filas horizontales ordenadas: Fila 1 para colecciones y estados de experiencia (`Todos`, `Favoritos`, `Quiero ir`, `Ya he ido`, `De amigos`, `Sin estrenar`) y Fila 2 para segmentación (`Grupos`, `Países`, `Ciudades`, rangos de precio).
+  - El botón de grupos privados ahora viaja dentro de la misma barra de scroll horizontal sin quedar huérfano en una línea solitaria en dispositivos móviles.
+  - Resaltado suave en color ámbar en los selectores de país y ciudad cuando hay un filtro activo seleccionado.
+
+### Corregido
+- **Eliminación de Anillos de Enfoque Naranja Invasivos**:
+  - Sustitución de los anillos `focus:ring-amber-500` en todos los inputs, selectores y buscadores por bordes limpios y neutros (`focus:border-slate-400 dark:focus:border-slate-500`).
+- **Fondo de Contenedor de Leaflet en Modo Oscuro y Límites de Zoom**:
+  - Fondo de `.leaflet-container` ajustado a `#090d16` en modo oscuro para evitar cortes y huecos grises (`#ddd`) al alejar el mapa por debajo de los polos.
+  - Configurado `minZoom: 2` y `worldCopyJump: true` en la inicialización de Leaflet.
+- **Traducción Completa de Tooltips y Atributos de Accesibilidad**:
+  - Localizados todos los textos restantes en atributos `title` y `aria-label` de las tarjetas de locales (favoritos, notas, visitas, web, teléfono, edición y eliminación).

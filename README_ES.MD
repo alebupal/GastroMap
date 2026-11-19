@@ -18,9 +18,11 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Extracción y normalización automática de coordenadas y enlaces.
   * Clasificación ágil por planes (*Tapear, Comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
-* **🔍 Encontrar un sitio («Asistente de Decisión»):**
+* **🔍 Encontrar un sitio («Asistente de Decisión» y Filtros Avanzados):**
   * Filtros por distancia real (*Cerca de mí a 1, 5, 10 o 25 km*) impulsados por **PostGIS**.
-  * Búsqueda por ocasión, etiquetas gastronómicas y experiencia (*Visitado*, *Probado por otros*, *Sin estrenar*).
+  * Selector mundial de países (+195 con banderas y buscador) y filtro por ciudades disponibles con selectores emergentes flotantes.
+  * Búsqueda por ocasión, etiquetas gastronómicas, grupos privados y experiencia (*Visitado*, *Probado por otros*, *Sin estrenar*).
+  * Organización visual optimizada en dos filas para móvil y PC sin elementos desalineados.
   * **🎲 Botón «Elegir al azar»**: Cuando no hay acuerdo sobre dónde ir, la app selecciona una opción entre los resultados filtrados.
 
 * **🗺️ Mapa interactivo Leaflet:**

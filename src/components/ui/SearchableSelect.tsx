@@ -145,11 +145,10 @@ export function SearchableSelect({
           setIsOpen(!isOpen);
           setQuery("");
         }}
-        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold outline-none focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer shadow-xs transition shrink-0 ${
-          isFiltered
-            ? "border-amber-500/50 bg-amber-500/15 text-amber-700 dark:text-amber-300"
-            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
-        } ${buttonClassName}`}
+        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold outline-none focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer shadow-xs transition shrink-0 ${isFiltered
+          ? "border-amber-500/50 bg-amber-500/15 text-amber-700 dark:text-amber-300"
+          : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+          } ${buttonClassName}`}
       >
         <span className="flex items-center gap-1.5 truncate">
           {displayIcon && <span className="text-base shrink-0">{displayIcon}</span>}
@@ -202,11 +201,10 @@ export function SearchableSelect({
               <button
                 type="button"
                 onClick={() => handleSelect(allOption.value)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer ${
-                  value === allOption.value || value === "all"
-                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer ${value === allOption.value || value === "all"
+                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
               >
                 <div className="flex items-center gap-2 truncate">
                   {allOption.icon && <span className="text-base shrink-0">{allOption.icon}</span>}
@@ -230,11 +228,10 @@ export function SearchableSelect({
                     key={opt.value}
                     type="button"
                     onClick={() => handleSelect(opt.value)}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer ${
-                      isSelected
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    }`}
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition cursor-pointer ${isSelected
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
                   >
                     <div className="flex items-center gap-2 truncate">
                       {opt.icon && <span className="text-base shrink-0">{opt.icon}</span>}
