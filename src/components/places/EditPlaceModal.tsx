@@ -9,10 +9,10 @@ import { LocationPicker } from "./LocationPicker";
 
 const PRICE_OPTIONS = [
   { id: "???", label: "???" },
-  { id: "€", label: "€" },
-  { id: "€€", label: "€€" },
-  { id: "€€€", label: "€€€" },
-  { id: "€€€€", label: "€€€€" },
+  { id: "€", label: "< 15 €" },
+  { id: "€€", label: "15 - 30 €" },
+  { id: "€€€", label: "30 - 50 €" },
+  { id: "€€€€", label: "> 50 €" },
 ];
 
 const STATUS_OPTIONS = [
@@ -334,7 +334,10 @@ export function EditPlaceModal({
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setCommunityPublished(true)}
+                onClick={() => {
+                  setCommunityPublished(true);
+                  setSelectedGroupIds([]);
+                }}
                 className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
                   communityPublished
                     ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
@@ -354,11 +357,11 @@ export function EditPlaceModal({
                 }`}
               >
                 <span>🔒</span>
-                <span>Privado (Solo yo)</span>
+                <span>Privado (Solo yo / Grupos)</span>
               </button>
             </div>
 
-            {availableGroups.length > 0 && (
+            {!communityPublished && availableGroups.length > 0 && (
               <div className="mt-2.5 space-y-1.5">
                 <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                   👥 Compartir con grupos privados:

@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import {
   getMyGroupsAction,
-  getActiveUsersForSharingAction,
   createGroupAction,
   renameGroupAction,
-  addGroupMemberAction,
   removeGroupMemberAction,
   deleteGroupAction,
+  createGroupInviteAction,
+  getGroupInvitesAction,
+  revokeGroupInviteAction,
   type SharingGroupWithMembers,
-  type SimpleUserOption,
+  type GroupInviteItem,
 } from "@/lib/actions/groups";
 
 interface GroupsModalProps {
@@ -21,25 +22,24 @@ interface GroupsModalProps {
 
 export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps) {
   const [groups, setGroups] = useState<SharingGroupWithMembers[]>([]);
-  const [availableUsers, setAvailableUsers] = useState<SimpleUserOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [addingMemberGroupId, setAddingMemberGroupId] = useState<string | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+
+  // Estado para gestión de invitaciones por grupo
+  const [expandedInvitesGroupId, setExpandedInvitesGroupId] = useState<string | null>(null);
+  const [groupInvites, setGroupInvites] = useState<Record<string, GroupInviteItem[]>>({});
+  const [generatingInviteForGroup, setGeneratingInviteForGroup] = useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
   async function loadData() {
     setLoading(true);
     try {
-      const [gList, uList] = await Promise.all([
-        getMyGroupsAction(),
-        getActiveUsersForSharingAction(),
-      ]);
+      const gList = await getMyGroupsAction();
       setGroups(gList);
-      setAvailableUsers(uList);
     } finally {
       setLoading(false);
     }
@@ -50,6 +50,57 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
       loadData();
     }
   }, [isOpen]);
+
+  async function loadInvitesForGroup(groupId: string) {
+    const res = await getGroupInvitesAction(groupId);
+    if (res.invites) {
+      setGroupInvites((prev) => ({ ...prev, [groupId]: res.invites || [] }));
+    }
+  }
+
+  function toggleInvitesSection(groupId: string) {
+    if (expandedInvitesGroupId === groupId) {
+      setExpandedInvitesGroupId(null);
+    } else {
+      setExpandedInvitesGroupId(groupId);
+      loadInvitesForGroup(groupId);
+    }
+  }
+
+  async function handleCreateInvite(groupId: string) {
+    setGeneratingInviteForGroup(groupId);
+    setError(null);
+    const res = await createGroupInviteAction(groupId, 7);
+    setGeneratingInviteForGroup(null);
+    if (res.error) {
+      setError(res.error);
+    } else {
+      await loadInvitesForGroup(groupId);
+      if (res.token) {
+        copyToClipboard(res.token);
+      }
+    }
+  }
+
+  async function handleRevokeInvite(groupId: string, inviteId: string) {
+    if (!confirm("¿Revocar este enlace de invitación? Nadie más podrá unirse con él.")) return;
+    setError(null);
+    const res = await revokeGroupInviteAction(inviteId);
+    if (res.error) {
+      setError(res.error);
+    } else {
+      loadInvitesForGroup(groupId);
+    }
+  }
+
+  function copyToClipboard(token: string) {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const fullUrl = `${origin}/groups/join/${token}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopiedToken(token);
+      setTimeout(() => setCopiedToken(null), 3000);
+    });
+  }
 
   if (!isOpen) return null;
 
@@ -64,19 +115,6 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
       setError(res.error);
     } else {
       setNewGroupName("");
-      loadData();
-    }
-  }
-
-  async function handleAddMember(groupId: string) {
-    if (!selectedUserId) return;
-    setError(null);
-    const res = await addGroupMemberAction(groupId, selectedUserId);
-    if (res.error) {
-      setError(res.error);
-    } else {
-      setSelectedUserId("");
-      setAddingMemberGroupId(null);
       loadData();
     }
   }
@@ -133,7 +171,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                 Mis Grupos Privados
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Crea grupos como Pareja, Amigos o Familia para compartir sitios en privado
+                Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir
               </p>
             </div>
           </div>
@@ -146,28 +184,28 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-5 space-y-4 overflow-y-auto">
           {error && (
-            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
-              ⚠️ {error}
+            <div className="p-3 text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-2xl">
+              {error}
             </div>
           )}
 
-          {/* Crear nuevo grupo */}
+          {/* Formulario nuevo grupo */}
           <form onSubmit={handleCreateGroup} className="flex gap-2">
             <input
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder="Nuevo grupo (ej. Pareja, Amigos, Familia...)"
-              className="flex-1 px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              placeholder="Nombre del nuevo grupo (ej. Tapeo con amigos)..."
+              className="flex-1 px-3.5 py-2 rounded-2xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
             <button
               type="submit"
-              disabled={creating || newGroupName.trim().length < 2}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
+              disabled={creating || !newGroupName.trim()}
+              className="px-4 py-2 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-40 shadow-xs"
             >
-              {creating ? "..." : "+ Crear"}
+              {creating ? "Creando..." : "+ Crear grupo"}
             </button>
           </form>
 
@@ -175,61 +213,67 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
           {loading ? (
             <p className="text-xs text-slate-400 text-center py-6">Cargando grupos...</p>
           ) : groups.length === 0 ? (
-            <div className="p-6 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400">
-              Todavía no perteneces a ningún grupo privado. ¡Crea el primero arriba!
+            <div className="text-center py-8 px-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+              <span className="text-3xl block mb-2">🤝</span>
+              <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Aún no tienes ningún grupo privado
+              </p>
+              <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
+                Crea uno arriba y genera un enlace de invitación para compartir recomendaciones solo con quien tú elijas.
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
               {groups.map((g) => {
-                const memberIds = new Set(g.members.map((m) => m.userId));
-                const candidatesToAdd = availableUsers.filter((u) => !memberIds.has(u.id));
+                const isExpanded = expandedInvitesGroupId === g.id;
+                const invites = groupInvites[g.id] || [];
 
                 return (
                   <div
                     key={g.id}
-                    className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2.5"
+                    className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 flex flex-col gap-2.5 transition"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      {renamingGroupId === g.id ? (
-                        <div className="flex items-center gap-1.5 flex-1">
-                          <input
-                            type="text"
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            className="flex-1 px-2.5 py-1 rounded-lg text-xs bg-white dark:bg-slate-950 border border-amber-400 text-slate-900 dark:text-slate-100"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleRename(g.id)}
-                            className="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[11px] cursor-pointer"
-                          >
-                            Guardar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setRenamingGroupId(null)}
-                            className="text-[11px] text-slate-400 cursor-pointer"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">
-                            {g.name}
-                          </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                            {g.members.length} {g.members.length === 1 ? "miembro" : "miembros"}
-                          </span>
-                          {g.isOwner && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                              Propietario
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {renamingGroupId === g.id ? (
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <input
+                              type="text"
+                              value={renameValue}
+                              onChange={(e) => setRenameValue(e.target.value)}
+                              autoFocus
+                              className="px-2 py-1 text-xs rounded-xl bg-white dark:bg-slate-950 border border-amber-500 text-slate-900 dark:text-slate-100 flex-1"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRename(g.id)}
+                              className="px-2 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold text-[11px] cursor-pointer"
+                            >
+                              ✓
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setRenamingGroupId(null)}
+                              className="text-xs text-slate-400 px-1 cursor-pointer"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <h4 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 truncate">
+                              {g.name}
+                            </h4>
+                            {g.isOwner && (
+                              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                Creador
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1">
                         {g.isOwner ? (
                           <>
                             <button
@@ -238,7 +282,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                 setRenamingGroupId(g.id);
                                 setRenameValue(g.name);
                               }}
-                              className="p-1 text-slate-400 hover:text-amber-500 text-xs cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs cursor-pointer rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700"
                               title="Renombrar grupo"
                             >
                               ✏️
@@ -246,7 +290,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             <button
                               type="button"
                               onClick={() => handleDeleteGroup(g)}
-                              className="p-1 text-slate-400 hover:text-red-500 text-xs cursor-pointer"
+                              className="p-1.5 text-slate-400 hover:text-red-500 text-xs cursor-pointer rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700"
                               title="Eliminar grupo"
                             >
                               🗑️
@@ -256,7 +300,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           <button
                             type="button"
                             onClick={() => handleRemoveMember(g.id, currentUserId, "ti mismo")}
-                            className="px-2 py-0.5 rounded-lg text-[11px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
+                            className="px-2 py-1 rounded-xl text-[11px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
                           >
                             Abandonar
                           </button>
@@ -264,76 +308,119 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                       </div>
                     </div>
 
-                    {/* Miembros */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {g.members.map((m) => (
-                        <span
-                          key={m.userId}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-700 dark:text-slate-300 font-medium"
-                        >
-                          <span>@{m.username || m.name}</span>
-                          {g.isOwner && m.userId !== g.ownerUserId && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveMember(g.id, m.userId, `@${m.username || m.name}`)
-                              }
-                              className="text-slate-400 hover:text-red-500 cursor-pointer text-[10px] ml-0.5"
-                              title="Expulsar del grupo"
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </span>
-                      ))}
+                    {/* Miembros del grupo */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                        Miembros ({g.members.length}):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {g.members.map((m) => (
+                          <span
+                            key={m.userId}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-700 dark:text-slate-300 font-medium shadow-2xs"
+                          >
+                            <span>@{m.username || m.name}</span>
+                            {m.userId === g.ownerUserId && (
+                              <span className="text-[9px] text-amber-500 font-bold" title="Propietario">
+                                ★
+                              </span>
+                            )}
+                            {g.isOwner && m.userId !== g.ownerUserId && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveMember(g.id, m.userId, `@${m.username || m.name}`)
+                                }
+                                className="text-slate-400 hover:text-red-500 cursor-pointer text-[10px] ml-0.5"
+                                title="Expulsar del grupo"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* Añadir miembro (solo propietario) */}
+                    {/* Sección Enlaces de Invitación (Solo propietario) */}
                     {g.isOwner && (
-                      <div className="pt-1">
-                        {addingMemberGroupId === g.id ? (
-                          <div className="flex items-center gap-1.5">
-                            <select
-                              value={selectedUserId}
-                              onChange={(e) => setSelectedUserId(e.target.value)}
-                              className="flex-1 px-2.5 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
-                            >
-                              <option value="">Selecciona un usuario...</option>
-                              {candidatesToAdd.map((u) => (
-                                <option key={u.id} value={u.id}>
-                                  {u.name} (@{u.username || u.name})
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              type="button"
-                              onClick={() => handleAddMember(g.id)}
-                              disabled={!selectedUserId}
-                              className="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer disabled:opacity-40"
-                            >
-                              Añadir
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setAddingMemberGroupId(null)}
-                              className="text-xs text-slate-400 px-1 cursor-pointer"
-                            >
-                              ✕
-                            </button>
+                      <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <div className="flex items-center justify-between">
+                          <button
+                            type="button"
+                            onClick={() => toggleInvitesSection(g.id)}
+                            className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-1"
+                          >
+                            <span>🔗 Enlaces de invitación</span>
+                            <span>{isExpanded ? "▲" : "▼"}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleCreateInvite(g.id)}
+                            disabled={generatingInviteForGroup === g.id}
+                            className="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer flex items-center gap-1"
+                          >
+                            <span>+</span>
+                            <span>{generatingInviteForGroup === g.id ? "Generando..." : "Nuevo enlace"}</span>
+                          </button>
+                        </div>
+
+                        {/* Desplegable de enlaces activos */}
+                        {isExpanded && (
+                          <div className="mt-2.5 space-y-2 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
+                            {invites.length === 0 ? (
+                              <p className="text-[11px] text-slate-400 italic text-center py-1">
+                                No hay enlaces activos. Pulsa "+ Nuevo enlace" para invitar personas.
+                              </p>
+                            ) : (
+                              invites.map((inv) => {
+                                const isCopied = copiedToken === inv.token;
+                                return (
+                                  <div
+                                    key={inv.id}
+                                    className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between gap-2"
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-[11px] font-mono text-slate-700 dark:text-slate-300 truncate">
+                                        .../groups/join/{inv.token.slice(0, 10)}...
+                                      </p>
+                                      <p className="text-[10px] text-slate-400">
+                                        Expira:{" "}
+                                        {new Date(inv.expiresAt).toLocaleDateString("es-ES", {
+                                          day: "numeric",
+                                          month: "short",
+                                        })}{" "}
+                                        • Usos: {inv.usedCount}
+                                      </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => copyToClipboard(inv.token)}
+                                        className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
+                                          isCopied
+                                            ? "bg-emerald-600 text-white"
+                                            : "bg-amber-500 hover:bg-amber-600 text-slate-950"
+                                        }`}
+                                      >
+                                        {isCopied ? "✓ ¡Copiado!" : "Copiar"}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRevokeInvite(g.id, inv.id)}
+                                        className="p-1 text-slate-400 hover:text-red-500 text-xs cursor-pointer"
+                                        title="Revocar enlace"
+                                      >
+                                        ✕
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
                           </div>
-                        ) : (
-                          candidatesToAdd.length > 0 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAddingMemberGroupId(g.id);
-                                setSelectedUserId("");
-                              }}
-                              className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                            >
-                              + Añadir miembro
-                            </button>
-                          )
                         )}
                       </div>
                     )}

@@ -8,6 +8,20 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-18
 
 ### Añadido
+- **Invitaciones a Grupos Privados mediante Enlace**:
+  - Sustituida la selección de usuarios del sistema por generación de enlaces de invitación únicos (`/groups/join/[token]`) para unirse a grupos privados.
+  - Gestión de enlaces activos en el modal de grupos con copia al portapapeles y revocación anticipada.
+- **Filtro de Grupos Privados y Rangos de Precios Numéricos**:
+  - Filtro rápido en la barra superior para explorar locales compartidos por uno o varios grupos privados.
+  - Reemplazo de iconos de precio (`€`, `€€`, `€€€`, `€€€€`) por rangos de números explícitos (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`) en filtros, tarjetas, modales y popups.
+- **Editor de Comentarios WYSIWYG**:
+  - Reemplazado el input simple por un editor enriquecido tipo WYSIWYG con barra de herramientas (negrita, cursiva, viñetas, citas destacadas, platos recomendados) y pestaña de previsualización en vivo.
+  - Renderizado formateado de comentarios en las fichas de los locales.
+- **Optimización Móvil del Modo Mapa y Paginación en Lista**:
+  - En móviles, en modo mapa se permite el desplazamiento vertical de la página manteniendo la lista de locales debajo del mapa, con botón de alternancia para mover el mapa o deslizar la lista.
+  - Paginación completa de establecimientos en modo lista (10 locales por página con controles de anterior, siguiente y salto de página).
+- **Control de Visibilidad en Creación y Edición**:
+  - El selector de grupos privados solo se muestra cuando la visibilidad seleccionada es «Privado», ocultándose al marcar «Comunidad».
 - **Arquitectura Base y Docker (Fase 0)**:
   - Next.js 15 (App Router, Server Actions, TypeScript, Tailwind CSS).
   - Compilación multi-etapa optimizada standalone en `Dockerfile` y `docker-compose.yml`.

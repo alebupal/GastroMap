@@ -11,6 +11,14 @@ import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
 import { PlaceVisitsModal } from "./PlaceVisitsModal";
 import { EditPlaceModal } from "./EditPlaceModal";
 
+const PRICE_RANGE_LABELS: Record<string, string> = {
+  "€": "< 15 €",
+  "€€": "15 - 30 €",
+  "€€€": "30 - 50 €",
+  "€€€€": "> 50 €",
+  "???": "???",
+};
+
 interface PlaceCardProps {
   place: PlaceWithDetails;
   currentUserId: string;
@@ -155,7 +163,7 @@ export function PlaceCard({
                   : "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60"
               }`}
             >
-              {place.priceRange}
+              {PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}
             </span>
           </div>
         </div>

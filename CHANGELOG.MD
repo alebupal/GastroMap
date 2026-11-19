@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-18
 
 ### Added
+- **Private Group Invitations via Unique Links**:
+  - Replaced system user selection with unique invite link generation (`/groups/join/[token]`) for joining private groups.
+  - Active invite management in groups modal with one-click clipboard copy and revocation.
+- **Private Groups Filter & Numeric Price Ranges**:
+  - Quick top-bar filter for exploring places shared via one or multiple private groups.
+  - Replaced price icons (`€`, `€€`, `€€€`, `€€€€`) with explicit numerical ranges (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`) across cards, filters, modales and map popups.
+- **WYSIWYG Rich Comment Editor**:
+  - Replaced plain input with a WYSIWYG rich text editor with toolbar (bold, italics, bullets, blockquotes, dish highlights) and live preview tab.
+  - Formatted rich rendering for recommendations and comments.
+- **Mobile Map Scroll Optimization & List Pagination**:
+  - In mobile map view, vertical page scrolling is preserved with the places list rendered below the map and a toggle button to pan map or scroll page.
+  - Dynamic pagination for places in list view (10 places per page with previous, next and direct page jumps).
+- **Visibility Control in Place Creation & Editing**:
+  - Private group selector is now strictly shown when «Private» visibility is selected, hiding when «Community» is chosen.
 - **Base Architecture & Docker (Phase 0)**:
   - Next.js 15 (App Router, Server Actions, TypeScript, Tailwind CSS).
   - Multi-stage standalone build in `Dockerfile` and `docker-compose.yml`.

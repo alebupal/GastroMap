@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
@@ -29,6 +29,14 @@ interface MapViewProps {
   cartoApiKey?: string | null;
 }
 
+const PRICE_RANGE_LABELS: Record<string, string> = {
+  "€": "< 15 €",
+  "€€": "15 - 30 €",
+  "€€€": "30 - 50 €",
+  "€€€€": "> 50 €",
+  "???": "???",
+};
+
 // Función auxiliar para construir el contenido HTML enriquecido del popup
 function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
@@ -52,7 +60,7 @@ function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
     <div style="padding: 12px; min-width: 200px; max-width: 260px; font-family: system-ui, sans-serif;">
       <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
         <strong style="font-size: 14px; color: #0f172a; line-height: 1.2;">${place.name}</strong>
-        <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${place.priceRange}</span>
+        <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}</span>
       </div>
       ${statusBanner}
       ${
@@ -435,9 +443,36 @@ export default function MapView({
     };
   }, [selectedPlaceId, places]);
 
+  const [mapUnlocked, setMapUnlocked] = useState(true);
+
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
       <div ref={mapContainerRef} className="w-full h-full z-0" />
+      {/* Botón flotante móvil para alternar entre interactuar con el mapa o hacer scroll vertical */}
+      <div className="absolute top-3 right-3 z-[1000] lg:hidden">
+        <button
+          type="button"
+          onClick={() => {
+            if (!mapInstanceRef.current) return;
+            const next = !mapUnlocked;
+            setMapUnlocked(next);
+            if (next) {
+              mapInstanceRef.current.dragging.enable();
+              mapInstanceRef.current.touchZoom.enable();
+            } else {
+              mapInstanceRef.current.dragging.disable();
+              mapInstanceRef.current.touchZoom.disable();
+            }
+          }}
+          className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold shadow-lg backdrop-blur-md border transition cursor-pointer flex items-center gap-1.5 ${
+            mapUnlocked
+              ? "bg-slate-900/90 text-white border-slate-700/80"
+              : "bg-amber-500 text-slate-950 border-amber-400"
+          }`}
+        >
+          <span>{mapUnlocked ? "🖐️ Mover mapa" : "📜 Deslizar lista"}</span>
+        </button>
+      </div>
     </div>
   );
 }

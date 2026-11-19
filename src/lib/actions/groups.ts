@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq, inArray, ne, or } from "drizzle-orm";
+import { and, eq, inArray, ne, or, gt, desc } from "drizzle-orm";
+import { randomBytes } from "crypto";
 import { db } from "@/db";
 import {
   sharingGroups,
   sharingGroupMembers,
+  groupInvitations,
   placeGroupAccess,
   users,
 } from "@/db/schema";
@@ -305,4 +307,254 @@ export async function deleteGroupAction(
 
   revalidatePath("/");
   return { success: true };
+}
+
+export interface GroupInviteItem {
+  id: string;
+  token: string;
+  groupId: string;
+  expiresAt: Date;
+  usedCount: number;
+  createdAt: Date;
+}
+
+/**
+ * Crea un enlace de invitación para unirse a un grupo privado.
+ */
+export async function createGroupInviteAction(
+  groupId: string,
+  expiresInDays: number = 7
+): Promise<{ success?: boolean; token?: string; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const [group] = await db
+    .select()
+    .from(sharingGroups)
+    .where(eq(sharingGroups.id, groupId))
+    .limit(1);
+
+  if (!group) return { error: "Grupo no encontrado." };
+  if (group.ownerUserId !== currentUser.id) {
+    return { error: "Solo el creador del grupo puede generar invitaciones." };
+  }
+
+  const token = randomBytes(24).toString("hex");
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+
+  await db.insert(groupInvitations).values({
+    groupId,
+    token,
+    createdById: currentUser.id,
+    expiresAt,
+  });
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "group",
+    entityId: groupId,
+    action: "group_invite_created",
+    metadata: { tokenPrefix: token.slice(0, 8), expiresInDays },
+  });
+
+  revalidatePath("/");
+  return { success: true, token };
+}
+
+/**
+ * Obtiene las invitaciones vigentes de un grupo (solo el propietario).
+ */
+export async function getGroupInvitesAction(
+  groupId: string
+): Promise<{ success?: boolean; invites?: GroupInviteItem[]; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const [group] = await db
+    .select()
+    .from(sharingGroups)
+    .where(eq(sharingGroups.id, groupId))
+    .limit(1);
+
+  if (!group) return { error: "Grupo no encontrado." };
+  if (group.ownerUserId !== currentUser.id) {
+    return { error: "Solo el creador del grupo puede consultar sus invitaciones." };
+  }
+
+  const rows = await db
+    .select({
+      id: groupInvitations.id,
+      token: groupInvitations.token,
+      groupId: groupInvitations.groupId,
+      expiresAt: groupInvitations.expiresAt,
+      usedCount: groupInvitations.usedCount,
+      createdAt: groupInvitations.createdAt,
+    })
+    .from(groupInvitations)
+    .where(
+      and(
+        eq(groupInvitations.groupId, groupId),
+        gt(groupInvitations.expiresAt, new Date())
+      )
+    )
+    .orderBy(desc(groupInvitations.createdAt));
+
+  return { success: true, invites: rows };
+}
+
+/**
+ * Revoca o elimina un enlace de invitación antes de su expiración.
+ */
+export async function revokeGroupInviteAction(
+  inviteId: string
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const [invite] = await db
+    .select({
+      id: groupInvitations.id,
+      groupId: groupInvitations.groupId,
+      ownerUserId: sharingGroups.ownerUserId,
+    })
+    .from(groupInvitations)
+    .innerJoin(sharingGroups, eq(groupInvitations.groupId, sharingGroups.id))
+    .where(eq(groupInvitations.id, inviteId))
+    .limit(1);
+
+  if (!invite) return { error: "Invitación no encontrada." };
+  if (invite.ownerUserId !== currentUser.id) {
+    return { error: "Solo el creador del grupo puede revocar esta invitación." };
+  }
+
+  await db.delete(groupInvitations).where(eq(groupInvitations.id, inviteId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "group",
+    entityId: invite.groupId,
+    action: "group_invite_revoked",
+    metadata: { inviteId },
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Información pública del enlace para la pantalla de bienvenida / aceptación.
+ */
+export async function getGroupInviteInfoAction(token: string): Promise<{
+  success?: boolean;
+  groupName?: string;
+  ownerName?: string;
+  isExpired?: boolean;
+  isAlreadyMember?: boolean;
+  error?: string;
+}> {
+  const currentUser = await getCurrentUser();
+
+  const [invite] = await db
+    .select({
+      id: groupInvitations.id,
+      groupId: groupInvitations.groupId,
+      expiresAt: groupInvitations.expiresAt,
+      groupName: sharingGroups.name,
+      ownerUserId: sharingGroups.ownerUserId,
+      ownerName: users.name,
+    })
+    .from(groupInvitations)
+    .innerJoin(sharingGroups, eq(groupInvitations.groupId, sharingGroups.id))
+    .innerJoin(users, eq(sharingGroups.ownerUserId, users.id))
+    .where(eq(groupInvitations.token, token))
+    .limit(1);
+
+  if (!invite) {
+    return { error: "El enlace de invitación no es válido o ha sido revocado." };
+  }
+
+  const isExpired = new Date(invite.expiresAt).getTime() < Date.now();
+
+  let isAlreadyMember = false;
+  if (currentUser) {
+    const [existingMember] = await db
+      .select({ id: sharingGroupMembers.id })
+      .from(sharingGroupMembers)
+      .where(
+        and(
+          eq(sharingGroupMembers.groupId, invite.groupId),
+          eq(sharingGroupMembers.userId, currentUser.id)
+        )
+      )
+      .limit(1);
+    if (existingMember) isAlreadyMember = true;
+  }
+
+  return {
+    success: true,
+    groupName: invite.groupName,
+    ownerName: invite.ownerName,
+    isExpired,
+    isAlreadyMember,
+  };
+}
+
+/**
+ * Acepta la invitación y une al usuario actual al grupo privado.
+ */
+export async function joinGroupWithTokenAction(token: string): Promise<{
+  success?: boolean;
+  groupName?: string;
+  groupId?: string;
+  error?: string;
+}> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "Debes iniciar sesión para unirte al grupo." };
+
+  const [invite] = await db
+    .select({
+      id: groupInvitations.id,
+      groupId: groupInvitations.groupId,
+      expiresAt: groupInvitations.expiresAt,
+      usedCount: groupInvitations.usedCount,
+      groupName: sharingGroups.name,
+    })
+    .from(groupInvitations)
+    .innerJoin(sharingGroups, eq(groupInvitations.groupId, sharingGroups.id))
+    .where(eq(groupInvitations.token, token))
+    .limit(1);
+
+  if (!invite) {
+    return { error: "El enlace de invitación no es válido o ya no existe." };
+  }
+
+  if (new Date(invite.expiresAt).getTime() < Date.now()) {
+    return { error: "Este enlace de invitación ha caducado." };
+  }
+
+  // Insertar como miembro si aún no lo es
+  await db
+    .insert(sharingGroupMembers)
+    .values({
+      groupId: invite.groupId,
+      userId: currentUser.id,
+    })
+    .onConflictDoNothing();
+
+  // Incrementar contador de usos
+  await db
+    .update(groupInvitations)
+    .set({ usedCount: (invite.usedCount || 0) + 1 })
+    .where(eq(groupInvitations.id, invite.id));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "group",
+    entityId: invite.groupId,
+    action: "group_joined_via_invite",
+    metadata: { tokenPrefix: token.slice(0, 8), groupName: invite.groupName },
+  });
+
+  revalidatePath("/");
+  return { success: true, groupName: invite.groupName, groupId: invite.groupId };
 }

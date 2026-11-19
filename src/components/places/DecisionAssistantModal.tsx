@@ -103,20 +103,25 @@ export function DecisionAssistantModal({
             2. Rango de precio
           </label>
           <div className="flex gap-2">
-            {["€", "€€", "€€€", "€€€€"].map((p) => {
-              const active = selectedPrice === p;
+            {[
+              { id: "€", label: "< 15 €" },
+              { id: "€€", label: "15 - 30 €" },
+              { id: "€€€", label: "30 - 50 €" },
+              { id: "€€€€", label: "> 50 €" },
+            ].map((p) => {
+              const active = selectedPrice === p.id;
               return (
                 <button
-                  key={p}
+                  key={p.id}
                   type="button"
-                  onClick={() => onSelectPrice(active ? null : p)}
+                  onClick={() => onSelectPrice(active ? null : p.id)}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
                     active
                       ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
                       : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                   }`}
                 >
-                  {p}
+                  {p.label}
                 </button>
               );
             })}

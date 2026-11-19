@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   getPlaceCommentsAction,
   addCommentAction,
@@ -16,6 +16,311 @@ interface PlaceCommentsThreadProps {
   isOpen: boolean;
   onClose: () => void;
   onCommentsCountChange?: (count: number) => void;
+}
+
+/**
+ * Renderizador de texto enriquecido ligero (soporta negrita, cursiva, tachado, citas, viñetas y enlaces).
+ */
+function FormattedCommentContent({ content }: { content: string }) {
+  const lines = content.split("\n");
+
+  return (
+    <div className="text-slate-600 dark:text-slate-300 text-xs space-y-1 leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={idx} className="h-1.5" />;
+        }
+
+        // Citas tipo "> Cita"
+        if (line.startsWith(">")) {
+          const quoteText = line.replace(/^>[ ]?/, "");
+          return (
+            <blockquote
+              key={idx}
+              className="border-l-2 border-amber-500/80 pl-2 py-0.5 text-slate-500 dark:text-slate-400 italic bg-amber-50/40 dark:bg-amber-950/20 rounded-r-md text-[11px]"
+            >
+              <InlineFormatted text={quoteText} />
+            </blockquote>
+          );
+        }
+
+        // Viñetas tipo "- " o "* "
+        if (/^[-*]\s+/.test(line)) {
+          const bulletText = line.replace(/^[-*]\s+/, "");
+          return (
+            <div key={idx} className="flex items-start gap-1.5 pl-1.5">
+              <span className="text-amber-500 dark:text-amber-400 font-bold leading-tight select-none">
+                •
+              </span>
+              <div className="flex-1">
+                <InlineFormatted text={bulletText} />
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx}>
+            <InlineFormatted text={line} />
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Parsea negrita (**texto**), cursiva (*texto*), tachado (~~texto~~) y enlaces ([texto](url))
+ */
+function InlineFormatted({ text }: { text: string }) {
+  // Regex para tokens: [texto](url), **negrita**, *cursiva*, ~~tachado~~
+  const tokenRegex =
+    /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|~~[^~]+~~)/g;
+  const parts = text.split(tokenRegex);
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (!part) return null;
+
+        // Enlace markdown [label](url)
+        const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (linkMatch) {
+          const [, label, url] = linkMatch;
+          const isSafeUrl = /^(https?:\/\/|\/)/i.test(url);
+          return isSafeUrl ? (
+            <a
+              key={i}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 dark:text-blue-400 font-semibold underline hover:text-blue-700"
+            >
+              {label}
+            </a>
+          ) : (
+            <span key={i}>{label}</span>
+          );
+        }
+
+        // Negrita **texto**
+        if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
+          return (
+            <strong key={i} className="font-bold text-slate-900 dark:text-slate-100">
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+
+        // Cursiva *texto*
+        if (part.startsWith("*") && part.endsWith("*") && part.length >= 2) {
+          return (
+            <em key={i} className="italic">
+              {part.slice(1, -1)}
+            </em>
+          );
+        }
+
+        // Tachado ~~texto~~
+        if (part.startsWith("~~") && part.endsWith("~~") && part.length >= 4) {
+          return (
+            <span key={i} className="line-through opacity-75">
+              {part.slice(2, -2)}
+            </span>
+          );
+        }
+
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
+/**
+ * Editor enriquecido WYSIWYG ligero para comentarios.
+ */
+function RichTextarea({
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  onSubmit,
+  isSubmitting,
+  submitLabel = "Enviar",
+  onCancel,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  rows?: number;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  submitLabel?: string;
+  onCancel?: () => void;
+}) {
+  const [tab, setTab] = useState<"write" | "preview">("write");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function wrapSelection(prefix: string, suffix: string = prefix, defaultPlaceholder = "texto") {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selectedText = value.substring(start, end) || defaultPlaceholder;
+    const replacement = `${prefix}${selectedText}${suffix}`;
+    const nextVal = value.substring(0, start) + replacement + value.substring(end);
+    onChange(nextVal);
+
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+    }, 10);
+  }
+
+  function insertPrefixAtLine(prefix: string) {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const before = value.substring(0, start);
+    const after = value.substring(start);
+    const lastNewline = before.lastIndexOf("\n");
+    const insertPos = lastNewline === -1 ? 0 : lastNewline + 1;
+    const nextVal = value.substring(0, insertPos) + prefix + value.substring(insertPos);
+    onChange(nextVal);
+
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + prefix.length, start + prefix.length);
+    }, 10);
+  }
+
+  return (
+    <div className="border border-slate-200 dark:border-slate-700/80 rounded-2xl bg-white dark:bg-slate-900/90 overflow-hidden shadow-xs focus-within:ring-2 focus-within:ring-amber-500/40 focus-within:border-amber-500 transition">
+      {/* Barra de herramientas WYSIWYG */}
+      <div className="flex items-center justify-between px-2.5 py-1.5 bg-slate-50/90 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-xs">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            title="Negrita (**texto**)"
+            onClick={() => wrapSelection("**", "**", "texto en negrita")}
+            className="w-6 h-6 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
+          >
+            B
+          </button>
+          <button
+            type="button"
+            title="Cursiva (*texto*)"
+            onClick={() => wrapSelection("*", "*", "texto en cursiva")}
+            className="w-6 h-6 flex items-center justify-center italic text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
+          >
+            I
+          </button>
+          <button
+            type="button"
+            title="Lista con viñetas"
+            onClick={() => insertPrefixAtLine("- ")}
+            className="px-1.5 h-6 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer text-[11px]"
+          >
+            • Lista
+          </button>
+          <button
+            type="button"
+            title="Cita o consejo destacado"
+            onClick={() => insertPrefixAtLine("> ")}
+            className="px-1.5 h-6 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer text-[11px]"
+          >
+            ❝ Consejo
+          </button>
+          <button
+            type="button"
+            title="Añadir plato recomendado"
+            onClick={() => {
+              const el = textareaRef.current;
+              const cursor = el ? el.selectionStart : value.length;
+              const snippet = "✨ Plato recomendado: ";
+              onChange(value.substring(0, cursor) + snippet + value.substring(cursor));
+            }}
+            className="px-1.5 h-6 flex items-center justify-center text-amber-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer text-[11px] font-semibold"
+          >
+            ✨ Plato
+          </button>
+        </div>
+
+        {/* Toggle escribir / previsualizar */}
+        <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-700/60 p-0.5 rounded-lg text-[10px] font-semibold">
+          <button
+            type="button"
+            onClick={() => setTab("write")}
+            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${
+              tab === "write"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                : "text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            Escribir
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("preview")}
+            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${
+              tab === "preview"
+                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                : "text-slate-600 dark:text-slate-400"
+            }`}
+          >
+            Vista previa
+          </button>
+        </div>
+      </div>
+
+      {/* Área de texto / Vista previa */}
+      {tab === "write" ? (
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          className="w-full px-3 py-2 text-xs bg-transparent text-slate-900 dark:text-slate-100 focus:outline-none resize-y min-h-[72px]"
+        />
+      ) : (
+        <div className="p-3 min-h-[72px] bg-slate-50/50 dark:bg-slate-950/40 text-left">
+          {value.trim() ? (
+            <FormattedCommentContent content={value} />
+          ) : (
+            <p className="text-slate-400 italic text-[11px]">Escribe algo para ver la vista previa con formato.</p>
+          )}
+        </div>
+      )}
+
+      {/* Botones de acción */}
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-50/60 dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-800">
+        <span className="text-[10px] text-slate-400">
+          Usa **negrita**, *cursiva*, &gt; citas o - viñetas
+        </span>
+        <div className="flex items-center gap-1.5">
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-2.5 py-1 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
+            >
+              Cancelar
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting || !value.trim()}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs transition cursor-pointer disabled:opacity-40"
+          >
+            {isSubmitting ? "Guardando..." : submitLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function PlaceCommentsThread({
@@ -46,8 +351,7 @@ export function PlaceCommentsThread({
     }
   }, [isOpen, placeId]);
 
-  async function handleAddComment(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleAddComment() {
     if (!newContent.trim() || submitting) return;
     setSubmitting(true);
 
@@ -103,12 +407,12 @@ export function PlaceCommentsThread({
       </div>
 
       {/* Lista de comentarios */}
-      <div className="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+      <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1 text-xs mb-3">
         {loading ? (
-          <p className="text-slate-400 py-2 text-center text-[11px]">Cargando comentarios...</p>
+          <p className="text-slate-400 py-3 text-center text-[11px]">Cargando comentarios...</p>
         ) : comments.length === 0 ? (
-          <p className="text-slate-400 italic py-1 text-[11px]">
-            Aún no hay comentarios. ¡Sé el primero en recomendar qué pedir o dar tu opinión!
+          <p className="text-slate-400 italic py-2 text-[11px] text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-xl">
+            Aún no hay comentarios. ¡Sé el primero en compartir qué pedir, reservas o consejos!
           </p>
         ) : (
           comments.map((c) => {
@@ -118,19 +422,22 @@ export function PlaceCommentsThread({
             return (
               <div
                 key={c.id}
-                className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/50 flex flex-col gap-1"
+                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex flex-col gap-1.5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-900 dark:text-slate-200 text-[11px]">
-                    @{c.authorUsername || c.authorName.toLowerCase().replace(/\s+/g, "")}
-                  </span>
                   <div className="flex items-center gap-1.5">
+                    <span className="font-bold text-slate-900 dark:text-slate-200 text-xs">
+                      @{c.authorUsername || c.authorName.toLowerCase().replace(/\s+/g, "")}
+                    </span>
                     <span className="text-[10px] text-slate-400">
                       {new Date(c.createdAt).toLocaleDateString("es-ES", {
                         day: "numeric",
                         month: "short",
+                        year: "numeric",
                       })}
                     </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
                     {isAuthor && !isEditing && (
                       <button
                         type="button"
@@ -138,7 +445,7 @@ export function PlaceCommentsThread({
                           setEditingCommentId(c.id);
                           setEditingContent(c.content);
                         }}
-                        className="text-slate-400 hover:text-amber-500 text-[10px] cursor-pointer"
+                        className="text-slate-400 hover:text-amber-500 text-xs cursor-pointer px-1 py-0.5 rounded hover:bg-slate-200/60 dark:hover:bg-slate-700"
                         title="Editar comentario"
                       >
                         ✏️
@@ -148,7 +455,7 @@ export function PlaceCommentsThread({
                       <button
                         type="button"
                         onClick={() => handleDeleteComment(c.id)}
-                        className="text-slate-400 hover:text-red-500 text-[10px] cursor-pointer"
+                        className="text-slate-400 hover:text-red-500 text-xs cursor-pointer px-1 py-0.5 rounded hover:bg-slate-200/60 dark:hover:bg-slate-700"
                         title="Eliminar comentario"
                       >
                         ✕
@@ -156,43 +463,24 @@ export function PlaceCommentsThread({
                     )}
                   </div>
                 </div>
+
                 {isEditing ? (
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <input
-                      type="text"
+                  <div className="mt-1">
+                    <RichTextarea
                       value={editingContent}
-                      onChange={(e) => setEditingContent(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleSaveEdit(c.id);
-                        } else if (e.key === "Escape") {
-                          setEditingCommentId(null);
-                        }
-                      }}
-                      autoFocus
-                      className="flex-1 px-2.5 py-1 rounded-lg text-xs bg-white dark:bg-slate-950 border border-amber-400 dark:border-amber-500/60 text-slate-900 dark:text-slate-100 focus:outline-none"
+                      onChange={setEditingContent}
+                      placeholder="Edita tu comentario..."
+                      rows={3}
+                      onSubmit={() => handleSaveEdit(c.id)}
+                      isSubmitting={savingEdit}
+                      submitLabel="Guardar cambios"
+                      onCancel={() => setEditingCommentId(null)}
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleSaveEdit(c.id)}
-                      disabled={savingEdit || !editingContent.trim()}
-                      className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 cursor-pointer disabled:opacity-40"
-                    >
-                      {savingEdit ? "..." : "Guardar"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditingCommentId(null)}
-                      className="px-2 py-1 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
                   </div>
                 ) : (
-                  <p className="text-slate-600 dark:text-slate-300 text-xs whitespace-pre-wrap">
-                    {c.content}
-                  </p>
+                  <div className="mt-0.5">
+                    <FormattedCommentContent content={c.content} />
+                  </div>
                 )}
               </div>
             );
@@ -200,23 +488,18 @@ export function PlaceCommentsThread({
         )}
       </div>
 
-      {/* Formulario para comentar */}
-      <form onSubmit={handleAddComment} className="mt-2.5 flex gap-1.5">
-        <input
-          type="text"
+      {/* Formulario WYSIWYG para añadir nuevo comentario */}
+      <div className="mt-2">
+        <RichTextarea
           value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
-          placeholder="Escribe un consejo o plato recomendado..."
-          className="flex-1 px-3 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          onChange={setNewContent}
+          placeholder="Escribe una recomendación detallada (platos imprescindibles, consejos de reserva, ambiente...)"
+          rows={3}
+          onSubmit={handleAddComment}
+          isSubmitting={submitting}
+          submitLabel="Publicar comentario"
         />
-        <button
-          type="submit"
-          disabled={submitting || !newContent.trim()}
-          className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-40"
-        >
-          Enviar
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

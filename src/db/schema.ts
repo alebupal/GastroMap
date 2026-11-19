@@ -7,6 +7,7 @@ import {
   doublePrecision,
   boolean,
   jsonb,
+  integer,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -283,10 +284,32 @@ export const placeVisits = pgTable(
   ]
 );
 
+export const groupInvitations = pgTable(
+  "group_invitations",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => sharingGroups.id, { onDelete: "cascade" }),
+    token: varchar("token", { length: 64 }).notNull().unique(),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedCount: integer("used_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("group_invitations_token_idx").on(table.token),
+    index("group_invitations_group_idx").on(table.groupId),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type Invitation = typeof invitations.$inferSelect;
+export type GroupInvitation = typeof groupInvitations.$inferSelect;
 export type Occasion = typeof occasions.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
 export type Place = typeof places.$inferSelect;

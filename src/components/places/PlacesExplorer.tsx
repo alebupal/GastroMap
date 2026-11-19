@@ -14,6 +14,7 @@ import {
   deleteSavedFilterAction,
   type SavedFilterItem,
 } from "@/lib/actions/saved-filters";
+import { getMyGroupsAction } from "@/lib/actions/groups";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -68,6 +69,15 @@ export function PlacesExplorer({
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
 
+  // Grupos privados
+  const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedGroupFilterIds, setSelectedGroupFilterIds] = useState<string[]>([]);
+  const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
+
+  // Paginación en modo lista
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+
   // Asistente y filtros avanzados (Fase 4)
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -112,6 +122,13 @@ export function PlacesExplorer({
       window.removeEventListener("offline", updateOnlineStatus);
     };
   }, [initialPlaces]);
+
+  // Cargar grupos privados del usuario para el filtro rápido
+  useEffect(() => {
+    getMyGroupsAction()
+      .then((list) => setMyGroups(list.map((g) => ({ id: g.id, name: g.name }))))
+      .catch(() => {});
+  }, []);
 
   function toggleComparePlace(placeId: string) {
     setCompareIds((prev) => {
@@ -345,6 +362,15 @@ export function PlacesExplorer({
       );
     }
 
+    // 6. Filtro por Grupos Privados (si se seleccionaron grupos específicos)
+    if (selectedGroupFilterIds.length > 0) {
+      result = result.filter(
+        (p) =>
+          p.sharedGroupIds &&
+          p.sharedGroupIds.some((gid) => selectedGroupFilterIds.includes(gid))
+      );
+    }
+
     // Ordenación configurable por el usuario
     const priceOrder: Record<string, number> = {
       "€": 1,
@@ -391,11 +417,44 @@ export function PlacesExplorer({
     selectedOccasions,
     selectedTags,
     selectedPrices,
+    selectedGroupFilterIds,
     experienceFilter,
     userLocation,
     radiusKm,
     sortBy,
   ]);
+
+  // Al cambiar filtros, resetear a la primera página
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    textSearch,
+    selectedOccasions,
+    selectedTags,
+    selectedPrices,
+    selectedGroupFilterIds,
+    experienceFilter,
+    radiusKm,
+    sortBy,
+  ]);
+
+  // Cálculo de locales paginados
+  const totalPages = Math.max(1, Math.ceil(filteredPlaces.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedPlaces = useMemo(() => {
+    return filteredPlaces.slice(startIndex, startIndex + pageSize);
+  }, [filteredPlaces, startIndex, pageSize]);
+
+  function handlePageChange(newPage: number) {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    if (typeof window !== "undefined") {
+      const el = document.getElementById("places-list-top");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+  }
 
   // Manejar clic en "Ver en mapa" desde una tarjeta
   function handleSelectOnMap(placeId: string) {
@@ -735,21 +794,100 @@ export function PlacesExplorer({
 
         <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1"></div>
 
-        {/* Filtro rápido de precio (acumulable) */}
-        {["€", "€€", "€€€", "€€€€"].map((p) => {
-          const active = selectedPrices.includes(p);
+        {/* Filtro por Grupos Privados (si el usuario tiene grupos) */}
+        {myGroups.length > 0 && (
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsGroupFilterOpen((prev) => !prev)}
+              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${
+                selectedGroupFilterIds.length > 0
+                  ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              }`}
+            >
+              <span>👥</span>
+              <span>
+                {selectedGroupFilterIds.length === 0
+                  ? "Grupos"
+                  : selectedGroupFilterIds.length === 1
+                  ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || "1 grupo"
+                  : `${selectedGroupFilterIds.length} grupos`}
+              </span>
+              <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
+            </button>
+
+            {/* Popover desplegable visual de grupos privados */}
+            {isGroupFilterOpen && (
+              <div className="absolute top-full left-0 mt-2 z-50 w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100">
+                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    Filtrar por grupo privado:
+                  </span>
+                  {selectedGroupFilterIds.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGroupFilterIds([])}
+                      className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
+                    >
+                      Limpiar
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  {myGroups.map((g) => {
+                    const isSelected = selectedGroupFilterIds.includes(g.id);
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedGroupFilterIds((prev) =>
+                            prev.includes(g.id)
+                              ? prev.filter((id) => id !== g.id)
+                              : [...prev, g.id]
+                          );
+                        }}
+                        className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-600 text-white font-bold"
+                            : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        <span className="truncate">👥 {g.name}</span>
+                        {isSelected && <span className="text-xs">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1"></div>
+
+        {/* Filtro rápido de precio numérico (acumulable) */}
+        {[
+          { id: "€", label: "< 15 €" },
+          { id: "€€", label: "15 - 30 €" },
+          { id: "€€€", label: "30 - 50 €" },
+          { id: "€€€€", label: "> 50 €" },
+        ].map((item) => {
+          const active = selectedPrices.includes(item.id);
           return (
             <button
-              key={p}
+              key={item.id}
               type="button"
-              onClick={() => togglePrice(p)}
+              onClick={() => togglePrice(item.id)}
               className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${
                 active
                   ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
                   : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
-              {p}
+              {item.label}
             </button>
           );
         })}
@@ -1138,14 +1276,43 @@ export function PlacesExplorer({
       </div>
 
       {/* =========================================================================
-          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil toggle)
+          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil toggle + scroll fluido)
          ========================================================================= */}
-      <div className="lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-1 lg:pt-2">
-        {/* Columna Izquierda: Lista de Tarjetas */}
+      <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-1 lg:pt-2">
+        {/* Columna Mapa: en móvil va arriba cuando activeMobileView === "map", o se oculta si activeMobileView === "list" */}
         <div
-          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 ${
-            activeMobileView === "map" ? "hidden lg:block" : "block"
+          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${
+            activeMobileView === "list" ? "hidden lg:block" : "block order-1 mb-4 lg:mb-0"
           }`}
+        >
+          <div className="lg:sticky lg:top-4 space-y-2 pb-2 lg:pb-0">
+            <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl">
+              <MapContainerWrapper
+                places={filteredPlaces}
+                selectedPlaceId={selectedPlaceId}
+                onSelectPlace={(id) => setSelectedPlaceId(id)}
+                userLocation={userLocation}
+                radiusKm={radiusKm}
+                occasionMap={occasionMap}
+                cartoApiKey={cartoApiKey}
+                className="w-full h-[50vh] sm:h-[500px] lg:h-[calc(100vh-14rem)] min-h-[360px]"
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 px-2">
+              <span>
+                Mostrando {filteredPlaces.filter((p) => p.latitude != null).length} locales geolocalizados.
+              </span>
+              <span className="lg:hidden text-amber-500 font-semibold animate-pulse">
+                ↓ Desliza abajo para ver la lista
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Columna Lista de Tarjetas: en móvil va abajo cuando activeMobileView === "map", o primero si activeMobileView === "list" */}
+        <div
+          id="places-list-top"
+          className="space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full"
         >
           {filteredPlaces.length === 0 ? (
             <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
@@ -1168,7 +1335,14 @@ export function PlacesExplorer({
             <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-14 lg:pb-0">
               <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-medium px-1 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <span>{filteredPlaces.length} {filteredPlaces.length === 1 ? "sitio encontrado" : "sitios encontrados"}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                    {filteredPlaces.length} {filteredPlaces.length === 1 ? "sitio" : "sitios"}
+                  </span>
+                  {totalPages > 1 && (
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800">
+                      Pág. {currentPage} de {totalPages}
+                    </span>
+                  )}
                   {textSearch && <span className="hidden sm:inline text-slate-400">• «{textSearch}»</span>}
                 </div>
 
@@ -1189,7 +1363,9 @@ export function PlacesExplorer({
                   </select>
                 </label>
               </div>
-              {filteredPlaces.map((place) => (
+
+              {/* Tarjetas paginadas */}
+              {paginatedPlaces.map((place) => (
                 <PlaceCard
                   key={place.id}
                   place={place}
@@ -1203,34 +1379,72 @@ export function PlacesExplorer({
                   onToggleCompare={() => toggleComparePlace(place.id)}
                 />
               ))}
+
+              {/* Barra de Paginación */}
+              {totalPages > 1 && (
+                <div className="pt-3 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 text-xs">
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">
+                    Mostrando {startIndex + 1} - {Math.min(startIndex + pageSize, filteredPlaces.length)} de {filteredPlaces.length}
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
+                    >
+                      ◀ Anterior
+                    </button>
+
+                    <div className="flex items-center gap-1 mx-1">
+                      {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+                        .filter(
+                          (p) =>
+                            p === 1 ||
+                            p === totalPages ||
+                            Math.abs(p - currentPage) <= 1
+                        )
+                        .map((p, idx, arr) => {
+                          const prev = arr[idx - 1];
+                          const showEllipsis = prev && p - prev > 1;
+                          return (
+                            <span key={p} className="flex items-center gap-1">
+                              {showEllipsis && (
+                                <span className="text-slate-400 px-0.5 text-xs">…</span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handlePageChange(p)}
+                                className={`w-7 h-7 rounded-xl font-bold text-xs flex items-center justify-center transition cursor-pointer ${
+                                  currentPage === p
+                                    ? "bg-amber-500 text-slate-950 shadow-xs"
+                                    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                }`}
+                              >
+                                {p}
+                              </button>
+                            </span>
+                          );
+                        })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                      className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
+                    >
+                      Siguiente ▶
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Columna Derecha: Mapa Interactivo Leaflet */}
-        <div
-          className={`lg:col-span-7 xl:col-span-7 ${
-            activeMobileView === "list" ? "hidden lg:block" : "block"
-          }`}
-        >
-          <div className="lg:sticky lg:top-4 space-y-2 pb-14 lg:pb-0">
-            <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl">
-              <MapContainerWrapper
-                places={filteredPlaces}
-                selectedPlaceId={selectedPlaceId}
-                onSelectPlace={(id) => setSelectedPlaceId(id)}
-                userLocation={userLocation}
-                radiusKm={radiusKm}
-                occasionMap={occasionMap}
-                cartoApiKey={cartoApiKey}
-                className="w-full h-[65vh] sm:h-[540px] lg:h-[calc(100vh-14rem)] min-h-[440px]"
-              />
-            </div>
-            <p className="text-[11px] text-slate-500 text-center">
-              Mostrando {filteredPlaces.filter((p) => p.latitude != null).length} locales geolocalizados en el mapa interactivo.
-            </p>
-          </div>
-        </div>
+        {/* Fin layout */}
       </div>
 
       {/* Botón flotante rápido en móvil (estilo Airbnb / Google Maps) para alternar sin volver arriba */}

@@ -162,10 +162,10 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
     );
   }
 
-  // 4. Compartición con grupos privados seleccionados
-  const sharedGroupIds = Array.from(
-    new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean))
-  );
+  // 4. Compartición con grupos privados seleccionados (solo aplica si NO es publicado en comunidad)
+  const sharedGroupIds = !communityPublished
+    ? Array.from(new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean)))
+    : [];
   if (sharedGroupIds.length > 0) {
     await db
       .insert(placeGroupAccess)
@@ -241,9 +241,9 @@ export async function updatePlaceAction(
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length > 0);
   const uniqueTags = Array.from(new Set(formTags));
-  const sharedGroupIds = Array.from(
-    new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean))
-  );
+  const sharedGroupIds = !communityPublished
+    ? Array.from(new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean)))
+    : [];
 
   // Regla 4.5: si un usuario no-admin intenta pasar a estrictamente privado una ficha
   // comunitaria que ya tiene colecciones o comentarios de otros usuarios, proteger los datos ajenos
