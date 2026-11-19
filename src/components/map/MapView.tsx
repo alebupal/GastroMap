@@ -1,10 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { createPlaceMarkerIcon, createUserLocationIcon } from "@/lib/map-icons";
+import {
+  createPlaceMarkerIcon,
+  createClusterMarkerIcon,
+  createUserLocationIcon,
+  type PinPersonalBadge,
+} from "@/lib/map-icons";
 import type { PlaceWithDetails } from "@/lib/actions/places";
+
+function getPersonalBadge(place: PlaceWithDetails): PinPersonalBadge {
+  if (place.isFavorite) return "favorite";
+  if (place.personalStatus === "visited") return "visited";
+  if (place.personalStatus === "pending") return "pending";
+  return null;
+}
 
 interface MapViewProps {
   places: PlaceWithDetails[];
@@ -29,12 +41,20 @@ function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
         }</span>`
       : "";
 
+  const statusBanner =
+    place.status === "permanently_closed"
+      ? `<div style="margin-top: 6px;"><span style="font-size: 10px; font-weight: 700; color: #b91c1c; background: #fef2f2; padding: 2px 6px; border-radius: 9999px;">🚫 Cerrado permanentemente</span></div>`
+      : place.status === "temporarily_closed"
+      ? `<div style="margin-top: 6px;"><span style="font-size: 10px; font-weight: 700; color: #b45309; background: #fffbeb; padding: 2px 6px; border-radius: 9999px;">⏸️ Cerrado temporalmente</span></div>`
+      : "";
+
   return `
     <div style="padding: 12px; min-width: 200px; max-width: 260px; font-family: system-ui, sans-serif;">
       <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
         <strong style="font-size: 14px; color: #0f172a; line-height: 1.2;">${place.name}</strong>
         <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${place.priceRange}</span>
       </div>
+      ${statusBanner}
       ${
         place.city || place.address
           ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">${place.city ? place.city : ""}${
@@ -71,6 +91,7 @@ export default function MapView({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
+  const clusterMarkersRef = useRef<L.Marker[]>([]);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const radiusCircleRef = useRef<L.Circle | null>(null);
 
@@ -189,44 +210,106 @@ export default function MapView({
     }
   }, [userLocation, radiusKm]);
 
-  // 3. Renderizar y actualizar marcadores de lugares
-  useEffect(() => {
+  // 3. Renderizado de marcadores y clustering dinámico por proximidad en pantalla
+  const renderMarkersAndClusters = useCallback(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Limpiar marcadores viejos que ya no están en places
-    const validPlaceIds = new Set(places.map((p) => p.id));
+    // Limpiar clústeres previos
+    clusterMarkersRef.current.forEach((cm) => cm.remove());
+    clusterMarkersRef.current = [];
+
+    // Preparar puntos válidos
+    type ValidItem = { place: PlaceWithDetails; lat: number; lng: number };
+    const validItems: ValidItem[] = [];
+    places.forEach((place) => {
+      if (place.latitude == null || place.longitude == null) return;
+      const lat =
+        typeof place.latitude === "number"
+          ? place.latitude
+          : parseFloat(String(place.latitude));
+      const lng =
+        typeof place.longitude === "number"
+          ? place.longitude
+          : parseFloat(String(place.longitude));
+      if (!isNaN(lat) && !isNaN(lng)) {
+        validItems.push({ place, lat, lng });
+      }
+    });
+
+    const zoom = map.getZoom();
+    const shouldCluster = zoom < 16 && validItems.length > 1;
+    const clusterRadiusPx = 52;
+
+    const singleItems: ValidItem[] = [];
+    const clusters: ValidItem[][] = [];
+
+    if (!shouldCluster) {
+      singleItems.push(...validItems);
+    } else {
+      const assigned = new Set<string>();
+
+      // El sitio seleccionado siempre se muestra individualmente (nunca oculto en un clúster)
+      if (selectedPlaceId) {
+        const selectedItem = validItems.find((i) => i.place.id === selectedPlaceId);
+        if (selectedItem) {
+          singleItems.push(selectedItem);
+          assigned.add(selectedItem.place.id);
+        }
+      }
+
+      // Agrupación espacial por distancia en píxeles de pantalla
+      const pointsCache = new Map<string, L.Point>();
+      validItems.forEach((item) => {
+        if (!assigned.has(item.place.id)) {
+          pointsCache.set(item.place.id, map.latLngToContainerPoint([item.lat, item.lng]));
+        }
+      });
+
+      for (const item of validItems) {
+        if (assigned.has(item.place.id)) continue;
+        assigned.add(item.place.id);
+
+        const p1 = pointsCache.get(item.place.id)!;
+        const group: ValidItem[] = [item];
+
+        for (const other of validItems) {
+          if (assigned.has(other.place.id)) continue;
+          const p2 = pointsCache.get(other.place.id)!;
+          if (p1.distanceTo(p2) <= clusterRadiusPx) {
+            assigned.add(other.place.id);
+            group.push(other);
+          }
+        }
+
+        if (group.length === 1) {
+          singleItems.push(group[0]);
+        } else {
+          clusters.push(group);
+        }
+      }
+    }
+
+    // Eliminar marcadores individuales que ya no son visibles (por filtro o porque entraron en un clúster)
+    const visibleSingleIds = new Set(singleItems.map((i) => i.place.id));
     markersRef.current.forEach((marker, id) => {
-      if (!validPlaceIds.has(id)) {
+      if (!visibleSingleIds.has(id)) {
         marker.remove();
         markersRef.current.delete(id);
       }
     });
 
-    const bounds: [number, number][] = [];
-
-    if (userLocation) {
-      bounds.push([userLocation.latitude, userLocation.longitude]);
-    }
-
-    places.forEach((place) => {
-      if (place.latitude == null || place.longitude == null) return;
-
-      const lat = typeof place.latitude === "number" ? place.latitude : parseFloat(String(place.latitude));
-      const lng = typeof place.longitude === "number" ? place.longitude : parseFloat(String(place.longitude));
-      if (isNaN(lat) || isNaN(lng)) return;
-
+    // Pintar marcadores individuales
+    singleItems.forEach(({ place, lat, lng }) => {
       const latLng: [number, number] = [lat, lng];
-      bounds.push(latLng);
-
       const isSelected = selectedPlaceId === place.id;
       const primaryOccasion = place.occasions[0];
       const occasionInfo = primaryOccasion ? occasionMap[primaryOccasion] : undefined;
-      const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, isSelected);
-
-      let marker = markersRef.current.get(place.id);
+      const badge = getPersonalBadge(place);
+      const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, isSelected, badge);
       const popupHtml = getPlacePopupHtml(place, lat, lng);
 
+      let marker = markersRef.current.get(place.id);
       if (!marker || !map.hasLayer(marker)) {
         if (marker) marker.remove();
         marker = L.marker(latLng, {
@@ -251,7 +334,56 @@ export default function MapView({
       }
     });
 
-    // Ajustar encuadre del mapa si hay varios sitios y no hay sitio seleccionado específico
+    // Pintar marcadores de clúster
+    clusters.forEach((group) => {
+      const avgLat = group.reduce((acc, i) => acc + i.lat, 0) / group.length;
+      const avgLng = group.reduce((acc, i) => acc + i.lng, 0) / group.length;
+      const clusterIcon = createClusterMarkerIcon(group.length);
+
+      const clusterMarker = L.marker([avgLat, avgLng], {
+        icon: clusterIcon,
+        zIndexOffset: 250,
+      })
+        .addTo(map)
+        .on("click", () => {
+          const groupBounds = L.latLngBounds(
+            group.map((i) => [i.lat, i.lng] as [number, number])
+          );
+          if (groupBounds.getNorthEast().equals(groupBounds.getSouthWest())) {
+            map.setView([avgLat, avgLng], Math.min(map.getZoom() + 2, 17));
+          } else {
+            map.fitBounds(groupBounds, { padding: [55, 55], maxZoom: 16 });
+          }
+        });
+
+      clusterMarkersRef.current.push(clusterMarker);
+    });
+  }, [places, selectedPlaceId, occasionMap, onSelectPlace]);
+
+  // 3b. Encuadrar vista inicial y re-renderizar marcadores/clústeres al cambiar datos o zoom
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const bounds: [number, number][] = [];
+    if (userLocation) {
+      bounds.push([userLocation.latitude, userLocation.longitude]);
+    }
+    places.forEach((place) => {
+      if (place.latitude == null || place.longitude == null) return;
+      const lat =
+        typeof place.latitude === "number"
+          ? place.latitude
+          : parseFloat(String(place.latitude));
+      const lng =
+        typeof place.longitude === "number"
+          ? place.longitude
+          : parseFloat(String(place.longitude));
+      if (!isNaN(lat) && !isNaN(lng)) {
+        bounds.push([lat, lng]);
+      }
+    });
+
     if (bounds.length > 0 && !selectedPlaceId) {
       if (bounds.length === 1) {
         map.setView(bounds[0], 15);
@@ -259,55 +391,49 @@ export default function MapView({
         map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40], maxZoom: 16 });
       }
     }
-  }, [places, selectedPlaceId, occasionMap, onSelectPlace, userLocation]);
+
+    renderMarkersAndClusters();
+
+    map.on("zoomend", renderMarkersAndClusters);
+    return () => {
+      map.off("zoomend", renderMarkersAndClusters);
+    };
+  }, [places, selectedPlaceId, userLocation, renderMarkersAndClusters]);
 
   // 4. Centrar cuando cambia la selección externa
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !selectedPlaceId) return;
 
-    let marker = markersRef.current.get(selectedPlaceId);
-    if (!marker || !map.hasLayer(marker)) {
-      // Si el marcador no estaba en el mapa, buscar el lugar y forzar su creación
-      const place = places.find((p) => p.id === selectedPlaceId);
-      if (place && place.latitude != null && place.longitude != null) {
-        const lat = typeof place.latitude === "number" ? place.latitude : parseFloat(String(place.latitude));
-        const lng = typeof place.longitude === "number" ? place.longitude : parseFloat(String(place.longitude));
-        if (!isNaN(lat) && !isNaN(lng)) {
-          const primaryOccasion = place.occasions[0];
-          const occasionInfo = primaryOccasion ? occasionMap[primaryOccasion] : undefined;
-          const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, true);
-          const popupHtml = getPlacePopupHtml(place, lat, lng);
-          marker = L.marker([lat, lng], {
-            icon,
-            zIndexOffset: 500,
-          })
-            .addTo(map)
-            .bindPopup(popupHtml)
-            .on("click", () => {
-              if (onSelectPlace) onSelectPlace(place.id);
-            });
-          markersRef.current.set(place.id, marker);
-        }
-      }
-    }
+    const place = places.find((p) => p.id === selectedPlaceId);
+    if (!place || place.latitude == null || place.longitude == null) return;
 
-    if (marker) {
-      const latLng = marker.getLatLng();
-      map.invalidateSize();
-      map.flyTo(latLng, 16, { animate: true, duration: 0.6 });
+    const lat =
+      typeof place.latitude === "number"
+        ? place.latitude
+        : parseFloat(String(place.latitude));
+    const lng =
+      typeof place.longitude === "number"
+        ? place.longitude
+        : parseFloat(String(place.longitude));
+    if (isNaN(lat) || isNaN(lng)) return;
 
-      map.once("moveend", () => {
-        marker?.openPopup();
-      });
+    map.invalidateSize();
+    map.flyTo([lat, lng], 16, { animate: true, duration: 0.6 });
 
-      const timer = setTimeout(() => {
-        marker?.openPopup();
-      }, 650);
+    const openSelectedPopup = () => {
+      const marker = markersRef.current.get(selectedPlaceId);
+      marker?.openPopup();
+    };
 
-      return () => clearTimeout(timer);
-    }
-  }, [selectedPlaceId, places, occasionMap]);
+    map.once("moveend", openSelectedPopup);
+    const timer = setTimeout(openSelectedPopup, 680);
+
+    return () => {
+      map.off("moveend", openSelectedPopup);
+      clearTimeout(timer);
+    };
+  }, [selectedPlaceId, places]);
 
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>

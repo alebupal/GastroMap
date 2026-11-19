@@ -1,0 +1,1 @@
+ALTER TABLE "places" ADD COLUMN "status" varchar(30) DEFAULT 'active' NOT NULL;

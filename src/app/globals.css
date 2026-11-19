@@ -60,11 +60,16 @@ body {
 
 /* Marcadores personalizados sin fondo blanco residual de Leaflet y con SVG visible */
 .custom-gastromap-pin,
+.custom-gastromap-cluster,
 .user-location-pin {
   background: transparent !important;
   border: none !important;
   pointer-events: auto !important;
   overflow: visible !important;
+}
+
+.custom-gastromap-cluster:hover > div {
+  transform: scale(1.1);
 }
 
 .custom-gastromap-pin svg,

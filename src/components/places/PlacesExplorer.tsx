@@ -72,6 +72,11 @@ export function PlacesExplorer({
   const [locationError, setLocationError] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
+  // Ordenación de resultados
+  const [sortBy, setSortBy] = useState<
+    "recent" | "distance" | "name" | "price_asc" | "price_desc" | "rating"
+  >("recent");
+
   // Estados de vista adaptativa para evitar problemas de espacio con muchas categorías o tags
   const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
   const [isOccasionSearchOpen, setIsOccasionSearchOpen] = useState(false);
@@ -117,7 +122,8 @@ export function PlacesExplorer({
           longitude: position.coords.longitude,
         });
         setIsLocating(false);
-        if (!radiusKm) setRadiusKm(5);
+        if (!radiusKm) setRadiusKm(10);
+        setSortBy("distance");
       },
       (error) => {
         setIsLocating(false);
@@ -135,6 +141,7 @@ export function PlacesExplorer({
     setUserLocation(null);
     setRadiusKm(null);
     setLocationError(null);
+    setSortBy((prev) => (prev === "distance" ? "recent" : prev));
   }
 
   function resetAllFilters() {
@@ -231,13 +238,43 @@ export function PlacesExplorer({
       );
     }
 
-    // Ordenar: si hay ubicación, por cercanía; si no, mantener orden original
-    if (userLocation) {
+    // Ordenación configurable por el usuario
+    const priceOrder: Record<string, number> = {
+      "€": 1,
+      "€€": 2,
+      "€€€": 3,
+      "€€€€": 4,
+      "???": 99,
+    };
+
+    if (sortBy === "distance" && userLocation) {
       result.sort((a, b) => {
         if (a.distanceMeters == null) return 1;
         if (b.distanceMeters == null) return -1;
         return a.distanceMeters - b.distanceMeters;
       });
+    } else if (sortBy === "name") {
+      result.sort((a, b) => a.name.localeCompare(b.name, "es"));
+    } else if (sortBy === "price_asc") {
+      result.sort((a, b) => (priceOrder[a.priceRange] ?? 99) - (priceOrder[b.priceRange] ?? 99));
+    } else if (sortBy === "price_desc") {
+      result.sort((a, b) => {
+        const pa = a.priceRange === "???" ? -1 : (priceOrder[a.priceRange] ?? -1);
+        const pb = b.priceRange === "???" ? -1 : (priceOrder[b.priceRange] ?? -1);
+        return pb - pa;
+      });
+    } else if (sortBy === "rating") {
+      result.sort((a, b) => {
+        const ra = a.rating ?? -1;
+        const rb = b.rating ?? -1;
+        if (rb !== ra) return rb - ra;
+        return a.name.localeCompare(b.name, "es");
+      });
+    } else {
+      // 'recent': más recientes primero
+      result.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
 
     return result;
@@ -250,6 +287,7 @@ export function PlacesExplorer({
     experienceFilter,
     userLocation,
     radiusKm,
+    sortBy,
   ]);
 
   // Manejar clic en "Ver en mapa" desde una tarjeta
@@ -841,9 +879,28 @@ export function PlacesExplorer({
             </div>
           ) : (
             <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-14 lg:pb-0">
-              <div className="flex items-center justify-between text-xs text-slate-500 font-medium px-1">
-                <span>{filteredPlaces.length} {filteredPlaces.length === 1 ? "sitio encontrado" : "sitios encontrados"}</span>
-                {textSearch && <span>Buscando: «{textSearch}»</span>}
+              <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-medium px-1 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span>{filteredPlaces.length} {filteredPlaces.length === 1 ? "sitio encontrado" : "sitios encontrados"}</span>
+                  {textSearch && <span className="hidden sm:inline text-slate-400">• «{textSearch}»</span>}
+                </div>
+
+                <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <span className="hidden sm:inline">Ordenar:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                    className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    aria-label="Ordenar establecimientos"
+                  >
+                    <option value="recent">🕒 Recientes</option>
+                    {userLocation && <option value="distance">📍 Más cercanos</option>}
+                    <option value="rating">⭐ Mi valoración</option>
+                    <option value="name">🔤 Nombre (A-Z)</option>
+                    <option value="price_asc">💶 Precio (menor)</option>
+                    <option value="price_desc">💶 Precio (mayor)</option>
+                  </select>
+                </label>
               </div>
               {filteredPlaces.map((place) => (
                 <PlaceCard
@@ -852,6 +909,8 @@ export function PlacesExplorer({
                   currentUserId={currentUserId}
                   isAdmin={isAdmin}
                   occasionMap={occasionMap}
+                  occasionsList={occasionsList}
+                  availableTags={tagsList.map((t) => t.name)}
                   onSelectOnMap={() => handleSelectOnMap(place.id)}
                 />
               ))}

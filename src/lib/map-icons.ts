@@ -18,16 +18,18 @@ const OCCASION_COLORS: Record<string, { bg: string; text: string; border: string
 
 const DEFAULT_COLOR = { bg: "#ea580c", text: "#ffffff", border: "#c2410c" }; // Naranja vibrante por defecto
 
+export type PinPersonalBadge = "favorite" | "visited" | "pending" | null;
+
 /**
  * Genera un marcador tipo pin gastronómico ultra-nítido y compatible.
  * Combina un pin vectorial SVG para la forma de gota invertida con una capa
- * HTML absoluta para el emoji nativo del sistema, garantizando visibilidad total
- * en Linux, Windows, macOS, Android e iOS.
+ * HTML absoluta para el emoji nativo del sistema e insignia opcional de estado personal.
  */
 export function createPlaceMarkerIcon(
   occasionId?: string,
   emoji?: string,
-  isSelected: boolean = false
+  isSelected: boolean = false,
+  personalBadge: PinPersonalBadge = null
 ): L.DivIcon {
   const colors = (occasionId && OCCASION_COLORS[occasionId]) || DEFAULT_COLOR;
   const iconEmoji = emoji || "🍽️";
@@ -37,6 +39,16 @@ export function createPlaceMarkerIcon(
   const cx = w / 2;
   const cy = w / 2 - 1;
   const r = w / 2 - 4;
+
+  // Insignia visual según estado personal (favorito, visitado, pendiente)
+  let badgeHtml = "";
+  if (personalBadge === "favorite") {
+    badgeHtml = `<div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 9999px; background: #f59e0b; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.35);">⭐</div>`;
+  } else if (personalBadge === "visited") {
+    badgeHtml = `<div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 9999px; background: #10b981; border: 2px solid #ffffff; color: #ffffff; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.35);">✓</div>`;
+  } else if (personalBadge === "pending") {
+    badgeHtml = `<div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 9999px; background: #3b82f6; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.35);">🕒</div>`;
+  }
 
   const html = `
     <div style="position: relative; width: ${w}px; height: ${h}px; filter: drop-shadow(0 4px 10px rgba(0,0,0,${
@@ -58,6 +70,7 @@ export function createPlaceMarkerIcon(
       <div style="position: absolute; left: 0; top: 0; width: ${w}px; height: ${w}px; display: flex; align-items: center; justify-content: center; font-size: ${emojiSize}px; line-height: 1; pointer-events: none; user-select: none;">
         ${iconEmoji}
       </div>
+      ${badgeHtml}
     </div>
   `;
 
@@ -67,6 +80,49 @@ export function createPlaceMarkerIcon(
     iconSize: [w, h],
     iconAnchor: [w / 2, h],
     popupAnchor: [0, -h],
+  });
+}
+
+/**
+ * Genera un marcador circular para agrupaciones (clusters) de establecimientos cercanos
+ */
+export function createClusterMarkerIcon(count: number): L.DivIcon {
+  const size = count >= 25 ? 46 : count >= 10 ? 40 : 36;
+  const fontSize = count >= 25 ? 14 : 13;
+  const bgGradient =
+    count >= 25
+      ? "linear-gradient(135deg, #ea580c, #c2410c)"
+      : count >= 10
+      ? "linear-gradient(135deg, #f59e0b, #ea580c)"
+      : "linear-gradient(135deg, #fbbf24, #f59e0b)";
+
+  const html = `
+    <div style="
+      width: ${size}px;
+      height: ${size}px;
+      border-radius: 9999px;
+      background: ${bgGradient};
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 12px rgba(234, 88, 12, 0.45), 0 0 0 4px rgba(245, 158, 11, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      font-weight: 900;
+      font-size: ${fontSize}px;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    ">
+      ${count}
+    </div>
+  `;
+
+  return L.divIcon({
+    html,
+    className: "custom-gastromap-cluster",
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 }
 

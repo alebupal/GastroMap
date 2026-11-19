@@ -8,6 +8,7 @@ import {
   places,
   placeOccasions,
   placeTags,
+  tags,
   users,
   userPlaces,
   placeComments,
@@ -151,6 +152,121 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
 
   revalidatePath("/");
   redirect("/");
+}
+
+export async function updatePlaceAction(
+  placeId: string,
+  formData: FormData
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return { error: "Debes iniciar sesión para editar un sitio." };
+  }
+
+  const [existing] = await db
+    .select()
+    .from(places)
+    .where(eq(places.id, placeId))
+    .limit(1);
+
+  if (!existing) {
+    return { error: "Establecimiento no encontrado." };
+  }
+
+  const isOwner = existing.createdById === currentUser.id;
+  const isAdminOnCommunity = currentUser.role === "admin" && existing.communityPublished;
+
+  if (!isOwner && !isAdminOnCommunity) {
+    return { error: "No tienes permiso para editar este establecimiento." };
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  if (!name || name.length < 2) {
+    return { error: "El nombre del establecimiento es obligatorio." };
+  }
+
+  const address = (formData.get("address") as string)?.trim() || null;
+  const city = (formData.get("city") as string)?.trim() || null;
+  const googleMapsUrl = (formData.get("googleMapsUrl") as string)?.trim() || null;
+  const website = (formData.get("website") as string)?.trim() || null;
+  const phone = (formData.get("phone") as string)?.trim() || null;
+  const priceRange = (formData.get("priceRange") as string) || "???";
+  const rawStatus = (formData.get("status") as string) || "active";
+  const status =
+    rawStatus === "temporarily_closed" || rawStatus === "permanently_closed"
+      ? rawStatus
+      : "active";
+  const notes = (formData.get("notes") as string)?.trim() || null;
+  const communityPublished = formData.get("communityPublished") !== "false";
+
+  const latStr = (formData.get("latitude") as string)?.trim();
+  const lngStr = (formData.get("longitude") as string)?.trim();
+  const parsedLat = latStr ? parseFloat(latStr) : null;
+  const parsedLng = lngStr ? parseFloat(lngStr) : null;
+  const latitude = parsedLat !== null && !isNaN(parsedLat) ? parsedLat : null;
+  const longitude = parsedLng !== null && !isNaN(parsedLng) ? parsedLng : null;
+
+  const occasionsSelected = formData.getAll("occasions") as string[];
+  const formTags = (formData.getAll("tags") as string[])
+    .flatMap((t) => t.split(","))
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length > 0);
+  const uniqueTags = Array.from(new Set(formTags));
+
+  // 1. Actualizar ficha principal
+  await db
+    .update(places)
+    .set({
+      name,
+      address,
+      city,
+      latitude,
+      longitude,
+      googleMapsUrl,
+      website,
+      phone,
+      priceRange,
+      status,
+      notes,
+      communityPublished,
+      updatedAt: new Date(),
+    })
+    .where(eq(places.id, placeId));
+
+  // 2. Sincronizar ocasiones/planes
+  await db.delete(placeOccasions).where(eq(placeOccasions.placeId, placeId));
+  if (occasionsSelected.length > 0) {
+    await db.insert(placeOccasions).values(
+      occasionsSelected.map((occ) => ({
+        placeId,
+        occasion: occ,
+      }))
+    );
+  }
+
+  // 3. Sincronizar etiquetas y asegurar que existan en catálogo tags
+  await db.delete(placeTags).where(eq(placeTags.placeId, placeId));
+  if (uniqueTags.length > 0) {
+    await db
+      .insert(tags)
+      .values(
+        uniqueTags.map((t) => ({
+          id: t,
+          name: t,
+        }))
+      )
+      .onConflictDoNothing();
+
+    await db.insert(placeTags).values(
+      uniqueTags.map((t) => ({
+        placeId,
+        tag: t,
+      }))
+    );
+  }
+
+  revalidatePath("/");
+  return { success: true };
 }
 
 export async function deletePlaceAction(placeId: string) {

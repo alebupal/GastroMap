@@ -1,43 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { deletePlaceAction } from "@/lib/actions/places";
+import { deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
 import {
   toggleFavoriteAction,
   setPersonalStatusAction,
 } from "@/lib/actions/interactions";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
+import { EditPlaceModal } from "./EditPlaceModal";
 
 interface PlaceCardProps {
-  place: {
-    id: string;
-    name: string;
-    address: string | null;
-    city: string | null;
-    googleMapsUrl: string | null;
-    latitude?: number | null;
-    longitude?: number | null;
-    priceRange: string;
-    notes: string | null;
-    createdById: string;
-    createdByName: string;
-    createdByUsername?: string | null;
-    createdAt: Date;
-    occasions: string[];
-    tags: string[];
-    distanceMeters?: number | null;
-    // Colección personal y estado
-    isFavorite?: boolean;
-    personalStatus?: "pending" | "visited" | null;
-    rating?: number | null;
-    privateNotes?: string | null;
-    commentsCount?: number;
-    experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
-  };
+  place: PlaceWithDetails;
   currentUserId: string;
   isAdmin: boolean;
   occasionMap?: Record<string, { name: string; icon: string }>;
+  occasionsList?: Array<{ id: string; name: string; icon: string }>;
+  availableTags?: string[];
   onSelectOnMap?: () => void;
 }
 
@@ -46,6 +25,8 @@ export function PlaceCard({
   currentUserId,
   isAdmin,
   occasionMap = {},
+  occasionsList = [],
+  availableTags = [],
   onSelectOnMap,
 }: PlaceCardProps) {
   const [deleting, setDeleting] = useState(false);
@@ -58,8 +39,11 @@ export function PlaceCard({
   const [commentsCount, setCommentsCount] = useState(place.commentsCount ?? 0);
   const [showComments, setShowComments] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const canDelete = isAdmin || place.createdById === currentUserId;
+  const canEdit =
+    place.createdById === currentUserId || (isAdmin && place.communityPublished);
 
   async function handleDelete() {
     if (!confirm(`¿Eliminar "${place.name}" de GastroMap?`)) return;
@@ -108,6 +92,25 @@ export function PlaceCard({
             {rating !== null && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
                 ⭐ {rating}/10
+              </span>
+            )}
+
+            {/* Estado del establecimiento si no está activo */}
+            {place.status === "temporarily_closed" && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
+                ⏸️ Cerrado temp.
+              </span>
+            )}
+            {place.status === "permanently_closed" && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800/60">
+                🚫 Cerrado
+              </span>
+            )}
+
+            {/* Indicador de ficha privada */}
+            {!place.communityPublished && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                🔒 Privado
               </span>
             )}
           </div>
@@ -276,6 +279,28 @@ export function PlaceCard({
             </button>
           )}
 
+          {place.website && (
+            <a
+              href={place.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-500 hover:text-amber-500 text-xs transition"
+              title="Visitar página web"
+            >
+              🌐
+            </a>
+          )}
+
+          {place.phone && (
+            <a
+              href={`tel:${place.phone}`}
+              className="text-slate-500 hover:text-emerald-500 text-xs transition"
+              title={`Llamar: ${place.phone}`}
+            >
+              📞
+            </a>
+          )}
+
           {place.googleMapsUrl && (
             <a
               href={place.googleMapsUrl}
@@ -285,6 +310,17 @@ export function PlaceCard({
             >
               Maps ↗
             </a>
+          )}
+
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer"
+              title="Editar establecimiento"
+            >
+              ✏️
+            </button>
           )}
 
           {canDelete && (
@@ -323,6 +359,25 @@ export function PlaceCard({
           setPrivateNotes(newNotes);
         }}
       />
+
+      {/* Modal de edición completa del establecimiento */}
+      {canEdit && (
+        <EditPlaceModal
+          place={place}
+          occasionsList={
+            occasionsList.length > 0
+              ? occasionsList
+              : Object.entries(occasionMap).map(([id, info]) => ({
+                  id,
+                  name: info.name,
+                  icon: info.icon,
+                }))
+          }
+          availableTags={availableTags}
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
     </div>
   );
 }
