@@ -105,3 +105,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Exportación multiformato (JSON, CSV, GeoJSON, KML) e importación con vista previa (JSON, GeoJSON, Google Takeout, CSV) desde `ExportImportModal`.
   - Comparador de establecimientos lado a lado (`ComparePlacesModal`) para hasta 3 sitios con barra flotante de selección.
   - Service Worker (`/sw.js`) con estrategia Network-First, caché local de favoritos/pendientes y aviso de modo sin conexión.
+- **Sección de Documentación y Visor de Changelog al estilo TVSPY**:
+  - Sección dedicada `/docs` con pestañas para consultar directamente el README oficial y el registro de cambios (Changelog).
+  - Selector interactivo de idioma (Español 🇪🇸 / Inglés 🇬🇧) con lectura desde los ficheros locales del repositorio y fallback a GitHub Raw.
+  - Renderizado visual estilizado de Markdown con insignias de versiones (`🏷️`), viñetas con check (`✓`), bloques de código y banner de apoyo/donación.
+  - Accesos directos integrados en la cabecera de usuario (`📚 Docs`) y en el pie de página.

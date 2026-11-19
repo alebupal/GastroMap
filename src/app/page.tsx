@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { countUsers, getCurrentUser } from "@/lib/auth";
 import { getAllPlaces } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
@@ -96,8 +97,17 @@ export default async function Home() {
               <span>Donar con PayPal</span>
             </a>
 
-            {/* Enlaces de repositorio y ecosistema */}
+            {/* Enlaces de repositorio, ecosistema y documentación estilo TVSPY */}
             <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
+              <Link
+                href="/docs"
+                className="hover:text-amber-500 font-semibold transition flex items-center gap-1"
+                title="Documentación y Changelog"
+              >
+                <span>📚</span>
+                <span>Docs & Changelog</span>
+              </Link>
+              <span>•</span>
               <a
                 href="https://github.com/alebupal/GastroMap"
                 target="_blank"

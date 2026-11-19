@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { EditProfileModal } from "./EditProfileModal";
 import { GroupsModal } from "./GroupsModal";
@@ -70,6 +71,16 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             <span className="text-sm">📊</span>
             <span className="hidden md:inline text-[11px] font-bold">Stats</span>
           </button>
+
+          {/* Documentación y Changelog estilo TVSPY */}
+          <Link
+            href="/docs"
+            className="w-8 h-8 sm:w-auto p-1.5 sm:px-2.5 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
+            title="Documentación y Changelog"
+          >
+            <span className="text-sm">📚</span>
+            <span className="hidden md:inline text-[11px] font-bold">Docs</span>
+          </Link>
 
           {/* Enlaces de comunidad: GitHub y PayPal */}
           <div className="hidden sm:flex items-center gap-1.5 mr-1">

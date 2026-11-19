@@ -100,3 +100,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-format export (JSON, CSV, GeoJSON, KML) and import with preview (JSON, GeoJSON, Google Takeout, CSV) via `ExportImportModal`.
   - Side-by-side establishment comparator (`ComparePlacesModal`) for up to 3 places with floating selection bar.
   - Service Worker (`/sw.js`) with Network-First caching and offline mode banner for consulting cached favorites and pending places without connectivity.
+- **TVSPY-Style Documentation & In-App Changelog Viewer**:
+  - Dedicated `/docs` section with tabs for official repository README and version Changelog.
+  - Interactive language switcher (Spanish 🇪🇸 / English 🇬🇧) reading local repository markdown or GitHub Raw fallback.
+  - Rich Markdown renderer with version tags (`🏷️`), styled checkboxes (`✓`), code blocks, and support banner.
+  - Direct access links added to the user header (`📚 Docs`) and footer.
