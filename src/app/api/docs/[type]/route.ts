@@ -14,6 +14,8 @@ export async function GET(
     let filename: string;
     if (type === "readme") {
       filename = lang === "en" ? "README.MD" : "README_ES.MD";
+    } else if (type === "docs" || type === "documentation") {
+      filename = lang === "en" ? "DOCUMENTATION.MD" : "DOCUMENTACION.MD";
     } else {
       filename = lang === "en" ? "CHANGELOG.MD" : "CHANGELOG_ES.MD";
     }

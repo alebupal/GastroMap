@@ -3,12 +3,14 @@
 import React, { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 
+type DocTab = "docs" | "changelog" | "readme";
+
 interface DocsViewerProps {
-  initialTab?: "changelog" | "readme";
+  initialTab?: DocTab;
 }
 
-export default function DocsViewer({ initialTab = "changelog" }: DocsViewerProps) {
-  const [activeTab, setActiveTab] = useState<"changelog" | "readme">(initialTab);
+export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
+  const [activeTab, setActiveTab] = useState<DocTab>(initialTab);
   const [lang, setLang] = useState<"es" | "en">("es");
   const [content, setContent] = useState<string>("");
   const [filename, setFilename] = useState<string>("");
@@ -16,7 +18,7 @@ export default function DocsViewer({ initialTab = "changelog" }: DocsViewerProps
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const loadDocumentation = async (tab: "changelog" | "readme", currentLang: "es" | "en") => {
+  const loadDocumentation = async (tab: DocTab, currentLang: "es" | "en") => {
     setLoading(true);
     setError(null);
     try {
@@ -38,7 +40,7 @@ export default function DocsViewer({ initialTab = "changelog" }: DocsViewerProps
     loadDocumentation(activeTab, lang);
   }, [activeTab, lang]);
 
-  const handleTabChange = (tab: "changelog" | "readme") => {
+  const handleTabChange = (tab: DocTab) => {
     setActiveTab(tab);
   };
 
@@ -275,9 +277,22 @@ export default function DocsViewer({ initialTab = "changelog" }: DocsViewerProps
         </a>
       </div>
 
-      {/* Navegación por pestañas (Changelog / README) */}
+      {/* Navegación por pestañas (Documentación / Changelog / README) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-1">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => handleTabChange("docs")}
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 border ${
+              activeTab === "docs"
+                ? "bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20"
+                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+            }`}
+          >
+            <span>📘</span>
+            <span>Documentación</span>
+          </button>
+
           <button
             type="button"
             onClick={() => handleTabChange("changelog")}

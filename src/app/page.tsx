@@ -103,10 +103,10 @@ export default async function Home() {
               <Link
                 href="/docs"
                 className="hover:text-amber-500 font-semibold transition flex items-center gap-1"
-                title="Documentación y Changelog"
+                title="Documentación"
               >
-                <span>📚</span>
-                <span>Docs & Changelog</span>
+                <span>📘</span>
+                <span>Documentación</span>
               </Link>
               <span>•</span>
               <a

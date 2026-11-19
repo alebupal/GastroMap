@@ -182,14 +182,14 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                     <span>Mis estadísticas y Wrapped</span>
                   </button>
 
-                  {/* Documentación y Changelog */}
+                  {/* Documentación */}
                   <Link
                     href="/docs"
                     onClick={() => setIsMenuOpen(false)}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition cursor-pointer text-left"
                   >
-                    <span className="text-base">📚</span>
-                    <span>Documentación y Changelog</span>
+                    <span className="text-base">📘</span>
+                    <span>Documentación</span>
                   </Link>
 
                   {/* Editar perfil */}

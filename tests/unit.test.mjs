@@ -111,3 +111,23 @@ test("GPX Generator: formato XML válido generado para exportación", () => {
   assert.ok(gpx.includes("<name>Restaurante El Gourmet</name>"));
   assert.ok(gpx.includes("</gpx>"));
 });
+
+test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
+  const root = path.join(__dirname, "..");
+  const docs = [
+    "DOCUMENTACION.MD",
+    "DOCUMENTATION.MD",
+    "CHANGELOG_ES.MD",
+    "CHANGELOG.MD",
+    "README_ES.MD",
+    "README.MD",
+  ];
+
+  for (const doc of docs) {
+    const full = path.join(root, doc);
+    assert.ok(fs.existsSync(full), `Falta el archivo de documentación ${doc}`);
+    const stat = fs.statSync(full);
+    assert.ok(stat.size > 500, `${doc} está vacío o es demasiado corto (${stat.size} bytes)`);
+  }
+});
+

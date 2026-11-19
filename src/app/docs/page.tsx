@@ -8,12 +8,13 @@ export const metadata = {
 };
 
 interface DocsPageProps {
-  searchParams: Promise<{ tab?: "changelog" | "readme" }>;
+  searchParams: Promise<{ tab?: "docs" | "changelog" | "readme" }>;
 }
 
 export default async function DocsPage({ searchParams }: DocsPageProps) {
   const params = await searchParams;
-  const initialTab = params.tab === "readme" ? "readme" : "changelog";
+  const initialTab =
+    params.tab === "readme" || params.tab === "changelog" ? params.tab : "docs";
 
   return (
     <div className="min-h-screen bg-slate-100/60 dark:bg-slate-950 px-3 sm:px-6 py-6 transition-colors">
