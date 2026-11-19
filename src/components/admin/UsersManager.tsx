@@ -10,6 +10,7 @@ import {
   createUserDirectlyAction,
   type SafeUser,
 } from "@/lib/actions/users";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 interface UsersManagerProps {
   currentUserId?: string;
@@ -22,8 +23,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Búsqueda y selección múltiple
+  // Búsqueda, paginación y selección múltiple
   const [filterQuery, setFilterQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [deletingMultiple, setDeletingMultiple] = useState(false);
 
@@ -72,10 +75,18 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     );
   }, [usersList, filterQuery]);
 
+  // Paginación de usuarios
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedUsers = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, safePage, pageSize]);
+
   // Usuarios seleccionables en la vista actual (excluyendo la cuenta propia del admin)
   const selectableUsers = useMemo(() => {
-    return filteredUsers.filter((u) => u.id !== currentUserId);
-  }, [filteredUsers, currentUserId]);
+    return paginatedUsers.filter((u) => u.id !== currentUserId);
+  }, [paginatedUsers, currentUserId]);
 
   const allSelectableAreSelected =
     selectableUsers.length > 0 &&
@@ -449,8 +460,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               No se encontraron usuarios {filterQuery ? `que coincidan con «${filterQuery}»` : ""}.
             </p>
           ) : (
-            <div className="space-y-2 max-h-80 overflow-y-auto pr-1 no-scrollbar">
-              {filteredUsers.map((u) => {
+            <div className="space-y-2">
+              {paginatedUsers.map((u) => {
                 const isMe = u.id === currentUserId;
                 const isSelected = selectedUserIds.has(u.id);
 
@@ -546,6 +557,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   </div>
                 );
               })}
+              <PaginationBar
+                currentPage={safePage}
+                totalItems={filteredUsers.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                itemLabel="usuarios"
+              />
             </div>
           )}
         </div>

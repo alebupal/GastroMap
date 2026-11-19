@@ -15,6 +15,7 @@ import {
   deleteEmptyTagsAction,
 } from "@/lib/actions/taxonomy";
 import type { Occasion } from "@/db/schema";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 interface TaxonomyManagerProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
@@ -33,9 +34,13 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Filtros de búsqueda en el panel admin
+  // Filtros de búsqueda y paginación en el panel admin
   const [occasionSearch, setOccasionSearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
+  const [occPage, setOccPage] = useState(1);
+  const [occPageSize, setOccPageSize] = useState(10);
+  const [tagPage, setTagPage] = useState(1);
+  const [tagPageSize, setTagPageSize] = useState(15);
 
   // Selección múltiple
   const [selectedOccasionIds, setSelectedOccasionIds] = useState<Set<string>>(new Set());
@@ -101,6 +106,22 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
       (tag) => tag.name.toLowerCase().includes(q) || tag.id.toLowerCase().includes(q)
     );
   }, [initialTags, tagSearch]);
+
+  // Paginación de ocasiones
+  const occTotalPages = Math.max(1, Math.ceil(filteredOccasions.length / occPageSize));
+  const safeOccPage = Math.min(Math.max(1, occPage), occTotalPages);
+  const paginatedOccasions = useMemo(() => {
+    const start = (safeOccPage - 1) * occPageSize;
+    return filteredOccasions.slice(start, start + occPageSize);
+  }, [filteredOccasions, safeOccPage, occPageSize]);
+
+  // Paginación de tags
+  const tagTotalPages = Math.max(1, Math.ceil(filteredTags.length / tagPageSize));
+  const safeTagPage = Math.min(Math.max(1, tagPage), tagTotalPages);
+  const paginatedTags = useMemo(() => {
+    const start = (safeTagPage - 1) * tagPageSize;
+    return filteredTags.slice(start, start + tagPageSize);
+  }, [filteredTags, safeTagPage, tagPageSize]);
 
   // Categorías y tags vacías disponibles
   const emptyOccasions = useMemo(() => {
@@ -496,13 +517,13 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
               )}
 
               {/* Listado de categorías */}
-              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                {filteredOccasions.length === 0 ? (
+              <div className="space-y-2">
+                {paginatedOccasions.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">
                     No se encontró ninguna categoría con ese criterio.
                   </p>
                 ) : (
-                  filteredOccasions.map((occ) => {
+                  paginatedOccasions.map((occ) => {
                     const isSelected = selectedOccasionIds.has(occ.id);
                     const isEmpty = occ.placesCount === 0;
 
@@ -587,6 +608,15 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
                   })
                 )}
               </div>
+
+              <PaginationBar
+                currentPage={safeOccPage}
+                totalItems={filteredOccasions.length}
+                pageSize={occPageSize}
+                onPageChange={setOccPage}
+                onPageSizeChange={setOccPageSize}
+                itemLabel="categorías"
+              />
 
               {/* Formulario para añadir nueva categoría */}
               <form
@@ -724,15 +754,15 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
               )}
 
               {/* Listado de etiquetas */}
-              <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
-                {filteredTags.length === 0 ? (
+              <div className="space-y-1.5">
+                {paginatedTags.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">
                     {initialTags.length === 0
                       ? "No hay etiquetas creadas todavía."
                       : "No se encontró ninguna etiqueta con ese criterio."}
                   </p>
                 ) : (
-                  filteredTags.map((tag) => {
+                  paginatedTags.map((tag) => {
                     const isSelected = selectedTagIds.has(tag.id);
                     const isEmpty = tag.placesCount === 0;
 
@@ -811,6 +841,16 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
                   })
                 )}
               </div>
+
+              <PaginationBar
+                currentPage={safeTagPage}
+                totalItems={filteredTags.length}
+                pageSize={tagPageSize}
+                onPageChange={setTagPage}
+                onPageSizeChange={setTagPageSize}
+                pageSizeOptions={[10, 15, 25, 50]}
+                itemLabel="etiquetas"
+              />
             </div>
           )}
         </div>

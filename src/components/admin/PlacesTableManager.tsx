@@ -7,6 +7,7 @@ import {
   mergePlacesAction,
   type PlaceWithDetails,
 } from "@/lib/actions/places";
+import { PaginationBar } from "@/components/ui/PaginationBar";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
@@ -17,6 +18,8 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [cityFilter, setCityFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [mergeSource, setMergeSource] = useState<PlaceWithDetails | null>(null);
@@ -61,13 +64,17 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
     setSelectedIds(next);
   }
 
-  // Seleccionar / Deseleccionar todos los visibles
+  // Seleccionar / Deseleccionar todos los visibles de la página actual
   function toggleSelectAll() {
-    if (selectedIds.size === filteredPlaces.length && filteredPlaces.length > 0) {
-      setSelectedIds(new Set());
+    const pageIds = paginatedPlaces.map((p) => p.id);
+    const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
+    const next = new Set(selectedIds);
+    if (allPageSelected) {
+      pageIds.forEach((id) => next.delete(id));
     } else {
-      setSelectedIds(new Set(filteredPlaces.map((p) => p.id)));
+      pageIds.forEach((id) => next.add(id));
     }
+    setSelectedIds(next);
   }
 
   // Eliminación individual
@@ -161,7 +168,15 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
     });
   }, [placesList, mergeSource, mergeSearch]);
 
-  const allSelected = filteredPlaces.length > 0 && selectedIds.size === filteredPlaces.length;
+  const totalPages = Math.max(1, Math.ceil(filteredPlaces.length / pageSize));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+  const paginatedPlaces = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredPlaces.slice(start, start + pageSize);
+  }, [filteredPlaces, safePage, pageSize]);
+
+  const allSelected =
+    paginatedPlaces.length > 0 && paginatedPlaces.every((p) => selectedIds.has(p.id));
 
   return (
     <div className="w-full space-y-4 text-left">
@@ -173,7 +188,10 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Filtrar por nombre, ciudad, tag o autor..."
               className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
@@ -182,7 +200,10 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
           {cities.length > 0 && (
             <select
               value={cityFilter}
-              onChange={(e) => setCityFilter(e.target.value)}
+              onChange={(e) => {
+                setCityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
             >
               <option value="all">Todas las ciudades ({cities.length})</option>
@@ -260,14 +281,14 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-medium">
-              {filteredPlaces.length === 0 ? (
+              {paginatedPlaces.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
                     No se encontraron establecimientos que coincidan con la búsqueda.
                   </td>
                 </tr>
               ) : (
-                filteredPlaces.map((place) => {
+                paginatedPlaces.map((place) => {
                   const isChecked = selectedIds.has(place.id);
                   const hasCoords = place.latitude != null && place.longitude != null;
 
@@ -377,6 +398,16 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
           </table>
         </div>
       </div>
+
+      {/* Paginación de tabla de sitios */}
+      <PaginationBar
+        currentPage={safePage}
+        totalItems={filteredPlaces.length}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
+        itemLabel="sitios"
+      />
 
       {/* Modal de fusión administrativa de duplicados */}
       {mergeSource && (
