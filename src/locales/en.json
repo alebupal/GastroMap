@@ -103,7 +103,13 @@
     "remove_compare": "Remove from comparison",
     "add_compare": "Add to comparison",
     "compare_side_by_side": "Compare side by side",
-    "showing_geolocated": "Showing {count} geolocated places."
+    "showing_geolocated": "Showing {count} geolocated places.",
+    "roulette_tooltip": "Random pick among current results",
+    "export_import_tooltip": "Export or import places (JSON, CSV, GeoJSON, KML, Google Takeout)",
+    "save_filter_tooltip": "Save this combination of filters",
+    "apply_filter_tooltip": "Apply saved filter",
+    "delete_filter_tooltip": "Delete saved filter",
+    "clear_compare_tooltip": "Clear comparison"
   },
   "cards": {
     "pending": "Pending",
@@ -119,7 +125,13 @@
     "friends_badge": "From friends",
     "visited_badge": "Visited",
     "closed_temp": "Temp. closed",
-    "closed_perm": "Closed"
+    "closed_perm": "Closed",
+    "add_note_tooltip": "Add note or private rating",
+    "visits_tooltip": "Log or view my visits",
+    "website_tooltip": "Visit official website",
+    "phone_tooltip": "Call: {phone}",
+    "edit_tooltip": "Edit place",
+    "delete_tooltip": "Delete place"
   },
   "location": {
     "title": "Location & Coordinates",

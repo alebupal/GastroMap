@@ -30,7 +30,7 @@ export function LanguageSelector({
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         aria-label={t("common.language")}
-        className="appearance-none rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 pl-2.5 pr-6 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-500 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition"
+        className="appearance-none rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 pl-2.5 pr-6 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition"
       >
         {options.map((o) => (
           <option key={o.code} value={o.code}>

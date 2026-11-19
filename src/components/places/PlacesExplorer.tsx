@@ -611,7 +611,7 @@ export function PlacesExplorer({
               value={textSearch}
               onChange={(e) => setTextSearch(e.target.value)}
               placeholder={t("places.search_placeholder")}
-              className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 dark:focus:ring-amber-500/50 focus:border-amber-500 transition shadow-inner"
+              className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition shadow-inner"
             />
             <span className="absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-500 text-sm pointer-events-none">
               🔍
@@ -661,7 +661,7 @@ export function PlacesExplorer({
               onClick={() => setIsRandomModalOpen(true)}
               disabled={filteredPlaces.length === 0}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer disabled:opacity-40"
-              title="Elegir al azar entre los resultados actuales"
+              title={t("places.roulette_tooltip")}
             >
               <span>🎲</span>
               <span>{t("places.roulette")}</span>
@@ -672,7 +672,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setIsExportImportOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
-              title="Exportar o importar establecimientos (JSON, CSV, GeoJSON, KML, Google Takeout)"
+              title={t("places.export_import_tooltip")}
             >
               <span>📦</span>
               <span className="hidden sm:inline">{t("places.export_import")}</span>
@@ -711,7 +711,7 @@ export function PlacesExplorer({
                   type="button"
                   onClick={() => setIsSaveFilterOpen((v) => !v)}
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
-                  title="Guardar esta combinación de filtros"
+                  title={t("places.save_filter_tooltip")}
                 >
                   <span>💾</span>
                   <span className="hidden sm:inline">Guardar filtro</span>
@@ -740,7 +740,7 @@ export function PlacesExplorer({
               onChange={(e) => setNewFilterName(e.target.value)}
               placeholder="Ej. Tapear sin estrenar, Citas baratas..."
               autoFocus
-              className="flex-1 px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="flex-1 px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
             />
             <button
               type="submit"
@@ -772,7 +772,7 @@ export function PlacesExplorer({
                   type="button"
                   onClick={() => handleApplySavedFilter(sf)}
                   className="px-2.5 py-1 font-semibold text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
-                  title="Aplicar filtro guardado"
+                  title={t("places.apply_filter_tooltip")}
                 >
                   {sf.name}
                 </button>
@@ -780,7 +780,7 @@ export function PlacesExplorer({
                   type="button"
                   onClick={() => handleDeleteSavedFilter(sf.id)}
                   className="pr-2 pl-0.5 py-1 text-slate-400 hover:text-red-500 transition cursor-pointer text-[10px]"
-                  title="Eliminar filtro guardado"
+                  title={t("places.delete_filter_tooltip")}
                 >
                   ✕
                 </button>
@@ -1059,7 +1059,7 @@ export function PlacesExplorer({
               value={occasionSearchQuery}
               onChange={(e) => setOccasionSearchQuery(e.target.value)}
               placeholder={t("places.search_occasions_placeholder")}
-              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
             />
             {occasionSearchQuery && (
               <button
@@ -1231,7 +1231,7 @@ export function PlacesExplorer({
                   value={tagSearchQuery}
                   onChange={(e) => setTagSearchQuery(e.target.value)}
                   placeholder={t("places.search_tags_placeholder")}
-                  className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
                 />
                 {tagSearchQuery && (
                   <button
@@ -1470,7 +1470,7 @@ export function PlacesExplorer({
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
                     aria-label={t("places.sort_by")}
                   >
                     <option value="recent">🕒 {t("places.sort_recent")}</option>
@@ -1608,7 +1608,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setCompareIds([])}
               className="text-xs text-slate-400 hover:text-red-400 font-bold px-1 cursor-pointer"
-              title="Limpiar comparación"
+              title={t("places.clear_compare_tooltip")}
             >
               ✕
             </button>

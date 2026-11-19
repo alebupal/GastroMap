@@ -180,7 +180,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                 }
               }}
               placeholder={t("form.tags_search_placeholder")}
-              className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 transition"
             />
             {searchQuery && (
               <button

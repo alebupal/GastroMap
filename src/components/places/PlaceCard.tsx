@@ -278,9 +278,9 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowNotesModal(true)}
-            aria-label="Añadir o editar nota y puntuación privada"
+            aria-label={t("cards.add_note_tooltip")}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center gap-1.5 ml-auto active:scale-95"
-            title="Añadir nota o puntuación privada"
+            title={t("cards.add_note_tooltip")}
           >
             📝 {rating !== null ? `${rating}★` : t("cards.private_note")}
           </button>
@@ -298,9 +298,9 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
-            aria-label={`Comentarios del sitio (${commentsCount})`}
+            aria-label={`${t("cards.comments")} (${commentsCount})`}
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
-            title="Comentarios"
+            title={t("cards.comments")}
           >
             💬 {commentsCount > 0 ? commentsCount : ""}
           </button>
@@ -308,9 +308,9 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowVisitsModal(true)}
-            aria-label="Registrar o ver mis visitas"
+            aria-label={t("cards.visits_tooltip")}
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
-            title="Registrar o ver mis visitas"
+            title={t("cards.visits_tooltip")}
           >
             📅
           </button>
@@ -334,7 +334,7 @@ export function PlaceCard({
             <button
               onClick={onSelectOnMap}
               type="button"
-              aria-label="Localizar en el mapa"
+              aria-label={t("places.view_map")}
               className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
             >
               🗺️ {t("places.view_map")}
@@ -346,9 +346,9 @@ export function PlaceCard({
               href={place.website}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Página web oficial de ${place.name}`}
+              aria-label={t("cards.website_tooltip")}
               className="text-slate-500 hover:text-amber-500 text-xs transition p-1"
-              title="Visitar página web"
+              title={t("cards.website_tooltip")}
             >
               🌐
             </a>
@@ -357,9 +357,9 @@ export function PlaceCard({
           {place.phone && (
             <a
               href={`tel:${place.phone}`}
-              aria-label={`Llamar por teléfono a ${place.name}`}
+              aria-label={t("cards.phone_tooltip", { phone: place.phone })}
               className="text-slate-500 hover:text-emerald-500 text-xs transition p-1"
-              title={`Llamar: ${place.phone}`}
+              title={t("cards.phone_tooltip", { phone: place.phone })}
             >
               📞
             </a>
@@ -370,7 +370,7 @@ export function PlaceCard({
               href={place.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Abrir ${place.name} en Google Maps`}
+              aria-label={`Maps: ${place.name}`}
               className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1"
             >
               Maps ↗
@@ -381,9 +381,9 @@ export function PlaceCard({
             <button
               type="button"
               onClick={() => setShowEditModal(true)}
-              aria-label={`Editar datos de ${place.name}`}
+              aria-label={t("cards.edit_tooltip")}
               className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer p-1"
-              title="Editar establecimiento"
+              title={t("cards.edit_tooltip")}
             >
               ✏️
             </button>
@@ -393,9 +393,9 @@ export function PlaceCard({
             <button
               onClick={handleDelete}
               disabled={deleting}
-              aria-label={`Eliminar ${place.name}`}
+              aria-label={t("cards.delete_tooltip")}
               className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40 p-1"
-              title="Eliminar sitio"
+              title={t("cards.delete_tooltip")}
             >
               🗑️
             </button>

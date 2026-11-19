@@ -73,7 +73,7 @@ export function CountrySelect({ value, onChange, className = "" }: CountrySelect
           setIsOpen(!isOpen);
           setQuery("");
         }}
-        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs transition"
+        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 cursor-pointer shadow-xs transition"
       >
         <span className="flex items-center gap-2 truncate">
           <span className="text-base">{currentCountry.flag}</span>
@@ -95,7 +95,7 @@ export function CountrySelect({ value, onChange, className = "" }: CountrySelect
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("location.country_placeholder")}
-              className="w-full px-2.5 py-1.5 pl-7 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full px-2.5 py-1.5 pl-7 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 transition"
             />
             <span className="absolute left-2 top-1.5 text-xs text-slate-400 pointer-events-none">
               🔍

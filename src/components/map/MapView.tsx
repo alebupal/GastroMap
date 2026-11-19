@@ -117,6 +117,8 @@ export default function MapView({
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
       zoom: initialZoom,
+      minZoom: 2,
+      worldCopyJump: true,
       zoomControl: true,
       attributionControl: false,
     });

@@ -5,9 +5,14 @@
 ---
 
 ## ⚡ Regla de Oro de Ejecución
-El proyecto está en el subdirectorio `GastroMap`. Al ejecutar comandos de terminal, **siempre** usar:
+Ejecutar siempre los comandos desde el directorio del proyecto `GastroMap`:
 ```bash
-cd /home/abueno/Proyectos/alebupal/GastroMap && <comando>
+# Directamente en la raíz del proyecto GastroMap:
+npm test
+npx tsc -p tsconfig.json --noEmit
+
+# O si te encuentras en un directorio superior:
+cd GastroMap && <comando>
 ```
 
 ### Comandos Frecuentes

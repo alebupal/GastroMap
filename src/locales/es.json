@@ -103,7 +103,13 @@
     "remove_compare": "Quitar de comparar",
     "add_compare": "Añadir a comparar",
     "compare_side_by_side": "Comparar lado a lado",
-    "showing_geolocated": "Mostrando {count} locales geolocalizados."
+    "showing_geolocated": "Mostrando {count} locales geolocalizados.",
+    "roulette_tooltip": "Elegir al azar entre los resultados actuales",
+    "export_import_tooltip": "Exportar o importar establecimientos (JSON, CSV, GeoJSON, KML, Google Takeout)",
+    "save_filter_tooltip": "Guardar esta combinación de filtros",
+    "apply_filter_tooltip": "Aplicar filtro guardado",
+    "delete_filter_tooltip": "Eliminar filtro guardado",
+    "clear_compare_tooltip": "Limpiar comparación"
   },
   "cards": {
     "pending": "Pendiente",
@@ -119,7 +125,13 @@
     "friends_badge": "De amigos",
     "visited_badge": "Ya he ido",
     "closed_temp": "Cerrado temp.",
-    "closed_perm": "Cerrado"
+    "closed_perm": "Cerrado",
+    "add_note_tooltip": "Añadir nota o puntuación privada",
+    "visits_tooltip": "Registrar o ver mis visitas",
+    "website_tooltip": "Visitar página web oficial",
+    "phone_tooltip": "Llamar: {phone}",
+    "edit_tooltip": "Editar establecimiento",
+    "delete_tooltip": "Eliminar sitio"
   },
   "location": {
     "title": "Localización y Coordenadas",
