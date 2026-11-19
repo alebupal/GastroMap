@@ -20,6 +20,7 @@ import { PaginationBar } from "@/components/ui/PaginationBar";
 interface TaxonomyManagerProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: Array<{ id: string; name: string; placesCount: number }>;
+  section?: "occasions" | "tags";
 }
 
 const EMOJI_SUGGESTIONS = [
@@ -27,9 +28,10 @@ const EMOJI_SUGGESTIONS = [
   "🍕", "🌮", "🍣", "🍷", "🍻", "🍨", "🥡", "🍜", "🥩", "🥗"
 ];
 
-export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManagerProps) {
-  const [activeTab, setActiveTab] = useState<"occasions" | "tags">("occasions");
-  const [isOpen, setIsOpen] = useState(false);
+export function TaxonomyManager({ initialOccasions, initialTags, section }: TaxonomyManagerProps) {
+  const [activeTab, setActiveTab] = useState<"occasions" | "tags">(section || "occasions");
+  const [isOpen, setIsOpen] = useState(true);
+  const currentTab = section ?? activeTab;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -373,28 +375,30 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
 
   return (
     <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs text-left">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🏷️</span>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Taxonomía y Clasificaciones
-            </h3>
-            <p className="text-xs text-slate-500">
-              Administra, renombra, combina, elimina varias y limpia categorías y etiquetas vacías
-            </p>
+      {!section && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🏷️</span>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                Taxonomía y Clasificaciones
+              </h3>
+              <p className="text-xs text-slate-500">
+                Administra, renombra, combina, elimina varias y limpia categorías y etiquetas vacías
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
+          >
+            {isOpen ? "Cerrar" : "Gestionar"}
+          </button>
         </div>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
-        >
-          {isOpen ? "Cerrar" : "Gestionar"}
-        </button>
-      </div>
+      )}
 
-      {isOpen && (
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+      {(section || isOpen) && (
+        <div className={section ? "space-y-4" : "mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4"}>
           {/* Mensajes de feedback */}
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
@@ -407,32 +411,34 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
             </div>
           )}
 
-          {/* Selector de Pestañas */}
-          <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
-            <button
-              onClick={() => setActiveTab("occasions")}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                activeTab === "occasions"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-              }`}
-            >
-              Categorías / Planes ({initialOccasions.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("tags")}
-              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                activeTab === "tags"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-              }`}
-            >
-              Etiquetas / Especialidades ({initialTags.length})
-            </button>
-          </div>
+          {/* Selector de Pestañas (solo si no se ha fijado una sección específica) */}
+          {!section && (
+            <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
+              <button
+                onClick={() => setActiveTab("occasions")}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                  currentTab === "occasions"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Categorías / Planes ({initialOccasions.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("tags")}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
+                  currentTab === "tags"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
+              >
+                Etiquetas / Especialidades ({initialTags.length})
+              </button>
+            </div>
+          )}
 
           {/* ==================== PESTAÑA 1: CATEGORÍAS ==================== */}
-          {activeTab === "occasions" && (
+          {currentTab === "occasions" && (
             <div className="space-y-4">
               {/* Barra de herramientas: Buscador y Acciones masivas */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
@@ -669,7 +675,7 @@ export function TaxonomyManager({ initialOccasions, initialTags }: TaxonomyManag
           )}
 
           {/* ==================== PESTAÑA 2: ETIQUETAS ==================== */}
-          {activeTab === "tags" && (
+          {currentTab === "tags" && (
             <div className="space-y-4">
               {/* Barra de herramientas: Buscador y Acciones masivas */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">

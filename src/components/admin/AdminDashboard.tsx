@@ -28,7 +28,7 @@ export function AdminDashboard({
 }: AdminDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "places" | "users" | "taxonomy" | "invites" | "audit" | "settings" | "demo"
+    "places" | "users" | "occasions" | "tags" | "invites" | "audit" | "settings" | "demo"
   >("places");
 
   return (
@@ -69,7 +69,8 @@ export function AdminDashboard({
             {[
               { id: "places", label: `📋 Tabla Sitios (${allPlaces.length})` },
               { id: "users", label: "👥 Usuarios" },
-              { id: "taxonomy", label: "🏷️ Taxonomía" },
+              { id: "occasions", label: `🍽️ Categorías (${initialOccasions.length})` },
+              { id: "tags", label: `🏷️ Etiquetas (${initialTags.length})` },
               { id: "invites", label: "🎟️ Invitaciones" },
               { id: "audit", label: "📜 Auditoría" },
               { id: "settings", label: "🔑 API Keys" },
@@ -97,8 +98,21 @@ export function AdminDashboard({
           <div className="pt-2">
             {activeTab === "places" && <PlacesTableManager places={allPlaces} />}
             {activeTab === "users" && <UsersManager currentUserId={currentUserId} />}
-            {activeTab === "taxonomy" && (
-              <TaxonomyManager initialOccasions={initialOccasions} initialTags={initialTags} />
+            {activeTab === "occasions" && (
+              <TaxonomyManager
+                key="occasions"
+                section="occasions"
+                initialOccasions={initialOccasions}
+                initialTags={initialTags}
+              />
+            )}
+            {activeTab === "tags" && (
+              <TaxonomyManager
+                key="tags"
+                section="tags"
+                initialOccasions={initialOccasions}
+                initialTags={initialTags}
+              />
             )}
             {activeTab === "invites" && <InviteManager />}
             {activeTab === "audit" && <AuditLogViewer />}

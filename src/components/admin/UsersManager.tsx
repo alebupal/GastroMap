@@ -18,7 +18,7 @@ interface UsersManagerProps {
 }
 
 export function UsersManager({ currentUserId }: UsersManagerProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
