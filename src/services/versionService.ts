@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { APP_VERSION } from "@/lib/version";
 
 export interface VersionInfo {
   currentVersion: string;
@@ -19,16 +20,7 @@ class VersionService {
   private readonly cacheTtlMs = 30 * 60 * 1000; // 30 minutos
 
   public getLocalVersion(): string {
-    try {
-      const pkgPath = path.resolve(process.cwd(), "package.json");
-      if (fs.existsSync(pkgPath)) {
-        const data = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-        if (data?.version) return data.version.trim();
-      }
-    } catch (e) {
-      console.warn("[VersionService] Error leyendo versión local:", e instanceof Error ? e.message : e);
-    }
-    return "0.1.0";
+    return APP_VERSION;
   }
 
   public compareVersions(current: string, latest: string): "major" | "minor" | "patch" | null {

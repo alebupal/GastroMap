@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-11-19
+## [0.1.0] - 2026-11-18
 
 ### Added
 - **Multi-language System & Internationalization (TVSpy-style i18n)**:
@@ -21,7 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full database export button and secure endpoint (`/api/admin/backup`) to download all tables in JSON format with audit logging.
 - **GPX and KML Export/Import**:
   - Full bidirectional support for GPX tracks and waypoints (XML export and parser import) alongside KML.
-- **Group Invites with Max Uses & Configurable Expiry**:
+- **Private Group Invitations via Unique Links**:
+  - Replaced system user selection with unique invite link generation (`/groups/join/[token]`) for joining private groups.
+  - Active invite management in groups modal with one-click clipboard copy and revocation.
   - Support for max usage count (`maxUses`) and never-expiring links (`neverExpires`) on private group invitations.
 - **Rate Limiting & Security Headers**:
   - In-memory rate limiter (`rate-limit.ts`) guarding authentication, registration and token redemption.
@@ -33,17 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reactive Toast notification system with action/undo capability.
 - **Automated Test Suite**:
   - Native unit test suite (`npm test`) asserting translation integrity, Haversine spatial calculations, coordinate safety and GPX output.
-
-### Fixed
-- Fixed `Cannot read properties of undefined (reading 'writeText')` in non-secure HTTP contexts.
-- Removed unwanted "PRO" badge from Admin Dashboard header.
-
-## [0.1.0] - 2026-11-18
-
-### Added
-- **Private Group Invitations via Unique Links**:
-  - Replaced system user selection with unique invite link generation (`/groups/join/[token]`) for joining private groups.
-  - Active invite management in groups modal with one-click clipboard copy and revocation.
 - **Private Groups Filter & Numeric Price Ranges**:
   - Quick top-bar filter for exploring places shared via one or multiple private groups.
   - Replaced price icons (`€`, `€€`, `€€€`, `€€€€`) with explicit numerical ranges (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`) across cards, filters, modales and map popups.

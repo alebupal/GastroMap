@@ -5,7 +5,7 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
-## [0.2.0] - 2026-11-19
+## [0.1.0] - 2026-11-18
 
 ### Añadido
 - **Sistema Multi-idioma e Internacionalización (i18n estilo TVSpy)**:
@@ -21,8 +21,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Nuevo botón y endpoint seguro (`/api/admin/backup`) para descargar una copia de seguridad íntegra en formato JSON de todas las tablas con registro de auditoría.
 - **Exportación e Importación GPX y KML**:
   - Soporte bidireccional completo para tracks y waypoints en formato GPX (exportación XML e importación) junto a KML.
-- **Invitaciones con Límite de Usos y Caducidad Configurable**:
-  - Posibilidad de definir límite máximo de usos (`maxUses`) y enlaces que nunca caducan (`neverExpires`) para grupos privados.
+- **Invitaciones a Grupos Privados mediante Enlace**:
+  - Sustituida la selección de usuarios del sistema por generación de enlaces de invitación únicos (`/groups/join/[token]`) para unirse a grupos privados.
+  - Gestión de enlaces activos en el modal de grupos con copia al portapapeles y revocación anticipada.
+  - Posibilidad de definir límite máximo de usos (`maxUses`) y enlaces que nunca caducan (`neverExpires`).
 - **Rate Limiting y Cabeceras de Seguridad**:
   - Limitador de tasa en memoria (`rate-limit.ts`) para proteger contra fuerza bruta el inicio de sesión, registro y uniones a grupos.
   - Cabeceras HTTP de seguridad estrictas configuradas en Next.js (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
@@ -33,17 +35,6 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Sistema reactivo de notificaciones Toast con soporte para botones de acción interactivos.
 - **Suite de Tests Automatizados**:
   - Pruebas unitarias nativas con `npm test` verificando consistencia de traducciones, fórmulas Haversine, validación de coordenadas y exportador GPX.
-
-### Corregido
-- Eliminado error `Cannot read properties of undefined (reading 'writeText')` en contextos HTTP no seguros.
-- Eliminado el distintivo "PRO" innecesario del Panel de Administración.
-
-## [0.1.0] - 2026-11-18
-
-### Añadido
-- **Invitaciones a Grupos Privados mediante Enlace**:
-  - Sustituida la selección de usuarios del sistema por generación de enlaces de invitación únicos (`/groups/join/[token]`) para unirse a grupos privados.
-  - Gestión de enlaces activos en el modal de grupos con copia al portapapeles y revocación anticipada.
 - **Filtro de Grupos Privados y Rangos de Precios Numéricos**:
   - Filtro rápido en la barra superior para explorar locales compartidos por uno o varios grupos privados.
   - Reemplazo de iconos de precio (`€`, `€€`, `€€€`, `€€€€`) por rangos de números explícitos (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`) en filtros, tarjetas, modales y popups.

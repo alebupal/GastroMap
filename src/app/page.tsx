@@ -9,6 +9,7 @@ import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
+import { APP_VERSION } from "@/lib/version";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function Home() {
     getSavedFiltersAction(),
   ]);
 
-  const version = versionService.getLocalVersion();
+  const version = APP_VERSION;
 
   // Mapa rápido de ID de ocasión a su objeto { name, icon }
   const occasionMap = occasionsList.reduce<Record<string, { name: string; icon: string }>>(

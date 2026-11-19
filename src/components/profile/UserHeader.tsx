@@ -8,6 +8,7 @@ import { GroupsModal } from "./GroupsModal";
 import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { APP_VERSION } from "@/lib/version";
 
 interface UserHeaderProps {
   currentUser: {
@@ -64,7 +65,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                 GastroMap
               </span>
               <span className="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/90 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700/60">
-                v0.2.0
+                v{APP_VERSION}
               </span>
             </div>
           </div>

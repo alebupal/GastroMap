@@ -1,3 +1,5 @@
+import { APP_VERSION } from "./version";
+
 export interface GeocodingResult {
   displayName: string;
   road?: string;
@@ -25,7 +27,7 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "GastroMap/0.1.0 (self-hosted gastronomic tracker)",
+        "User-Agent": `GastroMap/${APP_VERSION} (self-hosted gastronomic tracker)`,
         "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
       },
       signal: AbortSignal.timeout(4500),
@@ -81,7 +83,7 @@ export async function reverseGeocodeNominatim(
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "GastroMap/0.1.0 (self-hosted gastronomic tracker)",
+        "User-Agent": `GastroMap/${APP_VERSION} (self-hosted gastronomic tracker)`,
         "Accept-Language": "es-ES,es;q=0.9",
       },
       signal: AbortSignal.timeout(4500),
