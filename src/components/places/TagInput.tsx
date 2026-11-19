@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useT } from "@/lib/i18n/client";
 
 const PRESET_TAGS = [
   { id: "italiana", label: "🍕 Italiana" },
@@ -35,6 +36,7 @@ function normalizeTagInput(raw: string): string {
 }
 
 export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps) {
+  const { t } = useT();
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -123,11 +125,13 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-          Etiquetas y especialidades ({allPills.length})
+          {t("form.tags_title", { count: allPills.length })}
         </label>
         {selectedTags.length > 0 && (
           <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-            {selectedTags.length} {selectedTags.length === 1 ? "marcada" : "marcadas"}
+            {selectedTags.length === 1
+              ? t("form.tags_selected_single", { count: selectedTags.length })
+              : t("form.tags_selected_multiple", { count: selectedTags.length })}
           </span>
         )}
       </div>
@@ -143,7 +147,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                 type="button"
                 onClick={() => toggleTag(tagId)}
                 className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-500 text-slate-950 border border-amber-500 shadow-xs flex items-center gap-1 cursor-pointer hover:bg-amber-600 transition"
-                title="Quitar etiqueta"
+                title={t("form.tags_remove_title")}
               >
                 <span>{pill ? pill.label : `#${tagId}`}</span>
                 <span className="text-[10px] opacity-80">✕</span>
@@ -175,7 +179,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                   }
                 }
               }}
-              placeholder="Buscar etiqueta o escribir nueva (ej. ramen, tapas...)"
+              placeholder={t("form.tags_search_placeholder")}
               className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
             {searchQuery && (
@@ -204,7 +208,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
         <div className="flex flex-wrap gap-1.5">
           {displayedPills.length === 0 ? (
             <p className="text-[11px] text-slate-400 italic py-1">
-              Sin coincidencias. Pulsa «+ #{normalizedSearch}» para crearla al vuelo.
+              {t("form.tags_no_matches", { query: normalizedSearch })}
             </p>
           ) : (
             displayedPills.map((pill) => {
@@ -237,10 +241,10 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                 onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_STEP)}
                 className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
               >
-                + Mostrar más ({remainingCount} restantes)
+                {t("places.show_more_remaining", { count: remainingCount })}
               </button>
             ) : (
-              <span className="text-slate-400">Mostrando todas las etiquetas</span>
+              <span className="text-slate-400">{t("places.showing_all_tags")}</span>
             )}
 
             {visibleCount > INITIAL_VISIBLE && (
@@ -249,7 +253,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                 onClick={() => setVisibleCount(INITIAL_VISIBLE)}
                 className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
               >
-                ▲ Ver menos
+                {t("places.show_less")}
               </button>
             )}
           </div>

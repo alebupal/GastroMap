@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useT } from "@/lib/i18n/client";
 
 const INITIAL_VISIBLE = 10;
 const LOAD_MORE_STEP = 12;
@@ -24,9 +25,11 @@ export function OccasionPicker({
   occasions,
   selectedOccasions,
   onToggle,
-  label = "Planes / Categorías",
+  label,
   renderHiddenInputs = false,
 }: OccasionPickerProps) {
+  const { t } = useT();
+  const displayLabel = label || t("places.plans_title");
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
@@ -66,12 +69,13 @@ export function OccasionPicker({
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-          {label} ({occasions.length})
+          {displayLabel} ({occasions.length})
         </label>
         {selectedOccasions.length > 0 && (
           <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-            {selectedOccasions.length}{" "}
-            {selectedOccasions.length === 1 ? "seleccionado" : "seleccionados"}
+            {selectedOccasions.length === 1
+              ? t("form.occasions_selected_single", { count: selectedOccasions.length })
+              : t("form.occasions_selected_multiple", { count: selectedOccasions.length })}
           </span>
         )}
       </div>
@@ -86,7 +90,7 @@ export function OccasionPicker({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar plan o categoría..."
+              placeholder={t("form.occasions_search_placeholder")}
               className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
             {searchQuery && (
@@ -104,7 +108,7 @@ export function OccasionPicker({
         <div className="flex flex-wrap gap-1.5">
           {displayedOccasions.length === 0 ? (
             <p className="text-[11px] text-slate-400 italic py-1">
-              No se encontró ninguna categoría con «{searchQuery}».
+              {t("form.occasions_no_results", { query: searchQuery })}
             </p>
           ) : (
             displayedOccasions.map((occ) => {
@@ -137,10 +141,10 @@ export function OccasionPicker({
                 onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_STEP)}
                 className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
               >
-                + Mostrar más ({remainingCount} restantes)
+                {t("places.show_more_remaining", { count: remainingCount })}
               </button>
             ) : (
-              <span className="text-slate-400">Mostrando todas las categorías</span>
+              <span className="text-slate-400">{t("places.showing_all_categories")}</span>
             )}
 
             {visibleCount > INITIAL_VISIBLE && (
@@ -149,7 +153,7 @@ export function OccasionPicker({
                 onClick={() => setVisibleCount(INITIAL_VISIBLE)}
                 className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
               >
-                ▲ Ver menos
+                {t("places.show_less")}
               </button>
             )}
           </div>

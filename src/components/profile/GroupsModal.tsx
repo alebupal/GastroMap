@@ -185,7 +185,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                 {t("groups.title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir
+                {t("groups.subtitle")}
               </p>
             </div>
           </div>

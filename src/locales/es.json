@@ -184,7 +184,19 @@
     "status_perm_closed": "Cerrado perm.",
     "save_changes": "Guardar cambios",
     "website_label": "Página web oficial",
-    "phone_label": "Teléfono de contacto"
+    "phone_label": "Teléfono de contacto",
+    "occasions_selected_single": "{count} seleccionado",
+    "occasions_selected_multiple": "{count} seleccionados",
+    "occasions_search_placeholder": "Buscar plan o categoría...",
+    "occasions_no_results": "No se encontró ninguna categoría con «{query}».",
+    "tags_title": "Etiquetas y especialidades ({count})",
+    "tags_selected_single": "{count} marcada",
+    "tags_selected_multiple": "{count} marcadas",
+    "tags_remove_title": "Quitar etiqueta",
+    "tags_search_placeholder": "Buscar etiqueta o escribir nueva (ej. ramen, tapas...)",
+    "tags_no_matches": "Sin coincidencias. Pulsa «+ #{query}» para crearla al vuelo.",
+    "status_temporarily_closed": "Cerrado temp.",
+    "status_permanently_closed": "Cerrado perm."
   },
   "profile": {
     "title": "Editar mi perfil",
@@ -350,7 +362,8 @@
     "loading": "Cargando grupos...",
     "empty_title": "Aún no tienes ningún grupo privado",
     "empty_desc": "Crea uno arriba y genera un enlace de invitación para compartir recomendaciones solo con quien tú elijas.",
-    "yourself": "ti mismo"
+    "yourself": "ti mismo",
+    "subtitle": "Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir"
   },
   "common": {
     "save": "Guardar",

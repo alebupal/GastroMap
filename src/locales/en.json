@@ -184,7 +184,19 @@
     "status_perm_closed": "Permanently closed",
     "save_changes": "Save changes",
     "website_label": "Official website",
-    "phone_label": "Phone number"
+    "phone_label": "Phone number",
+    "occasions_selected_single": "{count} selected",
+    "occasions_selected_multiple": "{count} selected",
+    "occasions_search_placeholder": "Search plan or category...",
+    "occasions_no_results": "No category found matching \"{query}\".",
+    "tags_title": "Tags and specialties ({count})",
+    "tags_selected_single": "{count} marked",
+    "tags_selected_multiple": "{count} marked",
+    "tags_remove_title": "Remove tag",
+    "tags_search_placeholder": "Search tag or write new (e.g. ramen, tapas...)",
+    "tags_no_matches": "No matches. Click \"+ #{query}\" to create on the fly.",
+    "status_temporarily_closed": "Temporarily closed",
+    "status_permanently_closed": "Permanently closed"
   },
   "profile": {
     "title": "Edit my profile",
@@ -350,7 +362,8 @@
     "loading": "Loading groups...",
     "empty_title": "You don\"t have any private groups yet",
     "empty_desc": "Create one above and generate an invitation link to share recommendations only with people you choose.",
-    "yourself": "yourself"
+    "yourself": "yourself",
+    "subtitle": "Create groups (e.g. Partner, Friends or Family) and generate invite links to share"
   },
   "common": {
     "save": "Save",
