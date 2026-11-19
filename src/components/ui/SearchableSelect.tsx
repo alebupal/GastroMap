@@ -37,7 +37,9 @@ export function SearchableSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
 
   // Determinar la opción seleccionada actualmente
   const selectedOption = useMemo(() => {
@@ -62,10 +64,46 @@ export function SearchableSelect({
     );
   }, [options, query]);
 
+  // Posicionar el menú usando coordenadas fijas para evitar ser recortado por contenedores con overflow
+  useEffect(() => {
+    function updateCoords() {
+      if (dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        const popupWidth = window.innerWidth < 640 ? 256 : 288;
+        let left = rect.left;
+        if (left + popupWidth > window.innerWidth - 12) {
+          left = window.innerWidth - popupWidth - 12;
+        }
+        if (left < 12) left = 12;
+
+        setCoords({
+          top: rect.bottom + 6,
+          left,
+        });
+      }
+    }
+
+    if (isOpen) {
+      updateCoords();
+      window.addEventListener("scroll", updateCoords, true);
+      window.addEventListener("resize", updateCoords);
+    }
+    return () => {
+      window.removeEventListener("scroll", updateCoords, true);
+      window.removeEventListener("resize", updateCoords);
+    };
+  }, [isOpen]);
+
   // Cerrar al hacer clic fuera o presionar Escape
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     }
@@ -94,7 +132,7 @@ export function SearchableSelect({
 
   return (
     <div ref={dropdownRef} className={`relative inline-block ${className}`}>
-      {/* Botón selector principal (mismo estilo que CountrySelect) */}
+      {/* Botón selector principal */}
       <button
         type="button"
         aria-label={ariaLabel || displayLabel}
@@ -103,7 +141,7 @@ export function SearchableSelect({
           setIsOpen(!isOpen);
           setQuery("");
         }}
-        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-semibold focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs transition shrink-0 ${buttonClassName}`}
+        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-bold outline-none focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer shadow-xs transition shrink-0 ${buttonClassName}`}
       >
         <span className="flex items-center gap-1.5 truncate">
           {displayIcon && <span className="text-base shrink-0">{displayIcon}</span>}
@@ -114,10 +152,18 @@ export function SearchableSelect({
         </span>
       </button>
 
-      {/* Menú desplegable con buscador idéntico a CountrySelect */}
+      {/* Menú desplegable con buscador emergente sobre cualquier contenedor con overflow */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-          {/* Buscador superior */}
+        <div
+          ref={menuRef}
+          style={{
+            position: "fixed",
+            top: coords ? `${coords.top}px` : "auto",
+            left: coords ? `${coords.left}px` : "auto",
+          }}
+          className="z-[9999] w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col animate-in fade-in zoom-in-95 duration-100"
+        >
+          {/* Buscador superior sin anillo naranja invasivo */}
           <div className="relative shrink-0">
             <input
               ref={inputRef}
@@ -125,7 +171,7 @@ export function SearchableSelect({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full px-2.5 py-1.5 pl-7 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full px-2.5 py-1.5 pl-7 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 transition"
             />
             <span className="absolute left-2 top-1.5 text-xs text-slate-400 pointer-events-none">
               🔍
