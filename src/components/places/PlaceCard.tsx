@@ -8,6 +8,7 @@ import {
 } from "@/lib/actions/interactions";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
+import { PlaceVisitsModal } from "./PlaceVisitsModal";
 import { EditPlaceModal } from "./EditPlaceModal";
 
 interface PlaceCardProps {
@@ -18,6 +19,8 @@ interface PlaceCardProps {
   occasionsList?: Array<{ id: string; name: string; icon: string }>;
   availableTags?: string[];
   onSelectOnMap?: () => void;
+  isCompared?: boolean;
+  onToggleCompare?: () => void;
 }
 
 export function PlaceCard({
@@ -28,6 +31,8 @@ export function PlaceCard({
   occasionsList = [],
   availableTags = [],
   onSelectOnMap,
+  isCompared = false,
+  onToggleCompare,
 }: PlaceCardProps) {
   const [deleting, setDeleting] = useState(false);
   const [favorite, setFavorite] = useState(place.isFavorite ?? false);
@@ -39,6 +44,7 @@ export function PlaceCard({
   const [commentsCount, setCommentsCount] = useState(place.commentsCount ?? 0);
   const [showComments, setShowComments] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showVisitsModal, setShowVisitsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
   const canDelete = isAdmin || place.createdById === currentUserId;
@@ -280,9 +286,34 @@ export function PlaceCard({
             type="button"
             onClick={() => setShowComments(!showComments)}
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer"
+            title="Comentarios"
           >
             💬 {commentsCount > 0 ? commentsCount : ""}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowVisitsModal(true)}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition cursor-pointer"
+            title="Registrar o ver mis visitas"
+          >
+            📅
+          </button>
+
+          {onToggleCompare && (
+            <button
+              type="button"
+              onClick={onToggleCompare}
+              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 rounded-lg ${
+                isCompared
+                  ? "bg-amber-500 text-slate-950 font-bold"
+                  : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
+              }`}
+              title={isCompared ? "Quitar del comparador" : "Comparar lado a lado"}
+            >
+              ⚖️
+            </button>
+          )}
 
           {hasCoords && onSelectOnMap && (
             <button
@@ -372,6 +403,18 @@ export function PlaceCard({
         onSave={(newRating, newNotes) => {
           setRating(newRating);
           setPrivateNotes(newNotes);
+        }}
+      />
+
+      {/* Modal de historial de visitas con fecha */}
+      <PlaceVisitsModal
+        placeId={place.id}
+        placeName={place.name}
+        isOpen={showVisitsModal}
+        onClose={() => setShowVisitsModal(false)}
+        onVisitAdded={(newRating) => {
+          setPersonalStatus("visited");
+          if (newRating !== null) setRating(newRating);
         }}
       />
 

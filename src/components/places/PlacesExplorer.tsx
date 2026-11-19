@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { PlaceCard } from "./PlaceCard";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { RandomPickerModal } from "./RandomPickerModal";
 import { DecisionAssistantModal } from "./DecisionAssistantModal";
+import { ExportImportModal } from "./ExportImportModal";
+import { ComparePlacesModal } from "./ComparePlacesModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import {
@@ -69,9 +71,55 @@ export function PlacesExplorer({
   // Asistente y filtros avanzados (Fase 4)
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isExportImportOpen, setIsExportImportOpen] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
   const [experienceFilter, setExperienceFilter] = useState<
     "all" | "visited_by_me" | "visited_by_others" | "untried" | "favorite" | "pending"
   >("all");
+
+  // Registro PWA Service Worker y caché offline de favoritos / pendientes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    // Guardar favoritos y pendientes en caché local para consulta sin cobertura
+    try {
+      const offlineCollection = initialPlaces.filter(
+        (p) => p.isFavorite || p.personalStatus === "pending"
+      );
+      localStorage.setItem(
+        "gastromap_offline_collection_v1",
+        JSON.stringify({
+          updatedAt: new Date().toISOString(),
+          places: offlineCollection,
+        })
+      );
+    } catch {
+      // Ignorar si localStorage no está disponible
+    }
+
+    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
+    updateOnlineStatus();
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, [initialPlaces]);
+
+  function toggleComparePlace(placeId: string) {
+    setCompareIds((prev) => {
+      if (prev.includes(placeId)) return prev.filter((id) => id !== placeId);
+      if (prev.length >= 3) return [...prev.slice(1), placeId];
+      return [...prev, placeId];
+    });
+  }
 
   // Geolocalización
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -411,6 +459,14 @@ export function PlacesExplorer({
 
   return (
     <div className="w-full space-y-4">
+      {/* Banner discreto en modo sin conexión (PWA offline) */}
+      {isOffline && (
+        <div className="px-4 py-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-2">
+          <span>📡 Modo sin conexión — Consultando datos en caché offline</span>
+          <span className="text-[11px] opacity-75">Solo lectura</span>
+        </div>
+      )}
+
       {/* =========================================================================
           HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida
          ========================================================================= */}
@@ -477,6 +533,17 @@ export function PlacesExplorer({
             >
               <span>🎲</span>
               <span>Ruleta</span>
+            </button>
+
+            {/* Botón Importar / Exportar */}
+            <button
+              type="button"
+              onClick={() => setIsExportImportOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+              title="Exportar o importar establecimientos (JSON, CSV, GeoJSON, KML, Google Takeout)"
+            >
+              <span>📦</span>
+              <span className="hidden sm:inline">Importar / Exportar</span>
             </button>
           </div>
 
@@ -1132,6 +1199,8 @@ export function PlacesExplorer({
                   occasionsList={occasionsList}
                   availableTags={tagsList.map((t) => t.name)}
                   onSelectOnMap={() => handleSelectOnMap(place.id)}
+                  isCompared={compareIds.includes(place.id)}
+                  onToggleCompare={() => toggleComparePlace(place.id)}
                 />
               ))}
             </div>
@@ -1187,6 +1256,34 @@ export function PlacesExplorer({
         </button>
       </div>
 
+      {/* Barra flotante del Comparador de Establecimientos (hasta 3 sitios) */}
+      {compareIds.length > 0 && (
+        <div className="fixed bottom-20 lg:bottom-5 left-1/2 -translate-x-1/2 z-40">
+          <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
+            <span className="text-xs font-bold flex items-center gap-1.5">
+              <span>⚖️</span>
+              <span>Comparar ({compareIds.length}/3)</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsCompareOpen(true)}
+              disabled={compareIds.length < 2}
+              className="px-3 py-1 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Abrir
+            </button>
+            <button
+              type="button"
+              onClick={() => setCompareIds([])}
+              className="text-xs text-slate-400 hover:text-red-400 font-bold px-1 cursor-pointer"
+              title="Limpiar comparación"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modales Interactivos */}
       <RandomPickerModal
         isOpen={isRandomModalOpen}
@@ -1213,6 +1310,21 @@ export function PlacesExplorer({
         radiusKm={radiusKm || 10}
         onChangeRadius={(km) => setRadiusKm(km)}
         onReset={resetAllFilters}
+      />
+
+      <ExportImportModal
+        isOpen={isExportImportOpen}
+        onClose={() => setIsExportImportOpen(false)}
+        places={filteredPlaces}
+      />
+
+      <ComparePlacesModal
+        isOpen={isCompareOpen}
+        onClose={() => setIsCompareOpen(false)}
+        places={initialPlaces.filter((p) => compareIds.includes(p.id))}
+        occasionMap={occasionMap}
+        onRemovePlace={(id) => toggleComparePlace(id)}
+        onSelectOnMap={handleSelectOnMap}
       />
     </div>
   );

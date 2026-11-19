@@ -4,6 +4,7 @@ import { useState } from "react";
 import { logoutAction } from "@/lib/actions/auth";
 import { EditProfileModal } from "./EditProfileModal";
 import { GroupsModal } from "./GroupsModal";
+import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface UserHeaderProps {
@@ -19,6 +20,7 @@ interface UserHeaderProps {
 export function UserHeader({ currentUser }: UserHeaderProps) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
 
   const displayUsername = currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "");
 
@@ -56,6 +58,17 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
           >
             <span className="text-sm">👥</span>
             <span className="hidden md:inline text-[11px] font-bold">Grupos</span>
+          </button>
+
+          {/* Mis Estadísticas y Wrapped */}
+          <button
+            type="button"
+            onClick={() => setIsStatsOpen(true)}
+            className="w-8 h-8 sm:w-auto p-1.5 sm:px-2.5 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+            title="Mis estadísticas y Wrapped"
+          >
+            <span className="text-sm">📊</span>
+            <span className="hidden md:inline text-[11px] font-bold">Stats</span>
           </button>
 
           {/* Enlaces de comunidad: GitHub y PayPal */}
@@ -136,6 +149,13 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         isOpen={isGroupsOpen}
         onClose={() => setIsGroupsOpen(false)}
         currentUserId={currentUser.id}
+      />
+
+      {/* Modal de estadísticas personales y Wrapped */}
+      <StatsModal
+        isOpen={isStatsOpen}
+        onClose={() => setIsStatsOpen(false)}
+        username={displayUsername}
       />
     </>
   );

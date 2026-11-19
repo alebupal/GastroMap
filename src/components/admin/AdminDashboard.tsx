@@ -8,6 +8,7 @@ import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
 import { PlacesTableManager } from "./PlacesTableManager";
 import { AuditLogViewer } from "./AuditLogViewer";
+import { AdminStatsPanel } from "./AdminStatsPanel";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
@@ -28,7 +29,7 @@ export function AdminDashboard({
 }: AdminDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "places" | "users" | "taxonomy" | "invites" | "audit" | "settings" | "demo"
+    "stats" | "places" | "users" | "taxonomy" | "invites" | "audit" | "settings" | "demo"
   >("places");
 
   return (
@@ -67,6 +68,7 @@ export function AdminDashboard({
           {/* Navegación por pestañas */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs border-b border-slate-200 dark:border-slate-800/60">
             {[
+              { id: "stats", label: "📊 Estadísticas" },
               { id: "places", label: `📋 Tabla Sitios (${allPlaces.length})` },
               { id: "users", label: "👥 Usuarios" },
               { id: "taxonomy", label: "🏷️ Taxonomía" },
@@ -95,6 +97,7 @@ export function AdminDashboard({
 
           {/* Contenido de la pestaña activa */}
           <div className="pt-2">
+            {activeTab === "stats" && <AdminStatsPanel />}
             {activeTab === "places" && <PlacesTableManager places={allPlaces} />}
             {activeTab === "users" && <UsersManager currentUserId={currentUserId} />}
             {activeTab === "taxonomy" && (

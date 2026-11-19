@@ -1,0 +1,531 @@
+"use client";
+
+import { useState } from "react";
+import type { PlaceWithDetails } from "@/lib/actions/places";
+import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
+
+interface ExportImportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  places: PlaceWithDetails[];
+}
+
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function escapeCsv(val: string | number | null | undefined): string {
+  if (val === null || val === undefined) return "";
+  const str = String(val);
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function escapeXml(val: string): string {
+  return val
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function parseCsvLine(line: string): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function parseUploadedFile(text: string, filename: string): ImportPlacePayload[] {
+  const lower = filename.toLowerCase();
+
+  // 1. JSON / GeoJSON / Google Takeout Saved Places
+  if (lower.endsWith(".json") || lower.endsWith(".geojson")) {
+    const parsed = JSON.parse(text);
+
+    // GeoJSON FeatureCollection (incl. Google Takeout Saved Places.json)
+    if (parsed && parsed.type === "FeatureCollection" && Array.isArray(parsed.features)) {
+      const items: ImportPlacePayload[] = [];
+      for (const feat of parsed.features) {
+        const props = feat.properties || {};
+        const loc = props.Location || props.location || {};
+        const coords =
+          feat.geometry?.type === "Point" && Array.isArray(feat.geometry.coordinates)
+            ? feat.geometry.coordinates
+            : null;
+        const name = props.Title || props.name || loc["Business Name"] || props.title || "";
+        if (!name) continue;
+        const lng = coords ? Number(coords[0]) : loc["Geo Coordinates"]?.Longitude ? Number(loc["Geo Coordinates"].Longitude) : null;
+        const lat = coords ? Number(coords[1]) : loc["Geo Coordinates"]?.Latitude ? Number(loc["Geo Coordinates"].Latitude) : null;
+
+        items.push({
+          name: String(name),
+          address: props.address || loc.Address || null,
+          city: props.city || null,
+          latitude: lat && !isNaN(lat) ? lat : null,
+          longitude: lng && !isNaN(lng) ? lng : null,
+          googleMapsUrl: props["Google Maps URL"] || props.googleMapsUrl || null,
+          priceRange: props.priceRange || "???",
+          notes: props.Comment || props.notes || null,
+          occasions: Array.isArray(props.occasions) ? props.occasions : [],
+          tags: Array.isArray(props.tags) ? props.tags : [],
+        });
+      }
+      return items;
+    }
+
+    // Array directo (exportación GastroMap JSON)
+    const arr = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.places) ? parsed.places : [];
+    return arr
+      .filter((item: Record<string, unknown>) => typeof item?.name === "string" && item.name.trim().length > 1)
+      .map((item: Record<string, unknown>) => ({
+        name: String(item.name),
+        city: item.city ? String(item.city) : null,
+        address: item.address ? String(item.address) : null,
+        latitude: typeof item.latitude === "number" ? item.latitude : null,
+        longitude: typeof item.longitude === "number" ? item.longitude : null,
+        priceRange: typeof item.priceRange === "string" ? item.priceRange : "???",
+        googleMapsUrl: item.googleMapsUrl ? String(item.googleMapsUrl) : null,
+        website: item.website ? String(item.website) : null,
+        phone: item.phone ? String(item.phone) : null,
+        notes: item.notes ? String(item.notes) : null,
+        occasions: Array.isArray(item.occasions) ? item.occasions.map(String) : [],
+        tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
+      }));
+  }
+
+  // 2. CSV
+  if (lower.endsWith(".csv")) {
+    const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    if (lines.length < 2) return [];
+    const headers = parseCsvLine(lines[0]).map((h) => h.toLowerCase());
+    const idx = (names: string[]) => headers.findIndex((h) => names.includes(h));
+
+    const nameIdx = idx(["name", "nombre", "title", "titulo"]);
+    if (nameIdx === -1) return [];
+    const cityIdx = idx(["city", "ciudad", "municipio"]);
+    const addrIdx = idx(["address", "direccion", "dirección"]);
+    const latIdx = idx(["latitude", "lat", "latitud"]);
+    const lngIdx = idx(["longitude", "lng", "lon", "longitud"]);
+    const priceIdx = idx(["pricerange", "price", "precio"]);
+    const mapsIdx = idx(["googlemapsurl", "url", "maps", "google_maps_url"]);
+    const notesIdx = idx(["notes", "notas", "comment", "comentario"]);
+    const tagsIdx = idx(["tags", "etiquetas"]);
+
+    const items: ImportPlacePayload[] = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCsvLine(lines[i]);
+      const name = cols[nameIdx]?.trim();
+      if (!name || name.length < 2) continue;
+
+      const lat = latIdx >= 0 && cols[latIdx] ? parseFloat(cols[latIdx]) : null;
+      const lng = lngIdx >= 0 && cols[lngIdx] ? parseFloat(cols[lngIdx]) : null;
+
+      items.push({
+        name,
+        city: cityIdx >= 0 ? cols[cityIdx] || null : null,
+        address: addrIdx >= 0 ? cols[addrIdx] || null : null,
+        latitude: lat !== null && !isNaN(lat) ? lat : null,
+        longitude: lng !== null && !isNaN(lng) ? lng : null,
+        priceRange: priceIdx >= 0 && cols[priceIdx] ? cols[priceIdx] : "???",
+        googleMapsUrl: mapsIdx >= 0 ? cols[mapsIdx] || null : null,
+        notes: notesIdx >= 0 ? cols[notesIdx] || null : null,
+        tags:
+          tagsIdx >= 0 && cols[tagsIdx]
+            ? cols[tagsIdx].split(/[;|]/).map((t) => t.trim()).filter(Boolean)
+            : [],
+      });
+    }
+    return items;
+  }
+
+  return [];
+}
+
+export function ExportImportModal({ isOpen, onClose, places }: ExportImportModalProps) {
+  const [tab, setTab] = useState<"export" | "import">("export");
+  const [previewItems, setPreviewItems] = useState<ImportPlacePayload[]>([]);
+  const [fileName, setFileName] = useState<string>("");
+  const [importPublic, setImportPublic] = useState(true);
+  const [importing, setImporting] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  if (!isOpen) return null;
+
+  const dateStamp = new Date().toISOString().slice(0, 10);
+
+  function handleExportJson() {
+    const data = places.map((p) => ({
+      name: p.name,
+      city: p.city,
+      address: p.address,
+      latitude: p.latitude,
+      longitude: p.longitude,
+      priceRange: p.priceRange,
+      status: p.status,
+      googleMapsUrl: p.googleMapsUrl,
+      website: p.website,
+      phone: p.phone,
+      notes: p.notes,
+      occasions: p.occasions,
+      tags: p.tags,
+    }));
+    downloadFile(JSON.stringify(data, null, 2), `gastromap-${dateStamp}.json`, "application/json");
+  }
+
+  function handleExportCsv() {
+    const header = "name,city,address,latitude,longitude,priceRange,googleMapsUrl,notes,tags";
+    const rows = places.map((p) =>
+      [
+        escapeCsv(p.name),
+        escapeCsv(p.city),
+        escapeCsv(p.address),
+        escapeCsv(p.latitude),
+        escapeCsv(p.longitude),
+        escapeCsv(p.priceRange),
+        escapeCsv(p.googleMapsUrl),
+        escapeCsv(p.notes),
+        escapeCsv(p.tags.join(";")),
+      ].join(",")
+    );
+    downloadFile([header, ...rows].join("\n"), `gastromap-${dateStamp}.csv`, "text/csv;charset=utf-8");
+  }
+
+  function handleExportGeoJson() {
+    const fc = {
+      type: "FeatureCollection",
+      features: places
+        .filter((p) => p.latitude != null && p.longitude != null)
+        .map((p) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [p.longitude, p.latitude],
+          },
+          properties: {
+            name: p.name,
+            city: p.city,
+            address: p.address,
+            priceRange: p.priceRange,
+            googleMapsUrl: p.googleMapsUrl,
+            notes: p.notes,
+            occasions: p.occasions,
+            tags: p.tags,
+          },
+        })),
+    };
+    downloadFile(
+      JSON.stringify(fc, null, 2),
+      `gastromap-${dateStamp}.geojson`,
+      "application/geo+json"
+    );
+  }
+
+  function handleExportKml() {
+    const placemarks = places
+      .filter((p) => p.latitude != null && p.longitude != null)
+      .map(
+        (p) => `    <Placemark>
+      <name>${escapeXml(p.name)}</name>
+      <description>${escapeXml(
+        [p.city, p.address, p.priceRange, p.notes].filter(Boolean).join(" • ")
+      )}</description>
+      <Point>
+        <coordinates>${p.longitude},${p.latitude},0</coordinates>
+      </Point>
+    </Placemark>`
+      )
+      .join("\n");
+
+    const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>GastroMap (${dateStamp})</name>
+${placemarks}
+  </Document>
+</kml>`;
+
+    downloadFile(
+      kml,
+      `gastromap-${dateStamp}.kml`,
+      "application/vnd.google-earth.kml+xml"
+    );
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMessage(null);
+    setFileName(file.name);
+    try {
+      const text = await file.text();
+      const parsed = parseUploadedFile(text, file.name);
+      if (parsed.length === 0) {
+        setPreviewItems([]);
+        setMessage({
+          type: "error",
+          text: "No se encontraron establecimientos válidos en el archivo.",
+        });
+      } else {
+        setPreviewItems(parsed);
+      }
+    } catch {
+      setPreviewItems([]);
+      setMessage({
+        type: "error",
+        text: "Error al leer el archivo. Comprueba que es un JSON, GeoJSON o CSV válido.",
+      });
+    }
+  }
+
+  async function handleConfirmImport() {
+    if (previewItems.length === 0 || importing) return;
+    setImporting(true);
+    setMessage(null);
+    const res = await importPlacesAction(previewItems, importPublic);
+    setImporting(false);
+    if (res.error) {
+      setMessage({ type: "error", text: res.error });
+    } else {
+      setMessage({
+        type: "success",
+        text: `¡Importación completada! ${res.importedCount} sitios añadidos${
+          res.skippedCount ? ` (${res.skippedCount} omitidos)` : ""
+        }.`,
+      });
+      setPreviewItems([]);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 text-left">
+      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xl">📦</span>
+            <div>
+              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                Importar / Exportar Catálogo
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                JSON, CSV, GeoJSON, KML y Google Takeout
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer text-sm font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="px-5 pt-3">
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80">
+            <button
+              type="button"
+              onClick={() => setTab("export")}
+              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                tab === "export"
+                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              ⬇️ Exportar ({places.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("import")}
+              className={`py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                tab === "import"
+                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                  : "text-slate-500 dark:text-slate-400"
+              }`}
+            >
+              ⬆️ Importar
+            </button>
+          </div>
+        </div>
+
+        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+          {message && (
+            <div
+              className={`p-3 rounded-xl text-xs font-semibold ${
+                message.type === "success"
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50"
+                  : "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50"
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
+          {tab === "export" ? (
+            <div className="space-y-3">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Descarga los <strong>{places.length} establecimientos</strong> visibles en tu catálogo
+                actual en el formato que necesites:
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleExportJson}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    📄 JSON
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Copia completa con tags y planes
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    📊 CSV
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Ideal para Excel / Google Sheets
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportGeoJson}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    🌍 GeoJSON
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Puntos geoespaciales estándar
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportKml}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    🗺️ KML
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Google Earth / Google My Maps
+                  </div>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Sube un archivo <strong>.json</strong>, <strong>.geojson</strong> (compatible con{" "}
+                <em>Google Takeout — Saved Places.json</em>) o <strong>.csv</strong> (con columna{" "}
+                <code>name</code> o <code>nombre</code>).
+              </p>
+
+              <label className="block p-5 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 text-center cursor-pointer transition bg-slate-50 dark:bg-slate-800/30">
+                <div className="text-2xl mb-1">📂</div>
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                  {fileName || "Seleccionar archivo (.json, .geojson, .csv)"}
+                </div>
+                <input
+                  type="file"
+                  accept=".json,.geojson,.csv"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </label>
+
+              {previewItems.length > 0 && (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs text-amber-900 dark:text-amber-200">
+                    Se detectaron <strong>{previewItems.length} establecimientos</strong> listos para
+                    importar (ej. {previewItems.slice(0, 3).map((i) => i.name).join(", ")}
+                    {previewItems.length > 3 ? "..." : ""}).
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setImportPublic(true)}
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${
+                        importPublic
+                          ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
+                      }`}
+                    >
+                      🌍 Comunidad
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImportPublic(false)}
+                      className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${
+                        !importPublic
+                          ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
+                      }`}
+                    >
+                      🔒 Privado
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirmImport}
+                    disabled={importing}
+                    className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer disabled:opacity-50"
+                  >
+                    {importing
+                      ? "Importando..."
+                      : `⬆️ Importar ${previewItems.length} establecimientos`}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

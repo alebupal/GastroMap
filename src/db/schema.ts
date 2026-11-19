@@ -261,6 +261,28 @@ export const auditLogs = pgTable(
   (table) => [index("audit_logs_created_at_idx").on(table.createdAt)]
 );
 
+export const placeVisits = pgTable(
+  "place_visits",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    visitedAt: timestamp("visited_at", { withTimezone: true }).defaultNow().notNull(),
+    rating: doublePrecision("rating"), // 0.0 - 10.0 opcional por visita
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("place_visits_place_idx").on(table.placeId),
+    index("place_visits_user_idx").on(table.userId),
+    index("place_visits_date_idx").on(table.visitedAt),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -280,3 +302,4 @@ export type PlaceGroupAccess = typeof placeGroupAccess.$inferSelect;
 export type PlaceUserAccess = typeof placeUserAccess.$inferSelect;
 export type SavedFilter = typeof savedFilters.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;
+export type PlaceVisit = typeof placeVisits.$inferSelect;
