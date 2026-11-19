@@ -112,6 +112,62 @@ test("GPX Generator: formato XML válido generado para exportación", () => {
   assert.ok(gpx.includes("</gpx>"));
 });
 
+test("Ubicación: Granada se resuelve en la provincia de Granada y no en Barcelona", () => {
+  const allLocations = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "..", "src", "data", "spanishProvincesMunicipalities.json"), "utf8")
+  );
+
+  const rawLocations = allLocations;
+  const SPANISH_PROVINCES = Object.keys(rawLocations).map((provName) => {
+    const muns = rawLocations[provName] || [];
+    const capitalIndex = muns.findIndex(
+      (m) => m.toLowerCase() === provName.toLowerCase() || m.toLowerCase() === `${provName.toLowerCase()} (capital)`
+    );
+    let orderedMuns = [...muns];
+    if (capitalIndex > 0) {
+      const [capital] = orderedMuns.splice(capitalIndex, 1);
+      orderedMuns.unshift(capital);
+    }
+    return {
+      id: provName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-"),
+      name: provName,
+      municipalities: orderedMuns,
+    };
+  });
+
+  function findSpanishLocation(query) {
+    if (!query) return null;
+    const q = query.trim().toLowerCase();
+
+    const exactProv = SPANISH_PROVINCES.find(
+      (p) => p.name.toLowerCase() === q || p.id === q
+    );
+    if (exactProv) {
+      const mun =
+        exactProv.municipalities.find((m) => m.toLowerCase() === q) ||
+        exactProv.municipalities[0];
+      return { province: exactProv, municipality: mun };
+    }
+
+    for (const prov of SPANISH_PROVINCES) {
+      const exactMun = prov.municipalities.find((m) => m.toLowerCase() === q);
+      if (exactMun) {
+        return { province: prov, municipality: exactMun };
+      }
+    }
+
+    return null;
+  }
+
+  const resultGranada = findSpanishLocation("Granada");
+  assert.equal(resultGranada?.province.name, "Granada");
+  assert.equal(resultGranada?.municipality, "Granada");
+
+  const resultBarcelona = findSpanishLocation("Barcelona");
+  assert.equal(resultBarcelona?.province.name, "Barcelona");
+  assert.equal(resultBarcelona?.municipality, "Barcelona");
+});
+
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
   const root = path.join(__dirname, "..");
   const docs = [

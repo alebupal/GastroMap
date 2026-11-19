@@ -41,3 +41,57 @@ export function getMunicipalitiesByProvinceName(provinceName: string): string[] 
   );
   return prov ? prov.municipalities : [];
 }
+
+/**
+ * Busca de forma jerárquica y precisa la provincia y municipio español.
+ * Prioriza:
+ * 1. Coincidencia exacta con nombre o id de provincia (ej. "Granada" -> Provincia Granada, Municipio Granada).
+ * 2. Coincidencia exacta con nombre de municipio (evita que "Granada" coincida con "Granada, La" de Barcelona).
+ * 3. Coincidencia prefijo (startsWith).
+ * 4. Coincidencia inclusiva (includes).
+ */
+export function findSpanishLocation(
+  query?: string | null
+): { province: ProvinceData; municipality: string } | null {
+  if (!query) return null;
+  const q = query.trim().toLowerCase();
+
+  // 1. Coincidencia exacta con nombre o id de provincia
+  const exactProv = SPANISH_PROVINCES.find(
+    (p) => p.name.toLowerCase() === q || p.id === q
+  );
+  if (exactProv) {
+    const mun =
+      exactProv.municipalities.find((m) => m.toLowerCase() === q) ||
+      exactProv.municipalities[0];
+    return { province: exactProv, municipality: mun };
+  }
+
+  // 2. Coincidencia exacta con nombre de municipio
+  for (const prov of SPANISH_PROVINCES) {
+    const exactMun = prov.municipalities.find((m) => m.toLowerCase() === q);
+    if (exactMun) {
+      return { province: prov, municipality: exactMun };
+    }
+  }
+
+  // 3. Coincidencia donde el nombre del municipio empieza por la búsqueda
+  for (const prov of SPANISH_PROVINCES) {
+    const startsMun = prov.municipalities.find((m) =>
+      m.toLowerCase().startsWith(q)
+    );
+    if (startsMun) {
+      return { province: prov, municipality: startsMun };
+    }
+  }
+
+  // 4. Coincidencia inclusiva
+  for (const prov of SPANISH_PROVINCES) {
+    const incMun = prov.municipalities.find((m) => m.toLowerCase().includes(q));
+    if (incMun) {
+      return { province: prov, municipality: incMun };
+    }
+  }
+
+  return null;
+}

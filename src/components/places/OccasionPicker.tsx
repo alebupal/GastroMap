@@ -118,11 +118,10 @@ export function OccasionPicker({
                   key={occ.id}
                   type="button"
                   onClick={() => onToggle(occ.id)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${
-                    active
-                      ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-xs"
-                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
-                  }`}
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${active
+                    ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-xs"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
+                    }`}
                 >
                   <span>{occ.icon}</span>
                   <span>{occ.name}</span>

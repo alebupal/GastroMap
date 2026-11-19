@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { SPANISH_PROVINCES } from "@/data/spanishLocations";
+import { SPANISH_PROVINCES, findSpanishLocation } from "@/data/spanishLocations";
 import { searchAddressAction } from "@/lib/actions/places";
 import type { GeocodingResult } from "@/lib/geocoding";
 import { useT } from "@/lib/i18n/client";
@@ -46,29 +46,16 @@ export function LocationPicker({
 
   const [selectedProvinceId, setSelectedProvinceId] = useState<string>(() => {
     if (parsedInitial.country === "España" && parsedInitial.city) {
-      const found = SPANISH_PROVINCES.find(
-        (p) =>
-          p.name.toLowerCase().includes(parsedInitial.city.toLowerCase()) ||
-          p.municipalities.some((m) => m.toLowerCase().includes(parsedInitial.city.toLowerCase()))
-      );
-      if (found) return found.id;
+      const match = findSpanishLocation(parsedInitial.city);
+      if (match) return match.province.id;
     }
     return defaultProv.id;
   });
 
   const [selectedMunicipality, setSelectedMunicipality] = useState<string>(() => {
     if (parsedInitial.country === "España" && parsedInitial.city) {
-      const prov = SPANISH_PROVINCES.find(
-        (p) =>
-          p.name.toLowerCase().includes(parsedInitial.city.toLowerCase()) ||
-          p.municipalities.some((m) => m.toLowerCase().includes(parsedInitial.city.toLowerCase()))
-      );
-      if (prov) {
-        const mun = prov.municipalities.find((m) =>
-          m.toLowerCase().includes(parsedInitial.city.toLowerCase())
-        );
-        if (mun) return mun;
-      }
+      const match = findSpanishLocation(parsedInitial.city);
+      if (match) return match.municipality;
     }
     return defaultProv.municipalities[0] || "Granada";
   });
@@ -122,7 +109,7 @@ export function LocationPicker({
     if (initialLng) setLng(initialLng);
     if (initialAddress) setAddress(initialAddress);
 
-    if (initialCity) {
+    if (initialCity && initialCity !== effectiveCity) {
       const parsed = parseCityCountry(initialCity);
       const matched = findCountry(parsed.country);
       if (matched) {
@@ -135,21 +122,10 @@ export function LocationPicker({
       }
 
       if (parsed.country === "España") {
-        const foundProv = SPANISH_PROVINCES.find((p) =>
-          p.municipalities.some((m) => m.toLowerCase().includes(parsed.city.toLowerCase()))
-        );
-        if (foundProv) {
-          setSelectedProvinceId(foundProv.id);
-          const foundMun = foundProv.municipalities.find((m) =>
-            m.toLowerCase().includes(parsed.city.toLowerCase())
-          );
-          if (foundMun) setSelectedMunicipality(foundMun);
-        } else {
-          // Si es Granada u otra ciudad no indexada directamente
-          if (parsed.city.toLowerCase().includes("granada")) {
-            setSelectedProvinceId("granada");
-            setSelectedMunicipality("Granada");
-          }
+        const match = findSpanishLocation(parsed.city);
+        if (match) {
+          setSelectedProvinceId(match.province.id);
+          setSelectedMunicipality(match.municipality);
         }
       } else {
         setManualCity(parsed.city);
@@ -201,28 +177,15 @@ export function LocationPicker({
 
     if (isSpainResult) {
       setSelectedCountry("España");
-      if (result.province) {
-        const provLower = result.province.toLowerCase();
-        const matchedProv = SPANISH_PROVINCES.find(
-          (p) =>
-            provLower.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(provLower)
-        );
-        if (matchedProv) {
-          setSelectedProvinceId(matchedProv.id);
-          const matchedMun = matchedProv.municipalities.find((m) =>
-            (result.city || result.displayName).toLowerCase().includes(m.toLowerCase())
-          );
-          if (matchedMun) {
-            setSelectedMunicipality(matchedMun);
-          } else if (matchedProv.municipalities.length > 0) {
-            setSelectedMunicipality(matchedProv.municipalities[0]);
-          }
-        }
-      } else if (result.city) {
-        const matchedMun = currentProvince.municipalities.find((m) =>
-          result.city?.toLowerCase().includes(m.toLowerCase())
-        );
-        if (matchedMun) setSelectedMunicipality(matchedMun);
+      const match =
+        findSpanishLocation(result.city) ||
+        findSpanishLocation(result.province) ||
+        findSpanishLocation(result.road) ||
+        findSpanishLocation(result.displayName);
+
+      if (match) {
+        setSelectedProvinceId(match.province.id);
+        setSelectedMunicipality(match.municipality);
       }
     } else {
       // País internacional

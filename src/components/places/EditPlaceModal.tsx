@@ -74,7 +74,7 @@ export function EditPlaceModal({
     if (isOpen) {
       getMyGroupsAction()
         .then((groups) => setAvailableGroups(groups.map((g) => ({ id: g.id, name: g.name }))))
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [isOpen]);
 
@@ -209,15 +209,14 @@ export function EditPlaceModal({
                     key={opt.id}
                     type="button"
                     onClick={() => setStatus(opt.id)}
-                    className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition cursor-pointer flex items-center justify-center gap-1 ${
-                      active
-                        ? opt.id === "active"
-                          ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
-                          : opt.id === "temporarily_closed"
+                    className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition cursor-pointer flex items-center justify-center gap-1 ${active
+                      ? opt.id === "active"
+                        ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
+                        : opt.id === "temporarily_closed"
                           ? "bg-amber-500 border-amber-500 text-slate-950 shadow-xs"
                           : "bg-red-600 border-red-600 text-white shadow-xs"
-                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                    }`}
+                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                      }`}
                   >
                     <span>{opt.icon}</span>
                     <span className="truncate">{opt.label}</span>
@@ -314,11 +313,10 @@ export function EditPlaceModal({
                     key={p.id}
                     type="button"
                     onClick={() => setPriceRange(p.id)}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${
-                      isSelected
-                        ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs"
-                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
-                    }`}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer border ${isSelected
+                      ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-xs"
+                      : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
+                      }`}
                   >
                     {p.label}
                   </button>
@@ -356,11 +354,10 @@ export function EditPlaceModal({
                   setCommunityPublished(true);
                   setSelectedGroupIds([]);
                 }}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  communityPublished
-                    ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                }`}
+                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${communityPublished
+                  ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                  }`}
               >
                 <span>🌍</span>
                 <span>{t("form.visibility_community")}</span>
@@ -368,11 +365,10 @@ export function EditPlaceModal({
               <button
                 type="button"
                 onClick={() => setCommunityPublished(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  !communityPublished
-                    ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
-                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                }`}
+                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${!communityPublished
+                  ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
+                  }`}
               >
                 <span>🔒</span>
                 <span>{t("form.visibility_private")}</span>
@@ -398,11 +394,10 @@ export function EditPlaceModal({
                               : [...prev, g.id]
                           )
                         }
-                        className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${
-                          active
-                            ? "bg-blue-600 border-blue-600 text-white shadow-xs"
-                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                        }`}
+                        className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${active
+                          ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                          }`}
                       >
                         <span>👥 {g.name}</span>
                         {active && <span className="text-[10px]">✓</span>}

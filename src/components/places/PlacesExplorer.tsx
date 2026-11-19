@@ -99,7 +99,7 @@ export function PlacesExplorer({
     if (typeof window === "undefined") return;
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/sw.js").catch(() => { });
     }
 
     // Guardar favoritos y pendientes en caché local para consulta sin cobertura
@@ -132,7 +132,7 @@ export function PlacesExplorer({
   useEffect(() => {
     getMyGroupsAction()
       .then((list) => setMyGroups(list.map((g) => ({ id: g.id, name: g.name }))))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   function toggleComparePlace(placeId: string) {
@@ -796,11 +796,10 @@ export function PlacesExplorer({
                 key={r.label}
                 type="button"
                 onClick={() => setRadiusKm(r.val)}
-                className={`px-2.5 py-1 rounded-xl font-semibold shrink-0 transition cursor-pointer text-xs ${
-                  isSelected
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-slate-900/60 border border-slate-800 text-slate-400 hover:bg-slate-800"
-                }`}
+                className={`px-2.5 py-1 rounded-xl font-semibold shrink-0 transition cursor-pointer text-xs ${isSelected
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-slate-900/60 border border-slate-800 text-slate-400 hover:bg-slate-800"
+                  }`}
               >
                 {r.label}
               </button>
@@ -829,11 +828,10 @@ export function PlacesExplorer({
                   active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter)
                 )
               }
-              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs ${
-                active
-                  ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-950 shadow-md"
-                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
-              }`}
+              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs ${active
+                ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-950 shadow-md"
+                : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                }`}
             >
               <span>{item.icon}</span>
               <span>{item.label}</span>
@@ -850,19 +848,18 @@ export function PlacesExplorer({
             <button
               type="button"
               onClick={() => setIsGroupFilterOpen((prev) => !prev)}
-              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${
-                selectedGroupFilterIds.length > 0
-                  ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
+              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
+                ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
+                : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
             >
               <span>👥</span>
               <span>
                 {selectedGroupFilterIds.length === 0
                   ? t("places.groups_filter")
                   : selectedGroupFilterIds.length === 1
-                  ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
-                  : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
+                    ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
+                    : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
               </span>
               <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
             </button>
@@ -899,11 +896,10 @@ export function PlacesExplorer({
                               : [...prev, g.id]
                           );
                         }}
-                        className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${
-                          isSelected
-                            ? "bg-blue-600 text-white font-bold"
-                            : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                        }`}
+                        className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
+                          ? "bg-blue-600 text-white font-bold"
+                          : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          }`}
                       >
                         <span className="truncate">👥 {g.name}</span>
                         {isSelected && <span className="text-xs">✓</span>}
@@ -972,11 +968,10 @@ export function PlacesExplorer({
                 key={item.id}
                 type="button"
                 onClick={() => togglePrice(item.id)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${
-                  active
-                    ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                    : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${active
+                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  }`}
               >
                 {item.label}
               </button>
@@ -1010,9 +1005,8 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setIsOccasionSearchOpen(!isOccasionSearchOpen)}
-                className={`font-semibold transition cursor-pointer flex items-center gap-1 ${
-                  isOccasionSearchOpen || occasionSearchQuery ? "text-amber-400" : "text-slate-400 hover:text-slate-200"
-                }`}
+                className={`font-semibold transition cursor-pointer flex items-center gap-1 ${isOccasionSearchOpen || occasionSearchQuery ? "text-amber-400" : "text-slate-400 hover:text-slate-200"
+                  }`}
                 title={t("places.search_categories_title")}
               >
                 <span>🔍</span>
@@ -1061,11 +1055,10 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setSelectedOccasions([])}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                  selectedOccasions.length === 0
-                    ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${selectedOccasions.length === 0
+                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                  }`}
               >
                 🍽️ {t("places.all_plans")}
               </button>
@@ -1079,11 +1072,10 @@ export function PlacesExplorer({
                     key={occ.id}
                     type="button"
                     onClick={() => toggleOccasion(occ.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                      isSelected
-                        ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
-                        : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
-                    }`}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${isSelected
+                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
+                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                      }`}
                   >
                     <span>{occ.icon}</span>
                     <span>{occ.name}</span>
@@ -1129,11 +1121,10 @@ export function PlacesExplorer({
             <button
               type="button"
               onClick={() => setSelectedOccasions([])}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${
-                selectedOccasions.length === 0
-                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
-              }`}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${selectedOccasions.length === 0
+                ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
+                }`}
             >
               🍽️ {t("places.all_plans")}
             </button>
@@ -1147,11 +1138,10 @@ export function PlacesExplorer({
                   key={occ.id}
                   type="button"
                   onClick={() => toggleOccasion(occ.id)}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${
-                    isSelected
-                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
-                      : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
-                  }`}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${isSelected
+                    ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
+                    : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
+                    }`}
                 >
                   <span>{occ.icon}</span>
                   <span>{occ.name}</span>
@@ -1246,11 +1236,10 @@ export function PlacesExplorer({
                         key={t.id}
                         type="button"
                         onClick={() => toggleTag(t.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
-                          isSelected
-                            ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
-                            : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
-                        }`}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${isSelected
+                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                          : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
+                          }`}
                       >
                         #{t.name}
                         {t.placesCount > 0 && (
@@ -1299,11 +1288,10 @@ export function PlacesExplorer({
                     key={t.id}
                     type="button"
                     onClick={() => toggleTag(t.id)}
-                    className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${
-                      isSelected
-                        ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
-                        : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
-                    }`}
+                    className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${isSelected
+                      ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                      : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
+                      }`}
                   >
                     <span>#{t.name}</span>
                     {t.placesCount > 0 && (
@@ -1336,20 +1324,18 @@ export function PlacesExplorer({
           <button
             type="button"
             onClick={() => setActiveMobileView("map")}
-            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              activeMobileView === "map"
-                ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-            }`}
+            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeMobileView === "map"
+              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              }`}
           >
             <span className="text-base leading-none">🗺️</span>
             <span>{t("places.view_map")}</span>
             <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                activeMobileView === "map"
-                  ? "bg-slate-950/15 text-slate-950"
-                  : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-              }`}
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "map"
+                ? "bg-slate-950/15 text-slate-950"
+                : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                }`}
             >
               {filteredPlaces.filter((p) => p.latitude != null).length}
             </span>
@@ -1358,20 +1344,18 @@ export function PlacesExplorer({
           <button
             type="button"
             onClick={() => setActiveMobileView("list")}
-            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-              activeMobileView === "list"
-                ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-            }`}
+            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeMobileView === "list"
+              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+              }`}
           >
             <span className="text-base leading-none">📋</span>
             <span>{t("places.view_list")}</span>
             <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                activeMobileView === "list"
-                  ? "bg-slate-950/15 text-slate-950"
-                  : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-              }`}
+              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "list"
+                ? "bg-slate-950/15 text-slate-950"
+                : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                }`}
             >
               {filteredPlaces.length}
             </span>
@@ -1385,9 +1369,8 @@ export function PlacesExplorer({
       <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-1 lg:pt-2">
         {/* Columna Mapa: en móvil va arriba cuando activeMobileView === "map", o se oculta si activeMobileView === "list" */}
         <div
-          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${
-            activeMobileView === "list" ? "hidden lg:block" : "block order-1 mb-4 lg:mb-0"
-          }`}
+          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${activeMobileView === "list" ? "hidden lg:block" : "block order-1 mb-4 lg:mb-0"
+            }`}
         >
           <div className="lg:sticky lg:top-4 space-y-2 pb-2 lg:pb-0">
             <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl">
@@ -1528,11 +1511,10 @@ export function PlacesExplorer({
                               <button
                                 type="button"
                                 onClick={() => handlePageChange(p)}
-                                className={`w-7 h-7 rounded-xl font-bold text-xs flex items-center justify-center transition cursor-pointer ${
-                                  currentPage === p
-                                    ? "bg-amber-500 text-slate-950 shadow-xs"
-                                    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                }`}
+                                className={`w-7 h-7 rounded-xl font-bold text-xs flex items-center justify-center transition cursor-pointer ${currentPage === p
+                                  ? "bg-amber-500 text-slate-950 shadow-xs"
+                                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                  }`}
                               >
                                 {p}
                               </button>
