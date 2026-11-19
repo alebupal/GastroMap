@@ -48,7 +48,7 @@ export function SearchableSelect({
 
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
   const displayIcon = selectedOption ? selectedOption.icon : undefined;
-  const isFiltered = allOption ? value !== allOption.value : Boolean(value);
+  const isFiltered = Boolean(value) && value !== "all" && (allOption ? value !== allOption.value : true);
 
   // Filtrar las opciones según el query de búsqueda
   const filteredOptions = useMemo(() => {
@@ -102,10 +102,12 @@ export function SearchableSelect({
           setIsOpen(!isOpen);
           setQuery("");
         }}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition cursor-pointer shadow-xs whitespace-nowrap ${
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-bold border transition cursor-pointer shadow-xs whitespace-nowrap outline-none focus:outline-none focus:ring-0 focus-visible:outline-none ${
           isFiltered
-            ? "bg-amber-500/10 border-amber-500/50 text-amber-600 dark:text-amber-400 font-extrabold"
-            : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+            ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-xs"
+            : isOpen
+              ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+              : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
         } ${buttonClassName}`}
       >
         {displayIcon && <span className="shrink-0">{displayIcon}</span>}
@@ -135,7 +137,7 @@ export function SearchableSelect({
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-2 top-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 outline-none focus:outline-none"
               >
                 ✕
               </button>
@@ -149,7 +151,7 @@ export function SearchableSelect({
               <button
                 type="button"
                 onClick={() => handleSelect(allOption.value)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left outline-none focus:outline-none ${
                   value === allOption.value
                     ? "bg-amber-500 text-slate-950 font-bold"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -175,7 +177,7 @@ export function SearchableSelect({
                     key={opt.value}
                     type="button"
                     onClick={() => handleSelect(opt.value)}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer text-left ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer text-left outline-none focus:outline-none ${
                       isSelected
                         ? "bg-amber-500 text-slate-950 font-bold"
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
