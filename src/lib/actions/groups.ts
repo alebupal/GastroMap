@@ -13,6 +13,7 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { rateLimit } from "@/lib/rate-limit";
 
 export interface GroupMemberInfo {
   userId: string;
@@ -315,6 +316,8 @@ export interface GroupInviteItem {
   groupId: string;
   expiresAt: Date;
   usedCount: number;
+  maxUses: number | null;
+  neverExpires: boolean;
   createdAt: Date;
 }
 
@@ -323,7 +326,8 @@ export interface GroupInviteItem {
  */
 export async function createGroupInviteAction(
   groupId: string,
-  expiresInDays: number = 7
+  expiresInDays: number = 7,
+  maxUses: number | null = null
 ): Promise<{ success?: boolean; token?: string; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "No autenticado." };
@@ -339,14 +343,21 @@ export async function createGroupInviteAction(
     return { error: "Solo el creador del grupo puede generar invitaciones." };
   }
 
+  // expiresInDays <= 0 → sin caducidad (se guarda una fecha lejana + flag)
+  const neverExpires = expiresInDays <= 0;
+  const days = neverExpires ? 365 * 50 : Math.min(expiresInDays, 365);
+  const safeMax = maxUses && maxUses > 0 ? Math.min(Math.floor(maxUses), 1000) : null;
+
   const token = randomBytes(24).toString("hex");
-  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+  const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
   await db.insert(groupInvitations).values({
     groupId,
     token,
     createdById: currentUser.id,
     expiresAt,
+    maxUses: safeMax,
+    neverExpires,
   });
 
   await logAudit({
@@ -354,7 +365,7 @@ export async function createGroupInviteAction(
     entityType: "group",
     entityId: groupId,
     action: "group_invite_created",
-    metadata: { tokenPrefix: token.slice(0, 8), expiresInDays },
+    metadata: { tokenPrefix: token.slice(0, 8), expiresInDays, maxUses: safeMax },
   });
 
   revalidatePath("/");
@@ -388,6 +399,8 @@ export async function getGroupInvitesAction(
       groupId: groupInvitations.groupId,
       expiresAt: groupInvitations.expiresAt,
       usedCount: groupInvitations.usedCount,
+      maxUses: groupInvitations.maxUses,
+      neverExpires: groupInvitations.neverExpires,
       createdAt: groupInvitations.createdAt,
     })
     .from(groupInvitations)
@@ -511,12 +524,16 @@ export async function joinGroupWithTokenAction(token: string): Promise<{
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "Debes iniciar sesión para unirte al grupo." };
 
+  const rl = await rateLimit("join-group", 15, 10 * 60 * 1000);
+  if (!rl.allowed) return { error: "Demasiados intentos. Espera unos minutos." };
+
   const [invite] = await db
     .select({
       id: groupInvitations.id,
       groupId: groupInvitations.groupId,
       expiresAt: groupInvitations.expiresAt,
       usedCount: groupInvitations.usedCount,
+      maxUses: groupInvitations.maxUses,
       groupName: sharingGroups.name,
     })
     .from(groupInvitations)
@@ -530,6 +547,10 @@ export async function joinGroupWithTokenAction(token: string): Promise<{
 
   if (new Date(invite.expiresAt).getTime() < Date.now()) {
     return { error: "Este enlace de invitación ha caducado." };
+  }
+
+  if (invite.maxUses !== null && (invite.usedCount || 0) >= invite.maxUses) {
+    return { error: "Este enlace ya ha alcanzado su número máximo de usos." };
   }
 
   // Insertar como miembro si aún no lo es

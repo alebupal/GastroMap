@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { copyText } from "@/lib/clipboard";
 import {
   getMyGroupsAction,
   createGroupAction,
@@ -102,9 +103,14 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   function copyToClipboard(token: string) {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
     const fullUrl = `${origin}/groups/join/${token}`;
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopiedToken(token);
-      setTimeout(() => setCopiedToken(null), 3000);
+    copyText(fullUrl).then((ok) => {
+      if (ok) {
+        setCopiedToken(token);
+        setTimeout(() => setCopiedToken(null), 3000);
+      } else {
+        // Último recurso: mostrar el enlace para copiarlo a mano
+        window.prompt("Copia el enlace de invitación:", fullUrl);
+      }
     });
   }
 

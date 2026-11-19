@@ -7,6 +7,7 @@ import { eq, and, or, isNull, gt, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { users, invitations } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
+import { rateLimit, resetRateLimit } from "@/lib/rate-limit";
 import {
   hashPassword,
   verifyPassword,
@@ -91,6 +92,13 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return { error: "Introduce tu usuario o correo y contraseña." };
   }
 
+  // Anti fuerza bruta: 8 intentos / 10 min por IP+usuario
+  const limit = await rateLimit("login", 8, 10 * 60 * 1000, identifier);
+  if (!limit.allowed) {
+    const mins = Math.ceil(limit.retryAfterSec / 60);
+    return { error: `Demasiados intentos. Vuelve a probar en ${mins} min.` };
+  }
+
   const [user] = await db
     .select()
     .from(users)
@@ -110,6 +118,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return { error: "Credenciales incorrectas." };
   }
 
+  await resetRateLimit("login", identifier);
   const session = await createSession(user.id);
   await setSessionCookie(session.id, session.expiresAt);
 
@@ -169,6 +178,11 @@ export async function registerWithInvitationAction(
   token: string,
   formData: FormData
 ): Promise<ActionResult> {
+  const reg = await rateLimit("register", 10, 15 * 60 * 1000);
+  if (!reg.allowed) {
+    return { error: "Demasiados intentos de registro. Inténtalo más tarde." };
+  }
+
   const [invitation] = await db
     .select()
     .from(invitations)

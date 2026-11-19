@@ -297,6 +297,8 @@ export const groupInvitations = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedCount: integer("used_count").notNull().default(0),
+    maxUses: integer("max_uses"), // null = ilimitado
+    neverExpires: boolean("never_expires").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [

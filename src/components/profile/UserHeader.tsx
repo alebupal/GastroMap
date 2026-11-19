@@ -7,6 +7,7 @@ import { EditProfileModal } from "./EditProfileModal";
 import { GroupsModal } from "./GroupsModal";
 import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 interface UserHeaderProps {
   currentUser: {
@@ -71,6 +72,9 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
         {/* User profile pill & controls */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Selector de idioma */}
+          <LanguageSelector />
+
           {/* Selector de modo claro / modo oscuro siempre visible */}
           <ThemeToggle />
 

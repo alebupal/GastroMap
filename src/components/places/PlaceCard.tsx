@@ -84,7 +84,10 @@ export function PlaceCard({
   const hasCoords = place.latitude != null && place.longitude != null;
 
   return (
-    <div className="w-full p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl transition-all duration-200 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs">
+    <div
+      id={`place-card-${place.id}`}
+      className="w-full p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl transition-all duration-200 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs"
+    >
       <div>
         {/* Fila superior: Estado personal, Experiencia, Favorito y Precio */}
         <div className="flex items-center justify-between gap-2 mb-2">
@@ -149,8 +152,9 @@ export function PlaceCard({
             <button
               type="button"
               onClick={handleToggleFavorite}
-              className="text-base hover:scale-125 transition cursor-pointer p-0.5"
+              className="text-base hover:scale-125 active:scale-95 transition cursor-pointer p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg"
               title={favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
+              aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
             >
               {favorite ? "⭐" : "🤍"}
             </button>
@@ -250,7 +254,8 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => handleStatusChange("pending")}
-            className={`px-3 py-1 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+            aria-label={personalStatus === "pending" ? "Quitar de pendientes" : "Guardar en Quiero ir"}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${
               personalStatus === "pending"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
                 : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
@@ -262,7 +267,8 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => handleStatusChange("visited")}
-            className={`px-3 py-1 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+            aria-label={personalStatus === "visited" ? "Quitar de visitados" : "Marcar como Ya he ido"}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${
               personalStatus === "visited"
                 ? "bg-emerald-600 text-white font-bold shadow-sm"
                 : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
@@ -274,7 +280,8 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowNotesModal(true)}
-            className="px-3 py-1 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center gap-1.5 ml-auto"
+            aria-label="Añadir o editar nota y puntuación privada"
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center gap-1.5 ml-auto active:scale-95"
             title="Añadir nota o puntuación privada"
           >
             📝 {rating !== null ? `${rating}★` : "Mi nota"}
@@ -293,7 +300,8 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer"
+            aria-label={`Comentarios del sitio (${commentsCount})`}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
             title="Comentarios"
           >
             💬 {commentsCount > 0 ? commentsCount : ""}
@@ -302,7 +310,8 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => setShowVisitsModal(true)}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition cursor-pointer"
+            aria-label="Registrar o ver mis visitas"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
             title="Registrar o ver mis visitas"
           >
             📅
@@ -312,7 +321,8 @@ export function PlaceCard({
             <button
               type="button"
               onClick={onToggleCompare}
-              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 rounded-lg ${
+              aria-label={isCompared ? "Quitar de comparar" : "Añadir a comparar"}
+              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-1 rounded-lg ${
                 isCompared
                   ? "bg-amber-500 text-slate-950 font-bold"
                   : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
@@ -327,7 +337,8 @@ export function PlaceCard({
             <button
               onClick={onSelectOnMap}
               type="button"
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+              aria-label="Localizar en el mapa"
+              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
             >
               🗺️ Mapa
             </button>
@@ -338,7 +349,8 @@ export function PlaceCard({
               href={place.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-500 hover:text-amber-500 text-xs transition"
+              aria-label={`Página web oficial de ${place.name}`}
+              className="text-slate-500 hover:text-amber-500 text-xs transition p-1"
               title="Visitar página web"
             >
               🌐
@@ -348,7 +360,8 @@ export function PlaceCard({
           {place.phone && (
             <a
               href={`tel:${place.phone}`}
-              className="text-slate-500 hover:text-emerald-500 text-xs transition"
+              aria-label={`Llamar por teléfono a ${place.name}`}
+              className="text-slate-500 hover:text-emerald-500 text-xs transition p-1"
               title={`Llamar: ${place.phone}`}
             >
               📞
@@ -360,7 +373,8 @@ export function PlaceCard({
               href={place.googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+              aria-label={`Abrir ${place.name} en Google Maps`}
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1"
             >
               Maps ↗
             </a>
@@ -370,7 +384,8 @@ export function PlaceCard({
             <button
               type="button"
               onClick={() => setShowEditModal(true)}
-              className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer"
+              aria-label={`Editar datos de ${place.name}`}
+              className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer p-1"
               title="Editar establecimiento"
             >
               ✏️
@@ -381,7 +396,8 @@ export function PlaceCard({
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40"
+              aria-label={`Eliminar ${place.name}`}
+              className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40 p-1"
               title="Eliminar sitio"
             >
               🗑️

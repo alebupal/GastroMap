@@ -8,6 +8,7 @@ import {
   deleteCommentAction,
   type CommentWithAuthor,
 } from "@/lib/actions/interactions";
+import { CommentSkeleton } from "@/components/ui/Skeleton";
 
 interface PlaceCommentsThreadProps {
   placeId: string;
@@ -409,7 +410,10 @@ export function PlaceCommentsThread({
       {/* Lista de comentarios */}
       <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1 text-xs mb-3">
         {loading ? (
-          <p className="text-slate-400 py-3 text-center text-[11px]">Cargando comentarios...</p>
+          <div className="space-y-2 py-1">
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </div>
         ) : comments.length === 0 ? (
           <p className="text-slate-400 italic py-2 text-[11px] text-center bg-slate-50/50 dark:bg-slate-800/30 rounded-xl">
             Aún no hay comentarios. ¡Sé el primero en compartir qué pedir, reservas o consejos!

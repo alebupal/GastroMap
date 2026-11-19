@@ -12,17 +12,26 @@ export interface ParsedMapUrl {
  */
 export async function resolveGoogleMapsUrl(url: string): Promise<string> {
   try {
-    if (!url.includes("goo.gl") && !url.includes("maps.app.goo.gl")) {
+    const isShort = /(goo\.gl|g\.co\/kgs|share\.google|maps\.app)/i.test(url);
+    if (!isShort) {
       return url;
     }
 
-    const response = await fetch(url, {
-      method: "HEAD",
-      redirect: "follow",
-      signal: AbortSignal.timeout(2500),
-    });
-
-    return response.url || url;
+    // HEAD primero (barato); si no resuelve a una URL de maps, reintento con GET
+    for (const method of ["HEAD", "GET"] as const) {
+      try {
+        const response = await fetch(url, {
+          method,
+          redirect: "follow",
+          signal: AbortSignal.timeout(4000),
+          headers: { "User-Agent": "Mozilla/5.0 (GastroMap)" },
+        });
+        if (response.url && response.url !== url) return response.url;
+      } catch {
+        // probar siguiente método
+      }
+    }
+    return url;
   } catch {
     return url;
   }
@@ -58,6 +67,12 @@ export function parseGoogleMapsUrl(rawUrl: string): ParsedMapUrl {
         result.latitude = parseFloat(atCoordsMatch[1]);
         result.longitude = parseFloat(atCoordsMatch[2]);
       }
+    }
+
+    // 4. Nombre desde ?q=Texto (si no son coordenadas)
+    const qNameMatch = rawUrl.match(/[?&]q=([^&]+)/);
+    if (qNameMatch && !/^-?\d+\.\d+,/.test(decodeURIComponent(qNameMatch[1]))) {
+      result.name = decodeURIComponent(qNameMatch[1].replace(/\+/g, " "));
     }
 
     // 3. Extraer nombre desde /place/Nombre+Del+Sitio/

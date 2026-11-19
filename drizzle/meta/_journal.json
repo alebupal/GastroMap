@@ -64,6 +64,13 @@
       "when": 1795086663276,
       "tag": "0008_foamy_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795089301548,
+      "tag": "0009_premium_dazzler",
+      "breakpoints": true
     }
   ]
 }

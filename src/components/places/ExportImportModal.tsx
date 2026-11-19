@@ -122,6 +122,49 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
       }));
   }
 
+  // 1b. KML (Google My Maps / Earth) y GPX (waypoints)
+  if (lower.endsWith(".kml") || lower.endsWith(".gpx")) {
+    const doc = new DOMParser().parseFromString(text, "text/xml");
+    const items: ImportPlacePayload[] = [];
+    const txt = (el: Element | null, tag: string) =>
+      el?.getElementsByTagName(tag)[0]?.textContent?.trim() || null;
+
+    if (lower.endsWith(".kml")) {
+      for (const pm of Array.from(doc.getElementsByTagName("Placemark"))) {
+        const name = txt(pm, "name");
+        const coords = txt(pm, "coordinates");
+        if (!name || !coords) continue;
+        const [lng, lat] = coords.split(/[,\s]+/).map(Number);
+        items.push({
+          name,
+          notes: txt(pm, "description"),
+          latitude: !isNaN(lat) ? lat : null,
+          longitude: !isNaN(lng) ? lng : null,
+          priceRange: "???",
+          occasions: [],
+          tags: [],
+        });
+      }
+    } else {
+      for (const w of Array.from(doc.getElementsByTagName("wpt"))) {
+        const name = txt(w, "name");
+        if (!name) continue;
+        const lat = parseFloat(w.getAttribute("lat") || "");
+        const lng = parseFloat(w.getAttribute("lon") || "");
+        items.push({
+          name,
+          notes: txt(w, "desc") || txt(w, "cmt"),
+          latitude: !isNaN(lat) ? lat : null,
+          longitude: !isNaN(lng) ? lng : null,
+          priceRange: "???",
+          occasions: [],
+          tags: [],
+        });
+      }
+    }
+    return items;
+  }
+
   // 2. CSV
   if (lower.endsWith(".csv")) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
@@ -280,6 +323,24 @@ ${placemarks}
     );
   }
 
+  function handleExportGpx() {
+    const wpts = places
+      .filter((p) => p.latitude != null && p.longitude != null)
+      .map(
+        (p) => `  <wpt lat="${p.latitude}" lon="${p.longitude}">
+    <name>${escapeXml(p.name)}</name>
+    <desc>${escapeXml([p.city, p.address, p.priceRange, p.notes].filter(Boolean).join(" • "))}</desc>
+  </wpt>`
+      )
+      .join("\n");
+    const gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GastroMap" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>GastroMap (${dateStamp})</name></metadata>
+${wpts}
+</gpx>`;
+    downloadFile(gpx, `gastromap-${dateStamp}.gpx`, "application/gpx+xml");
+  }
+
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -339,7 +400,7 @@ ${placemarks}
                 Importar / Exportar Catálogo
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                JSON, CSV, GeoJSON, KML y Google Takeout
+                JSON, CSV, GeoJSON, KML, GPX y Google Takeout
               </p>
             </div>
           </div>
@@ -454,24 +515,38 @@ ${placemarks}
                     Google Earth / Google My Maps
                   </div>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportGpx}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    🧭 GPX
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    GPS, Garmin, Komoot, OsmAnd
+                  </div>
+                </button>
               </div>
             </div>
           ) : (
             <div className="space-y-3.5">
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 Sube un archivo <strong>.json</strong>, <strong>.geojson</strong> (compatible con{" "}
-                <em>Google Takeout — Saved Places.json</em>) o <strong>.csv</strong> (con columna{" "}
+                <em>Google Takeout — Saved Places.json</em>) o <strong>.kml</strong>, <strong>.gpx</strong> o <strong>.csv</strong> (con columna{" "}
                 <code>name</code> o <code>nombre</code>).
               </p>
 
               <label className="block p-5 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 text-center cursor-pointer transition bg-slate-50 dark:bg-slate-800/30">
                 <div className="text-2xl mb-1">📂</div>
                 <div className="text-xs font-bold text-slate-700 dark:text-slate-200">
-                  {fileName || "Seleccionar archivo (.json, .geojson, .csv)"}
+                  {fileName || "Seleccionar archivo (.json, .geojson, .csv, .kml, .gpx)"}
                 </div>
                 <input
                   type="file"
-                  accept=".json,.geojson,.csv"
+                  accept=".json,.geojson,.csv,.kml,.gpx"
                   onChange={handleFileSelect}
                   className="hidden"
                 />

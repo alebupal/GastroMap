@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { copyText } from "@/lib/clipboard";
 import {
   createInvitationAction,
   getAllInvitationsAction,
@@ -59,9 +60,11 @@ export function InviteManager() {
   }
 
   function handleCopy(url: string, tokenId: string) {
-    navigator.clipboard.writeText(url);
-    setCopiedToken(tokenId);
-    setTimeout(() => setCopiedToken(null), 2500);
+    copyText(url).then((ok) => {
+      if (!ok) window.prompt("Copia el enlace de invitación:", url);
+      setCopiedToken(tokenId);
+      setTimeout(() => setCopiedToken(null), 2500);
+    });
   }
 
   async function handleDelete(invitation: SafeInvitation) {

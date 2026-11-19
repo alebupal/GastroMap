@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { saveSettingAction } from "@/lib/actions/settings";
+import { useT } from "@/lib/i18n/client";
 
 interface SettingsManagerProps {
   initialCartoApiKey?: string | null;
@@ -25,7 +26,10 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
     setTimeout(() => setSaved(false), 3000);
   }
 
+  const { t } = useT();
+
   return (
+    <div className="space-y-4">
     <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 shadow-xs">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -82,6 +86,25 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
           </div>
         </form>
       )}
+    </div>
+
+    {/* Copia de seguridad */}
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4 shadow-xs flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center gap-2.5">
+        <span className="text-xl">💾</span>
+        <div>
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">{t("admin.backup.title")}</h3>
+          <p className="text-xs text-slate-400">{t("admin.backup.desc")}</p>
+        </div>
+      </div>
+      <a
+        href="/api/admin/backup"
+        download
+        className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-950 font-bold text-xs shadow-xs hover:opacity-90 transition"
+      >
+        ⬇️ {t("admin.backup.button")}
+      </a>
+    </div>
     </div>
   );
 }

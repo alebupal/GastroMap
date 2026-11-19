@@ -445,6 +445,11 @@ export function PlacesExplorer({
     return filteredPlaces.slice(startIndex, startIndex + pageSize);
   }, [filteredPlaces, startIndex, pageSize]);
 
+  const selectedPlace = useMemo(
+    () => (selectedPlaceId ? filteredPlaces.find((p) => p.id === selectedPlaceId) || null : null),
+    [filteredPlaces, selectedPlaceId]
+  );
+
   function handlePageChange(newPage: number) {
     if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
@@ -793,11 +798,11 @@ export function PlacesExplorer({
         })}
       </HorizontalScroll>
 
-      {/* Filtros Específicos: Grupos Privados y Rangos de Precio (Fila separada en móvil) */}
-      <HorizontalScroll className="flex items-center gap-1.5 pb-1 text-xs">
-        {/* Filtro por Grupos Privados (si el usuario tiene grupos) */}
+      {/* Filtros Específicos: Grupos Privados y Rangos de Precio (En líneas distintas en móvil para mayor claridad) */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 pb-1 text-xs">
+        {/* Línea 1: Filtro por Grupos Privados (si el usuario tiene grupos) */}
         {myGroups.length > 0 && (
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 flex items-center gap-2">
             <button
               type="button"
               onClick={() => setIsGroupFilterOpen((prev) => !prev)}
@@ -864,37 +869,37 @@ export function PlacesExplorer({
                 </div>
               </div>
             )}
+
+            <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
           </div>
         )}
 
-        {myGroups.length > 0 && (
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
-        )}
-
-        {/* Filtro rápido de precio numérico (acumulable) */}
-        {[
-          { id: "€", label: "< 15 €" },
-          { id: "€€", label: "15 - 30 €" },
-          { id: "€€€", label: "30 - 50 €" },
-          { id: "€€€€", label: "> 50 €" },
-        ].map((item) => {
-          const active = selectedPrices.includes(item.id);
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => togglePrice(item.id)}
-              className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${
-                active
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-            >
-              {item.label}
-            </button>
-          );
-        })}
-      </HorizontalScroll>
+        {/* Línea 2: Filtro rápido de precio numérico (acumulable en su propia línea o continuación en desktop) */}
+        <HorizontalScroll className="flex items-center gap-1.5 text-xs">
+          {[
+            { id: "€", label: "< 15 €" },
+            { id: "€€", label: "15 - 30 €" },
+            { id: "€€€", label: "30 - 50 €" },
+            { id: "€€€€", label: "> 50 €" },
+          ].map((item) => {
+            const active = selectedPrices.includes(item.id);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => togglePrice(item.id)}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${
+                  active
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                    : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </HorizontalScroll>
+      </div>
 
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
@@ -1301,13 +1306,19 @@ export function PlacesExplorer({
                 className="w-full h-[50vh] sm:h-[500px] lg:h-[calc(100vh-14rem)] min-h-[360px]"
               />
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 px-2">
+            <div className="flex items-center justify-between text-[11px] text-slate-500 px-2 flex-wrap gap-1">
               <span>
                 Mostrando {filteredPlaces.filter((p) => p.latitude != null).length} locales geolocalizados.
               </span>
-              <span className="lg:hidden text-amber-500 font-semibold animate-pulse">
-                ↓ Desliza abajo para ver la lista
-              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById("places-list-top")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="lg:hidden px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>↓ Bajar a la lista ({filteredPlaces.length})</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1543,6 +1554,66 @@ export function PlacesExplorer({
         onRemovePlace={(id) => toggleComparePlace(id)}
         onSelectOnMap={handleSelectOnMap}
       />
+
+      {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}
+      {selectedPlace && activeMobileView === "map" && (
+        <div className="lg:hidden fixed bottom-4 left-3 right-3 z-40 p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                  {selectedPlace.priceRange}
+                </span>
+                {selectedPlace.isFavorite && <span className="text-xs">⭐</span>}
+                <span className="text-xs font-bold text-slate-500 truncate">
+                  {selectedPlace.city || ""}
+                </span>
+              </div>
+              <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm mt-1 truncate">
+                {selectedPlace.name}
+              </h4>
+              {selectedPlace.address && (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  📍 {selectedPlace.address}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedPlaceId(null)}
+              className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
+              aria-label="Cerrar tarjeta flotante"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-xs">
+            {selectedPlace.latitude != null && selectedPlace.longitude != null && (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.latitude},${selectedPlace.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-2 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-center border border-blue-200 dark:border-blue-900/40"
+              >
+                🗺️ Cómo llegar
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMobileView("list");
+                setTimeout(() => {
+                  document.getElementById(`place-card-${selectedPlace.id}`)?.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+              }}
+              className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-center shadow-sm cursor-pointer"
+            >
+              Ver ficha completa →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
