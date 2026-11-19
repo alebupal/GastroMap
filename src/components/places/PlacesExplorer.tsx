@@ -81,8 +81,10 @@ export function PlacesExplorer({
   const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
   const [isOccasionSearchOpen, setIsOccasionSearchOpen] = useState(false);
   const [occasionSearchQuery, setOccasionSearchQuery] = useState("");
+  const [visibleOccasionsCount, setVisibleOccasionsCount] = useState(12);
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [visibleTagsCount, setVisibleTagsCount] = useState(24);
 
   // Alternar selección de ocasión acumulable
   function toggleOccasion(occId: string) {
@@ -626,39 +628,71 @@ export function PlacesExplorer({
         )}
 
         {isOccasionsWrapped ? (
-          <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 animate-in fade-in duration-150">
-            <button
-              type="button"
-              onClick={() => setSelectedOccasions([])}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                selectedOccasions.length === 0
-                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-            >
-              🍽️ Todos los planes
-            </button>
-            {filteredOccasions.map((occ) => {
-              const isSelected = selectedOccasions.includes(occ.id);
-              return (
-                <button
-                  key={occ.id}
-                  type="button"
-                  onClick={() => toggleOccasion(occ.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    isSelected
-                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
-                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
-                  }`}
-                >
-                  <span>{occ.icon}</span>
-                  <span>{occ.name}</span>
-                  {(occ.placesCount || 0) > 0 && (
-                    <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-150">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedOccasions([])}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  selectedOccasions.length === 0
+                    ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                    : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                🍽️ Todos los planes
+              </button>
+              {(occasionSearchQuery.trim()
+                ? filteredOccasions
+                : filteredOccasions.slice(0, visibleOccasionsCount)
+              ).map((occ) => {
+                const isSelected = selectedOccasions.includes(occ.id);
+                return (
+                  <button
+                    key={occ.id}
+                    type="button"
+                    onClick={() => toggleOccasion(occ.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                      isSelected
+                        ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
+                        : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                    }`}
+                  >
+                    <span>{occ.icon}</span>
+                    <span>{occ.name}</span>
+                    {(occ.placesCount || 0) > 0 && (
+                      <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {!occasionSearchQuery.trim() &&
+              (filteredOccasions.length > visibleOccasionsCount ||
+                visibleOccasionsCount > 12) && (
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                  {filteredOccasions.length > visibleOccasionsCount ? (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleOccasionsCount((c) => c + 12)}
+                      className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                    >
+                      + Mostrar más ({filteredOccasions.length - visibleOccasionsCount} restantes)
+                    </button>
+                  ) : (
+                    <span className="text-slate-400">Mostrando todas las categorías</span>
                   )}
-                </button>
-              );
-            })}
+                  {visibleOccasionsCount > 12 && (
+                    <button
+                      type="button"
+                      onClick={() => setVisibleOccasionsCount(12)}
+                      className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      ▲ Ver menos
+                    </button>
+                  )}
+                </div>
+              )}
           </div>
         ) : (
           <HorizontalScroll className="flex items-center gap-1.5 pb-1">
@@ -673,7 +707,10 @@ export function PlacesExplorer({
             >
               🍽️ Todos los planes
             </button>
-            {filteredOccasions.map((occ) => {
+            {(occasionSearchQuery.trim()
+              ? filteredOccasions
+              : filteredOccasions.slice(0, visibleOccasionsCount)
+            ).map((occ) => {
               const isSelected = selectedOccasions.includes(occ.id);
               return (
                 <button
@@ -694,11 +731,20 @@ export function PlacesExplorer({
                 </button>
               );
             })}
+            {!occasionSearchQuery.trim() && filteredOccasions.length > visibleOccasionsCount && (
+              <button
+                type="button"
+                onClick={() => setVisibleOccasionsCount((c) => c + 12)}
+                className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
+              >
+                + Mostrar más ({filteredOccasions.length - visibleOccasionsCount})
+              </button>
+            )}
           </HorizontalScroll>
         )}
       </div>
 
-      {/* Filtro por Etiquetas Populares (acumulables, ordenadas por uso, con vista expandible y buscador) */}
+      {/* Filtro por Etiquetas Populares (acumulables, ordenadas por uso, con buscador y Mostrar más) */}
       {sortedTags.length > 0 && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -717,26 +763,26 @@ export function PlacesExplorer({
               )}
             </div>
 
-            {sortedTags.length > 10 && (
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsTagsExpanded(!isTagsExpanded)}
-                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
+                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1"
               >
-                {isTagsExpanded ? "▲ Menos tags" : `+ Ver todos los ${sortedTags.length} tags`}
+                <span>{isTagsExpanded ? "▲ Ocultar buscador" : "🔍 Buscar / Mostrar más"}</span>
               </button>
-            )}
+            </div>
           </div>
 
           {isTagsExpanded ? (
-            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 animate-in fade-in duration-150">
+            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-150">
               <div className="relative">
                 <span className="absolute left-3 top-2 text-xs text-slate-400 dark:text-slate-500">🔍</span>
                 <input
                   type="text"
                   value={tagSearchQuery}
                   onChange={(e) => setTagSearchQuery(e.target.value)}
-                  placeholder="Filtrar etiquetas..."
+                  placeholder="Buscar entre las etiquetas más usadas..."
                   className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 {tagSearchQuery && (
@@ -749,28 +795,64 @@ export function PlacesExplorer({
                   </button>
                 )}
               </div>
-              <div className="flex flex-wrap gap-1 max-h-44 overflow-y-auto pr-1 no-scrollbar">
-                {filteredTags.map((t) => {
-                  const isSelected = selectedTags.includes(t.id);
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => toggleTag(t.id)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
-                        isSelected
-                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
-                          : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
-                      }`}
-                    >
-                      #{t.name}
-                      {t.placesCount > 0 && (
-                        <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
-                      )}
-                    </button>
-                  );
-                })}
+
+              <div className="flex flex-wrap gap-1.5">
+                {filteredTags.length === 0 ? (
+                  <p className="text-[11px] text-slate-400 italic py-1">
+                    No se encontró ninguna etiqueta con «{tagSearchQuery}».
+                  </p>
+                ) : (
+                  (tagSearchQuery.trim()
+                    ? filteredTags.slice(0, 40)
+                    : filteredTags.slice(0, visibleTagsCount)
+                  ).map((t) => {
+                    const isSelected = selectedTags.includes(t.id);
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => toggleTag(t.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${
+                          isSelected
+                            ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                            : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
+                        }`}
+                      >
+                        #{t.name}
+                        {t.placesCount > 0 && (
+                          <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
               </div>
+
+              {!tagSearchQuery.trim() &&
+                (filteredTags.length > visibleTagsCount || visibleTagsCount > 24) && (
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                    {filteredTags.length > visibleTagsCount ? (
+                      <button
+                        type="button"
+                        onClick={() => setVisibleTagsCount((c) => c + 24)}
+                        className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                      >
+                        + Mostrar más ({filteredTags.length - visibleTagsCount} restantes)
+                      </button>
+                    ) : (
+                      <span className="text-slate-400">Mostrando todas las etiquetas</span>
+                    )}
+                    {visibleTagsCount > 24 && (
+                      <button
+                        type="button"
+                        onClick={() => setVisibleTagsCount(24)}
+                        className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                      >
+                        ▲ Ver menos
+                      </button>
+                    )}
+                  </div>
+                )}
             </div>
           ) : (
             <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
@@ -794,6 +876,15 @@ export function PlacesExplorer({
                   </button>
                 );
               })}
+              {sortedTags.length > defaultTags.length && (
+                <button
+                  type="button"
+                  onClick={() => setIsTagsExpanded(true)}
+                  className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
+                >
+                  + Mostrar más ({sortedTags.length - defaultTags.length})
+                </button>
+              )}
             </HorizontalScroll>
           )}
         </div>

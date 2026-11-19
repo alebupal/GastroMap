@@ -8,6 +8,7 @@ import {
   type PotentialDuplicate,
 } from "@/lib/actions/places";
 import { TagInput } from "@/components/places/TagInput";
+import { OccasionPicker } from "@/components/places/OccasionPicker";
 import { LocationPicker } from "@/components/places/LocationPicker";
 import type { Occasion } from "@/db/schema";
 
@@ -255,41 +256,14 @@ export function NewPlaceForm({
         }}
       />
 
-      {/* 4. Para qué plan es (Ocasiones dinámicas en BD con multiselección) */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-            ¿Para qué plan es? (Puedes marcar varios)
-          </label>
-          <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
-            {selectedOccasions.length} {selectedOccasions.length === 1 ? "elegido" : "elegidos"}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {availableOccasions.map((occ) => {
-            const isSelected = selectedOccasions.includes(occ.id);
-            return (
-              <button
-                type="button"
-                key={occ.id}
-                onClick={() => toggleOccasion(occ.id)}
-                className={`py-2 px-2.5 rounded-xl text-xs font-medium border flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
-                  isSelected
-                    ? "bg-amber-500 text-white border-amber-600 shadow-xs font-semibold"
-                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <span>{occ.icon}</span>
-                <span className="truncate">{occ.name}</span>
-              </button>
-            );
-          })}
-        </div>
-        {selectedOccasions.map((occ) => (
-          <input key={occ} type="hidden" name="occasions" value={occ} />
-        ))}
-      </div>
+      {/* 4. Para qué plan es (Ocasiones dinámicas con buscador y Mostrar más) */}
+      <OccasionPicker
+        occasions={availableOccasions}
+        selectedOccasions={selectedOccasions}
+        onToggle={toggleOccasion}
+        label="¿Para qué plan es? (Puedes marcar varios)"
+        renderHiddenInputs
+      />
 
       {/* 4. Precio estimado */}
       <div>

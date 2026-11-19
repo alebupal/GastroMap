@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const PRESET_TAGS = [
   { id: "italiana", label: "🍕 Italiana" },
@@ -17,60 +17,113 @@ const PRESET_TAGS = [
   { id: "vinos", label: "🍷 Vinos / Bodega" },
 ];
 
+const INITIAL_VISIBLE = 16;
+const LOAD_MORE_STEP = 24;
+
 interface TagInputProps {
   availableTags?: string[];
   initialTags?: string[];
 }
 
+function normalizeTagInput(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/^#+/, "")
+    .replace(/[^a-z0-9áéíóúñü\-_ ]/gi, "")
+    .trim();
+}
+
 export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [customTags, setCustomTags] = useState<string[]>([]);
-  const [newTagInput, setNewTagInput] = useState("");
-  const [isAddingCustom, setIsAddingCustom] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
 
   function toggleTag(tagId: string) {
-    if (selectedTags.includes(tagId)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tagId));
-    } else {
-      setSelectedTags([...selectedTags, tagId]);
-    }
+    setSelectedTags((prev) =>
+      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
+    );
   }
 
-  function handleAddCustomTag(e: React.FormEvent) {
-    e.preventDefault();
-    const clean = newTagInput
-      .trim()
-      .toLowerCase()
-      .replace(/^#+/, "")
-      .replace(/[^a-z0-9áéíóúñü\-_ ]/gi, "")
-      .trim();
+  function handleCreateFromSearch() {
+    const clean = normalizeTagInput(searchQuery);
+    if (!clean) return;
 
-    if (clean && !selectedTags.includes(clean)) {
-      setSelectedTags([...selectedTags, clean]);
-      if (!customTags.includes(clean) && !PRESET_TAGS.some((p) => p.id === clean)) {
-        setCustomTags([...customTags, clean]);
+    if (!selectedTags.includes(clean)) {
+      setSelectedTags((prev) => [...prev, clean]);
+    }
+    if (
+      !customTags.includes(clean) &&
+      !PRESET_TAGS.some((p) => p.id === clean) &&
+      !availableTags.includes(clean)
+    ) {
+      setCustomTags((prev) => [clean, ...prev]);
+    }
+    setSearchQuery("");
+  }
+
+  // Lista unificada manteniendo orden de frecuencia (availableTags ya viene ordenado por uso)
+  const allPills = useMemo(() => {
+    const seen = new Set<string>();
+    const list: Array<{ id: string; label: string }> = [];
+
+    // 1. Etiquetas más frecuentes de la BD (respetando icono si coincide con preset)
+    const presetMap = new Map(PRESET_TAGS.map((p) => [p.id, p.label]));
+    for (const t of availableTags) {
+      if (!seen.has(t)) {
+        seen.add(t);
+        list.push({ id: t, label: presetMap.get(t) || `#${t}` });
       }
     }
-    setNewTagInput("");
-    setIsAddingCustom(false);
-  }
 
-  // Combinar los presets con las etiquetas ya existentes de la BD y las personalizadas
-  const allAvailablePills = [
-    ...PRESET_TAGS,
-    ...availableTags
-      .filter((t) => !PRESET_TAGS.some((p) => p.id === t))
-      .map((t) => ({ id: t, label: `#${t}` })),
-    ...customTags
-      .filter((t) => !PRESET_TAGS.some((p) => p.id === t) && !availableTags.includes(t))
-      .map((t) => ({ id: t, label: `✨ #${t}` })),
-  ];
+    // 2. Presets que aún no estuvieran en la BD
+    for (const p of PRESET_TAGS) {
+      if (!seen.has(p.id)) {
+        seen.add(p.id);
+        list.push(p);
+      }
+    }
+
+    // 3. Personalizadas creadas al vuelo
+    for (const c of customTags) {
+      if (!seen.has(c)) {
+        seen.add(c);
+        list.push({ id: c, label: `✨ #${c}` });
+      }
+    }
+
+    return list;
+  }, [availableTags, customTags]);
+
+  const normalizedSearch = normalizeTagInput(searchQuery);
+
+  const filteredPills = useMemo(() => {
+    if (!normalizedSearch) return allPills;
+    return allPills.filter(
+      (p) =>
+        p.id.toLowerCase().includes(normalizedSearch) ||
+        p.label.toLowerCase().includes(normalizedSearch)
+    );
+  }, [allPills, normalizedSearch]);
+
+  const displayedPills = normalizedSearch
+    ? filteredPills.slice(0, 40)
+    : filteredPills.slice(0, visibleCount);
+
+  const remainingCount = normalizedSearch
+    ? Math.max(0, filteredPills.length - displayedPills.length)
+    : Math.max(0, filteredPills.length - visibleCount);
+
+  const exactExists =
+    normalizedSearch.length > 0 &&
+    allPills.some((p) => p.id.toLowerCase() === normalizedSearch);
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-          Tipo de cocina y especialidades (haz clic para marcar)
+          Etiquetas y especialidades ({allPills.length})
         </label>
         {selectedTags.length > 0 && (
           <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
@@ -79,78 +132,131 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
         )}
       </div>
 
-      {/* Píldoras interactivas clicables */}
-      <div className="flex flex-wrap gap-1.5 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
-        {allAvailablePills.map((pill) => {
-          const isSelected = selectedTags.includes(pill.id);
-          return (
-            <button
-              type="button"
-              key={pill.id}
-              onClick={() => toggleTag(pill.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition active:scale-95 cursor-pointer border flex items-center gap-1.5 ${
-                isSelected
-                  ? "bg-amber-500 text-white border-amber-600 shadow-xs scale-102"
-                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300"
-              }`}
-            >
-              <span>{pill.label}</span>
-              {isSelected && <span className="text-[10px] font-extrabold opacity-90">✓</span>}
-            </button>
-          );
-        })}
-
-        {/* Botón para abrir creador de etiqueta propia */}
-        {!isAddingCustom && (
-          <button
-            type="button"
-            onClick={() => setIsAddingCustom(true)}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-medium border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 cursor-pointer flex items-center gap-1"
-          >
-            <span>➕</span>
-            <span>Otra especialidad</span>
-          </button>
-        )}
-      </div>
-
-      {/* Mini formulario para añadir etiqueta personalizada */}
-      {isAddingCustom && (
-        <div className="p-2.5 rounded-xl border border-amber-300 dark:border-amber-700/60 bg-amber-50/50 dark:bg-amber-950/20 flex items-center gap-2 animate-in fade-in duration-100">
-          <input
-            type="text"
-            autoFocus
-            value={newTagInput}
-            onChange={(e) => setNewTagInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleAddCustomTag(e);
-              } else if (e.key === "Escape") {
-                setIsAddingCustom(false);
-              }
-            }}
-            placeholder="Ej. tarta de queso, smash burger..."
-            className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-          />
-          <button
-            type="button"
-            onClick={handleAddCustomTag}
-            disabled={!newTagInput.trim()}
-            className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition active:scale-95 disabled:opacity-40 cursor-pointer"
-          >
-            Añadir
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsAddingCustom(false)}
-            className="px-2 py-1.5 text-xs text-slate-400 hover:text-slate-600 transition cursor-pointer"
-          >
-            ✕
-          </button>
+      {/* Etiquetas seleccionadas actualmente (siempre visibles arriba) */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {selectedTags.map((tagId) => {
+            const pill = allPills.find((p) => p.id === tagId);
+            return (
+              <button
+                key={tagId}
+                type="button"
+                onClick={() => toggleTag(tagId)}
+                className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-500 text-slate-950 border border-amber-500 shadow-xs flex items-center gap-1 cursor-pointer hover:bg-amber-600 transition"
+                title="Quitar etiqueta"
+              >
+                <span>{pill ? pill.label : `#${tagId}`}</span>
+                <span className="text-[10px] opacity-80">✕</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* Inputs ocultos enviados al formulario */}
+      {/* Buscador + creación rápida */}
+      <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2.5">
+        <div className="relative flex gap-1.5">
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
+              🔍
+            </span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (normalizedSearch && !exactExists) {
+                    handleCreateFromSearch();
+                  } else if (filteredPills.length === 1) {
+                    toggleTag(filteredPills[0].id);
+                    setSearchQuery("");
+                  }
+                }
+              }}
+              placeholder="Buscar etiqueta o escribir nueva (ej. ramen, tapas...)"
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {normalizedSearch && !exactExists && (
+            <button
+              type="button"
+              onClick={handleCreateFromSearch}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shrink-0 transition cursor-pointer"
+            >
+              + #{normalizedSearch}
+            </button>
+          )}
+        </div>
+
+        {/* Chips más frecuentes o filtrados */}
+        <div className="flex flex-wrap gap-1.5">
+          {displayedPills.length === 0 ? (
+            <p className="text-[11px] text-slate-400 italic py-1">
+              Sin coincidencias. Pulsa «+ #{normalizedSearch}» para crearla al vuelo.
+            </p>
+          ) : (
+            displayedPills.map((pill) => {
+              const isSelected = selectedTags.includes(pill.id);
+              return (
+                <button
+                  type="button"
+                  key={pill.id}
+                  onClick={() => toggleTag(pill.id)}
+                  className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition active:scale-95 cursor-pointer border flex items-center gap-1 ${
+                    isSelected
+                      ? "bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-xs"
+                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                  }`}
+                >
+                  <span>{pill.label}</span>
+                  {isSelected && <span className="text-[10px] font-extrabold">✓</span>}
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Botones Mostrar más / Ver menos */}
+        {!normalizedSearch && (remainingCount > 0 || visibleCount > INITIAL_VISIBLE) && (
+          <div className="flex items-center justify-between pt-1 border-t border-slate-200/70 dark:border-slate-700/50 text-[11px]">
+            {remainingCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => prev + LOAD_MORE_STEP)}
+                className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+              >
+                + Mostrar más ({remainingCount} restantes)
+              </button>
+            ) : (
+              <span className="text-slate-400">Mostrando todas las etiquetas</span>
+            )}
+
+            {visibleCount > INITIAL_VISIBLE && (
+              <button
+                type="button"
+                onClick={() => setVisibleCount(INITIAL_VISIBLE)}
+                className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+              >
+                ▲ Ver menos
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Inputs ocultos para envío estándar de FormData */}
       {selectedTags.map((tag) => (
         <input key={tag} type="hidden" name="tags" value={tag} />
       ))}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
 import { TagInput } from "./TagInput";
+import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
 
 const PRICE_OPTIONS = [
@@ -260,32 +261,13 @@ export function EditPlaceModal({
             </div>
           </div>
 
-          {/* Planes / Ocasiones */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Planes / Ocasiones
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {occasionsList.map((occ) => {
-                const active = selectedOccasions.includes(occ.id);
-                return (
-                  <button
-                    key={occ.id}
-                    type="button"
-                    onClick={() => toggleOccasion(occ.id)}
-                    className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${
-                      active
-                        ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-xs"
-                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    <span>{occ.icon}</span>
-                    <span>{occ.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Planes / Ocasiones (con buscador y Mostrar más) */}
+          <OccasionPicker
+            occasions={occasionsList}
+            selectedOccasions={selectedOccasions}
+            onToggle={toggleOccasion}
+            label="Planes / Ocasiones"
+          />
 
           {/* Precio */}
           <div>
