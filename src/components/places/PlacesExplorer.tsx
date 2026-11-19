@@ -1431,57 +1431,10 @@ export function PlacesExplorer({
       )}
 
       {/* =========================================================================
-          SELECTOR DE VISTA MÓVIL PROMINENTE (Pegado directamente a Mapa / Lista)
-         ========================================================================= */}
-      <div className="lg:hidden pt-1">
-        <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border border-slate-300/80 dark:border-slate-800 shadow-inner">
-          <button
-            type="button"
-            onClick={() => setActiveMobileView("map")}
-            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeMobileView === "map"
-              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-          >
-            <span className="text-base leading-none">🗺️</span>
-            <span>{t("places.view_map")}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "map"
-                ? "bg-slate-950/15 text-slate-950"
-                : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                }`}
-            >
-              {filteredPlaces.filter((p) => p.latitude != null).length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveMobileView("list")}
-            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ${activeMobileView === "list"
-              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-          >
-            <span className="text-base leading-none">📋</span>
-            <span>{t("places.view_list")}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "list"
-                ? "bg-slate-950/15 text-slate-950"
-                : "bg-slate-300/70 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                }`}
-            >
-              {filteredPlaces.length}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil toggle + scroll fluido)
+          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil vista exclusiva Mapa/Lista estilo Airbnb)
          ========================================================================= */}
       <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-1 lg:pt-2">
-        {/* Columna Mapa: en móvil va arriba cuando activeMobileView === "map", o se oculta si activeMobileView === "list" */}
+        {/* Columna Mapa: en desktop siempre visible; en móvil exclusiva cuando activeMobileView === "map" */}
         <div
           className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${activeMobileView === "list" ? "hidden lg:block" : "block order-1 mb-4 lg:mb-0"
             }`}
@@ -1496,7 +1449,7 @@ export function PlacesExplorer({
                 radiusKm={radiusKm}
                 occasionMap={occasionMap}
                 cartoApiKey={cartoApiKey}
-                className="w-full h-[50vh] sm:h-[500px] lg:h-[calc(100vh-14rem)] min-h-[360px]"
+                className="w-full h-[58vh] sm:h-[520px] lg:h-[calc(100vh-14rem)] min-h-[380px]"
               />
             </div>
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-2 flex-wrap gap-1">
@@ -1505,23 +1458,15 @@ export function PlacesExplorer({
                   count: filteredPlaces.filter((p) => p.latitude != null).length,
                 })}
               </span>
-              <button
-                type="button"
-                onClick={() => {
-                  document.getElementById("places-list-top")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="lg:hidden px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer"
-              >
-                <span>{t("places.jump_to_list")} ({filteredPlaces.length})</span>
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Columna Lista de Tarjetas: en móvil va abajo cuando activeMobileView === "map", o primero si activeMobileView === "list" */}
+        {/* Columna Lista de Tarjetas: en desktop siempre visible; en móvil exclusiva cuando activeMobileView === "list" */}
         <div
           id="places-list-top"
-          className="space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full"
+          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${activeMobileView === "map" ? "hidden lg:block" : "block"
+            }`}
         >
           {filteredPlaces.length === 0 ? (
             <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
@@ -1656,27 +1601,29 @@ export function PlacesExplorer({
       </div>
 
       {/* Botón flotante rápido en móvil (estilo Airbnb / Google Maps) para alternar sin volver arriba */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 lg:hidden">
-        <button
-          type="button"
-          onClick={() => {
-            setActiveMobileView((prev) => (prev === "map" ? "list" : "map"));
-          }}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 dark:bg-amber-500 text-white dark:text-slate-950 font-black text-xs shadow-2xl shadow-slate-950/50 dark:shadow-amber-500/30 border border-slate-700/70 dark:border-amber-300/60 backdrop-blur-md active:scale-95 transition cursor-pointer"
-        >
-          {activeMobileView === "map" ? (
-            <>
-              <span className="text-sm">📋</span>
-              <span>Ver lista ({filteredPlaces.length})</span>
-            </>
-          ) : (
-            <>
-              <span className="text-sm">🗺️</span>
-              <span>Ver mapa ({filteredPlaces.filter((p) => p.latitude != null).length})</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!selectedPlace && (
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 lg:hidden">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveMobileView((prev) => (prev === "map" ? "list" : "map"));
+            }}
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-slate-900/95 dark:bg-amber-500 text-white dark:text-slate-950 font-black text-xs shadow-2xl shadow-slate-950/50 dark:shadow-amber-500/30 border border-slate-700/70 dark:border-amber-300/60 backdrop-blur-md active:scale-95 transition cursor-pointer"
+          >
+            {activeMobileView === "map" ? (
+              <>
+                <span className="text-sm">📋</span>
+                <span>{t("places.view_list")} ({filteredPlaces.length})</span>
+              </>
+            ) : (
+              <>
+                <span className="text-sm">🗺️</span>
+                <span>{t("places.view_map")} ({filteredPlaces.filter((p) => p.latitude != null).length})</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Barra flotante del Comparador de Establecimientos (hasta 3 sitios) */}
       {compareIds.length > 0 && (
