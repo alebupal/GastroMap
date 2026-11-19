@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { bulkDeletePlacesAction, deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
+import {
+  bulkDeletePlacesAction,
+  deletePlaceAction,
+  mergePlacesAction,
+  type PlaceWithDetails,
+} from "@/lib/actions/places";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
@@ -14,6 +19,9 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
   const [cityFilter, setCityFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [mergeSource, setMergeSource] = useState<PlaceWithDetails | null>(null);
+  const [mergeTargetId, setMergeTargetId] = useState<string>("");
+  const [mergeSearch, setMergeSearch] = useState<string>("");
 
   // Lista única de ciudades para el filtro rápido
   const cities = useMemo(() => {
@@ -108,6 +116,50 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
       setStatusMessage({ type: "success", text: `Se han eliminado ${count} sitios con éxito.` });
     }
   }
+
+  // Fusión administrativa de sitio duplicado en uno principal
+  async function handleConfirmMerge() {
+    if (!mergeSource || !mergeTargetId) return;
+    const targetPlace = placesList.find((p) => p.id === mergeTargetId);
+    if (!targetPlace) return;
+
+    setLoading(true);
+    setStatusMessage(null);
+    const res = await mergePlacesAction(mergeTargetId, mergeSource.id);
+    setLoading(false);
+
+    if (res.error) {
+      setStatusMessage({ type: "error", text: res.error });
+    } else {
+      setPlacesList((prev) => prev.filter((p) => p.id !== mergeSource.id));
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(mergeSource.id);
+        return next;
+      });
+      setStatusMessage({
+        type: "success",
+        text: `«${mergeSource.name}» se ha fusionado correctamente dentro de «${targetPlace.name}».`,
+      });
+      setMergeSource(null);
+      setMergeTargetId("");
+      setMergeSearch("");
+    }
+  }
+
+  const mergeCandidates = useMemo(() => {
+    if (!mergeSource) return [];
+    const q = mergeSearch.toLowerCase().trim();
+    return placesList.filter((p) => {
+      if (p.id === mergeSource.id) return false;
+      if (!q) return true;
+      return (
+        p.name.toLowerCase().includes(q) ||
+        (p.city && p.city.toLowerCase().includes(q)) ||
+        (p.address && p.address.toLowerCase().includes(q))
+      );
+    });
+  }, [placesList, mergeSource, mergeSearch]);
 
   const allSelected = filteredPlaces.length > 0 && selectedIds.size === filteredPlaces.length;
 
@@ -295,6 +347,19 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                           )}
                           <button
                             type="button"
+                            onClick={() => {
+                              setMergeSource(place);
+                              setMergeTargetId("");
+                              setMergeSearch("");
+                            }}
+                            disabled={loading || placesList.length < 2}
+                            className="text-slate-400 hover:text-amber-400 text-xs transition cursor-pointer disabled:opacity-40"
+                            title="Fusionar este sitio duplicado dentro de otro"
+                          >
+                            🔀
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleDeleteSingle(place)}
                             disabled={loading}
                             className="text-slate-500 hover:text-red-400 text-xs transition cursor-pointer disabled:opacity-40"
@@ -312,6 +377,102 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
           </table>
         </div>
       </div>
+
+      {/* Modal de fusión administrativa de duplicados */}
+      {mergeSource && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 text-left max-h-[90vh] flex flex-col">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <span>🔀</span>
+                  <span>Fusionar establecimiento duplicado</span>
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Se absorberá y eliminará:{" "}
+                  <strong className="text-red-600 dark:text-red-400">{mergeSource.name}</strong>
+                  {mergeSource.city ? ` (${mergeSource.city})` : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMergeSource(null)}
+                className="text-slate-400 hover:text-slate-200 text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-[11px] text-amber-900 dark:text-amber-300">
+              Todos los comentarios, favoritos, estados personales, valoraciones, notas, ocasiones y etiquetas de{" "}
+              <strong>{mergeSource.name}</strong> se transferirán a la ficha principal que elijas abajo.
+            </div>
+
+            <div className="space-y-2 flex-1 overflow-hidden flex flex-col">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                Elige la ficha principal que sobrevivirá:
+              </label>
+              <input
+                type="text"
+                value={mergeSearch}
+                onChange={(e) => setMergeSearch(e.target.value)}
+                placeholder="🔍 Buscar establecimiento destino..."
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+              <div className="overflow-y-auto max-h-52 space-y-1.5 pr-1">
+                {mergeCandidates.length === 0 ? (
+                  <p className="text-xs text-slate-400 text-center py-4">
+                    No hay establecimientos coincidentes.
+                  </p>
+                ) : (
+                  mergeCandidates.map((cand) => {
+                    const selected = mergeTargetId === cand.id;
+                    return (
+                      <button
+                        key={cand.id}
+                        type="button"
+                        onClick={() => setMergeTargetId(cand.id)}
+                        className={`w-full text-left p-2.5 rounded-xl border text-xs transition cursor-pointer flex items-center justify-between gap-2 ${
+                          selected
+                            ? "bg-amber-500/15 border-amber-500 text-amber-900 dark:text-amber-200 font-bold"
+                            : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-400"
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate font-bold">{cand.name}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            {cand.city || "Sin ciudad"}
+                            {cand.address ? ` • ${cand.address}` : ""}
+                          </div>
+                        </div>
+                        {selected && <span className="text-amber-500 font-black">✓</span>}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setMergeSource(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmMerge}
+                disabled={loading || !mergeTargetId}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black transition cursor-pointer disabled:opacity-40"
+              >
+                {loading ? "Fusionando..." : "🔀 Fusionar fichas"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

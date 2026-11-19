@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import {
   getPlaceCommentsAction,
   addCommentAction,
+  updateCommentAction,
   deleteCommentAction,
   type CommentWithAuthor,
 } from "@/lib/actions/interactions";
@@ -29,6 +30,9 @@ export function PlaceCommentsThread({
   const [loading, setLoading] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -67,6 +71,20 @@ export function PlaceCommentsThread({
     }
   }
 
+  async function handleSaveEdit(commentId: string) {
+    if (!editingContent.trim() || savingEdit) return;
+    setSavingEdit(true);
+    const res = await updateCommentAction(commentId, editingContent);
+    if (res.success && res.content) {
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, content: res.content! } : c))
+      );
+      setEditingCommentId(null);
+      setEditingContent("");
+    }
+    setSavingEdit(false);
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -78,7 +96,7 @@ export function PlaceCommentsThread({
         <button
           type="button"
           onClick={onClose}
-          className="text-[11px] text-slate-400 hover:text-slate-200 cursor-pointer"
+          className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
         >
           Ocultar ✕
         </button>
@@ -94,7 +112,9 @@ export function PlaceCommentsThread({
           </p>
         ) : (
           comments.map((c) => {
-            const canDelete = isAdmin || c.userId === currentUserId;
+            const isAuthor = c.userId === currentUserId;
+            const canDelete = isAdmin || isAuthor;
+            const isEditing = editingCommentId === c.id;
             return (
               <div
                 key={c.id}
@@ -111,6 +131,19 @@ export function PlaceCommentsThread({
                         month: "short",
                       })}
                     </span>
+                    {isAuthor && !isEditing && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCommentId(c.id);
+                          setEditingContent(c.content);
+                        }}
+                        className="text-slate-400 hover:text-amber-500 text-[10px] cursor-pointer"
+                        title="Editar comentario"
+                      >
+                        ✏️
+                      </button>
+                    )}
                     {canDelete && (
                       <button
                         type="button"
@@ -123,9 +156,44 @@ export function PlaceCommentsThread({
                     )}
                   </div>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 text-xs whitespace-pre-wrap">
-                  {c.content}
-                </p>
+                {isEditing ? (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <input
+                      type="text"
+                      value={editingContent}
+                      onChange={(e) => setEditingContent(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSaveEdit(c.id);
+                        } else if (e.key === "Escape") {
+                          setEditingCommentId(null);
+                        }
+                      }}
+                      autoFocus
+                      className="flex-1 px-2.5 py-1 rounded-lg text-xs bg-white dark:bg-slate-950 border border-amber-400 dark:border-amber-500/60 text-slate-900 dark:text-slate-100 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSaveEdit(c.id)}
+                      disabled={savingEdit || !editingContent.trim()}
+                      className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 cursor-pointer disabled:opacity-40"
+                    >
+                      {savingEdit ? "..." : "Guardar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCommentId(null)}
+                      className="px-2 py-1 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-slate-600 dark:text-slate-300 text-xs whitespace-pre-wrap">
+                    {c.content}
+                  </p>
+                )}
               </div>
             );
           })

@@ -473,6 +473,280 @@ export async function getAllPlaces(
   );
 
   return placesWithDetails;
+}
 
-  return placesWithDetails;
+export interface PotentialDuplicate {
+  id: string;
+  name: string;
+  city: string | null;
+  address: string | null;
+  priceRange: string;
+  distanceMeters: number | null;
+  reason: string;
+}
+
+function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function haversineMeters(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number {
+  const R = 6371e3;
+  const φ1 = (lat1 * Math.PI) / 180;
+  const φ2 = (lat2 * Math.PI) / 180;
+  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c);
+}
+
+/**
+ * Busca posibles establecimientos duplicados entre las fichas accesibles al usuario
+ * (nunca revela fichas privadas de otros usuarios).
+ */
+export async function findPotentialDuplicatesAction(params: {
+  name?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}): Promise<PotentialDuplicate[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  const normalizedName = params.name ? normalizeText(params.name) : "";
+  const hasCoords =
+    typeof params.latitude === "number" &&
+    typeof params.longitude === "number" &&
+    !isNaN(params.latitude) &&
+    !isNaN(params.longitude);
+
+  if (normalizedName.length < 3 && !hasCoords) {
+    return [];
+  }
+
+  // Solo consultar fichas accesibles para este usuario
+  const accessible = await db
+    .select({
+      id: places.id,
+      name: places.name,
+      city: places.city,
+      address: places.address,
+      priceRange: places.priceRange,
+      latitude: places.latitude,
+      longitude: places.longitude,
+    })
+    .from(places)
+    .where(
+      sql`(${places.communityPublished} = true OR ${places.createdById} = ${currentUser.id})`
+    );
+
+  const matches: PotentialDuplicate[] = [];
+
+  for (const p of accessible) {
+    const pNorm = normalizeText(p.name);
+    let distanceMeters: number | null = null;
+    if (hasCoords && p.latitude != null && p.longitude != null) {
+      distanceMeters = haversineMeters(
+        params.latitude!,
+        params.longitude!,
+        p.latitude,
+        p.longitude
+      );
+    }
+
+    const nameMatch =
+      normalizedName.length >= 3 &&
+      (pNorm === normalizedName ||
+        (normalizedName.length >= 4 &&
+          (pNorm.includes(normalizedName) || normalizedName.includes(pNorm))));
+    const proximityMatch = distanceMeters !== null && distanceMeters <= 100;
+
+    if (nameMatch || proximityMatch) {
+      const reasons: string[] = [];
+      if (nameMatch) reasons.push("Nombre similar");
+      if (proximityMatch) reasons.push(`A ${distanceMeters} m`);
+
+      matches.push({
+        id: p.id,
+        name: p.name,
+        city: p.city,
+        address: p.address,
+        priceRange: p.priceRange,
+        distanceMeters,
+        reason: reasons.join(" • "),
+      });
+    }
+  }
+
+  // Priorizar los más cercanos o coincidentes exactos, máximo 5 sugerencias
+  return matches
+    .sort((a, b) => (a.distanceMeters ?? 999999) - (b.distanceMeters ?? 999999))
+    .slice(0, 5);
+}
+
+/**
+ * Fusión administrativa de dos establecimientos duplicados:
+ * transfiere comentarios, colecciones personales (sin colisiones), ocasiones,
+ * etiquetas y completa datos vacíos de la ficha principal, eliminando la duplicada.
+ */
+export async function mergePlacesAction(
+  primaryPlaceId: string,
+  duplicatePlaceId: string
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "Solo los administradores pueden fusionar establecimientos." };
+  }
+
+  if (!primaryPlaceId || !duplicatePlaceId || primaryPlaceId === duplicatePlaceId) {
+    return { error: "Debes seleccionar dos establecimientos distintos." };
+  }
+
+  const [primary] = await db
+    .select()
+    .from(places)
+    .where(eq(places.id, primaryPlaceId))
+    .limit(1);
+
+  const [duplicate] = await db
+    .select()
+    .from(places)
+    .where(eq(places.id, duplicatePlaceId))
+    .limit(1);
+
+  if (!primary || !duplicate) {
+    return { error: "Uno de los establecimientos seleccionados no existe." };
+  }
+
+  // Proteger fichas estrictamente privadas de terceros
+  if (
+    (!primary.communityPublished && primary.createdById !== currentUser.id) ||
+    (!duplicate.communityPublished && duplicate.createdById !== currentUser.id)
+  ) {
+    return { error: "No se pueden fusionar fichas privadas de otros usuarios." };
+  }
+
+  // 1. Transferir comentarios al establecimiento principal
+  await db
+    .update(placeComments)
+    .set({ placeId: primaryPlaceId })
+    .where(eq(placeComments.placeId, duplicatePlaceId));
+
+  // 2. Fusionar colecciones personales (user_places) sin violar índice único (userId, placeId)
+  const [primaryUserRows, dupUserRows] = await Promise.all([
+    db.select().from(userPlaces).where(eq(userPlaces.placeId, primaryPlaceId)),
+    db.select().from(userPlaces).where(eq(userPlaces.placeId, duplicatePlaceId)),
+  ]);
+
+  const primaryByUser = new Map(primaryUserRows.map((r) => [r.userId, r]));
+
+  for (const dupRow of dupUserRows) {
+    const existing = primaryByUser.get(dupRow.userId);
+    if (!existing) {
+      // Mover el registro directamente al principal
+      await db
+        .update(userPlaces)
+        .set({ placeId: primaryPlaceId, updatedAt: new Date() })
+        .where(eq(userPlaces.id, dupRow.id));
+    } else {
+      // Combinar sin perder datos del usuario
+      const mergedFavorite = existing.favorite || dupRow.favorite;
+      const mergedStatus = existing.personalStatus || dupRow.personalStatus;
+      const mergedRating = existing.rating ?? dupRow.rating;
+      const mergedNotes =
+        existing.privateNotes && dupRow.privateNotes && existing.privateNotes !== dupRow.privateNotes
+          ? `${existing.privateNotes}\n---\n${dupRow.privateNotes}`
+          : existing.privateNotes || dupRow.privateNotes;
+
+      await db
+        .update(userPlaces)
+        .set({
+          favorite: mergedFavorite,
+          personalStatus: mergedStatus,
+          rating: mergedRating,
+          privateNotes: mergedNotes,
+          updatedAt: new Date(),
+        })
+        .where(eq(userPlaces.id, existing.id));
+
+      await db.delete(userPlaces).where(eq(userPlaces.id, dupRow.id));
+    }
+  }
+
+  // 3. Combinar ocasiones sin duplicados
+  const [primaryOccs, dupOccs] = await Promise.all([
+    db.select().from(placeOccasions).where(eq(placeOccasions.placeId, primaryPlaceId)),
+    db.select().from(placeOccasions).where(eq(placeOccasions.placeId, duplicatePlaceId)),
+  ]);
+  const existingOccSet = new Set(primaryOccs.map((o) => o.occasion));
+  const missingOccs = dupOccs
+    .map((o) => o.occasion)
+    .filter((occ) => !existingOccSet.has(occ));
+  if (missingOccs.length > 0) {
+    await db.insert(placeOccasions).values(
+      Array.from(new Set(missingOccs)).map((occ) => ({
+        placeId: primaryPlaceId,
+        occasion: occ,
+      }))
+    );
+  }
+
+  // 4. Combinar etiquetas sin duplicados
+  const [primaryTags, dupTags] = await Promise.all([
+    db.select().from(placeTags).where(eq(placeTags.placeId, primaryPlaceId)),
+    db.select().from(placeTags).where(eq(placeTags.placeId, duplicatePlaceId)),
+  ]);
+  const existingTagSet = new Set(primaryTags.map((t) => t.tag));
+  const missingTags = dupTags
+    .map((t) => t.tag)
+    .filter((t) => !existingTagSet.has(t));
+  if (missingTags.length > 0) {
+    await db.insert(placeTags).values(
+      Array.from(new Set(missingTags)).map((t) => ({
+        placeId: primaryPlaceId,
+        tag: t,
+      }))
+    );
+  }
+
+  // 5. Completar campos vacíos de la ficha principal con los del duplicado
+  await db
+    .update(places)
+    .set({
+      address: primary.address || duplicate.address,
+      city: primary.city || duplicate.city,
+      latitude: primary.latitude ?? duplicate.latitude,
+      longitude: primary.longitude ?? duplicate.longitude,
+      googleMapsUrl: primary.googleMapsUrl || duplicate.googleMapsUrl,
+      website: primary.website || duplicate.website,
+      phone: primary.phone || duplicate.phone,
+      priceRange:
+        primary.priceRange === "???" && duplicate.priceRange !== "???"
+          ? duplicate.priceRange
+          : primary.priceRange,
+      notes: primary.notes || duplicate.notes,
+      updatedAt: new Date(),
+    })
+    .where(eq(places.id, primaryPlaceId));
+
+  // 6. Eliminar la ficha duplicada y restos
+  await db.delete(placeOccasions).where(eq(placeOccasions.placeId, duplicatePlaceId));
+  await db.delete(placeTags).where(eq(placeTags.placeId, duplicatePlaceId));
+  await db.delete(places).where(eq(places.id, duplicatePlaceId));
+
+  revalidatePath("/");
+  return { success: true };
 }

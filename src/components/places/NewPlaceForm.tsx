@@ -1,7 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { createPlaceAction, parseUrlAction } from "@/lib/actions/places";
+import { useState, useEffect } from "react";
+import {
+  createPlaceAction,
+  parseUrlAction,
+  findPotentialDuplicatesAction,
+  type PotentialDuplicate,
+} from "@/lib/actions/places";
 import { TagInput } from "@/components/places/TagInput";
 import { LocationPicker } from "@/components/places/LocationPicker";
 import type { Occasion } from "@/db/schema";
@@ -42,6 +47,37 @@ export function NewPlaceForm({
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [duplicates, setDuplicates] = useState<PotentialDuplicate[]>([]);
+  const [dismissedDuplicates, setDismissedDuplicates] = useState(false);
+
+  // Detección automática en vivo de posibles establecimientos duplicados
+  useEffect(() => {
+    const parsedLat = lat ? parseFloat(lat) : null;
+    const parsedLng = lng ? parseFloat(lng) : null;
+    const hasCoords =
+      parsedLat !== null && !isNaN(parsedLat) && parsedLng !== null && !isNaN(parsedLng);
+
+    if (name.trim().length < 3 && !hasCoords) {
+      setDuplicates([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const found = await findPotentialDuplicatesAction({
+          name: name.trim(),
+          latitude: hasCoords ? parsedLat : null,
+          longitude: hasCoords ? parsedLng : null,
+        });
+        setDuplicates(found);
+        setDismissedDuplicates(false);
+      } catch {
+        // Silenciar error de comprobación no bloqueante
+      }
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [name, lat, lng]);
 
   async function handleAutoResolve() {
     if (!url) return;
@@ -152,6 +188,57 @@ export function NewPlaceForm({
           placeholder="Ej. Casa Paco, Restaurante El Mirador..."
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
         />
+
+        {/* Aviso no bloqueante de posibles duplicados */}
+        {duplicates.length > 0 && !dismissedDuplicates && (
+          <div className="mt-2.5 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 space-y-2 animate-in fade-in duration-150">
+            <div className="flex items-start justify-between gap-2">
+              <div className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                <span>⚠️</span>
+                <span>
+                  {duplicates.length === 1
+                    ? "Ya existe un sitio muy parecido en el catálogo"
+                    : `Hemos encontrado ${duplicates.length} sitios parecidos en el catálogo`}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDismissedDuplicates(true)}
+                className="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:underline shrink-0 cursor-pointer"
+              >
+                Es distinto ✕
+              </button>
+            </div>
+            <div className="space-y-1.5">
+              {duplicates.map((dup) => (
+                <div
+                  key={dup.id}
+                  className="p-2 rounded-xl bg-white/90 dark:bg-slate-900/70 border border-amber-200 dark:border-amber-800/50 flex items-center justify-between gap-2 text-xs"
+                >
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-slate-100 truncate">
+                      {dup.name}{" "}
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-[11px]">
+                        ({dup.priceRange})
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {dup.reason}
+                      {dup.city ? ` • ${dup.city}` : ""}
+                      {dup.address ? ` • ${dup.address}` : ""}
+                    </div>
+                  </div>
+                  <a
+                    href="/"
+                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] shrink-0 transition"
+                  >
+                    Ver catálogo
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 3. Selector estructurado de Ubicación con buscador Nominatim */}

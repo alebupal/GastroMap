@@ -244,6 +244,39 @@ export async function deleteCommentAction(commentId: string) {
 }
 
 /**
+ * Edita el contenido de un comentario propio (solo el autor)
+ */
+export async function updateCommentAction(commentId: string, content: string) {
+  const user = await getCurrentUser();
+  if (!user) return { error: "No autenticado" };
+
+  const trimmed = content.trim();
+  if (!trimmed) return { error: "El comentario no puede estar vacío." };
+
+  const [comment] = await db
+    .select()
+    .from(placeComments)
+    .where(eq(placeComments.id, commentId))
+    .limit(1);
+
+  if (!comment) return { error: "Comentario no encontrado." };
+  if (comment.userId !== user.id) {
+    return { error: "Solo el autor puede editar su propio comentario." };
+  }
+
+  await db
+    .update(placeComments)
+    .set({
+      content: trimmed,
+      updatedAt: new Date(),
+    })
+    .where(eq(placeComments.id, commentId));
+
+  revalidatePath("/");
+  return { success: true, content: trimmed };
+}
+
+/**
  * Grupos de compartición (Fase 5)
  */
 export async function getSharingGroupsAction() {
