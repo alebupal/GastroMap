@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { useT } from "@/lib/i18n/client";
@@ -57,6 +57,18 @@ export function EditPlaceModal({
   const [resolving, setResolving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Asegurar que las ocasiones de la ficha se muestren aunque la lista externa viniera parcial
+  const mergedOccasions = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; icon: string }>();
+    (occasionsList || []).forEach((occ) => map.set(occ.id, occ));
+    (place.occasions || []).forEach((occId) => {
+      if (!map.has(occId)) {
+        map.set(occId, { id: occId, name: occId, icon: "🍽️" });
+      }
+    });
+    return Array.from(map.values());
+  }, [occasionsList, place.occasions]);
 
   useEffect(() => {
     if (isOpen) {
@@ -283,7 +295,7 @@ export function EditPlaceModal({
 
           {/* Planes / Ocasiones (con buscador y Mostrar más) */}
           <OccasionPicker
-            occasions={occasionsList}
+            occasions={mergedOccasions}
             selectedOccasions={selectedOccasions}
             onToggle={toggleOccasion}
             label={t("places.plans_title")}

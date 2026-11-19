@@ -154,8 +154,8 @@ export function PlaceCard({
               type="button"
               onClick={handleToggleFavorite}
               className="text-base hover:scale-125 active:scale-95 transition cursor-pointer p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg"
-              title={favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
-              aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"}
+              title={favorite ? t("places.remove_favorite") : t("places.add_favorite")}
+              aria-label={favorite ? t("places.remove_favorite") : t("places.add_favorite")}
             >
               {favorite ? "⭐" : "🤍"}
             </button>
@@ -255,7 +255,7 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => handleStatusChange("pending")}
-            aria-label={personalStatus === "pending" ? "Quitar de pendientes" : "Guardar en Quiero ir"}
+            aria-label={personalStatus === "pending" ? t("places.remove_pending") : t("places.add_pending")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${
               personalStatus === "pending"
                 ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
@@ -268,7 +268,7 @@ export function PlaceCard({
           <button
             type="button"
             onClick={() => handleStatusChange("visited")}
-            aria-label={personalStatus === "visited" ? "Quitar de visitados" : "Marcar como Ya he ido"}
+            aria-label={personalStatus === "visited" ? t("places.remove_visited") : t("places.mark_visited")}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${
               personalStatus === "visited"
                 ? "bg-emerald-600 text-white font-bold shadow-sm"
@@ -322,13 +322,13 @@ export function PlaceCard({
             <button
               type="button"
               onClick={onToggleCompare}
-              aria-label={isCompared ? "Quitar de comparar" : "Añadir a comparar"}
+              aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
               className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-1 rounded-lg ${
                 isCompared
                   ? "bg-amber-500 text-slate-950 font-bold"
                   : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
               }`}
-              title={isCompared ? "Quitar del comparador" : "Comparar lado a lado"}
+              title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
             >
               ⚖️
             </button>

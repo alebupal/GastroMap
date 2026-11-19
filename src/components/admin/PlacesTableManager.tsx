@@ -10,16 +10,22 @@ import {
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
+import { parseCityCountry } from "@/lib/location";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
+  occasionsList?: Array<{ id: string; name: string; icon: string }>;
 }
 
-export function PlacesTableManager({ places: initialPlaces }: PlacesTableManagerProps) {
+export function PlacesTableManager({
+  places: initialPlaces,
+  occasionsList = [],
+}: PlacesTableManagerProps) {
   const { t } = useT();
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -30,21 +36,39 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
   const [mergeSearch, setMergeSearch] = useState<string>("");
   const [editingPlace, setEditingPlace] = useState<PlaceWithDetails | null>(null);
 
-  // Lista única de ciudades para el filtro rápido
-  const cities = useMemo(() => {
-    const set = new Set<string>();
+  // Lista única de países y ciudades filtradas
+  const { allCountries, availableCities } = useMemo(() => {
+    const cSet = new Set<string>();
     placesList.forEach((p) => {
-      if (p.city) set.add(p.city);
+      const parsed = parseCityCountry(p.city);
+      if (parsed.country) cSet.add(parsed.country);
     });
-    return Array.from(set).sort();
-  }, [placesList]);
+    const countries = Array.from(cSet).sort((a, b) => a.localeCompare(b));
+
+    const citySet = new Set<string>();
+    placesList.forEach((p) => {
+      const parsed = parseCityCountry(p.city);
+      if (countryFilter === "all" || parsed.country === countryFilter) {
+        if (parsed.city) citySet.add(parsed.city);
+      }
+    });
+    const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
+
+    return { allCountries: countries, availableCities: cities };
+  }, [placesList, countryFilter]);
 
   // Sitios filtrados en la tabla
   const filteredPlaces = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return placesList.filter((p) => {
-      const matchCity = cityFilter === "all" || p.city === cityFilter;
-      if (!matchCity) return false;
+      const parsed = parseCityCountry(p.city);
+
+      if (countryFilter !== "all" && parsed.country !== countryFilter) {
+        return false;
+      }
+      if (cityFilter !== "all" && parsed.city !== cityFilter) {
+        return false;
+      }
 
       if (!q) return true;
       const matchName = p.name.toLowerCase().includes(q);
@@ -55,7 +79,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
 
       return matchName || matchAddr || matchCityName || matchAuthor || matchTags;
     });
-  }, [placesList, searchQuery, cityFilter]);
+  }, [placesList, searchQuery, countryFilter, cityFilter]);
 
   // Selección individual
   function toggleSelect(id: string) {
@@ -201,7 +225,26 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
             />
           </div>
 
-          {cities.length > 0 && (
+          {allCountries.length > 0 && (
+            <select
+              value={countryFilter}
+              onChange={(e) => {
+                setCountryFilter(e.target.value);
+                setCityFilter("all");
+                setCurrentPage(1);
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
+            >
+              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
+              {allCountries.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {availableCities.length > 0 && (
             <select
               value={cityFilter}
               onChange={(e) => {
@@ -210,8 +253,8 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
               }}
               className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
             >
-              <option value="all">{t("admin_places.all_cities")} ({cities.length})</option>
-              {cities.map((c) => (
+              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
+              {availableCities.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -517,7 +560,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
       {editingPlace && (
         <EditPlaceModal
           place={editingPlace}
-          occasionsList={[]}
+          occasionsList={occasionsList}
           availableTags={Array.from(new Set(placesList.flatMap((p) => p.tags || [])))}
           isOpen={true}
           onClose={() => setEditingPlace(null)}

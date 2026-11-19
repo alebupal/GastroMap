@@ -97,7 +97,9 @@ export function AdminDashboard({
           {/* Contenido de la pestaña activa */}
           <div className="pt-2">
             {activeTab === "stats" && <AdminStatsPanel />}
-            {activeTab === "places" && <PlacesTableManager places={allPlaces} />}
+            {activeTab === "places" && (
+              <PlacesTableManager places={allPlaces} occasionsList={initialOccasions} />
+            )}
             {activeTab === "users" && <UsersManager currentUserId={currentUserId} />}
             {activeTab === "taxonomy" && (
               <div className="space-y-4">

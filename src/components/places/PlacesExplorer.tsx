@@ -16,6 +16,7 @@ import {
   type SavedFilterItem,
 } from "@/lib/actions/saved-filters";
 import { getMyGroupsAction } from "@/lib/actions/groups";
+import { parseCityCountry } from "@/lib/location";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -68,6 +69,8 @@ export function PlacesExplorer({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
 
@@ -274,6 +277,8 @@ export function PlacesExplorer({
     setSelectedOccasions([]);
     setSelectedTags([]);
     setSelectedPrices([]);
+    setSelectedCountry("all");
+    setSelectedCity("all");
     setExperienceFilter("all");
     setTextSearch("");
     setUserLocation(null);
@@ -281,6 +286,27 @@ export function PlacesExplorer({
     setOccasionSearchQuery("");
     setTagSearchQuery("");
   }
+
+  // Lista única de países y ciudades filtradas
+  const { allCountries, availableCities } = useMemo(() => {
+    const cSet = new Set<string>();
+    initialPlaces.forEach((p) => {
+      const parsed = parseCityCountry(p.city);
+      if (parsed.country) cSet.add(parsed.country);
+    });
+    const countries = Array.from(cSet).sort((a, b) => a.localeCompare(b));
+
+    const citySet = new Set<string>();
+    initialPlaces.forEach((p) => {
+      const parsed = parseCityCountry(p.city);
+      if (selectedCountry === "all" || parsed.country === selectedCountry) {
+        if (parsed.city) citySet.add(parsed.city);
+      }
+    });
+    const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
+
+    return { allCountries: countries, availableCities: cities };
+  }, [initialPlaces, selectedCountry]);
 
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
@@ -373,6 +399,16 @@ export function PlacesExplorer({
       );
     }
 
+    // 7. Filtro por País
+    if (selectedCountry !== "all") {
+      result = result.filter((p) => parseCityCountry(p.city).country === selectedCountry);
+    }
+
+    // 8. Filtro por Ciudad
+    if (selectedCity !== "all") {
+      result = result.filter((p) => parseCityCountry(p.city).city === selectedCity);
+    }
+
     // Ordenación configurable por el usuario
     const priceOrder: Record<string, number> = {
       "€": 1,
@@ -419,6 +455,8 @@ export function PlacesExplorer({
     selectedOccasions,
     selectedTags,
     selectedPrices,
+    selectedCountry,
+    selectedCity,
     selectedGroupFilterIds,
     experienceFilter,
     userLocation,
@@ -434,6 +472,8 @@ export function PlacesExplorer({
     selectedOccasions,
     selectedTags,
     selectedPrices,
+    selectedCountry,
+    selectedCity,
     selectedGroupFilterIds,
     experienceFilter,
     radiusKm,
@@ -519,6 +559,8 @@ export function PlacesExplorer({
     selectedOccasions.length +
     selectedTags.length +
     selectedPrices.length +
+    (selectedCountry !== "all" ? 1 : 0) +
+    (selectedCity !== "all" ? 1 : 0) +
     (experienceFilter !== "all" ? 1 : 0) +
     (userLocation ? 1 : 0) +
     (textSearch.trim() ? 1 : 0);
@@ -878,6 +920,46 @@ export function PlacesExplorer({
 
         {/* Línea 2: Filtro rápido de precio numérico (acumulable en su propia línea o continuación en desktop) */}
         <HorizontalScroll className="flex items-center gap-1.5 text-xs">
+          {/* Filtros de País y Ciudad */}
+          {allCountries.length > 0 && (
+            <select
+              value={selectedCountry}
+              onChange={(e) => {
+                setSelectedCountry(e.target.value);
+                setSelectedCity("all");
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0"
+            >
+              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
+              {allCountries.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {availableCities.length > 0 && (
+            <select
+              value={selectedCity}
+              onChange={(e) => {
+                setSelectedCity(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0"
+            >
+              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
+              {availableCities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
+
           {[
             { id: "€", label: "< 15 €" },
             { id: "€€", label: "15 - 30 €" },
@@ -1322,7 +1404,9 @@ export function PlacesExplorer({
             </div>
             <div className="flex items-center justify-between text-[11px] text-slate-500 px-2 flex-wrap gap-1">
               <span>
-                Mostrando {filteredPlaces.filter((p) => p.latitude != null).length} locales geolocalizados.
+                {t("places.showing_geolocated", {
+                  count: filteredPlaces.filter((p) => p.latitude != null).length,
+                })}
               </span>
               <button
                 type="button"

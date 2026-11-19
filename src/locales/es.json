@@ -87,7 +87,21 @@
     "remove_filter_single": "✕ Quitar filtro",
     "remove_filter_multiple": "✕ Quitar filtros ({count})",
     "group_count_single": "1 grupo",
-    "group_count_multiple": "{count} grupos"
+    "group_count_multiple": "{count} grupos",
+    "all_countries": "Todos los países",
+    "all_cities": "Todas las ciudades",
+    "country_filter": "País",
+    "city_filter": "Ciudad",
+    "remove_favorite": "Quitar de favoritos",
+    "add_favorite": "Guardar en favoritos",
+    "remove_pending": "Quitar de pendientes",
+    "add_pending": "Guardar en Quiero ir",
+    "remove_visited": "Quitar de visitados",
+    "mark_visited": "Marcar como Ya he ido",
+    "remove_compare": "Quitar de comparar",
+    "add_compare": "Añadir a comparar",
+    "compare_side_by_side": "Comparar lado a lado",
+    "showing_geolocated": "Mostrando {count} locales geolocalizados."
   },
   "cards": {
     "pending": "Pendiente",
@@ -116,7 +130,14 @@
     "municipality_label": "Municipio",
     "address_label": "Dirección / Calle o Barrio (ej. Shibuya, Trastevere, Calle Navas...)",
     "address_placeholder": "Ej. Calle Navas 28, Times Square...",
-    "coords_label": "Coordenadas: {lat}, {lng}"
+    "coords_label": "Coordenadas: {lat}, {lng}",
+    "country_label": "País",
+    "country_placeholder": "Buscar país...",
+    "other_country": "Otro país...",
+    "other_country_label": "Nombre del país",
+    "other_country_placeholder": "Escribe el nombre del país...",
+    "select_country": "Seleccionar país...",
+    "no_countries_found": "No se encontraron países"
   },
   "random": {
     "title": "¿Dónde vamos hoy?",
@@ -196,7 +217,18 @@
     "tags_search_placeholder": "Buscar etiqueta o escribir nueva (ej. ramen, tapas...)",
     "tags_no_matches": "Sin coincidencias. Pulsa «+ #{query}» para crearla al vuelo.",
     "status_temporarily_closed": "Cerrado temp.",
-    "status_permanently_closed": "Cerrado perm."
+    "status_permanently_closed": "Cerrado perm.",
+    "occasions_empty": "No hay categorías disponibles.",
+    "import_ok": "✓ Enlace procesado correctamente",
+    "import": {
+      "label": "Autocompletar pegando enlace de Google Maps",
+      "placeholder": "https://maps.app.goo.gl/... o pega enlace compartido",
+      "button": "Leer datos ⚡",
+      "hint": "Detectamos el nombre, coordenadas y dirección al pegar enlaces de Google Maps.",
+      "nothing": "No se encontraron datos automáticos en la URL introducida.",
+      "reading": "Leyendo enlace...",
+      "ok": "✓ Enlace procesado correctamente"
+    }
   },
   "profile": {
     "title": "Editar mi perfil",
@@ -562,8 +594,8 @@
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "delete_confirm": "¿Eliminar esta opción?",
-    "search_occasions": "🔍 Buscar categoría por nombre o id...",
-    "search_tags": "🔍 Buscar etiqueta por nombre...",
+    "search_occasions": "Buscar categoría por nombre o id...",
+    "search_tags": "Buscar etiqueta por nombre...",
     "delete_empty": "Eliminar vacías ({count})",
     "delete_selected": "Eliminar ({count})",
     "select_all_visible": "Seleccionar todas visibles ({count})",

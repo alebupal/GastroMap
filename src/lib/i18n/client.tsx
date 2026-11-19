@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { LOCALE_COOKIE, type Locale } from "./config";
 import { getMessages, translate, type Messages } from "./messages";
+import { updateUserLocaleAction } from "@/lib/actions/auth";
 
 interface I18nContextValue {
   locale: Locale;
@@ -48,6 +49,8 @@ export function I18nProvider({
       if (typeof document !== "undefined") {
         document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
       }
+      // Persistir preferencia de idioma en el perfil de usuario en base de datos
+      updateUserLocaleAction(next).catch(() => {});
       router.refresh();
     },
     [router]

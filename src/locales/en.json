@@ -87,7 +87,21 @@
     "remove_filter_single": "✕ Remove filter",
     "remove_filter_multiple": "✕ Remove filters ({count})",
     "group_count_single": "1 group",
-    "group_count_multiple": "{count} groups"
+    "group_count_multiple": "{count} groups",
+    "all_countries": "All countries",
+    "all_cities": "All cities",
+    "country_filter": "Country",
+    "city_filter": "City",
+    "remove_favorite": "Remove from favorites",
+    "add_favorite": "Save to favorites",
+    "remove_pending": "Remove from want to go",
+    "add_pending": "Save to Want to go",
+    "remove_visited": "Remove from visited",
+    "mark_visited": "Mark as visited",
+    "remove_compare": "Remove from comparison",
+    "add_compare": "Add to comparison",
+    "compare_side_by_side": "Compare side by side",
+    "showing_geolocated": "Showing {count} geolocated places."
   },
   "cards": {
     "pending": "Pending",
@@ -116,7 +130,14 @@
     "municipality_label": "Municipality",
     "address_label": "Address / Street or Area (e.g. Shibuya, Trastevere, Main St...)",
     "address_placeholder": "E.g. 28 Navas St, Times Square...",
-    "coords_label": "Coordinates: {lat}, {lng}"
+    "coords_label": "Coordinates: {lat}, {lng}",
+    "country_label": "Country",
+    "country_placeholder": "Search country...",
+    "other_country": "Other country...",
+    "other_country_label": "Country name",
+    "other_country_placeholder": "Type country name...",
+    "select_country": "Select country...",
+    "no_countries_found": "No countries found"
   },
   "random": {
     "title": "Where are we going today?",
@@ -196,7 +217,18 @@
     "tags_search_placeholder": "Search tag or write new (e.g. ramen, tapas...)",
     "tags_no_matches": "No matches. Click \"+ #{query}\" to create on the fly.",
     "status_temporarily_closed": "Temporarily closed",
-    "status_permanently_closed": "Permanently closed"
+    "status_permanently_closed": "Permanently closed",
+    "occasions_empty": "No categories available.",
+    "import_ok": "✓ Link processed successfully",
+    "import": {
+      "label": "Autocomplete by pasting a Google Maps link",
+      "placeholder": "https://maps.app.goo.gl/... or paste shared link",
+      "button": "Read data ⚡",
+      "hint": "We detect the name, coordinates, and address when pasting Google Maps links.",
+      "nothing": "No automatic data found in the provided URL.",
+      "reading": "Reading link...",
+      "ok": "✓ Link processed successfully"
+    }
   },
   "profile": {
     "title": "Edit my profile",
@@ -562,8 +594,8 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "delete_confirm": "Delete this option?",
-    "search_occasions": "🔍 Search category by name or id...",
-    "search_tags": "🔍 Search tag by name...",
+    "search_occasions": "Search category by name or id...",
+    "search_tags": "Search tag by name...",
     "delete_empty": "Delete empty ({count})",
     "delete_selected": "Delete ({count})",
     "select_all_visible": "Select all visible ({count})",

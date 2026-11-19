@@ -108,7 +108,7 @@ export function OccasionPicker({
         <div className="flex flex-wrap gap-1.5">
           {displayedOccasions.length === 0 ? (
             <p className="text-[11px] text-slate-400 italic py-1">
-              {t("form.occasions_no_results", { query: searchQuery })}
+              {q ? t("form.occasions_no_results", { query: searchQuery }) : t("form.occasions_empty")}
             </p>
           ) : (
             displayedOccasions.map((occ) => {

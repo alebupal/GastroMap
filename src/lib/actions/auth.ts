@@ -18,6 +18,7 @@ import {
   countUsers,
   invalidateSession,
 } from "@/lib/auth";
+import { LOCALE_COOKIE, isLocale } from "@/lib/i18n/config";
 
 export interface ActionResult {
   success?: boolean;
@@ -122,7 +123,33 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const session = await createSession(user.id);
   await setSessionCookie(session.id, session.expiresAt);
 
+  // Sincronizar cookie de idioma preferido por el usuario
+  if (user.locale && isLocale(user.locale)) {
+    const cookieStore = await (await import("next/headers")).cookies();
+    cookieStore.set(LOCALE_COOKIE, user.locale, {
+      path: "/",
+      maxAge: 31536000,
+      sameSite: "lax",
+    });
+  }
+
   redirect("/");
+}
+
+/**
+ * Guarda el idioma preferido del usuario en la base de datos.
+ */
+export async function updateUserLocaleAction(locale: string): Promise<{ success: boolean }> {
+  try {
+    const user = await getCurrentUser();
+    if (user && isLocale(locale)) {
+      await db.update(users).set({ locale }).where(eq(users.id, user.id));
+    }
+    return { success: true };
+  } catch (err) {
+    console.error("Error updating user locale:", err);
+    return { success: false };
+  }
 }
 
 /**
