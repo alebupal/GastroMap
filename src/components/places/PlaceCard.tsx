@@ -7,6 +7,7 @@ import {
   setPersonalStatusAction,
 } from "@/lib/actions/interactions";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
 import { PlaceVisitsModal } from "./PlaceVisitsModal";
@@ -44,6 +45,7 @@ export function PlaceCard({
   onToggleCompare,
 }: PlaceCardProps) {
   const { t } = useT();
+  const { toast } = useToast();
   const [deleting, setDeleting] = useState(false);
   const [favorite, setFavorite] = useState(place.isFavorite ?? false);
   const [personalStatus, setPersonalStatus] = useState<"pending" | "visited" | null>(
@@ -61,12 +63,14 @@ export function PlaceCard({
   const canEdit = isAdmin || place.createdById === currentUserId;
 
   async function handleDelete() {
-    if (!confirm(`¿Eliminar "${place.name}" de GastroMap?`)) return;
+    if (!confirm(t("places.delete_confirm", { name: place.name }))) return;
     setDeleting(true);
     const res = await deletePlaceAction(place.id);
     if (res?.error) {
       setDeleting(false);
-      alert(res.error);
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("places.delete_success", { name: place.name }), { kind: "success" });
     }
   }
 

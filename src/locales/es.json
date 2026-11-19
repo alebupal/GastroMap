@@ -46,7 +46,8 @@
     "roulette": "Ruleta",
     "export_import": "Importar / Exportar",
     "undo": "Deshacer",
-    "delete_confirm": "¿Seguro que quieres eliminar este sitio?",
+    "delete_confirm": "¿Eliminar «{name}» de GastroMap?",
+    "delete_success": "✓ Establecimiento «{name}» eliminado correctamente.",
     "no_results": "No se encontraron sitios con estos filtros.",
     "private_group_badge": "Grupo",
     "sort_by": "Ordenar por",
@@ -518,6 +519,10 @@
     "delete_title": "Eliminar sitio",
     "delete_confirm": "¿Eliminar definitivamente «{name}»?",
     "delete_bulk_confirm": "¿Eliminar definitivamente los {count} establecimientos seleccionados? Esta acción es irreversible.",
+    "delete_bulk_confirm_single": "¿Eliminar definitivamente el establecimiento seleccionado? Esta acción es irreversible.",
+    "delete_success": "✓ Establecimiento «{name}» eliminado correctamente.",
+    "delete_bulk_success": "✓ {count} establecimientos eliminados correctamente.",
+    "delete_bulk_success_single": "✓ Establecimiento eliminado correctamente.",
     "merge_modal_title": "Fusionar establecimiento duplicado",
     "merge_modal_subtitle": "Se absorberá y eliminará:",
     "merge_modal_desc": "Todos los comentarios, favoritos, estados personales, valoraciones, notas, ocasiones y etiquetas se transferirán a la ficha principal que elijas abajo.",
@@ -528,7 +533,6 @@
     "merging": "Fusionando...",
     "cancel": "Cancelar",
     "merge_success": "Sitios fusionados correctamente.",
-    "delete_success": "Sitio «{name}» eliminado.",
     "edit_title": "Editar establecimiento"
   },
   "admin_users": {

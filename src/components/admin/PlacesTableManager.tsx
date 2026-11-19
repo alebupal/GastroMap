@@ -155,7 +155,12 @@ export function PlacesTableManager({
     const count = selectedIds.size;
     if (count === 0) return;
 
-    if (!confirm(t("admin_places.delete_bulk_confirm", { count: String(count) }))) {
+    const confirmMsg =
+      count === 1
+        ? t("admin_places.delete_bulk_confirm_single")
+        : t("admin_places.delete_bulk_confirm", { count: String(count) });
+
+    if (!confirm(confirmMsg)) {
       return;
     }
 
@@ -171,7 +176,11 @@ export function PlacesTableManager({
     } else {
       setPlacesList((prev) => prev.filter((p) => !selectedIds.has(p.id)));
       setSelectedIds(new Set());
-      setStatusMessage({ type: "success", text: t("admin_places.delete_bulk_confirm", { count: String(count) }) });
+      const successMsg =
+        count === 1
+          ? t("admin_places.delete_bulk_success_single")
+          : t("admin_places.delete_bulk_success", { count: String(count) });
+      setStatusMessage({ type: "success", text: successMsg });
     }
   }
 
