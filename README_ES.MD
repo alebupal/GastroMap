@@ -48,8 +48,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Selector integrado en la cabecera persistente y scripts CLI para sincronizar con hojas de cálculo (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Experiencia Móvil (PWA), Caché Offline y Modo Oscuro / Claro:**
-  * Tarjeta flotante inferior en móvil al seleccionar cualquier chincheta con botón «Cómo llegar» y apertura rápida de ficha.
-  * Conmutador para evitar el bloqueo del scroll vertical en móvil al interactuar con el mapa.
+  * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
+  * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline** (`/sw.js`) para consultar favoritos y pendientes sin conexión.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC).
 

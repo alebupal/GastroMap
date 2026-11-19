@@ -8,6 +8,14 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-19
 
 ### Añadido
+- **Botón Flotante «Subir Arriba» (Scroll to Top)**:
+  - Botón flotante discreto y compacto (`ScrollToTop.tsx`) con diseño *glassmorphism* que aparece suavemente al descender más de 300px y permite volver a la cabecera con desplazamiento fluido.
+- **Navegación Fluida «Ver Ficha Completa» desde el Mapa**:
+  - Salto sincronizado desde la tarjeta flotante del mapa móvil hasta la ficha completa del establecimiento en la lista: cálculo automático de la página de destino en la paginación, cambio de vista inmediato, desplazamiento centrado suave (`scrollIntoView`) y resalte visual dorado (`ring-2 ring-amber-500/50`) en la tarjeta seleccionada.
+- **Pestañas Superiores Móviles Optimizadas y Cero Duplicidad**:
+  - Reorganización de la vista móvil con selector de pestañas exclusivo (`[🗺️ Mapa] | [📋 Lista]`), eliminando botones intermedios y píldoras redundantes para maximizar la superficie visual útil.
+- **Posicionamiento Robusto mediante Portal (`createPortal`)**:
+  - Integración de `createPortal` en `SearchableSelect.tsx` y en el desplegable de grupos de `PlacesExplorer.tsx` montando los menús directamente en `document.body`, eliminando interferencias con contenedores padres que usan `backdrop-blur` u `overflow-hidden` (como el panel de administración).
 - **Selector Mundial de Países y Ciudades con Buscador Integrado**:
   - Catálogo de más de 195 países del mundo con banderas emoji, nombres en español e inglés y filtrado de texto instantáneo (`CountrySelect.tsx`).
   - Componente de selección con buscador desplegable (`SearchableSelect.tsx`) con posicionamiento flotante fijo que previene recortes por overflow en contenedores scrolleables.

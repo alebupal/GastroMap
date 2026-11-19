@@ -111,8 +111,9 @@ Al acceder por primera vez a una instancia limpia:
 - **Modos de Vista**: Alternancia fluida entre **Mapa interactivo** y **Lista de fichas**.
 
 ### 📱 Experiencia Móvil Optimizada
-- **Scroll Libre sin Bloqueo**: El mapa en móvil incluye un conmutador táctil y un botón directo `↓ Bajar a la lista` que evita que los gestos táctiles atrapen el desplazamiento vertical de la página.
-- **Tarjeta Flotante Inferior**: Al pulsar cualquier chincheta en el mapa móvil, se despliega una tarjeta resumen inferior (*Bottom Card*) con nombre, rango de precio, botón de navegación directa en Google Maps (`🗺️ Cómo llegar`) y acceso a la ficha completa.
+- **Pestañas Exclusivas sin Duplicidades**: Alternancia limpia en la cabecera móvil mediante `[🗺️ Mapa] | [📋 Lista]` que muestra la vista seleccionada de forma limpia y despejada.
+- **Tarjeta Flotante Inferior y Salto Sincronizado**: Al pulsar cualquier chincheta en el mapa móvil, se despliega una tarjeta resumen inferior (*Bottom Card*) con nombre, rango de precio, botón de navegación directa en Google Maps (`🗺️ Cómo llegar`) y acceso a la ficha completa. Al pulsar *"Ver ficha completa →"*, la aplicación calcula automáticamente la página de paginación correcta, cambia a la lista y hace un scroll suave y centrado resaltando la tarjeta con un halo dorado.
+- **Botón Flotante «Subir Arriba»**: Botón circular sutil y minimalista con estética *glassmorphism* que aparece de forma no invasiva al desplazarse más de 300px hacia abajo para volver inmediatamente a la parte superior.
 - **Paginación Inteligente**: En modo lista los locales se muestran paginados de 10 en 10 con selector de página para navegación ultra ágil.
 
 ### 🎲 Asistente de Decisión y Ruleta

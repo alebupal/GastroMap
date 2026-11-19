@@ -50,8 +50,8 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Header language selector persisted via cookies, plus CLI synchronization scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Mobile Experience (PWA), Offline Cache & Dark/Light Mode:**
-  * Mobile floating bottom card on map pin selection with direct directions link and quick details drawer.
-  * Touch-scroll switch preventing page scroll hijacking on mobile map view.
+  * Clean exclusive mobile tabs (`[🗺️ Map] | [📋 List]`) and bottom floating summary card on map pin selection with direct directions and synchronized jump to full place card with golden highlight.
+  * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.
   * Installable on iOS and Android home screens as a Progressive Web App with **Service Worker offline caching** (`/sw.js`) for favorites and pending places.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
 

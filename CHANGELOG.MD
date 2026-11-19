@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-19
 
 ### Added
+- **Floating «Back to Top» Button (Scroll to Top)**:
+  - Discreet and lightweight floating button (`ScrollToTop.tsx`) with glassmorphism styling that smoothly appears when scrolling past 300px, triggering a smooth scroll back to the header.
+- **Synchronized «Full Details» Navigation from Map**:
+  - Direct navigation jump from the mobile map bottom sheet to the place's full details card in the list view: automatic destination pagination page calculation, instant view switch, smooth centered scrolling (`scrollIntoView`), and golden highlight ring (`ring-2 ring-amber-500/50`) on the target place card.
+- **Streamlined Mobile Tabs & Zero Duplication**:
+  - Reorganized mobile header with exclusive view tabs (`[🗺️ Map] | [📋 List]`), removing redundant intermediate floating pills and jump buttons to maximize visible map and card space.
+- **Robust Dropdown Positioning via Portal (`createPortal`)**:
+  - Integrated `createPortal` in `SearchableSelect.tsx` and the private groups popover mounting directly into `document.body`, eliminating positioning offsets caused by parent containers using `backdrop-blur` or `overflow-hidden` (such as the admin panel).
 - **Worldwide Country & City Selector with Integrated Search**:
   - Comprehensive list of 195+ world countries with emoji flags, localized names in English and Spanish, and instant text filtering (`CountrySelect.tsx`).
   - Searchable dropdown select (`SearchableSelect.tsx`) with fixed-position popover preventing vertical clipping inside horizontal scrolling containers.
