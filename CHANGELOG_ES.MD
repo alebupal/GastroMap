@@ -8,6 +8,12 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-19
 
 ### Añadido
+- **Centrado por Defecto en España y Encuadre Inteligente**:
+  - El mapa se inicializa y enfoca por defecto en España (`[40.4168, -3.7038]`, zoom 6), evitando el zoom out mundial que alejaba la vista al abarcar locales internacionales cuando no hay filtros aplicados. Al aplicar filtros (país, ciudad, etiquetas), encuadra automáticamente los locales filtrados.
+- **Sincronización Bidireccional Chincheta-Lista en Escritorio**:
+  - Al hacer clic sobre cualquier chincheta del mapa en pantalla de escritorio, se calcula la página de paginación correspondiente, se cambia de página de ser necesario y se desplaza suavemente la lista hasta centrar la tarjeta con su resalte dorado activo.
+- **Corrección de Error `flyTo NaN` al Alternar Favoritos**:
+  - Protección en `MapView.tsx` para evitar ejecuciones de `flyTo` cuando el contenedor del mapa está oculto (`display: none` en modo lista móvil) o cuando el ID seleccionado no ha cambiado, resolviendo la excepción `Invalid LatLng object: (NaN, NaN)` producida por la revalidación de datos al marcar favorito.
 - **Botón Flotante «Subir Arriba» (Scroll to Top)**:
   - Botón flotante discreto y compacto (`ScrollToTop.tsx`) con diseño *glassmorphism* que aparece suavemente al descender más de 300px y permite volver a la cabecera con desplazamiento fluido.
 - **Navegación Fluida «Ver Ficha Completa» desde el Mapa**:

@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-19
 
 ### Added
+- **Default Map Centering on Spain & Smart Bounds Framing**:
+  - The map initializes and remains focused on Spain by default (`[40.4168, -3.7038]`, zoom 6), avoiding the world-wide zoom out caused by international demo places when no filters are set. When filters are applied (country, city, tags), it automatically frames the filtered results.
+- **Bidirectional Pin-to-Card Synchronization on Desktop**:
+  - Clicking any pin on the desktop map automatically resolves the target pagination page, switches page if necessary, smoothly scrolls to the card, and activates its golden highlight ring.
+- **Fixed `flyTo NaN` Crash upon Toggling Favorites**:
+  - Robust guards in `MapView.tsx` preventing `flyTo` execution when the map container is hidden (`display: none` in mobile list view) or when the selected place ID hasn't changed, resolving the `Invalid LatLng object: (NaN, NaN)` exception on data revalidation.
 - **Floating «Back to Top» Button (Scroll to Top)**:
   - Discreet and lightweight floating button (`ScrollToTop.tsx`) with glassmorphism styling that smoothly appears when scrolling past 300px, triggering a smooth scroll back to the header.
 - **Synchronized «Full Details» Navigation from Map**:
