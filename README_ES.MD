@@ -44,10 +44,17 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **📱 Experiencia Móvil (PWA), Caché Offline y Modo Oscuro / Claro:**
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline** (`/sw.js`) para consultar favoritos y pendientes sin conexión.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC) y con paletas cromáticas de alto contraste optimizadas para lectura diurna y nocturna.
-  * Interfaz optimizada para uso táctil con una sola mano, cabecera responsive ultra-compacta, selector prominente Mapa/Lista y carruseles con scroll fluido.
+  * Interfaz optimizada para uso táctil con una sola mano, cabecera móvil adaptativa con menú de usuario desplegable (`[ (A) ▾ ]`) sin desbordamientos, selector prominente Mapa/Lista y carruseles con scroll fluido.
+
+* **📚 Documentación y Registro de Cambios Integrado (`/docs`):**
+  * Visor oficial de documentación y changelog integrado en la propia aplicación al estilo TVSPY.
+  * Selector interactivo de idioma (Español 🇪🇸 / Inglés 🇬🇧) con carga local y fallback a GitHub Raw.
+  * Renderizado Markdown enriquecido con badges de versiones (`🏷️`), viñetas estilizadas (`✓`), bloques de código y banner de agradecimiento.
 
 * **🛠️ Panel de Administración y Limpieza:**
-  * Tabla paginada de gestión global de establecimientos con fusión de duplicados, eliminación masiva, activación/desactivación de usuarios y **registro de auditoría**.
+  * Gestión completa de usuarios: alta directa manual, edición exhaustiva de perfiles (nombre, @username, email, rol, estado) y restablecimiento instantáneo de contraseñas.
+  * Registro integral de invitaciones privadas: listado con estados en tiempo real (Activa 🟢, Usada ✓, Caducada ⏳), copia de enlaces al portapapeles y revocación anticipada antes de caducar.
+  * Tabla paginada de gestión global de establecimientos con fusión de duplicados, eliminación masiva y **registro de auditoría** de acciones críticas.
   * Gestión avanzada de taxonomía con bloques independientes para Categorías y Etiquetas, borrado masivo y botón «🧹 Eliminar vacías» con confirmación.
   * Integridad referencial con borrado en cascada: al eliminar un usuario o local se purgan de forma atómica todos sus comentarios, visitas, reseñas y referencias sin dejar registros huérfanos.
 

@@ -46,10 +46,17 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **📱 Mobile Experience (PWA), Offline Cache & Dark/Light Mode:**
   * Installable on iOS and Android home screens as a Progressive Web App with **Service Worker offline caching** (`/sw.js`) for favorites and pending places.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage and high-contrast color palettes tailored for day and night use.
-  * Single-hand touch optimization, ultra-compact header for narrow smartphone screens, prominent mobile map/list switcher, and smooth swipe carousels.
+  * Single-hand touch optimization, overflow-free mobile navigation with a consolidated tappable profile menu (`[ (A) ▾ ]`), prominent mobile map/list switcher, and smooth swipe carousels.
+
+* **📚 In-App Documentation & Changelog (`/docs`):**
+  * Official repository documentation and version changelog viewer directly within the app.
+  * Real-time bilingual switcher (Spanish 🇪🇸 / English 🇬🇧) reading local files with GitHub Raw fallback.
+  * Rich Markdown renderer styled with version badges (`🏷️`), checklist items (`✓`), code blocks, and support options.
 
 * **🛠️ Admin Dashboard & Database Integrity:**
-  * Paginated global places table with duplicate merging, bulk deletion, user activation/deactivation, and an administrative **Audit Log**.
+  * Complete user management: create users directly, edit profile fields (name, @username, email, role, status), and perform instant password resets.
+  * Advanced invitation registry: list all issued tokens with real-time status (Active 🟢, Used ✓, Expired ⏳), copy links on demand, and revoke invitations before their expiration date.
+  * Paginated global places table with duplicate merging, bulk deletion, and an administrative **Audit Log** tracking critical actions.
   * Strict taxonomy management: dedicated Categories and Tags sections, bulk delete, and «🧹 Delete empty» with pre-confirmation modals.
   * Cascade deletion integrity: removing a place or user atomically purges all comments, notes, visits, and relational dependencies without leaving orphaned records.
 

@@ -83,6 +83,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Cabecera de usuario (`UserHeader`) optimizada para dispositivos móviles estrechos (320px–360px): avatar compacto con acceso a ajustes ⚙️, botón de salir responsive (`🚪` en móvil, texto en desktop) y ocultación de elementos secundarios.
   - Iconos de mapa Leaflet optimizados con silueta vectorial SVG y capa HTML nativa para emojis, garantizando visibilidad en todos los navegadores y sistemas móviles (Android/iOS).
   - Vistas adaptadas para smartphones: conmutador rápido «🗺️ Mapa» y «📋 Lista», `ResizeObserver` para recálculo de dimensiones del mapa sin pérdidas de tiles y scrolls táctiles fluidos.
+- **Rediseño de Cabecera Móvil y Menú Desplegable Táctil de Usuario**:
+  - Rediseño integral de la barra de navegación en pantallas de smartphones (320px–390px): sustituye la barra saturada por un menú desplegable flotante táctil (`[ (A) ▾ ]`), erradicando cualquier desbordamiento o corte horizontal.
+  - Agrupa en un panel emergente con animación suave el acceso a perfil, grupos privados de compartición, estadísticas y Wrapped, documentación oficial, donación PayPal y cierre de sesión.
+  - En pantallas medianas y de escritorio (`md:` en adelante), preserva todos los botones de acceso directo visibles con sus textos correspondientes para una navegación ágil.
 - **Donación PayPal y Enlaces al estilo TVSpy**:
   - Enlaces a GitHub, Docker Hub y botón de donación con PayPal (`paypal.me/alebupal`).
 - **Edición de Sitios, Estado del Local, Detección de Duplicados y Fusión**:

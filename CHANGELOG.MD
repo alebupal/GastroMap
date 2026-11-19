@@ -78,6 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Compact header (`UserHeader`) tailored for small mobile viewports (320px–360px): tap-friendly profile pill with quick settings ⚙️, responsive logout button (`🚪` on mobile, text on desktop), and layout stabilization without horizontal overflow.
   - Refined Leaflet map markers combining clean SVG pin teardrops with native HTML emoji layers for universal cross-platform rendering (Android, iOS, desktop).
   - Mobile split-view with fluid switching between «🗺️ Map» and «📋 List», touch-friendly scroll carousels, and responsive map layout recalculations with `ResizeObserver`.
+- **Mobile Header Overhaul & Tappable Dropdown Menu**:
+  - Redesigned top navigation bar on mobile viewports (320px–390px): eliminates button cramming and horizontal overflow by consolidating profile, private groups, personal statistics, documentation, PayPal donation, and secure logout into an animated floating dropdown menu (`[ (A) ▾ ]`).
+  - Desktop viewports (`md:` and above) retain full direct navigation buttons with expanded labels for streamlined workflow.
 - **PayPal Support & TVSpy-style Ecosystem Links**:
   - Subtle PayPal donation button (`paypal.me/alebupal`), GitHub repository, and Docker Hub links.
 - **Place Editing, Status, Duplicate Detection & Admin Merging**:
