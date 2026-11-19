@@ -437,7 +437,8 @@
     "copy": "Copy",
     "copied": "Copied!",
     "saving": "Saving...",
-    "search": "Search"
+    "search": "Search",
+    "scroll_to_top": "Back to top"
   },
   "comments": {
     "title": "Recommendations & comments",

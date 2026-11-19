@@ -437,7 +437,8 @@
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "saving": "Guardando...",
-    "search": "Buscar"
+    "search": "Buscar",
+    "scroll_to_top": "Subir arriba"
   },
   "comments": {
     "title": "Recomendaciones y comentarios",
