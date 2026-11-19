@@ -34,6 +34,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   const [groupInvites, setGroupInvites] = useState<Record<string, GroupInviteItem[]>>({});
   const [generatingInviteForGroup, setGeneratingInviteForGroup] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   async function loadData() {
     setLoading(true);
@@ -70,14 +71,19 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   async function handleCreateInvite(groupId: string) {
     setGeneratingInviteForGroup(groupId);
     setError(null);
+    setSuccessMessage(null);
     const res = await createGroupInviteAction(groupId, 7);
     setGeneratingInviteForGroup(null);
     if (res.error) {
       setError(res.error);
     } else {
+      // Desplegar automáticamente los enlaces del grupo para que se vean de inmediato
+      setExpandedInvitesGroupId(groupId);
       await loadInvitesForGroup(groupId);
       if (res.token) {
         copyToClipboard(res.token);
+        setSuccessMessage("¡Enlace de invitación generado y copiado al portapapeles! Ya puedes compartirlo.");
+        setTimeout(() => setSuccessMessage(null), 5000);
       }
     }
   }
@@ -185,6 +191,22 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
         </div>
 
         <div className="p-5 space-y-4 overflow-y-auto">
+          {successMessage && (
+            <div className="p-3.5 text-xs bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-2xl flex items-center justify-between gap-2 shadow-xs animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📋</span>
+                <span className="font-bold">{successMessage}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSuccessMessage(null)}
+                className="text-emerald-700 dark:text-emerald-300 font-bold px-1 hover:text-emerald-900 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="p-3 text-xs bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-2xl">
               {error}

@@ -83,11 +83,10 @@ export function DecisionAssistantModal({
                   key={occ.id}
                   type="button"
                   onClick={() => toggleOccasion(occ.id)}
-                  className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition cursor-pointer ${
-                    active
-                      ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold dark:bg-amber-950/40"
-                      : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                  }`}
+                  className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition cursor-pointer ${active
+                    ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold dark:bg-amber-950/40"
+                    : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                    }`}
                 >
                   <span className="text-base">{occ.icon}</span>
                   <span className="truncate">{occ.name}</span>
@@ -115,11 +114,10 @@ export function DecisionAssistantModal({
                   key={p.id}
                   type="button"
                   onClick={() => onSelectPrice(active ? null : p.id)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
-                    active
-                      ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                      : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                  }`}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${active
+                    ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                    : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                    }`}
                 >
                   {p.label}
                 </button>
@@ -140,11 +138,10 @@ export function DecisionAssistantModal({
             <button
               type="button"
               onClick={onToggleNearMe}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                nearMeActive
-                  ? "bg-blue-600 border-blue-600 text-white"
-                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-              }`}
+              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition cursor-pointer ${nearMeActive
+                ? "bg-blue-600 border-blue-600 text-white"
+                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
             >
               <span>📍</span>
               <span>{nearMeActive ? "Cerca de mí (Activo)" : "Activar Cerca de mí"}</span>
@@ -174,11 +171,10 @@ export function DecisionAssistantModal({
             <button
               type="button"
               onClick={() => onSelectExperience(experienceFilter === "untried" ? "all" : "untried")}
-              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-                experienceFilter === "untried"
-                  ? "bg-violet-600 border-violet-600 text-white shadow-sm"
-                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-              }`}
+              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "untried"
+                ? "bg-violet-600 border-violet-600 text-white shadow-sm"
+                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
             >
               <span>✨</span>
               <span>Sin estrenar (nuevo)</span>
@@ -187,11 +183,10 @@ export function DecisionAssistantModal({
             <button
               type="button"
               onClick={() => onSelectExperience(experienceFilter === "visited_by_others" ? "all" : "visited_by_others")}
-              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-                experienceFilter === "visited_by_others"
-                  ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-              }`}
+              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "visited_by_others"
+                ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
+                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
             >
               <span>👥</span>
               <span>Probado por amigos</span>
@@ -200,11 +195,10 @@ export function DecisionAssistantModal({
             <button
               type="button"
               onClick={() => onSelectExperience(experienceFilter === "visited_by_me" ? "all" : "visited_by_me")}
-              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-                experienceFilter === "visited_by_me"
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-              }`}
+              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "visited_by_me"
+                ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
             >
               <span>✅</span>
               <span>Probado por mí</span>
@@ -213,11 +207,10 @@ export function DecisionAssistantModal({
             <button
               type="button"
               onClick={() => onSelectExperience(experienceFilter === "favorite" ? "all" : "favorite")}
-              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${
-                experienceFilter === "favorite"
-                  ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-sm"
-                  : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-              }`}
+              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "favorite"
+                ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-sm"
+                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+                }`}
             >
               <span>⭐</span>
               <span>Solo Mis Favoritos</span>

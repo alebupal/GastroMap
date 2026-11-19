@@ -791,9 +791,10 @@ export function PlacesExplorer({
             </button>
           );
         })}
+      </HorizontalScroll>
 
-        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1"></div>
-
+      {/* Filtros Específicos: Grupos Privados y Rangos de Precio (Fila separada en móvil) */}
+      <HorizontalScroll className="flex items-center gap-1.5 pb-1 text-xs">
         {/* Filtro por Grupos Privados (si el usuario tiene grupos) */}
         {myGroups.length > 0 && (
           <div className="relative shrink-0">
@@ -866,7 +867,9 @@ export function PlacesExplorer({
           </div>
         )}
 
-        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-1"></div>
+        {myGroups.length > 0 && (
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
+        )}
 
         {/* Filtro rápido de precio numérico (acumulable) */}
         {[
