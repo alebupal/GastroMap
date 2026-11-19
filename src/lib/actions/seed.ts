@@ -11,6 +11,10 @@ import {
   users,
   userPlaces,
   placeComments,
+  sharingGroups,
+  sharingGroupMembers,
+  placeGroupAccess,
+  savedFilters,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword } from "@/lib/auth";
 
@@ -30,6 +34,9 @@ interface DemoPlace {
   notes: string;
   occasions: string[];
   tags: string[];
+  website?: string;
+  phone?: string;
+  status?: "active" | "temporarily_closed" | "permanently_closed";
   createdByUser?: string; // username creador
   favorite?: boolean;
   personalStatus?: "pending" | "visited" | null;
@@ -47,48 +54,56 @@ const DEMO_USERS = [
     name: "Laura Gourmet",
     email: "laura@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "marcos_foodie",
     name: "Marcos Foodie",
     email: "marcos@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "elena_tapas",
     name: "Elena Tapas",
     email: "elena@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "carlos_chef",
     name: "Carlos Chef",
     email: "carlos@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "sofia_viajera",
     name: "Sofía Gómez",
     email: "sofia@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "david_dulces",
     name: "David Obrador",
     email: "david@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "marta_bcn",
     name: "Marta BCN",
     email: "marta@gastromap.local",
     role: "user",
+    locale: "es",
   },
   {
     username: "javier_asador",
     name: "Javier Asador",
     email: "javier@gastromap.local",
     role: "user",
+    locale: "en",
   },
 ];
 
@@ -107,6 +122,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Imprescindible el pescadito frito recién sacado y las gambas con cada caña.",
     occasions: ["tapear"],
     tags: ["pescaitofrito", "tapas", "marisco", "granada"],
+    website: "https://barlosdiamantes.com",
+    phone: "+34 958 227 070",
+    status: "active",
     createdByUser: "elena_tapas",
     favorite: true,
     personalStatus: "visited",
@@ -128,6 +146,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Pedir un vermut de grifo con montadito caliente o una tabla combinada.",
     occasions: ["tapear"],
     tags: ["vermut", "montaditos", "taberna", "granada"],
+    website: "https://bodegascastaneda.com",
+    phone: "+34 958 215 469",
+    status: "active",
     createdByUser: "elena_tapas",
     favorite: true,
     personalStatus: "visited",
@@ -149,6 +170,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Sitio histórico donde se reunía Federico García Lorca. Ricos los habas con jamón y la cola de toro.",
     occasions: ["comer"],
     tags: ["andaluz", "tradicional", "historia", "granada"],
+    website: "https://restaurantechikito.com",
+    phone: "+34 958 223 364",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: false,
     personalStatus: "pending",
@@ -169,6 +193,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Una de las mejores bodegas de vino por copa de España con embutidos selectos y quesos afinados.",
     occasions: ["tapear", "copas"],
     tags: ["vinos", "quesos", "embutidos", "granada"],
+    website: "https://tabernalatana.com",
+    phone: "+34 958 225 248",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "visited",
@@ -190,6 +217,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El bocadillo de calamares más famoso junto a la Plaza Mayor. Barato, crujiente y rápido.",
     occasions: ["tapear", "comer"],
     tags: ["calamares", "bocadillos", "castizo", "madrid"],
+    website: "https://barlacampanamadrid.es",
+    phone: "+34 913 642 984",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: false,
     personalStatus: "visited",
@@ -211,6 +241,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Cuna de los auténticos huevos estrellados en La Latina.",
     occasions: ["comer"],
     tags: ["huevosestrellados", "tradicional", "madrid", "castizo"],
+    website: "https://casalucio.es",
+    phone: "+34 913 653 252",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -232,6 +265,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Churros y porras con chocolate espeso desde 1894. Abierto casi 24h.",
     occasions: ["dulce", "cafe"],
     tags: ["churros", "chocolate", "desayuno", "madrid"],
+    website: "https://chocolateriasangines.com",
+    phone: "+34 913 656 546",
+    status: "active",
     createdByUser: "david_dulces",
     favorite: true,
     personalStatus: "visited",
@@ -253,6 +289,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Tapeo vanguardista y concepto industrial de lonja de carnicería en plena calle Ponzano.",
     occasions: ["tapear", "postureo"],
     tags: ["ponzaning", "creativo", "tartar", "madrid"],
+    website: "https://saladedespiece.com",
+    phone: "+34 918 523 862",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -273,6 +312,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "3 Estrellas Michelin de Dabiz Muñoz. Una montaña rusa culinaria sin reglas.",
     occasions: ["comer", "postureo"],
     tags: ["michelin", "altacocina", "vanguardia", "dabizmuñoz", "madrid"],
+    website: "https://diverxo.com",
+    phone: "+34 915 700 766",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "pending",
@@ -293,6 +335,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Bodega histórica en El Born. Copas de cava espumoso dulce artesanal y anchoas del Cantábrico.",
     occasions: ["tapear", "copas"],
     tags: ["cava", "anchoas", "elborn", "barcelona"],
+    website: "https://elxampanyet.es",
+    phone: "+34 933 105 294",
+    status: "active",
     createdByUser: "marta_bcn",
     favorite: true,
     personalStatus: "visited",
@@ -314,6 +359,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El restaurante más antiguo de Cataluña (fundado en 1786). Cocina catalana de cuchara en el Gótico.",
     occasions: ["comer"],
     tags: ["tradicional", "catalan", "antiguo", "barcelona"],
+    website: "https://culleretes.com",
+    phone: "+34 933 173 022",
+    status: "active",
     createdByUser: "marta_bcn",
     favorite: false,
     personalStatus: "visited",
@@ -334,6 +382,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Templo del chocolate y alta pastelería de Christian Escribà desde 1906.",
     occasions: ["dulce", "cafe"],
     tags: ["pasteleria", "chocolate", "croissants", "barcelona"],
+    website: "https://escriba.es",
+    phone: "+34 934 547 535",
+    status: "active",
     createdByUser: "david_dulces",
     favorite: true,
     personalStatus: "visited",
@@ -354,6 +405,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "La 'Santísima Trinidad': chuleta de buey vieja a la brasa, ensalada de tomate y tortilla de patatas.",
     occasions: ["comer", "tapear"],
     tags: ["chuleta", "tortilla", "pintxos", "sansebastian"],
+    website: "https://barnestorsansebastian.com",
+    phone: "+34 943 424 873",
+    status: "active",
     createdByUser: "javier_asador",
     favorite: true,
     personalStatus: "visited",
@@ -375,6 +429,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Pintxos calientes de alta cocina en pizarra: carrillera melosa, foie a la plancha y cochinillo crocante.",
     occasions: ["tapear", "comer"],
     tags: ["pintxos", "gourmet", "caliente", "sansebastian"],
+    website: "https://lacucharadesantelmo.com",
+    phone: "+34 943 441 655",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -395,6 +452,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "La taberna más antigua de Sevilla (fundada en 1670). Apuntan la cuenta con tiza en la barra de caoba.",
     occasions: ["tapear"],
     tags: ["historico", "espinacascongarbanzos", "jamon", "sevilla"],
+    website: "https://elrinconcillo.es",
+    phone: "+34 954 223 183",
+    status: "active",
     createdByUser: "elena_tapas",
     favorite: true,
     personalStatus: "visited",
@@ -415,6 +475,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El mejor montadito de pringá de toda Sevilla. Jugoso, crujiente y casero.",
     occasions: ["tapear"],
     tags: ["pringá", "montadito", "tapas", "sevilla"],
+    website: "https://bodeguita-romero.com",
+    phone: "+34 954 229 556",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -435,6 +498,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Auténtica paella valenciana tradicional cocinada con leña de naranjo frente a la playa de la Malvarrosa.",
     occasions: ["comer"],
     tags: ["paella", "leña", "arroz", "valencia"],
+    website: "https://casacarmela.com",
+    phone: "+34 963 710 073",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "visited",
@@ -455,6 +521,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Salmorejo cordobés denso con jamón ibérico y berenjenas fritas con miel de caña.",
     occasions: ["comer", "tapear"],
     tags: ["salmorejo", "berenjenas", "cordoba", "andaluz"],
+    website: "https://casapepedelajuderia.com",
+    phone: "+34 957 200 744",
+    status: "active",
     createdByUser: "elena_tapas",
     favorite: false,
     personalStatus: "visited",
@@ -475,6 +544,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Pulpo á feira en tabla de madera, zamburiñas a la plancha y pimientos de Padrón.",
     occasions: ["tapear", "comer"],
     tags: ["marisco", "pulpo", "galicia", "santiago"],
+    website: "https://atabernadobispo.com",
+    phone: "+34 981 581 656",
+    status: "active",
     createdByUser: "sofia_viajera",
     favorite: true,
     personalStatus: "visited",
@@ -495,6 +567,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Café histórico neobarroco frente a los Jardines de Albia. Famosos por sus pintxos morunos al carbón.",
     occasions: ["cafe", "tapear"],
     tags: ["cafe", "pintxomoruno", "historico", "bilbao"],
+    website: "https://cafeirunabilbao.net",
+    phone: "+34 944 237 021",
+    status: "active",
     createdByUser: "javier_asador",
     favorite: false,
     personalStatus: "visited",
@@ -515,6 +590,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Barriles de vino dulce firmados por Antonio Banderas y Picasso junto al Teatro Romano.",
     occasions: ["tapear", "copas"],
     tags: ["vinos", "malaga", "jamon", "postureo"],
+    website: "https://elpimpi.com",
+    phone: "+34 952 229 517",
+    status: "active",
     createdByUser: "elena_tapas",
     favorite: false,
     personalStatus: "visited",
@@ -535,6 +613,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El templo mundial del Atún Rojo Salvaje de Almadraba. Cortes únicos: morrillo, ventresca, facera y tartar.",
     occasions: ["comer"],
     tags: ["atunrojo", "almadraba", "cadiz", "marisco"],
+    website: "https://restauranteelcampero.es",
+    phone: "+34 956 432 300",
+    status: "temporarily_closed",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "visited",
@@ -556,6 +637,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Cochinillo asado al horno de leña cortado con plato a los pies del Acueducto Romano.",
     occasions: ["comer"],
     tags: ["cochinillo", "asado", "acueducto", "segovia"],
+    website: "https://restaurantecandido.com",
+    phone: "+34 921 425 911",
+    status: "active",
     createdByUser: "javier_asador",
     favorite: false,
     personalStatus: "pending",
@@ -576,6 +660,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "La tarta de queso quemada más copiada del mundo (Basque Burnt Cheesecake). Cremosa, templada y sin base.",
     occasions: ["dulce", "tapear"],
     tags: ["tartadequeso", "cheesecake", "dulce", "sansebastian"],
+    website: "https://lavinarestaurante.com",
+    phone: "+34 943 427 495",
+    status: "active",
     createdByUser: "david_dulces",
     favorite: true,
     personalStatus: "visited",
@@ -600,6 +687,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "La meca de la pizza napolitana desde 1870. Solo sirven dos tipos: Margherita y Marinara.",
     occasions: ["comer"],
     tags: ["pizza", "margherita", "napoles", "italia"],
+    website: "https://damichele.net",
+    phone: "+39 081 553 9204",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -621,6 +711,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Massimo Bottura. Tres estrellas Michelin y dos veces elegido mejor restaurante del mundo.",
     occasions: ["comer", "postureo"],
     tags: ["michelin", "altacocina", "italia", "bottura"],
+    website: "https://osteriafrancescana.it",
+    phone: "+39 059 223 912",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "pending",
@@ -641,6 +734,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Auténtica trattoria en el Trastevere. La mejor Carbonara romana y Cacio e Pepe de la ciudad.",
     occasions: ["comer"],
     tags: ["pasta", "carbonara", "roma", "trattoria"],
+    website: "https://daenzoal29.com",
+    phone: "+39 065 812 260",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -662,6 +758,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Schiacciata toscana gigante rellena de finocchiona, porchetta caliente, crema de trufa y pecorino.",
     occasions: ["tapear", "comer"],
     tags: ["panino", "schiacciata", "streetfood", "florencia"],
+    website: "https://allanticovinaio.com",
+    phone: "+39 055 238 2723",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -682,6 +781,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Solo sirven un plato: ensalada de nueces y lomo de buey en finas lonchas con su salsa secreta verde y patatas fritas ilimitadas.",
     occasions: ["comer"],
     tags: ["entrecote", "paris", "clasico", "frances"],
+    website: "https://relaisentrecote.fr",
+    phone: "+33 1 47 23 34 40",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -702,6 +804,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Boulangerie tradicional de 1875 cerca del Canal Saint-Martin. Famosa por el 'Escargot Pistache Chocolat'.",
     occasions: ["dulce", "cafe"],
     tags: ["croissant", "boulangerie", "paris", "desayuno"],
+    website: "https://dupainetdesidees.com",
+    phone: "+33 1 42 40 44 52",
+    status: "active",
     createdByUser: "david_dulces",
     favorite: true,
     personalStatus: "visited",
@@ -722,6 +827,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Gran bouillon popular de la Belle Époque desde 1896. Caracoles bourguignon y confit de pato a precios imbatibles.",
     occasions: ["comer"],
     tags: ["bouillon", "paris", "belleepoque", "frances"],
+    website: "https://bouillon-chartier.com",
+    phone: "+33 1 47 70 86 29",
+    status: "active",
     createdByUser: "sofia_viajera",
     favorite: false,
     personalStatus: "visited",
@@ -742,6 +850,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Templo del marisco fresco: percebes, carabineros gigantes, gambas al ajillo y el tradicional 'prego' de ternera de postre.",
     occasions: ["comer", "tapear"],
     tags: ["marisco", "percebes", "lisboa", "portugal"],
+    website: "https://cervejariaramiro.pt",
+    phone: "+351 969 839 462",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "visited",
@@ -762,6 +873,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Pasteles de nata originales con receta secreta monacal de 1837. Calientes con canela y azúcar glas.",
     occasions: ["dulce", "cafe"],
     tags: ["pasteisdenata", "lisboa", "dulce", "portugal"],
+    website: "https://pasteisdebelem.pt",
+    phone: "+351 21 363 7864",
+    status: "active",
     createdByUser: "david_dulces",
     favorite: true,
     personalStatus: "visited",
@@ -782,6 +896,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Tributo a los antiguos cafés iraníes de Bombay. Legendario Black Daal cocinado durante 24h y rollos de Naan recién horneados.",
     occasions: ["comer"],
     tags: ["indio", "curry", "naan", "londres"],
+    website: "https://dishoom.com",
+    phone: "+44 20 7420 9320",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -802,6 +919,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Charcutería y taberna tradicional bizantina. Embutidos artesanales ahumados, pastirma y cazuelitas de saganaki caliente.",
     occasions: ["tapear", "comer"],
     tags: ["griego", "mezedes", "pastirma", "atenas"],
+    website: "https://karamanlidika.gr",
+    phone: "+30 21 0325 4220",
+    status: "active",
     createdByUser: "sofia_viajera",
     favorite: true,
     personalStatus: "visited",
@@ -826,6 +946,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El legendario maestro de sushi Jiro Ono. Menú omakase de 20 piezas en 30 minutos.",
     occasions: ["comer"],
     tags: ["sushi", "omakase", "tokio", "japon", "michelin"],
+    website: "https://sushi-jiro.jp",
+    phone: "+81 3 3535 3600",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "pending",
@@ -846,6 +969,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Tonkotsu ramen artesanal en cabinas individuales para máxima concentración sensorial.",
     occasions: ["comer"],
     tags: ["ramen", "tonkotsu", "tokio", "japon"],
+    website: "https://ichiran.com",
+    phone: "+81 3 3463 3501",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -867,6 +993,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Carne de wagyu empanada en panko ultra fino, servida semicruda para terminarla al gusto sobre una piedra caliente personal.",
     occasions: ["comer"],
     tags: ["gyukatsu", "wagyu", "shinjuku", "tokio"],
+    website: "https://gyukatsu-motomura.com",
+    phone: "+81 3 3406 8885",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -887,6 +1016,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "La reina del wok callejero con gafas de esquí y Estrella Michelin. Su tortilla rellena de cangrejo real gigante es histórica.",
     occasions: ["comer"],
     tags: ["streetfood", "crabomelette", "bangkok", "tailandesa"],
+    website: "https://jayfaibangkok.com",
+    phone: "+66 2 223 9384",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "visited",
@@ -908,6 +1040,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Considerado el mejor Pad Thai de Tailandia. Fideos envueltos en una finísima tortilla de huevo al wok.",
     occasions: ["comer"],
     tags: ["padthai", "streetfood", "bangkok", "fideos"],
+    website: "https://thipsamai.com",
+    phone: "+66 2 226 6666",
+    status: "active",
     createdByUser: "sofia_viajera",
     favorite: false,
     personalStatus: "visited",
@@ -928,6 +1063,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Café cultural en la medina con terraza panorámica. Famosos por su hamburguesa de camello y té moruno a la menta.",
     occasions: ["cafe", "comer", "copas"],
     tags: ["marrakech", "te", "camello", "medina"],
+    website: "https://cafeclock.com",
+    phone: "+212 524 378 367",
+    status: "active",
     createdByUser: "sofia_viajera",
     favorite: false,
     personalStatus: "visited",
@@ -952,6 +1090,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Una de las mejores parrillas del mundo. Ojo de bife de raza Aberdeen Angus alimentado a pastura y mollejas crocantes.",
     occasions: ["comer"],
     tags: ["asado", "parrilla", "buenosaires", "ojodebife", "argentina"],
+    website: "https://parrilladonjulio.com",
+    phone: "+54 11 4831 9564",
+    status: "active",
     createdByUser: "javier_asador",
     favorite: true,
     personalStatus: "visited",
@@ -973,6 +1114,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Pizza porteña al molde desde 1932. La fugazzeta rellena de queso derretido y cebolla dorada es una locura.",
     occasions: ["comer", "tapear"],
     tags: ["pizza", "fugazzeta", "porteño", "buenosaires"],
+    website: "https://pizzeriaguerrin.com",
+    phone: "+54 11 4371 8141",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -993,6 +1137,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Bocadillos de Pastrami legendarios cortados a mano desde 1888. Templo cinematográfico de Manhattan.",
     occasions: ["comer"],
     tags: ["pastrami", "sandwich", "nuevayork", "deli"],
+    website: "https://katzsdelicatessen.com",
+    phone: "+1 212 254 2246",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -1014,6 +1161,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El 'slice' de pizza neoyorquina definitivo. Masa crujiente que se dobla por la mitad sin romperse.",
     occasions: ["tapear", "comer"],
     tags: ["pizza", "slice", "streetfood", "nuevayork"],
+    website: "https://joespizzanyc.com",
+    phone: "+1 212 366 1182",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: false,
     personalStatus: "visited",
@@ -1034,6 +1184,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "El Steakhouse de dry-aged beef más influyente desde 1887. Porterhouse steak servido en plato hirviendo con mantequilla.",
     occasions: ["comer"],
     tags: ["porterhouse", "carne", "brooklyn", "steakhouse"],
+    website: "https://peterluger.com",
+    phone: "+1 718 387 7400",
+    status: "active",
     createdByUser: "javier_asador",
     favorite: true,
     personalStatus: "pending",
@@ -1054,6 +1207,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Tacos de suadero, tripa dorada, longaniza y lengua confitados lentamente en cazo de manteca las 24 horas del día.",
     occasions: ["tapear", "comer"],
     tags: ["tacos", "suadero", "cdmx", "mexicana"],
+    website: "https://loscocuyos.mx",
+    phone: "+52 55 5518 4231",
+    status: "active",
     createdByUser: "marcos_foodie",
     favorite: true,
     personalStatus: "visited",
@@ -1075,6 +1231,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Enrique Olvera. Alta cocina mexicana de raíz indígena. Su 'Mole Madre' lleva más de 3.000 días de fermentación continua.",
     occasions: ["comer", "postureo"],
     tags: ["molemadre", "michelin", "mexico", "altacocina"],
+    website: "https://pujol.com.mx",
+    phone: "+52 55 5545 4125",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "pending",
@@ -1095,6 +1254,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Virgilio Martínez y Pía León. Nombrado mejor restaurante del mundo en The World's 50 Best. Menú por ecosistemas y alturas andinas.",
     occasions: ["comer"],
     tags: ["peruano", "altacocina", "50best", "lima", "biodiversidad"],
+    website: "https://centralrestaurante.com.pe",
+    phone: "+51 1 242 8515",
+    status: "active",
     createdByUser: "carlos_chef",
     favorite: true,
     personalStatus: "pending",
@@ -1115,6 +1277,9 @@ const DEMO_PLACES: DemoPlace[] = [
     notes: "Gastón Acurio. Solo abre al mediodía para garantizar la frescura de la pesca del día: cebiches, tiraditos y arroces con marisco.",
     occasions: ["comer"],
     tags: ["cebiche", "tiradito", "lima", "peru", "marisco"],
+    website: "https://lamarcebicheria.com",
+    phone: "+51 1 421 3365",
+    status: "active",
     createdByUser: "lauragourmet",
     favorite: true,
     personalStatus: "visited",
@@ -1151,7 +1316,11 @@ export async function seedDemoPlacesAction() {
       // Actualizar siempre la contraseña a 1234 para que puedan iniciar sesión
       await db
         .update(users)
-        .set({ passwordHash: defaultPasswordHash, updatedAt: new Date() })
+        .set({
+          passwordHash: defaultPasswordHash,
+          locale: demoUser.locale || "es",
+          updatedAt: new Date(),
+        })
         .where(eq(users.id, existing.id));
     } else {
       const [newUser] = await db
@@ -1162,6 +1331,7 @@ export async function seedDemoPlacesAction() {
           email: demoUser.email,
           passwordHash: defaultPasswordHash,
           role: demoUser.role,
+          locale: demoUser.locale || "es",
         })
         .returning({ id: users.id });
 
@@ -1200,6 +1370,9 @@ export async function seedDemoPlacesAction() {
           googleMapsUrl: item.googleMapsUrl,
           priceRange: item.priceRange,
           notes: item.notes,
+          website: item.website ?? null,
+          phone: item.phone ?? null,
+          status: item.status ?? "active",
           communityPublished: true,
           updatedAt: new Date(),
         })
@@ -1216,6 +1389,9 @@ export async function seedDemoPlacesAction() {
           googleMapsUrl: item.googleMapsUrl,
           priceRange: item.priceRange,
           notes: item.notes,
+          website: item.website ?? null,
+          phone: item.phone ?? null,
+          status: item.status ?? "active",
           communityPublished: true,
           createdById: creatorId,
         })
@@ -1338,6 +1514,77 @@ export async function seedDemoPlacesAction() {
           });
         }
       }
+    }
+  }
+
+  // 7. Grupos compartidos demo para mostrar la funcionalidad de grupos privados
+  const [existingGroup] = await db
+    .select({ id: sharingGroups.id })
+    .from(sharingGroups)
+    .where(and(eq(sharingGroups.ownerUserId, currentUser.id), eq(sharingGroups.name, "Tapeo & Amigos")))
+    .limit(1);
+
+  let demoGroupId: string;
+  if (!existingGroup) {
+    const [createdGroup] = await db
+      .insert(sharingGroups)
+      .values({
+        name: "Tapeo & Amigos",
+        ownerUserId: currentUser.id,
+      })
+      .returning({ id: sharingGroups.id });
+    demoGroupId = createdGroup.id;
+  } else {
+    demoGroupId = existingGroup.id;
+  }
+
+  // Añadir miembros demo al grupo
+  const demoMembers = ["elena_tapas", "lauragourmet", "carlos_chef"];
+  for (const username of demoMembers) {
+    const memberId = userMap[username];
+    if (memberId) {
+      await db
+        .insert(sharingGroupMembers)
+        .values({
+          groupId: demoGroupId,
+          userId: memberId,
+        })
+        .onConflictDoNothing();
+    }
+  }
+
+  // 8. Filtros guardados demo para el usuario actual
+  const demoSavedFiltersList = [
+    {
+      name: "Tapas en Granada",
+      criteria: {
+        country: "España",
+        city: "Granada",
+        occasions: ["tapear"],
+      },
+    },
+    {
+      name: "Alta Cocina Internacional",
+      criteria: {
+        prices: ["€€€€"],
+        tags: ["michelin", "50best"],
+      },
+    },
+  ];
+
+  for (const sf of demoSavedFiltersList) {
+    const [existingSf] = await db
+      .select({ id: savedFilters.id })
+      .from(savedFilters)
+      .where(and(eq(savedFilters.userId, currentUser.id), eq(savedFilters.name, sf.name)))
+      .limit(1);
+
+    if (!existingSf) {
+      await db.insert(savedFilters).values({
+        userId: currentUser.id,
+        name: sf.name,
+        criteria: sf.criteria,
+      });
     }
   }
 
