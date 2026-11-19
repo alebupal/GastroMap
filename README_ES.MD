@@ -1,6 +1,6 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -39,12 +39,22 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
   * Filtros guardados (`💾`), ordenación multicriterio y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
-  * Exportación en **JSON, CSV, GeoJSON y KML** e importación desde **JSON, GeoJSON, Google Takeout y CSV** con vista previa.
+  * Exportación en **JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa.
+
+* **🌐 Sistema Multi-idioma (i18n):**
+  * Soporte completo para múltiples idiomas (Español 🇪🇸 / English 🇬🇧) con arquitectura extensible por JSON y CSV.
+  * Selector integrado en la cabecera persistente y scripts CLI para sincronizar con hojas de cálculo (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Experiencia Móvil (PWA), Caché Offline y Modo Oscuro / Claro:**
+  * Tarjeta flotante inferior en móvil al seleccionar cualquier chincheta con botón «Cómo llegar» y apertura rápida de ficha.
+  * Conmutador para evitar el bloqueo del scroll vertical en móvil al interactuar con el mapa.
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline** (`/sw.js`) para consultar favoritos y pendientes sin conexión.
-  * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC) y con paletas cromáticas de alto contraste optimizadas para lectura diurna y nocturna.
-  * Interfaz optimizada para uso táctil con una sola mano, cabecera móvil adaptativa con menú de usuario desplegable (`[ (A) ▾ ]`) sin desbordamientos, selector prominente Mapa/Lista y carruseles con scroll fluido.
+  * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC).
+
+* **🛡️ Seguridad, Auditoría y Copias de Seguridad:**
+  * Rate limiting en memoria para mitigación de ataques de fuerza bruta en inicio de sesión y endpoints críticos.
+  * Cabeceras de seguridad estrictas (CSP, X-Frame-Options, HSTS).
+  * Botón de descarga de copia de seguridad íntegra de la base de datos en JSON desde el panel de administración.
 
 * **📚 Documentación y Registro de Cambios Integrado (`/docs`):**
   * Visor oficial de documentación y changelog integrado en la propia aplicación al estilo TVSPY.

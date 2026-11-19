@@ -2,7 +2,7 @@
 
 [Versión en Español](README_ES.MD)
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -41,12 +41,22 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
   * Saved filter presets (`💾`), multi-criteria sorting, and live searchable taxonomies with progressive «Show more» loading.
-  * Export in **JSON, CSV, GeoJSON, and KML** and import from **JSON, GeoJSON, Google Takeout, and CSV** with preview.
+  * Export in **JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview.
+
+* **🌐 Multi-language System (i18n):**
+  * Full support for multiple languages (Spanish 🇪🇸 / English 🇬🇧) powered by JSON dictionaries and CSV sync architecture.
+  * Header language selector persisted via cookies, plus CLI synchronization scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Mobile Experience (PWA), Offline Cache & Dark/Light Mode:**
+  * Mobile floating bottom card on map pin selection with direct directions link and quick details drawer.
+  * Touch-scroll switch preventing page scroll hijacking on mobile map view.
   * Installable on iOS and Android home screens as a Progressive Web App with **Service Worker offline caching** (`/sw.js`) for favorites and pending places.
-  * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage and high-contrast color palettes tailored for day and night use.
-  * Single-hand touch optimization, overflow-free mobile navigation with a consolidated tappable profile menu (`[ (A) ▾ ]`), prominent mobile map/list switcher, and smooth swipe carousels.
+  * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
+
+* **🛡️ Security, Auditing & Backups:**
+  * In-memory rate limiting against brute force attacks on authentication and tokens.
+  * Strict security headers (CSP, X-Frame-Options, HSTS).
+  * One-click full database backup in JSON from the admin dashboard with audit trail.
 
 * **📚 In-App Documentation & Changelog (`/docs`):**
   * Official repository documentation and version changelog viewer directly within the app.

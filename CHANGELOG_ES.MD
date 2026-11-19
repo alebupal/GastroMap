@@ -5,6 +5,39 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-11-19
+
+### Añadido
+- **Sistema Multi-idioma e Internacionalización (i18n estilo TVSpy)**:
+  - Motor de traducción extensible basado en diccionarios JSON (`src/locales/es.json`, `src/locales/en.json`) sincronizados con hoja de cálculo centralizada (`translations.csv`).
+  - Selector de idioma dinámico en la cabecera de la aplicación persistente en cookies (`gastromap_lang`).
+  - Herramientas CLI automatizadas: `npm run i18n:export` (exportar a CSV), `npm run i18n:import` (regenerar JSON desde CSV) y `npm run i18n:check` (auditoría de traducciones pendientes).
+- **Tarjeta Flotante Inferior y Experiencia de Mapa en Móvil**:
+  - Tarjeta flotante inferior (*Bottom Sheet / Floating Card*) que se despliega automáticamente al pulsar cualquier establecimiento en el mapa móvil, con foto, precio, botón de navegación directa en Google Maps y salto a ficha completa.
+  - Botón de navegación rápida `↓ Bajar a la lista ({count})` que previene quedar atrapado por los gestos táctiles del mapa.
+  - Conmutador táctil flotante en el mapa para alternar entre navegación libre del mapa o desplazamiento fluido de la página.
+  - Separación de los filtros específicos (Grupos Privados y Rangos de Precio numéricos) en líneas dedicadas e independientes en vista móvil.
+- **Copia de Seguridad de la Base de Datos (Admin)**:
+  - Nuevo botón y endpoint seguro (`/api/admin/backup`) para descargar una copia de seguridad íntegra en formato JSON de todas las tablas con registro de auditoría.
+- **Exportación e Importación GPX y KML**:
+  - Soporte bidireccional completo para tracks y waypoints en formato GPX (exportación XML e importación) junto a KML.
+- **Invitaciones con Límite de Usos y Caducidad Configurable**:
+  - Posibilidad de definir límite máximo de usos (`maxUses`) y enlaces que nunca caducan (`neverExpires`) para grupos privados.
+- **Rate Limiting y Cabeceras de Seguridad**:
+  - Limitador de tasa en memoria (`rate-limit.ts`) para proteger contra fuerza bruta el inicio de sesión, registro y uniones a grupos.
+  - Cabeceras HTTP de seguridad estrictas configuradas en Next.js (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
+- **Sistema de Portapapeles Universal**:
+  - Mecanismo de copia al portapapeles con fallback automático mediante `document.execCommand('copy')` para entornos HTTP y accesos por IP local sin certificado SSL.
+- **Skeletons de Carga y Sistema de Toasts**:
+  - Componentes de esqueleto animados (`Skeleton.tsx`) para la carga de comentarios y tarjetas de establecimientos.
+  - Sistema reactivo de notificaciones Toast con soporte para botones de acción interactivos.
+- **Suite de Tests Automatizados**:
+  - Pruebas unitarias nativas con `npm test` verificando consistencia de traducciones, fórmulas Haversine, validación de coordenadas y exportador GPX.
+
+### Corregido
+- Eliminado error `Cannot read properties of undefined (reading 'writeText')` en contextos HTTP no seguros.
+- Eliminado el distintivo "PRO" innecesario del Panel de Administración.
+
 ## [0.1.0] - 2026-11-18
 
 ### Añadido

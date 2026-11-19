@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-19
+
+### Added
+- **Multi-language System & Internationalization (TVSpy-style i18n)**:
+  - Extensible translation engine based on JSON dictionaries (`src/locales/es.json`, `src/locales/en.json`) synchronized with a centralized spreadsheet (`translations.csv`).
+  - Dynamic language selector in header persisted via cookies (`gastromap_lang`).
+  - Automated CLI scripts: `npm run i18n:export` (export to CSV), `npm run i18n:import` (regenerate JSON from CSV) and `npm run i18n:check` (audit missing keys).
+- **Mobile Floating Bottom Card & Map Scroll UX**:
+  - Interactive bottom floating card displayed upon tapping any place pin on mobile map view with quick actions (`🗺️ Get Directions` and `Full details →`).
+  - Fast jump button `↓ Jump to list ({count})` avoiding getting trapped by mobile touch gestures on map.
+  - Floating map touch switch to toggle between map navigation and fluid page scrolling.
+  - Dedicated independent rows for Private Groups and Numeric Price Range filters in mobile viewport.
+- **Database Backup (Admin)**:
+  - Full database export button and secure endpoint (`/api/admin/backup`) to download all tables in JSON format with audit logging.
+- **GPX and KML Export/Import**:
+  - Full bidirectional support for GPX tracks and waypoints (XML export and parser import) alongside KML.
+- **Group Invites with Max Uses & Configurable Expiry**:
+  - Support for max usage count (`maxUses`) and never-expiring links (`neverExpires`) on private group invitations.
+- **Rate Limiting & Security Headers**:
+  - In-memory rate limiter (`rate-limit.ts`) guarding authentication, registration and token redemption.
+  - Strict HTTP security headers in Next.js config (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
+- **Universal Clipboard Copy**:
+  - Robust clipboard helper with automatic `document.execCommand('copy')` fallback for non-SSL/HTTP environments and local IP access.
+- **Animated Skeletons & Toast System**:
+  - Animated skeleton loaders (`Skeleton.tsx`) for comment threads and place cards.
+  - Reactive Toast notification system with action/undo capability.
+- **Automated Test Suite**:
+  - Native unit test suite (`npm test`) asserting translation integrity, Haversine spatial calculations, coordinate safety and GPX output.
+
+### Fixed
+- Fixed `Cannot read properties of undefined (reading 'writeText')` in non-secure HTTP contexts.
+- Removed unwanted "PRO" badge from Admin Dashboard header.
+
 ## [0.1.0] - 2026-11-18
 
 ### Added
