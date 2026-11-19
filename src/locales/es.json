@@ -242,8 +242,13 @@
     "tab_demo": "🌱 Sitios Demo",
     "backup": {
       "title": "Copia de Seguridad de la Base de Datos",
-      "desc": "Descarga una copia completa en formato SQLite para salvaguardar todos tus datos",
-      "button": "Descargar Backup (.sqlite)"
+      "desc": "Descarga o restaura una copia de seguridad completa en formato JSON con todas las tablas del sistema (lugares, usuarios, notas, categorías, grupos, etc.).",
+      "button": "Descargar Backup (.json)",
+      "restore_button": "Importar / Restaurar (.json)",
+      "restoring": "Restaurando copia de seguridad...",
+      "restore_confirm": "¿Restaurar esta copia de seguridad? Se reemplazarán los datos de la base de datos por los contenidos en el archivo JSON seleccionado.",
+      "restore_success": "✓ Copia de seguridad restaurada correctamente. Recargando...",
+      "restore_error": "Error al procesar o restaurar la copia de seguridad."
     },
     "settings": {
       "title": "Configuración y Mapas",

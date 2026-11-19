@@ -1,6 +1,11 @@
 key,es,en
-admin.backup.button,"Descargar Backup (.sqlite)","Download Backup (.sqlite)"
-admin.backup.desc,"Descarga una copia completa en formato SQLite para salvaguardar todos tus datos","Download a full SQLite copy to safeguard all your data"
+admin.backup.button,"Descargar Backup (.json)","Download Backup (.json)"
+admin.backup.desc,"Descarga o restaura una copia de seguridad completa en formato JSON con todas las tablas del sistema (lugares, usuarios, notas, categorías, grupos, etc.).","Download or restore a complete database backup in JSON format with all system tables (places, users, notes, categories, groups, etc.)."
+admin.backup.restore_button,"Importar / Restaurar (.json)","Import / Restore (.json)"
+admin.backup.restore_confirm,"¿Restaurar esta copia de seguridad? Se reemplazarán los datos de la base de datos por los contenidos en el archivo JSON seleccionado.","Restore this database backup? Current database data will be replaced with the contents of the selected JSON file."
+admin.backup.restore_error,"Error al procesar o restaurar la copia de seguridad.","Error processing or restoring database backup."
+admin.backup.restore_success,"✓ Copia de seguridad restaurada correctamente. Recargando...","✓ Database backup restored successfully. Reloading..."
+admin.backup.restoring,"Restaurando copia de seguridad...","Restoring backup..."
 admin.backup.title,"Copia de Seguridad de la Base de Datos","Database Backup"
 admin.collapse,"Plegar panel","Collapse panel"
 admin.expand,"Abrir herramientas","Open tools"

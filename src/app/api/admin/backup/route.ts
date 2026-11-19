@@ -1,16 +1,29 @@
-import { NextResponse } from "next/server";
-import { getTableName, is } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
+import { eq, ne, getTableName, is } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { versionService } from "@/services/versionService";
+import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
 
 export const dynamic = "force-dynamic";
 
 // Tablas que no tiene sentido respaldar (sesiones activas)
 const EXCLUDED = new Set(["sessions"]);
+
+function sanitizeRow(row: Record<string, unknown>): Record<string, unknown> {
+  const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row)) {
+    if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(v)) {
+      clean[k] = new Date(v);
+    } else {
+      clean[k] = v;
+    }
+  }
+  return clean;
+}
 
 /**
  * Descarga un volcado JSON de la base de datos (solo administradores).
@@ -58,4 +71,176 @@ export async function GET() {
       "Cache-Control": "no-store",
     },
   });
+}
+
+/**
+ * Restaura una copia de seguridad completa o importa un archivo JSON de establecimientos.
+ */
+export async function POST(request: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  let payload: any;
+  const contentType = request.headers.get("content-type") || "";
+
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+    if (!file) {
+      return NextResponse.json(
+        { error: "No se proporcionó ningún archivo de copia de seguridad." },
+        { status: 400 }
+      );
+    }
+    const text = await file.text();
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      return NextResponse.json(
+        { error: "El archivo no contiene un formato JSON válido." },
+        { status: 400 }
+      );
+    }
+  } else {
+    try {
+      payload = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Cuerpo de solicitud JSON no válido." },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return NextResponse.json(
+      { error: "El formato de los datos de copia de seguridad no es válido." },
+      { status: 400 }
+    );
+  }
+
+  // Caso 1: Archivo de importación simple de establecimientos (array o { places: [...] })
+  if (!payload.tables && (Array.isArray(payload) || Array.isArray(payload.places))) {
+    const items = (Array.isArray(payload) ? payload : payload.places) as ImportPlacePayload[];
+    const res = await importPlacesAction(items, true);
+    if (res.error) {
+      return NextResponse.json({ error: res.error }, { status: 400 });
+    }
+    return NextResponse.json({
+      success: true,
+      message: `Importados ${res.importedCount || 0} establecimientos correctamente.`,
+      importedCount: res.importedCount,
+    });
+  }
+
+  // Caso 2: Copia de seguridad completa de base de datos GastroMap
+  if (!payload.tables || typeof payload.tables !== "object") {
+    return NextResponse.json(
+      { error: "El archivo JSON no contiene tablas de base de datos reconocidas." },
+      { status: 400 }
+    );
+  }
+
+  const tableMap: Record<string, PgTable> = {};
+  for (const value of Object.values(schema)) {
+    if (is(value, PgTable)) {
+      const name = getTableName(value);
+      tableMap[name] = value;
+    }
+  }
+
+  const INSERT_ORDER = [
+    "app_settings",
+    "users",
+    "occasions",
+    "tags",
+    "invitations",
+    "sharing_groups",
+    "places",
+    "group_invitations",
+    "sharing_group_members",
+    "place_occasions",
+    "place_tags",
+    "user_places",
+    "place_comments",
+    "place_group_access",
+    "place_user_access",
+    "saved_filters",
+    "place_visits",
+    "audit_logs",
+  ];
+
+  for (const tName of Object.keys(payload.tables)) {
+    if (!INSERT_ORDER.includes(tName) && !EXCLUDED.has(tName)) {
+      INSERT_ORDER.push(tName);
+    }
+  }
+
+  const restoredCounts: Record<string, number> = {};
+
+  try {
+    await db.transaction(async (tx) => {
+      // 1. Borrado de tablas en orden inverso respetando integridad referencial
+      const deleteOrder = [...INSERT_ORDER].reverse();
+      for (const tableName of deleteOrder) {
+        if (tableName === "users") {
+          // Mantener la cuenta del administrador actual para no invalidar la sesión en curso
+          await tx.delete(schema.users).where(ne(schema.users.id, user.id));
+        } else if (tableMap[tableName]) {
+          await tx.delete(tableMap[tableName]);
+        }
+      }
+
+      // 2. Inserción de filas en orden de dependencias
+      for (const tableName of INSERT_ORDER) {
+        const rows = payload.tables[tableName];
+        const table = tableMap[tableName];
+        if (Array.isArray(rows) && rows.length > 0 && table) {
+          let rowsToInsert = rows.map((r) => sanitizeRow(r as Record<string, unknown>));
+
+          if (tableName === "users") {
+            const currentAdminInBackup = rowsToInsert.find((r) => r.id === user.id);
+            if (currentAdminInBackup) {
+              await tx
+                .update(schema.users)
+                .set(currentAdminInBackup)
+                .where(eq(schema.users.id, user.id));
+            }
+            rowsToInsert = rowsToInsert.filter((r) => r.id !== user.id);
+          }
+
+          if (rowsToInsert.length > 0) {
+            const chunkSize = 100;
+            for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+              const chunk = rowsToInsert.slice(i, i + chunkSize);
+              await tx.insert(table).values(chunk as any);
+            }
+          }
+          restoredCounts[tableName] = rows.length;
+        }
+      }
+    });
+
+    await logAudit({
+      actorUserId: user.id,
+      entityType: "system",
+      entityId: user.id,
+      action: "backup_restored",
+      metadata: restoredCounts,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Base de datos restaurada correctamente.",
+      restoredCounts,
+    });
+  } catch (err: any) {
+    console.error("Error al restaurar backup:", err);
+    return NextResponse.json(
+      { error: `Error al restaurar la base de datos: ${err.message || String(err)}` },
+      { status: 500 }
+    );
+  }
 }

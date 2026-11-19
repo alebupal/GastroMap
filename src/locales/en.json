@@ -242,8 +242,13 @@
     "tab_demo": "🌱 Demo Places",
     "backup": {
       "title": "Database Backup",
-      "desc": "Download a full SQLite copy to safeguard all your data",
-      "button": "Download Backup (.sqlite)"
+      "desc": "Download or restore a complete database backup in JSON format with all system tables (places, users, notes, categories, groups, etc.).",
+      "button": "Download Backup (.json)",
+      "restore_button": "Import / Restore (.json)",
+      "restoring": "Restoring backup...",
+      "restore_confirm": "Restore this database backup? Current database data will be replaced with the contents of the selected JSON file.",
+      "restore_success": "✓ Database backup restored successfully. Reloading...",
+      "restore_error": "Error processing or restoring database backup."
     },
     "settings": {
       "title": "Settings & Maps",
