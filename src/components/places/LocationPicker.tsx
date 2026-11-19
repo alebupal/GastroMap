@@ -62,7 +62,7 @@ export function LocationPicker({
         longitude: lng,
       });
     }
-  }, [effectiveCity, address, lat, lng]);
+  }, [effectiveCity, address, lat, lng, onLocationChange]);
 
   // Si vienen coordenadas o ciudad inicial por autocompletado de URL
   useEffect(() => {

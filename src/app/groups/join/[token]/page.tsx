@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getGroupInviteInfoAction } from "@/lib/actions/groups";
 import { JoinGroupClient } from "./JoinGroupClient";
@@ -31,12 +32,12 @@ export default async function JoinGroupPage({ params }: JoinGroupPageProps) {
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             {info.error || "Este enlace de invitación ha superado su fecha límite de validez."}
           </p>
-          <a
+          <Link
             href="/"
             className="inline-block py-2.5 px-5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition"
           >
             Volver al mapa
-          </a>
+          </Link>
         </div>
       </div>
     );

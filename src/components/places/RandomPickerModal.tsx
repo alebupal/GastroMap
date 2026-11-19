@@ -41,6 +41,7 @@ export function RandomPickerModal({
     if (isOpen && places.length > 0) {
       spin();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   if (!isOpen) return null;

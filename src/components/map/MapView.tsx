@@ -150,10 +150,11 @@ export default function MapView({
       resizeObserver.observe(mapContainerRef.current);
     }
 
+    const markers = markersRef.current;
     return () => {
       resizeObserver.disconnect();
-      markersRef.current.forEach((marker) => marker.remove());
-      markersRef.current.clear();
+      markers.forEach((marker) => marker.remove());
+      markers.clear();
       if (userMarkerRef.current) {
         userMarkerRef.current.remove();
         userMarkerRef.current = null;
@@ -165,6 +166,7 @@ export default function MapView({
       map.remove();
       mapInstanceRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. Actualizar marcador del usuario y círculo de radio

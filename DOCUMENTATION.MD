@@ -206,8 +206,5 @@ In the **Import / Export** modal (`📦`):
 ### How do I bump the application version?
 Change `"version"` in [package.json](package.json). Header, footer, API, and services update automatically.
 
-### Why did copying Google Maps links fail on local networks?
-Modern browsers disable `navigator.clipboard` on insecure HTTP contexts (e.g. `http://192.168.x.x`). GastroMap includes an automatic fallback that works on every browser and protocol.
-
 ### How can I add a new language?
 Run `npm run i18n:export`, add a new column to `translations.csv`, run `npm run i18n:import`, and register the locale code in `src/lib/i18n/config.ts`.

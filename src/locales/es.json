@@ -12,7 +12,11 @@
     "donate": "Donar",
     "profile": "Editar mi perfil",
     "logout": "Cerrar sesión",
-    "admin": "Administración"
+    "admin": "Administración",
+    "my_groups": "Mis grupos privados",
+    "my_stats": "Mis estadísticas y Wrapped",
+    "documentation": "Documentación",
+    "donate_paypal": "Donar con PayPal"
   },
   "places": {
     "add_new": "Añadir sitio",
@@ -43,7 +47,37 @@
     "sort_rating": "Mejor valorados",
     "sort_price_asc": "Más económicos",
     "sort_price_desc": "Más exclusivos",
-    "sort_alphabetical": "Alfabético"
+    "sort_alphabetical": "Alfabético",
+    "sort_distance": "Más cercanos",
+    "show_more": "+ Mostrar más",
+    "show_less": "▲ Ver menos",
+    "jump_to_list": "↓ Bajar a la lista",
+    "locales_count": "sitios",
+    "locale_single": "sitio",
+    "page_of": "Pág. {current} de {total}",
+    "previous": "◀ Anterior",
+    "next": "Siguiente ▶",
+    "get_directions": "🗺️ Cómo llegar",
+    "view_details": "Ver ficha completa →",
+    "reset_filters": "Restablecer todos los filtros",
+    "lock_map": "📜 Deslizar lista",
+    "unlock_map": "🖐️ Mover mapa"
+  },
+  "cards": {
+    "pending": "Pendiente",
+    "want_to_go": "Quiero ir",
+    "visited": "Ya he ido",
+    "private_note": "Mi nota",
+    "by_author": "Por @{author}",
+    "comments": "Comentarios",
+    "visits": "Visitas",
+    "compare": "Comparar",
+    "private_badge": "Privado",
+    "untried_badge": "Sin estrenar",
+    "friends_badge": "De amigos",
+    "visited_badge": "Ya he ido",
+    "closed_temp": "Cerrado temp.",
+    "closed_perm": "Cerrado"
   },
   "groups": {
     "title": "Mis grupos privados",

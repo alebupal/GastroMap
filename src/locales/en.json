@@ -12,7 +12,11 @@
     "donate": "Donate",
     "profile": "Edit profile",
     "logout": "Log out",
-    "admin": "Admin"
+    "admin": "Admin",
+    "my_groups": "My private groups",
+    "my_stats": "My statistics & Wrapped",
+    "documentation": "Documentation",
+    "donate_paypal": "Donate with PayPal"
   },
   "places": {
     "add_new": "Add place",
@@ -43,7 +47,37 @@
     "sort_rating": "Top rated",
     "sort_price_asc": "Price: low to high",
     "sort_price_desc": "Price: high to low",
-    "sort_alphabetical": "Alphabetical"
+    "sort_alphabetical": "Alphabetical",
+    "sort_distance": "Nearest",
+    "show_more": "+ Show more",
+    "show_less": "▲ Show less",
+    "jump_to_list": "↓ Jump to list",
+    "locales_count": "places",
+    "locale_single": "place",
+    "page_of": "Page {current} of {total}",
+    "previous": "◀ Previous",
+    "next": "Next ▶",
+    "get_directions": "🗺️ Directions",
+    "view_details": "Full details →",
+    "reset_filters": "Reset all filters",
+    "lock_map": "📜 Scroll list",
+    "unlock_map": "🖐️ Pan map"
+  },
+  "cards": {
+    "pending": "Pending",
+    "want_to_go": "Want to go",
+    "visited": "Visited",
+    "private_note": "My note",
+    "by_author": "By @{author}",
+    "comments": "Comments",
+    "visits": "Visits",
+    "compare": "Compare",
+    "private_badge": "Private",
+    "untried_badge": "Unexplored",
+    "friends_badge": "From friends",
+    "visited_badge": "Visited",
+    "closed_temp": "Temp. closed",
+    "closed_perm": "Closed"
   },
   "groups": {
     "title": "My private groups",

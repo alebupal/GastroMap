@@ -350,7 +350,7 @@ export function PlaceCommentsThread({
         })
         .finally(() => setLoading(false));
     }
-  }, [isOpen, placeId]);
+  }, [isOpen, placeId, onCommentsCountChange]);
 
   async function handleAddComment() {
     if (!newContent.trim() || submitting) return;

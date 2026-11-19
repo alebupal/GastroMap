@@ -399,7 +399,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           <div className="mt-2.5 space-y-2 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
                             {invites.length === 0 ? (
                               <p className="text-[11px] text-slate-400 italic text-center py-1">
-                                No hay enlaces activos. Pulsa "+ Nuevo enlace" para invitar personas.
+                                No hay enlaces activos. Pulsa &ldquo;+ Nuevo enlace&rdquo; para invitar personas.
                               </p>
                             ) : (
                               invites.map((inv) => {

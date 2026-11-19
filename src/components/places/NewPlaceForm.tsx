@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   createPlaceAction,
   parseUrlAction,
@@ -250,12 +251,12 @@ export function NewPlaceForm({
                       {dup.address ? ` • ${dup.address}` : ""}
                     </div>
                   </div>
-                  <a
+                  <Link
                     href="/"
                     className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] shrink-0 transition"
                   >
                     Ver catálogo
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -409,12 +410,12 @@ export function NewPlaceForm({
 
       {/* Botones de acción */}
       <div className="pt-2 flex gap-2">
-        <a
+        <Link
           href="/"
           className="flex-1 py-3 px-4 rounded-xl text-center border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition"
         >
           Cancelar
-        </a>
+        </Link>
         <button
           type="submit"
           disabled={submitting}

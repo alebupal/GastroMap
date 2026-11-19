@@ -236,9 +236,6 @@ GastroMap está construido bajo los principios de modularidad, tipado estricto y
 ### ¿Cómo cambio la versión de la aplicación?
 Solo necesitas cambiar el campo `"version"` en [package.json](package.json). La cabecera, el pie de página, los servicios y la API adoptarán la nueva versión de manera automática.
 
-### ¿Por qué al compartir enlaces de Google Maps en local daba error de portapapeles?
-Los navegadores modernos bloquean la API `navigator.clipboard` cuando se navega por HTTP sin SSL (ej. IP local `http://192.168.x.x`). GastroMap incluye una capa de compatibilidad universal con fallback que funciona en cualquier entorno.
-
 ### ¿Cómo añado un nuevo idioma (por ejemplo, Francés o Alemán)?
 1. Ejecuta `npm run i18n:export` para generar `src/locales/translations.csv`.
 2. Añade una nueva columna (ej. `fr` o `de`) con las traducciones en tu hoja de cálculo o editor de texto.

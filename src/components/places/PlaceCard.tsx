@@ -6,6 +6,7 @@ import {
   toggleFavoriteAction,
   setPersonalStatusAction,
 } from "@/lib/actions/interactions";
+import { useT } from "@/lib/i18n/client";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
 import { PlaceVisitsModal } from "./PlaceVisitsModal";
@@ -42,6 +43,7 @@ export function PlaceCard({
   isCompared = false,
   onToggleCompare,
 }: PlaceCardProps) {
+  const { t } = useT();
   const [deleting, setDeleting] = useState(false);
   const [favorite, setFavorite] = useState(place.isFavorite ?? false);
   const [personalStatus, setPersonalStatus] = useState<"pending" | "visited" | null>(
@@ -95,17 +97,17 @@ export function PlaceCard({
             {/* Experiencia */}
             {place.experienceStatus === "untried" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/50">
-                ✨ Sin estrenar
+                ✨ {t("cards.untried_badge")}
               </span>
             )}
             {place.experienceStatus === "visited_by_others" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/50">
-                👥 De amigos
+                👥 {t("cards.friends_badge")}
               </span>
             )}
             {place.experienceStatus === "visited_by_me" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
-                ✅ Ya he ido
+                ✅ {t("cards.visited_badge")}
               </span>
             )}
 
@@ -119,12 +121,12 @@ export function PlaceCard({
             {/* Estado del establecimiento si no está activo */}
             {place.status === "temporarily_closed" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
-                ⏸️ Cerrado temp.
+                ⏸️ {t("cards.closed_temp")}
               </span>
             )}
             {place.status === "permanently_closed" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800/60">
-                🚫 Cerrado
+                🚫 {t("cards.closed_perm")}
               </span>
             )}
 
@@ -142,7 +144,7 @@ export function PlaceCard({
               ))
             ) : !place.communityPublished ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                🔒 Privado
+                🔒 {t("cards.private_badge")}
               </span>
             ) : null}
           </div>
@@ -244,7 +246,7 @@ export function PlaceCard({
               onClick={() => setShowNotesModal(true)}
               className="text-[10px] text-amber-700 dark:text-amber-400 font-bold hover:underline shrink-0 cursor-pointer"
             >
-              Editar
+              {t("common.edit")}
             </button>
           </div>
         )}
@@ -261,7 +263,7 @@ export function PlaceCard({
                 : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
             }`}
           >
-            🕒 {personalStatus === "pending" ? "Pendiente" : "Quiero ir"}
+            🕒 {personalStatus === "pending" ? t("cards.pending") : t("cards.want_to_go")}
           </button>
 
           <button
@@ -274,7 +276,7 @@ export function PlaceCard({
                 : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
             }`}
           >
-            ✅ {personalStatus === "visited" ? "Visitado" : "Ya he ido"}
+            ✅ {personalStatus === "visited" ? t("cards.visited") : t("cards.visited")}
           </button>
 
           <button
@@ -284,7 +286,7 @@ export function PlaceCard({
             className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center gap-1.5 ml-auto active:scale-95"
             title="Añadir nota o puntuación privada"
           >
-            📝 {rating !== null ? `${rating}★` : "Mi nota"}
+            📝 {rating !== null ? `${rating}★` : t("cards.private_note")}
           </button>
         </div>
       </div>
@@ -292,7 +294,7 @@ export function PlaceCard({
       {/* Pie de tarjeta: Autor, comentarios, Maps y Borrar */}
       <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
         <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[160px]">
-          Por @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+          {t("cards.by_author", { author: place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "") })}
         </span>
 
         <div className="flex items-center gap-2.5 shrink-0">
@@ -340,7 +342,7 @@ export function PlaceCard({
               aria-label="Localizar en el mapa"
               className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
             >
-              🗺️ Mapa
+              🗺️ {t("places.view_map")}
             </button>
           )}
 

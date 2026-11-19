@@ -8,6 +8,7 @@ import { DecisionAssistantModal } from "./DecisionAssistantModal";
 import { ExportImportModal } from "./ExportImportModal";
 import { ComparePlacesModal } from "./ComparePlacesModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
+import { useT } from "@/lib/i18n/client";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import {
   createSavedFilterAction,
@@ -60,6 +61,7 @@ export function PlacesExplorer({
   cartoApiKey,
   initialSavedFilters = [],
 }: PlacesExplorerProps) {
+  const { t } = useT();
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
   // Filtros acumulables
@@ -542,7 +544,7 @@ export function PlacesExplorer({
               type="text"
               value={textSearch}
               onChange={(e) => setTextSearch(e.target.value)}
-              placeholder="Buscar restaurante, plato, ciudad (Roma, Tokio, Granada...)"
+              placeholder={t("places.search_placeholder")}
               className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 dark:focus:ring-amber-500/50 focus:border-amber-500 transition shadow-inner"
             />
             <span className="absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-500 text-sm pointer-events-none">
@@ -565,7 +567,7 @@ export function PlacesExplorer({
             className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition active:scale-[0.98] shrink-0"
           >
             <span className="text-base">➕</span>
-            <span>Añadir sitio</span>
+            <span>{t("places.add_new")}</span>
           </a>
         </div>
 
@@ -579,7 +581,7 @@ export function PlacesExplorer({
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
             >
               <span>🎯</span>
-              <span>Asistente</span>
+              <span>{t("places.assistant")}</span>
               {activeFiltersCount > 0 && (
                 <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] flex items-center justify-center font-black">
                   {activeFiltersCount}
@@ -596,7 +598,7 @@ export function PlacesExplorer({
               title="Elegir al azar entre los resultados actuales"
             >
               <span>🎲</span>
-              <span>Ruleta</span>
+              <span>{t("places.roulette")}</span>
             </button>
 
             {/* Botón Importar / Exportar */}
@@ -607,7 +609,7 @@ export function PlacesExplorer({
               title="Exportar o importar establecimientos (JSON, CSV, GeoJSON, KML, Google Takeout)"
             >
               <span>📦</span>
-              <span className="hidden sm:inline">Importar / Exportar</span>
+              <span className="hidden sm:inline">{t("places.export_import")}</span>
             </button>
           </div>
 
@@ -621,7 +623,7 @@ export function PlacesExplorer({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
               >
                 <span>{isLocating ? "⏳" : "📍"}</span>
-                <span>{isLocating ? "Localizando..." : "Cerca de mí"}</span>
+                <span>{isLocating ? "Localizando..." : t("places.near_me")}</span>
               </button>
             ) : (
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
@@ -768,12 +770,12 @@ export function PlacesExplorer({
       {/* Píldoras Rápidas de Colección y Experiencia */}
       <HorizontalScroll className="flex items-center gap-1.5 pb-1 text-xs">
         {[
-          { key: "all", label: "Todos", icon: "🌐" },
-          { key: "favorite", label: "Favoritos", icon: "⭐" },
-          { key: "pending", label: "Quiero ir", icon: "🕒" },
-          { key: "visited_by_me", label: "Ya he ido", icon: "✅" },
-          { key: "visited_by_others", label: "De amigos", icon: "👥" },
-          { key: "untried", label: "Sin estrenar", icon: "✨" },
+          { key: "all", label: t("places.all"), icon: "🌐" },
+          { key: "favorite", label: t("places.favorites"), icon: "⭐" },
+          { key: "pending", label: t("places.want_to_go"), icon: "🕒" },
+          { key: "visited_by_me", label: t("places.visited"), icon: "✅" },
+          { key: "visited_by_others", label: t("places.friends"), icon: "👥" },
+          { key: "untried", label: t("places.unexplored"), icon: "✨" },
         ].map((item) => {
           const active = experienceFilter === item.key;
           return (
@@ -815,7 +817,7 @@ export function PlacesExplorer({
               <span>👥</span>
               <span>
                 {selectedGroupFilterIds.length === 0
-                  ? "Grupos"
+                  ? t("places.groups_filter")
                   : selectedGroupFilterIds.length === 1
                   ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || "1 grupo"
                   : `${selectedGroupFilterIds.length} grupos`}
@@ -906,7 +908,7 @@ export function PlacesExplorer({
         <div className="flex items-center justify-between text-[11px] px-0.5">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-400 uppercase tracking-wider">
-              Planes / Categorías ({occasionsList.length})
+              {t("places.plans_title")} ({occasionsList.length})
             </span>
             {selectedOccasions.length > 0 && (
               <button
@@ -981,7 +983,7 @@ export function PlacesExplorer({
                     : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
-                🍽️ Todos los planes
+                🍽️ {t("places.all_plans")}
               </button>
               {(occasionSearchQuery.trim()
                 ? filteredOccasions
@@ -1047,7 +1049,7 @@ export function PlacesExplorer({
                   : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
               }`}
             >
-              🍽️ Todos los planes
+              🍽️ {t("places.all_plans")}
             </button>
             {(occasionSearchQuery.trim()
               ? filteredOccasions
@@ -1092,7 +1094,7 @@ export function PlacesExplorer({
           <div className="flex items-center justify-between text-[11px] px-0.5">
             <div className="flex items-center gap-2">
               <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Etiquetas ({sortedTags.length})
+                {t("places.tags_title")} ({sortedTags.length})
               </span>
               {selectedTags.length > 0 && (
                 <button
@@ -1247,7 +1249,7 @@ export function PlacesExplorer({
             }`}
           >
             <span className="text-base leading-none">🗺️</span>
-            <span>Mapa</span>
+            <span>{t("places.view_map")}</span>
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
                 activeMobileView === "map"
@@ -1269,7 +1271,7 @@ export function PlacesExplorer({
             }`}
           >
             <span className="text-base leading-none">📋</span>
-            <span>Lista</span>
+            <span>{t("places.view_list")}</span>
             <span
               className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
                 activeMobileView === "list"
@@ -1317,7 +1319,7 @@ export function PlacesExplorer({
                 }}
                 className="lg:hidden px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 font-bold transition flex items-center gap-1 cursor-pointer"
               >
-                <span>↓ Bajar a la lista ({filteredPlaces.length})</span>
+                <span>{t("places.jump_to_list")} ({filteredPlaces.length})</span>
               </button>
             </div>
           </div>
@@ -1332,7 +1334,7 @@ export function PlacesExplorer({
             <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
               <div className="text-4xl mb-3">🔍</div>
               <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
-                No encontramos ningún establecimiento
+                {t("places.no_results")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs mx-auto">
                 Prueba a ajustar tu búsqueda, ampliar el radio de distancia o limpiar los filtros.
@@ -1342,7 +1344,7 @@ export function PlacesExplorer({
                 onClick={resetAllFilters}
                 className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition cursor-pointer"
               >
-                Restablecer todos los filtros
+                {t("places.reset_filters")}
               </button>
             </div>
           ) : (
@@ -1350,30 +1352,30 @@ export function PlacesExplorer({
               <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-medium px-1 flex-wrap">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {filteredPlaces.length} {filteredPlaces.length === 1 ? "sitio" : "sitios"}
+                    {filteredPlaces.length} {filteredPlaces.length === 1 ? t("places.locale_single") : t("places.locales_count")}
                   </span>
                   {totalPages > 1 && (
                     <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800">
-                      Pág. {currentPage} de {totalPages}
+                      {t("places.page_of", { current: currentPage, total: totalPages })}
                     </span>
                   )}
                   {textSearch && <span className="hidden sm:inline text-slate-400">• «{textSearch}»</span>}
                 </div>
 
                 <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  <span className="hidden sm:inline">Ordenar:</span>
+                  <span className="hidden sm:inline">{t("places.sort_by")}:</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                     className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
-                    aria-label="Ordenar establecimientos"
+                    aria-label={t("places.sort_by")}
                   >
-                    <option value="recent">🕒 Recientes</option>
-                    {userLocation && <option value="distance">📍 Más cercanos</option>}
-                    <option value="rating">⭐ Mi valoración</option>
-                    <option value="name">🔤 Nombre (A-Z)</option>
-                    <option value="price_asc">💶 Precio (menor)</option>
-                    <option value="price_desc">💶 Precio (mayor)</option>
+                    <option value="recent">🕒 {t("places.sort_recent")}</option>
+                    {userLocation && <option value="distance">📍 {t("places.sort_distance")}</option>}
+                    <option value="rating">⭐ {t("places.sort_rating")}</option>
+                    <option value="name">🔤 {t("places.sort_alphabetical")}</option>
+                    <option value="price_asc">💶 {t("places.sort_price_asc")}</option>
+                    <option value="price_desc">💶 {t("places.sort_price_desc")}</option>
                   </select>
                 </label>
               </div>
@@ -1408,7 +1410,7 @@ export function PlacesExplorer({
                       disabled={currentPage <= 1}
                       className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
                     >
-                      ◀ Anterior
+                      {t("places.previous")}
                     </button>
 
                     <div className="flex items-center gap-1 mx-1">
@@ -1449,7 +1451,7 @@ export function PlacesExplorer({
                       disabled={currentPage >= totalPages}
                       className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
                     >
-                      Siguiente ▶
+                      {t("places.next")}
                     </button>
                   </div>
                 </div>

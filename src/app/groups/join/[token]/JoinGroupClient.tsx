@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { joinGroupWithTokenAction } from "@/lib/actions/groups";
 
@@ -66,12 +67,12 @@ export function JoinGroupClient({
         {loading ? "Uniéndote al grupo..." : "Aceptar y unirme al grupo"}
       </button>
 
-      <a
+      <Link
         href="/"
         className="inline-block text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
       >
         Rechazar y volver al mapa
-      </a>
+      </Link>
     </div>
   );
 }

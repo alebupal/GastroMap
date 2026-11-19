@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getMyGroupsAction } from "@/lib/actions/groups";
@@ -47,12 +48,13 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 flex flex-col justify-center items-center">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 sm:p-7">
         <div className="flex items-center gap-3 mb-5">
-          <a
+          <Link
             href="/"
             className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 text-sm transition"
+            aria-label="Volver al mapa"
           >
             ←
-          </a>
+          </Link>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Añadir nuevo sitio
