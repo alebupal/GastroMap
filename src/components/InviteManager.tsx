@@ -55,7 +55,7 @@ export function InviteManager() {
     } else if (result.url) {
       const fullUrl = `${window.location.origin}${result.url}`;
       setCreatedUrl(fullUrl);
-      setSuccess("¡Enlace de invitación generado con éxito!");
+      setSuccess(t("invites.generate_success"));
       form.reset();
       loadInvitations();
     }
@@ -63,7 +63,7 @@ export function InviteManager() {
 
   function handleCopy(url: string, tokenId: string) {
     copyText(url).then((ok) => {
-      if (!ok) window.prompt("Copia el enlace de invitación:", url);
+      if (!ok) window.prompt(t("invites.copy_prompt"), url);
       setCopiedToken(tokenId);
       setTimeout(() => setCopiedToken(null), 2500);
     });
@@ -73,10 +73,10 @@ export function InviteManager() {
     const isUsed = invitation.usedAt !== null;
     const isExpired = new Date(invitation.expiresAt) < new Date();
     const promptText = isUsed
-      ? "¿Eliminar este registro de invitación ya utilizada?"
+      ? t("invites.confirm_delete_used")
       : isExpired
-      ? "¿Eliminar esta invitación caducada?"
-      : "¿Revocar y eliminar esta invitación activa antes de su vencimiento? El enlace dejará de ser válido inmediatamente.";
+      ? t("invites.confirm_delete_expired")
+      : t("invites.confirm_revoke_active");
 
     if (!confirm(promptText)) return;
 
@@ -90,7 +90,7 @@ export function InviteManager() {
     if (res.error) {
       setError(res.error);
     } else {
-      setSuccess("Invitación eliminada correctamente.");
+      setSuccess(t("invites.delete_success"));
       loadInvitations();
     }
   }
@@ -145,18 +145,18 @@ export function InviteManager() {
         >
           <div className="flex items-center justify-between">
             <h4 className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-              Nueva invitación
+              {t("invites.new_invite_title")}
             </h4>
           </div>
 
           <div>
             <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-              Email del invitado (opcional, déjalo vacío para enlace libre reutilizable)
+              {t("invites.email_label")}
             </label>
             <input
               type="email"
               name="email"
-              placeholder="amigo@email.com (o vacío para cualquiera con el enlace)"
+              placeholder={t("invites.email_placeholder")}
               className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
           </div>
@@ -164,21 +164,21 @@ export function InviteManager() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                Rol otorgado
+                {t("invites.role_granted")}
               </label>
               <select
                 name="role"
                 defaultValue="user"
                 className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
               >
-                <option value="user">Usuario estándar</option>
-                <option value="admin">Administrador</option>
+                <option value="user">{t("invites.role_standard_user")}</option>
+                <option value="admin">{t("invites.role_admin")}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                Tiempo de validez (días hasta caducidad)
+                {t("invites.validity_time")}
               </label>
               <input
                 type="number"
@@ -196,13 +196,13 @@ export function InviteManager() {
             disabled={loading}
             className="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-xs"
           >
-            {loading ? "Generando invitación..." : "Generar enlace de invitación"}
+            {loading ? t("invites.generating_btn") : t("invites.submit_btn")}
           </button>
 
           {createdUrl && (
             <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 space-y-1.5">
               <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                ¡Enlace generado listo para compartir!
+                {t("invites.link_ready")}
               </p>
               <div className="flex items-center gap-1.5">
                 <input
@@ -216,7 +216,7 @@ export function InviteManager() {
                   onClick={() => handleCopy(createdUrl, "new-token")}
                   className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 shrink-0 transition cursor-pointer"
                 >
-                  {copiedToken === "new-token" ? "¡Copiado!" : "Copiar"}
+                  {copiedToken === "new-token" ? t("invites.copied") : t("invites.copy_link")}
                 </button>
               </div>
             </div>
@@ -227,22 +227,22 @@ export function InviteManager() {
       {/* Lista de invitaciones existentes */}
       <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
         <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center justify-between">
-          <span>Enlaces de invitación registrados</span>
+          <span>{t("invites.registered_links")}</span>
           <button
             type="button"
             onClick={loadInvitations}
             disabled={loadingList}
             className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
-            {loadingList ? "Actualizando..." : "🔄 Refrescar"}
+            {loadingList ? t("invites.refreshing") : t("invites.refresh")}
           </button>
         </h4>
 
         {loadingList && invitations.length === 0 ? (
-          <p className="text-xs text-slate-400 py-4 text-center">Cargando invitaciones...</p>
+          <p className="text-xs text-slate-400 py-4 text-center">{t("invites.loading_invites")}</p>
         ) : invitations.length === 0 ? (
           <div className="p-6 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-xs text-slate-400 italic">
-            No hay ninguna invitación registrada actualmente. Pulsa «➕ Crear nueva invitación» para generar la primera.
+            {t("invites.no_invites")}
           </div>
         ) : (
           <div className="space-y-2">
@@ -270,22 +270,22 @@ export function InviteManager() {
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {isActive && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                          ACTIVA 🟢
+                          {t("invites.active_badge")}
                         </span>
                       )}
                       {isUsed && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-                          UTILIZADA ✓
+                          {t("invites.used_badge")}
                         </span>
                       )}
                       {isExpired && (
                         <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-500">
-                          CADUCADA ⏳
+                          {t("invites.expired_badge")}
                         </span>
                       )}
 
                       <span className="font-mono text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">
-                        {inv.email || "🌐 Enlace abierto"}
+                        {inv.email || t("invites.open_link")}
                       </span>
 
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 uppercase">
@@ -295,16 +295,18 @@ export function InviteManager() {
 
                     <div className="text-[11px] text-slate-400 flex items-center gap-2 flex-wrap">
                       <span>
-                        Creada por @{inv.createdByUsername || inv.createdByName || "admin"} el{" "}
-                        {new Date(inv.createdAt).toLocaleDateString()}
+                        {t("invites.created_by_info", {
+                          user: inv.createdByUsername || inv.createdByName || "admin",
+                          date: new Date(inv.createdAt).toLocaleDateString(),
+                        })}
                       </span>
                       <span>•</span>
                       <span>
                         {isUsed
-                          ? `Usada el ${new Date(inv.usedAt!).toLocaleDateString()}`
+                          ? t("invites.used_on", { date: new Date(inv.usedAt!).toLocaleDateString() })
                           : isExpired
-                          ? `Caducó el ${new Date(inv.expiresAt).toLocaleDateString()}`
-                          : `Vence el ${new Date(inv.expiresAt).toLocaleDateString()}`}
+                          ? t("invites.expired_on", { date: new Date(inv.expiresAt).toLocaleDateString() })
+                          : t("invites.expires_on", { date: new Date(inv.expiresAt).toLocaleDateString() })}
                       </span>
                     </div>
                   </div>
@@ -316,9 +318,9 @@ export function InviteManager() {
                         type="button"
                         onClick={() => handleCopy(fullInviteUrl, inv.id)}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
-                        title="Copiar enlace de invitación"
+                        title={t("invites.copy_link")}
                       >
-                        <span>{copiedToken === inv.id ? "✓ ¡Copiado!" : "📋 Copiar enlace"}</span>
+                        <span>{copiedToken === inv.id ? t("invites.copied_btn") : t("invites.copy_link_btn")}</span>
                       </button>
                     )}
 
@@ -327,10 +329,10 @@ export function InviteManager() {
                       onClick={() => handleDelete(inv)}
                       disabled={deletingId === inv.id}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 text-[11px] font-bold transition cursor-pointer disabled:opacity-40"
-                      title={isActive ? "Revocar y eliminar invitación antes de vencer" : "Eliminar registro"}
+                      title={isActive ? t("invites.revoke_btn") : t("invites.delete_btn")}
                     >
                       <span>🗑️</span>
-                      <span>{deletingId === inv.id ? "Eliminando..." : isActive ? "Revocar" : "Eliminar"}</span>
+                      <span>{deletingId === inv.id ? t("invites.deleting") : isActive ? t("invites.revoke_btn") : t("invites.delete_btn")}</span>
                     </button>
                   </div>
                 </div>

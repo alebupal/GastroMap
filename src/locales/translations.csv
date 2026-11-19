@@ -1,432 +1,572 @@
 key,es,en
-admin.collapse,Plegar panel,Collapse panel
-admin.expand,Abrir herramientas,Open tools
+admin.backup.button,"Descargar Backup (.sqlite)","Download Backup (.sqlite)"
+admin.backup.desc,"Descarga una copia completa en formato SQLite para salvaguardar todos tus datos","Download a full SQLite copy to safeguard all your data"
+admin.backup.title,"Copia de Seguridad de la Base de Datos","Database Backup"
+admin.collapse,"Plegar panel","Collapse panel"
+admin.expand,"Abrir herramientas","Open tools"
+admin.settings.carto_hint,"Si se deja en blanco, GastroMap utiliza automáticamente las capas abiertas de OpenStreetMap sin coste ni marcas de agua.","If left blank, GastroMap automatically uses open OpenStreetMap layers at no cost and without watermarks."
+admin.settings.carto_label,"CartoDB API Key (Opcional)","CartoDB API Key (Optional)"
+admin.settings.carto_placeholder,"Introduce tu API Key de carto.com si dispones de una...","Enter your carto.com API Key if you have one..."
+admin.settings.save_btn,"Guardar Ajustes","Save Settings"
+admin.settings.saved,"✓ Configuración guardada","✓ Settings saved"
+admin.settings.subtitle,"API Keys y proveedores de cartografía","API Keys and map providers"
+admin.settings.title,"Configuración y Mapas","Settings & Maps"
 admin.subtitle,"Gestión centralizada de usuarios, taxonomía, invitaciones, API keys y datos de prueba","Centralized management of users, taxonomy, invitations, API keys and test data"
-admin.tab_audit,📜 Auditoría,📜 Audit Log
-admin.tab_demo,🌱 Sitios Demo,🌱 Demo Places
-admin.tab_invites,🎟️ Invitaciones,🎟️ Invitations
-admin.tab_places,📋 Tabla Sitios ({count}),📋 Places Table ({count})
-admin.tab_settings,🔑 API Keys,🔑 API Keys
-admin.tab_stats,📊 Estadísticas,📊 Statistics
-admin.tab_taxonomy,🏷️ Taxonomía,🏷️ Taxonomy
-admin.tab_users,👥 Usuarios,👥 Users
-admin.title,Panel de Administración,Admin Dashboard
-admin_audit.col_action,Acción,Action
-admin_audit.col_date,Fecha / Hora,Date / Time
-admin_audit.col_details,Detalles,Details
-admin_audit.col_entity,Entidad / ID,Entity / ID
-admin_audit.col_user,Usuario,User
-admin_audit.empty,No hay registros de auditoría aún.,No audit records yet.
-admin_audit.filter_all,Todas las acciones,All actions
-admin_audit.refresh,Actualizar,Refresh
-admin_audit.subtitle,Historial cronológico de cambios y acciones realizadas por usuarios y administradores,Chronological history of changes and actions performed by users and administrators
-admin_audit.title,Registro de Auditoría,Audit Log
+admin.tab_audit,"📜 Auditoría","📜 Audit Log"
+admin.tab_demo,"🌱 Sitios Demo","🌱 Demo Places"
+admin.tab_invites,"🎟️ Invitaciones","🎟️ Invitations"
+admin.tab_places,"📋 Tabla Sitios ({count})","📋 Places Table ({count})"
+admin.tab_settings,"🔑 API Keys","🔑 API Keys"
+admin.tab_stats,"📊 Estadísticas","📊 Statistics"
+admin.tab_taxonomy,"🏷️ Taxonomía","🏷️ Taxonomy"
+admin.tab_users,"👥 Usuarios","👥 Users"
+admin.title,"Panel de Administración","Admin Dashboard"
+admin_audit.col_action,"Acción","Action"
+admin_audit.col_date,"Fecha / Hora","Date / Time"
+admin_audit.col_details,"Detalles","Details"
+admin_audit.col_entity,"Entidad / ID","Entity / ID"
+admin_audit.col_user,"Usuario","User"
+admin_audit.empty,"No hay registros de auditoría aún.","No audit records yet."
+admin_audit.filter_all,"Todas las acciones","All actions"
+admin_audit.refresh,"Actualizar","Refresh"
+admin_audit.subtitle,"Historial cronológico de cambios y acciones realizadas por usuarios y administradores","Chronological history of changes and actions performed by users and administrators"
+admin_audit.title,"Registro de Auditoría","Audit Log"
 admin_demo.desc,"Puebla la base de datos con una selección variada de sitios gastronómicos reales con coordenadas, fotos, tags y ocasiones para pruebas.","Populate the database with a curated selection of real foodie places with coordinates, photos, tags and occasions for testing."
-admin_demo.seed_btn,🌱 Cargar Sitios de Demostración,🌱 Load Demo Places
-admin_demo.seeding,Cargando datos...,Loading data...
-admin_demo.success,¡Datos de prueba cargados correctamente!,Demo data loaded successfully!
-admin_demo.title,Generador de Datos de Demostración,Demo Data Generator
-admin_places.all_cities,Todas las ciudades,All cities
-admin_places.cancel,Cancelar,Cancel
-admin_places.col_action,Acción,Action
-admin_places.col_author,Autor,Author
-admin_places.col_city,Ciudad,City
-admin_places.col_gps,GPS / Mapa,GPS / Map
-admin_places.col_occasions,Planes / Ocasiones,Plans / Occasions
-admin_places.col_place,Establecimiento,Place
-admin_places.col_price,Precio,Price
-admin_places.col_select_all,Seleccionar todos los visibles,Select all visible
-admin_places.delete_bulk_confirm,¿Eliminar definitivamente los {count} establecimientos seleccionados? Esta acción es irreversible.,Permanently delete {count} selected places? This action is irreversible.
-admin_places.delete_confirm,¿Eliminar definitivamente «{name}»?,"Permanently delete ""{name}""?"
-admin_places.delete_selected,Eliminar seleccionados,Delete selected
-admin_places.delete_success,Sitio «{name}» eliminado.,"Place ""{name}"" deleted."
-admin_places.delete_title,Eliminar sitio,Delete place
-admin_places.empty_search,No se encontraron establecimientos que coincidan con la búsqueda.,No places found matching your search.
-admin_places.merge_btn,Fusionar fichas,Merge places
+admin_demo.seed_btn,"🌱 Cargar Sitios de Demostración","🌱 Load Demo Places"
+admin_demo.seeding,"Cargando datos...","Loading data..."
+admin_demo.success,"¡Datos de prueba cargados correctamente!","Demo data loaded successfully!"
+admin_demo.title,"Generador de Datos de Demostración","Demo Data Generator"
+admin_places.all_cities,"Todas las ciudades","All cities"
+admin_places.cancel,"Cancelar","Cancel"
+admin_places.col_action,"Acción","Action"
+admin_places.col_author,"Autor","Author"
+admin_places.col_city,"Ciudad","City"
+admin_places.col_gps,"GPS / Mapa","GPS / Map"
+admin_places.col_occasions,"Planes / Ocasiones","Plans / Occasions"
+admin_places.col_place,"Establecimiento","Place"
+admin_places.col_price,"Precio","Price"
+admin_places.col_select_all,"Seleccionar todos los visibles","Select all visible"
+admin_places.delete_bulk_confirm,"¿Eliminar definitivamente los {count} establecimientos seleccionados? Esta acción es irreversible.","Permanently delete {count} selected places? This action is irreversible."
+admin_places.delete_confirm,"¿Eliminar definitivamente «{name}»?","Permanently delete ""{name}""?"
+admin_places.delete_selected,"Eliminar seleccionados","Delete selected"
+admin_places.delete_success,"Sitio «{name}» eliminado.","Place ""{name}"" deleted."
+admin_places.delete_title,"Eliminar sitio","Delete place"
+admin_places.edit_title,"Editar establecimiento","Edit establishment"
+admin_places.empty_search,"No se encontraron establecimientos que coincidan con la búsqueda.","No places found matching your search."
+admin_places.merge_btn,"Fusionar fichas","Merge places"
 admin_places.merge_modal_desc,"Todos los comentarios, favoritos, estados personales, valoraciones, notas, ocasiones y etiquetas se transferirán a la ficha principal que elijas abajo.","All comments, favorites, personal statuses, ratings, notes, occasions and tags will be transferred to the main place chosen below."
-admin_places.merge_modal_no_candidates,No hay establecimientos coincidentes.,No matching places found.
-admin_places.merge_modal_search,🔍 Buscar establecimiento destino...,🔍 Search destination place...
-admin_places.merge_modal_subtitle,Se absorberá y eliminará:,Will be absorbed and deleted:
-admin_places.merge_modal_target_label,Elige la ficha principal que sobrevivirá:,Choose surviving main place:
-admin_places.merge_modal_title,Fusionar establecimiento duplicado,Merge duplicate place
-admin_places.merge_success,Sitios fusionados correctamente.,Places merged successfully.
-admin_places.merge_title,Fusionar este sitio duplicado dentro de otro,Merge this duplicate place into another
-admin_places.merging,Fusionando...,Merging...
-admin_places.no_coords,Sin coords,No coords
-admin_places.open_maps,Abrir en Google Maps,Open in Google Maps
+admin_places.merge_modal_no_candidates,"No hay establecimientos coincidentes.","No matching places found."
+admin_places.merge_modal_search,"🔍 Buscar establecimiento destino...","🔍 Search destination place..."
+admin_places.merge_modal_subtitle,"Se absorberá y eliminará:","Will be absorbed and deleted:"
+admin_places.merge_modal_target_label,"Elige la ficha principal que sobrevivirá:","Choose surviving main place:"
+admin_places.merge_modal_title,"Fusionar establecimiento duplicado","Merge duplicate place"
+admin_places.merge_success,"Sitios fusionados correctamente.","Places merged successfully."
+admin_places.merge_title,"Fusionar este sitio duplicado dentro de otro","Merge this duplicate place into another"
+admin_places.merging,"Fusionando...","Merging..."
+admin_places.no_coords,"Sin coords","No coords"
+admin_places.open_maps,"Abrir en Google Maps","Open in Google Maps"
 admin_places.search_placeholder,"🔍 Buscar por nombre, dirección, autor o etiquetas...","🔍 Search by name, address, author or tags..."
-admin_places.showing_of,Mostrando {filtered} de {total},Showing {filtered} of {total}
-admin_stats.by_city,Distribución por Ciudades,Distribution by Cities
-admin_stats.by_occasion,Distribución por Planes,Distribution by Plans
-admin_stats.by_price,Distribución por Precios,Distribution by Price
-admin_stats.error,No se pudieron cargar las estadísticas de administración.,Could not load admin analytics.
-admin_stats.interactions_count,interacciones,interactions
-admin_stats.kpi_closed_places,sitios cerrados,closed places
-admin_stats.kpi_comments,Comentarios,Comments
-admin_stats.kpi_groups_closed,Grupos / Cerr.,Groups / Closed
-admin_stats.kpi_places,Sitios,Places
-admin_stats.kpi_places_com,com.,com.
-admin_stats.kpi_places_priv,priv.,priv.
-admin_stats.kpi_taxonomy,Taxonomía,Taxonomy
-admin_stats.kpi_taxonomy_sub,Planes / Tags,Plans / Tags
-admin_stats.kpi_users,Usuarios,Users
-admin_stats.kpi_users_active,activos,active
-admin_stats.kpi_users_inact,inact.,inact.
-admin_stats.kpi_visits,Visitas,Visits
-admin_stats.loading,Calculando métricas globales...,Calculating global metrics...
-admin_stats.no_data,Sin datos todavía,No data yet
-admin_stats.places_count,sitios,places
-admin_stats.pulse_comments,comentarios,comments
-admin_stats.pulse_places,sitios,places
-admin_stats.pulse_title,Pulso de los últimos 30 días:,Last 30 days pulse:
-admin_stats.pulse_users,usuarios nuevos,new users
-admin_stats.pulse_visits,visitas,visits
-admin_stats.recent_activity,Última Actividad Global,Latest Global Activity
-admin_stats.refresh,Actualizar,Refresh
+admin_places.showing_of,"Mostrando {filtered} de {total}","Showing {filtered} of {total}"
+admin_stats.by_city,"Distribución por Ciudades","Distribution by Cities"
+admin_stats.by_occasion,"Distribución por Planes","Distribution by Plans"
+admin_stats.by_price,"Distribución por Precios","Distribution by Price"
+admin_stats.error,"No se pudieron cargar las estadísticas de administración.","Could not load admin analytics."
+admin_stats.interactions_count,"interacciones","interactions"
+admin_stats.kpi_closed_places,"sitios cerrados","closed places"
+admin_stats.kpi_comments,"Comentarios","Comments"
+admin_stats.kpi_groups_closed,"Grupos / Cerr.","Groups / Closed"
+admin_stats.kpi_places,"Sitios","Places"
+admin_stats.kpi_places_com,"com.","com."
+admin_stats.kpi_places_priv,"priv.","priv."
+admin_stats.kpi_taxonomy,"Taxonomía","Taxonomy"
+admin_stats.kpi_taxonomy_sub,"Planes / Tags","Plans / Tags"
+admin_stats.kpi_users,"Usuarios","Users"
+admin_stats.kpi_users_active,"activos","active"
+admin_stats.kpi_users_inact,"inact.","inact."
+admin_stats.kpi_visits,"Visitas","Visits"
+admin_stats.loading,"Calculando métricas globales...","Calculating global metrics..."
+admin_stats.no_data,"Sin datos todavía","No data yet"
+admin_stats.places_count,"sitios","places"
+admin_stats.pulse_comments,"comentarios","comments"
+admin_stats.pulse_places,"sitios","places"
+admin_stats.pulse_title,"Pulso de los últimos 30 días:","Last 30 days pulse:"
+admin_stats.pulse_users,"usuarios nuevos","new users"
+admin_stats.pulse_visits,"visitas","visits"
+admin_stats.recent_activity,"Última Actividad Global","Latest Global Activity"
+admin_stats.refresh,"Actualizar","Refresh"
 admin_stats.subtitle,"Métricas completas de uso, comunidad, catálogo y tendencias (respetando notas y fichas privadas)","Comprehensive usage, community, catalog and trend metrics (respecting private notes and places)"
-admin_stats.title,Analítica Global de GastroMap,Global GastroMap Analytics
-admin_stats.top_contributors,Top Contribuidores,Top Contributors
-admin_stats.top_places,Sitios Más Populares,Most Popular Places
-admin_stats.top_tags,Etiquetas más utilizadas,Most used tags
-admin_taxonomy.cancel,Cancelar,Cancel
-admin_taxonomy.color,Color,Color
-admin_taxonomy.delete,Eliminar,Delete
-admin_taxonomy.delete_confirm,¿Eliminar esta opción?,Delete this option?
-admin_taxonomy.icon,Icono (emoji),Icon (emoji)
-admin_taxonomy.name,Nombre,Name
-admin_taxonomy.new_occasion,Nuevo Plan,New Plan
-admin_taxonomy.new_tag,Nueva Etiqueta,New Tag
-admin_taxonomy.save,Guardar,Save
+admin_stats.title,"Analítica Global de GastroMap","Global GastroMap Analytics"
+admin_stats.top_contributors,"Top Contribuidores","Top Contributors"
+admin_stats.top_places,"Sitios Más Populares","Most Popular Places"
+admin_stats.top_tags,"Etiquetas más utilizadas","Most used tags"
+admin_taxonomy.cancel,"Cancelar","Cancel"
+admin_taxonomy.category_name_placeholder,"Nombre ej. Cervecería artesanal...","Name e.g. Craft Brewery..."
+admin_taxonomy.category_place_count,"({count} sitio)","({count} place)"
+admin_taxonomy.category_places_count,"({count} sitios)","({count} places)"
+admin_taxonomy.choose_emoji,"Elige un emoji:","Choose an emoji:"
+admin_taxonomy.color,"Color","Color"
+admin_taxonomy.create_category_title,"➕ Crear nueva categoría","➕ Create new category"
+admin_taxonomy.delete,"Eliminar","Delete"
+admin_taxonomy.delete_confirm,"¿Eliminar esta opción?","Delete this option?"
+admin_taxonomy.delete_empty,"Eliminar vacías ({count})","Delete empty ({count})"
+admin_taxonomy.delete_selected,"Eliminar ({count})","Delete ({count})"
+admin_taxonomy.empty_badge,"vacía","empty"
+admin_taxonomy.icon,"Icono (emoji)","Icon (emoji)"
+admin_taxonomy.merge_title,"Combinar / Fusionar con otra","Combine / Merge with another"
+admin_taxonomy.name,"Nombre","Name"
+admin_taxonomy.new_occasion,"Nuevo Plan","New Plan"
+admin_taxonomy.new_tag,"Nueva Etiqueta","New Tag"
+admin_taxonomy.no_categories_found,"No se encontró ninguna categoría con ese criterio.","No categories found matching that criteria."
+admin_taxonomy.no_tags_found,"No se encontró ninguna etiqueta con ese criterio.","No tags found matching that criteria."
+admin_taxonomy.save,"Guardar","Save"
+admin_taxonomy.save_btn,"Guardar","Save"
+admin_taxonomy.search_occasions,"🔍 Buscar categoría por nombre o id...","🔍 Search category by name or id..."
+admin_taxonomy.search_tags,"🔍 Buscar etiqueta por nombre...","🔍 Search tag by name..."
+admin_taxonomy.select_all_visible,"Seleccionar todas visibles ({count})","Select all visible ({count})"
 admin_taxonomy.subtitle_occasions,"Define las categorías para clasificar planes (ej: tapeo, cena romántica...)","Define categories to classify occasions (e.g. tapas, romantic dinner...)"
-admin_taxonomy.subtitle_tags,Gestiona las etiquetas temáticas del catálogo,Manage catalog topic tags
-admin_taxonomy.title_occasions,Planes y Ocasiones,Plans & Occasions
-admin_taxonomy.title_tags,Etiquetas Globales,Global Tags
-admin_users.add_modal_title,Añadir Nuevo Usuario,Add New User
-admin_users.add_user,Nuevo Usuario,New User
-admin_users.btn_delete,Eliminar usuario,Delete user
-admin_users.btn_edit,Editar usuario,Edit user
-admin_users.btn_password,Cambiar contraseña,Change password
-admin_users.btn_toggle_status,Activar/Desactivar,Enable/Disable
-admin_users.cancel,Cancelar,Cancel
-admin_users.col_actions,Acciones,Actions
-admin_users.col_created,Registro,Registered
-admin_users.col_role,Rol,Role
-admin_users.col_status,Estado,Status
-admin_users.col_user,Usuario,User
-admin_users.create_user,Crear Usuario,Create User
-admin_users.delete_bulk_confirm,¿Eliminar definitivamente los {count} usuarios seleccionados?,Permanently delete the {count} selected users?
+admin_taxonomy.subtitle_tags,"Gestiona las etiquetas temáticas del catálogo","Manage catalog topic tags"
+admin_taxonomy.title_occasions,"Planes y Ocasiones","Plans & Occasions"
+admin_taxonomy.title_tags,"Etiquetas Globales","Global Tags"
+admin_users.account_status,"Estado de cuenta","Account status"
+admin_users.add_modal_title,"Añadir Nuevo Usuario","Add New User"
+admin_users.add_user,"Nuevo Usuario","New User"
+admin_users.btn_delete,"Eliminar usuario","Delete user"
+admin_users.btn_edit,"Editar usuario","Edit user"
+admin_users.btn_password,"Cambiar contraseña","Change password"
+admin_users.btn_toggle_status,"Activar/Desactivar","Enable/Disable"
+admin_users.cancel,"Cancelar","Cancel"
+admin_users.cannot_delete_self,"No puedes eliminar tu propia cuenta","You cannot delete your own account"
+admin_users.cannot_select_self,"No puedes seleccionarte a ti mismo","You cannot select yourself"
+admin_users.col_actions,"Acciones","Actions"
+admin_users.col_created,"Registro","Registered"
+admin_users.col_role,"Rol","Role"
+admin_users.col_status,"Estado","Status"
+admin_users.col_user,"Usuario","User"
+admin_users.create_user,"Crear Usuario","Create User"
+admin_users.delete_bulk_confirm,"¿Eliminar definitivamente los {count} usuarios seleccionados?","Permanently delete the {count} selected users?"
 admin_users.delete_confirm,"¿Eliminar definitivamente al usuario @{username}? Se eliminarán todas sus notas, visitas y favoritos.","Permanently delete user @{username}? All their notes, visits and favorites will be deleted."
-admin_users.delete_selected,Eliminar seleccionados,Delete selected
-admin_users.edit_modal_title,Editar Usuario,Edit User
-admin_users.email,Correo electrónico,Email address
-admin_users.name,Nombre completo,Full name
-admin_users.new_password_placeholder,Nueva contraseña (mínimo 6 caracteres),New password (minimum 6 characters)
-admin_users.password,Contraseña,Password
-admin_users.password_modal_title,Cambiar Contraseña de @{username},Change Password for @{username}
-admin_users.role_admin,Administrador,Administrator
-admin_users.role_user,Usuario,User
-admin_users.save_changes,Guardar Cambios,Save Changes
+admin_users.delete_selected,"Eliminar seleccionados","Delete selected"
+admin_users.delete_user_btn,"Eliminar usuario","Delete user"
+admin_users.edit_modal_title,"Editar Usuario","Edit User"
+admin_users.edit_subtitle,"Modifica datos de perfil, accesos y credenciales","Modify profile details, access and credentials"
+admin_users.edit_title,"Editar usuario","Edit user"
+admin_users.edit_tooltip,"Editar usuario (nombre, usuario, email, rol, contraseña)","Edit user (name, username, email, role, password)"
+admin_users.email,"Correo electrónico (email)","Email address"
+admin_users.email_placeholder,"correo@ejemplo.com","email@example.com"
+admin_users.full_name,"Nombre completo","Full name"
+admin_users.full_name_placeholder,"Nombre y apellidos","First and last name"
+admin_users.loading_users,"Cargando usuarios...","Loading users..."
+admin_users.make_admin,"Hacer Admin","Make Admin"
+admin_users.make_user,"Hacer User","Make User"
+admin_users.matching_query,"que coincidan con «{query}»","matching ""{query}"""
+admin_users.name,"Nombre completo","Full name"
+admin_users.new_password_hint,"Si escribes una contraseña aquí, se reemplazará la actual (mín. 4 caracteres).","If you enter a password here, current one will be replaced (min 4 characters)."
+admin_users.new_password_leave_blank,"Dejar en blanco para no cambiarla","Leave blank to keep unchanged"
+admin_users.new_password_optional,"Nueva contraseña (opcional)","New password (optional)"
+admin_users.new_password_placeholder,"Nueva contraseña (mínimo 6 caracteres)","New password (minimum 6 characters)"
+admin_users.no_users_found,"No se encontraron usuarios {query}.","No users found {query}."
+admin_users.password,"Contraseña","Password"
+admin_users.password_modal_title,"Cambiar Contraseña de @{username}","Change Password for @{username}"
+admin_users.reset_password_btn_title,"Restablecer contraseña rápida","Quick password reset"
+admin_users.reset_password_desc,"Introduce la nueva contraseña temporal para este usuario.","Enter the new temporary password for this user."
+admin_users.reset_password_input_placeholder,"Nueva contraseña (mín. 4 caracteres, ej. 1234)","New password (min. 4 characters, e.g. 1234)"
+admin_users.reset_password_title,"🔑 Restablecer contraseña","🔑 Reset password"
+admin_users.reset_password_update_btn,"Actualizar","Update"
+admin_users.role,"Rol","Role"
+admin_users.role_admin,"Administrador","Administrator"
+admin_users.role_admin_option,"Administrador","Administrator"
+admin_users.role_user,"Usuario","User"
+admin_users.role_user_option,"Usuario","User"
+admin_users.save_changes,"Guardar Cambios","Save Changes"
+admin_users.save_changes_btn,"Guardar cambios","Save changes"
 admin_users.search_placeholder,"🔍 Buscar usuario por nombre, @username o email...","🔍 Search user by name, @username or email..."
-admin_users.status_active,Activo,Active
-admin_users.status_disabled,Desactivado,Disabled
+admin_users.select_user,"Seleccionar usuario","Select user"
+admin_users.status_active,"Activo","Active"
+admin_users.status_active_option,"Activo 🟢","Active 🟢"
+admin_users.status_disabled,"Desactivado","Disabled"
+admin_users.status_disabled_option,"Inactivo / Bloqueado ⏸️","Inactive / Blocked ⏸️"
 admin_users.subtitle,"Control de accesos, roles y contraseñas","Access control, roles and passwords"
-admin_users.title,Gestión de Usuarios,User Management
-admin_users.username,Nombre de usuario (@),Username (@)
-app.subtitle,Tu mapa personal y colaborativo de restaurantes y gastronomía,Your personal and collaborative food & restaurant map
-app.title,GastroMap,GastroMap
-assistant.favorites_only,Solo Mis Favoritos,Favorites only
-assistant.friends,Probado por amigos,Tried by friends
-assistant.reset,Restablecer filtros,Reset filters
-assistant.step1_title,1. Plan o Momento,1. Plan or Occasion
-assistant.step2_hint,* Los sitios sin precio asignado (???) se mostrarán siempre para no descartar opciones.,* Places without price (???) are always shown so you don't miss options.
-assistant.step2_title,2. Rango de precio,2. Price range
-assistant.step3_active,Cerca de mí (Activo),Near me (Active)
-assistant.step3_inactive,Activar Cerca de mí,Activate Near me
-assistant.step3_title,3. Localización,3. Location
-assistant.step4_title,4. Experiencia del grupo,4. Group experience
+admin_users.title,"Gestión de Usuarios","User Management"
+admin_users.username,"Nombre de usuario (@username)","Username (@username)"
+admin_users.username_placeholder,"usuario","username"
+app.subtitle,"Tu mapa personal y colaborativo de restaurantes y gastronomía","Your personal and collaborative food & restaurant map"
+app.title,"GastroMap","GastroMap"
+assistant.favorites_only,"Solo Mis Favoritos","Favorites only"
+assistant.friends,"Probado por amigos","Tried by friends"
+assistant.reset,"Restablecer filtros","Reset filters"
+assistant.step1_title,"1. Plan o Momento","1. Plan or Occasion"
+assistant.step2_hint,"* Los sitios sin precio asignado (???) se mostrarán siempre para no descartar opciones.","* Places without price (???) are always shown so you don't miss options."
+assistant.step2_title,"2. Rango de precio","2. Price range"
+assistant.step3_active,"Cerca de mí (Activo)","Near me (Active)"
+assistant.step3_inactive,"Activar Cerca de mí","Activate Near me"
+assistant.step3_title,"3. Localización","3. Location"
+assistant.step4_title,"4. Experiencia del grupo","4. Group experience"
 assistant.subtitle,"Filtra por plan, precio, distancia o novedades del grupo","Filter by plan, price, distance or group updates"
-assistant.title,Asistente: Encontrar un sitio,Assistant: Find a place
-assistant.untried,Sin estrenar (nuevo),Unexplored (new)
-assistant.view_results,Ver resultados,View results
-assistant.visited_by_me,Probado por mí,Tried by me
-auth.email,Correo electrónico,Email address
-auth.enter,Entrar,Log in
-auth.invalid_invite,La invitación no es válida o ha caducado.,The invitation is invalid or has expired.
-auth.invite_subtitle,Completa tu registro para unirte al mapa gastronómico,Complete your registration to join the foodie map
-auth.invite_title,¡Has sido invitado a GastroMap!,You have been invited to GastroMap!
-auth.loading,Accediendo...,Signing in...
-auth.login_subtitle,Accede a tu mapa gastronómico personal,Access your personal food map
-auth.login_title,Iniciar sesión,Sign in
-auth.password,Contraseña,Password
-auth.register_btn,Completar Registro,Complete Registration
-auth.registering,Registrando...,Registering...
-auth.setup_subtitle,Crea la cuenta del primer administrador para empezar,Create the first administrator account to get started
-auth.setup_title,Configuración Inicial de GastroMap,Initial GastroMap Setup
-cards.by_author,Por @{author},By @{author}
-cards.closed_perm,Cerrado,Closed
-cards.closed_temp,Cerrado temp.,Temp. closed
-cards.comments,Comentarios,Comments
-cards.compare,Comparar,Compare
-cards.friends_badge,De amigos,From friends
-cards.pending,Pendiente,Pending
-cards.private_badge,Privado,Private
-cards.private_note,Mi nota,My note
-cards.untried_badge,Sin estrenar,Unexplored
-cards.visited,Ya he ido,Visited
-cards.visited_badge,Ya he ido,Visited
-cards.visits,Visitas,Visits
-cards.want_to_go,Quiero ir,Want to go
-comments.cancel,Cancelar,Cancel
-comments.delete_confirm,¿Eliminar este comentario?,Delete this comment?
-comments.delete_title,Eliminar comentario,Delete comment
-comments.edit_placeholder,Edita tu comentario...,Edit your comment...
-comments.edit_title,Editar comentario,Edit comment
+assistant.title,"Asistente: Encontrar un sitio","Assistant: Find a place"
+assistant.untried,"Sin estrenar (nuevo)","Unexplored (new)"
+assistant.view_results,"Ver resultados","View results"
+assistant.visited_by_me,"Probado por mí","Tried by me"
+auth.email,"Correo electrónico","Email address"
+auth.enter,"Entrar","Log in"
+auth.invalid_invite,"La invitación no es válida o ha caducado.","The invitation is invalid or has expired."
+auth.invite_subtitle,"Completa tu registro para unirte al mapa gastronómico","Complete your registration to join the foodie map"
+auth.invite_title,"¡Has sido invitado a GastroMap!","You have been invited to GastroMap!"
+auth.loading,"Accediendo...","Signing in..."
+auth.login_subtitle,"Accede a tu mapa gastronómico personal","Access your personal food map"
+auth.login_title,"Iniciar sesión","Sign in"
+auth.password,"Contraseña","Password"
+auth.register_btn,"Completar Registro","Complete Registration"
+auth.registering,"Registrando...","Registering..."
+auth.setup_subtitle,"Crea la cuenta del primer administrador para empezar","Create the first administrator account to get started"
+auth.setup_title,"Configuración Inicial de GastroMap","Initial GastroMap Setup"
+cards.by_author,"Por @{author}","By @{author}"
+cards.closed_perm,"Cerrado","Closed"
+cards.closed_temp,"Cerrado temp.","Temp. closed"
+cards.comments,"Comentarios","Comments"
+cards.compare,"Comparar","Compare"
+cards.friends_badge,"De amigos","From friends"
+cards.pending,"Pendiente","Pending"
+cards.private_badge,"Privado","Private"
+cards.private_note,"Mi nota","My note"
+cards.untried_badge,"Sin estrenar","Unexplored"
+cards.visited,"Ya he ido","Visited"
+cards.visited_badge,"Ya he ido","Visited"
+cards.visits,"Visitas","Visits"
+cards.want_to_go,"Quiero ir","Want to go"
+comments.cancel,"Cancelar","Cancel"
+comments.delete_confirm,"¿Eliminar este comentario?","Delete this comment?"
+comments.delete_title,"Eliminar comentario","Delete comment"
+comments.edit_placeholder,"Edita tu comentario...","Edit your comment..."
+comments.edit_title,"Editar comentario","Edit comment"
 comments.empty,"Aún no hay comentarios. ¡Sé el primero en compartir qué pedir, reservas o consejos!","No comments yet. Be the first to share tips, must-try dishes or reservations!"
-comments.hide,Ocultar ✕,Hide ✕
+comments.hide,"Ocultar ✕","Hide ✕"
 comments.markdown_hint,"Usa **negrita**, *cursiva*, > citas o - viñetas","Use **bold**, *italic*, > quotes or - bullets"
 comments.placeholder,"Escribe una recomendación detallada (platos imprescindibles, consejos de reserva, ambiente...)","Write a detailed recommendation (must-try dishes, booking tips, vibe...)"
-comments.preview,Vista previa,Preview
-comments.preview_empty,Escribe algo para ver la vista previa con formato.,Type something to see formatted preview.
-comments.publish,Publicar comentario,Post comment
-comments.save,Guardar cambios,Save changes
-comments.saving,Guardando...,Saving...
-comments.title,Recomendaciones y comentarios,Recommendations & comments
-comments.write,Escribir,Write
-common.cancel,Cancelar,Cancel
-common.close,Cerrar,Close
-common.delete,Eliminar,Delete
-common.edit,Editar,Edit
-common.error,Ha ocurrido un error inesperado,An unexpected error occurred
-common.language,Idioma,Language
-common.loading,Cargando...,Loading...
-common.save,Guardar,Save
-common.success,Operación completada con éxito,Operation completed successfully
-compare.city,Ciudad,City
-compare.comments,Comentarios,Comments
-compare.distance,Distancia,Distance
-compare.empty,Selecciona al menos 2 sitios para comparar,Select at least 2 places to compare
-compare.experience,Experiencia,Experience
-compare.my_rating,Mi valoración,My rating
-compare.not_rated,Sin puntuar,Not rated
-compare.open_maps,Maps ↗,Maps ↗
-compare.price,Precio,Price
-compare.remove_title,Quitar de la comparativa,Remove from comparison
-compare.subtitle,Compara tus opciones lado a lado para decidir dónde ir,Compare your options side by side to decide where to go
-compare.title,Comparador de Establecimientos,Place Comparison
-compare.view_on_map,Ver en mapa,View on map
-export_import.community,Comunidad,Community
-export_import.csv_desc,Ideal para Excel / Google Sheets,Ideal for Excel / Google Sheets
-export_import.detected,Se detectaron {count} establecimientos listos para importar,{count} places ready to import were detected
-export_import.error_invalid_file,No se encontraron establecimientos válidos en el archivo.,No valid places found in file.
+comments.preview,"Vista previa","Preview"
+comments.preview_empty,"Escribe algo para ver la vista previa con formato.","Type something to see formatted preview."
+comments.publish,"Publicar comentario","Post comment"
+comments.save,"Guardar cambios","Save changes"
+comments.saving,"Guardando...","Saving..."
+comments.title,"Recomendaciones y comentarios","Recommendations & comments"
+comments.write,"Escribir","Write"
+common.active,"Activo","Active"
+common.cancel,"Cancelar","Cancel"
+common.close,"Cerrar","Close"
+common.collapse,"Ocultar","Collapse"
+common.copied,"¡Copiado!","Copied!"
+common.copy,"Copiar","Copy"
+common.delete,"Eliminar","Delete"
+common.edit,"Editar","Edit"
+common.error,"Ha ocurrido un error inesperado","An unexpected error occurred"
+common.expand,"Gestionar","Manage"
+common.inactive,"Inactivo","Inactive"
+common.language,"Idioma","Language"
+common.loading,"Cargando...","Loading..."
+common.manage,"Gestionar","Manage"
+common.save,"Guardar","Save"
+common.saving,"Guardando...","Saving..."
+common.search,"Buscar","Search"
+common.success,"Operación completada con éxito","Operation completed successfully"
+common.you,"TÚ","YOU"
+compare.city,"Ciudad","City"
+compare.comments,"Comentarios","Comments"
+compare.distance,"Distancia","Distance"
+compare.empty,"Selecciona al menos 2 sitios para comparar","Select at least 2 places to compare"
+compare.experience,"Experiencia","Experience"
+compare.my_rating,"Mi valoración","My rating"
+compare.not_rated,"Sin puntuar","Not rated"
+compare.open_maps,"Maps ↗","Maps ↗"
+compare.price,"Precio","Price"
+compare.remove_title,"Quitar de la comparativa","Remove from comparison"
+compare.subtitle,"Compara tus opciones lado a lado para decidir dónde ir","Compare your options side by side to decide where to go"
+compare.title,"Comparador de Establecimientos","Place Comparison"
+compare.view_on_map,"Ver en mapa","View on map"
+export_import.community,"Comunidad","Community"
+export_import.csv_desc,"Ideal para Excel / Google Sheets","Ideal for Excel / Google Sheets"
+export_import.detected,"Se detectaron {count} establecimientos listos para importar","{count} places ready to import were detected"
+export_import.error_invalid_file,"No se encontraron establecimientos válidos en el archivo.","No valid places found in file."
 export_import.error_read,"Error al leer el archivo. Comprueba que es un JSON, GeoJSON o CSV válido.","Error reading file. Verify it is a valid JSON, GeoJSON or CSV."
-export_import.export_desc,Descarga los establecimientos visibles en tu catálogo actual en el formato que necesites:,Download visible places in your current catalog in the format you need:
-export_import.geojson_desc,Puntos geoespaciales estándar,Standard geospatial points
+export_import.export_desc,"Descarga los establecimientos visibles en tu catálogo actual en el formato que necesites:","Download visible places in your current catalog in the format you need:"
+export_import.geojson_desc,"Puntos geoespaciales estándar","Standard geospatial points"
 export_import.gpx_desc,"GPS, Garmin, Komoot, OsmAnd","GPS, Garmin, Komoot, OsmAnd"
-export_import.import_btn,Importar {count} establecimientos,Import {count} places
+export_import.import_btn,"Importar {count} establecimientos","Import {count} places"
 export_import.import_desc,"Sube un archivo .json, .geojson, .csv, .kml o .gpx","Upload a .json, .geojson, .csv, .kml or .gpx file"
-export_import.importing,Importando...,Importing...
-export_import.json_desc,Copia completa con tags y planes,Complete backup with tags and occasions
-export_import.kml_desc,Google Earth / Google My Maps,Google Earth / Google My Maps
-export_import.private,Privado,Private
+export_import.importing,"Importando...","Importing..."
+export_import.json_desc,"Copia completa con tags y planes","Complete backup with tags and occasions"
+export_import.kml_desc,"Google Earth / Google My Maps","Google Earth / Google My Maps"
+export_import.private,"Privado","Private"
 export_import.select_file,"Seleccionar archivo (.json, .geojson, .csv, .kml, .gpx)","Select file (.json, .geojson, .csv, .kml, .gpx)"
 export_import.subtitle,"JSON, CSV, GeoJSON, KML, GPX y Google Takeout","JSON, CSV, GeoJSON, KML, GPX and Google Takeout"
-export_import.success_msg,¡Importación completada! {count} sitios añadidos.,Import completed! {count} places added.
-export_import.tab_export,Exportar,Export
-export_import.tab_import,Importar,Import
-export_import.title,Importar / Exportar Catálogo,Import / Export Catalog
-form.duplicate_dismiss,Es distinto ✕,It's different ✕
-form.duplicate_multiple,Hemos encontrado {count} sitios parecidos en el catálogo,We found {count} similar places in the catalog
-form.duplicate_single,Ya existe un sitio muy parecido en el catálogo,A very similar place already exists in the catalog
-form.duplicate_view_catalog,Ver catálogo,View catalog
-form.edit_status,Estado del establecimiento,Place status
-form.edit_title,Editar establecimiento,Edit place
-form.import_button,Leer datos ⚡,Read data ⚡
+export_import.success_msg,"¡Importación completada! {count} sitios añadidos.","Import completed! {count} places added."
+export_import.tab_export,"Exportar","Export"
+export_import.tab_import,"Importar","Import"
+export_import.title,"Importar / Exportar Catálogo","Import / Export Catalog"
+form.duplicate_dismiss,"Es distinto ✕","It's different ✕"
+form.duplicate_multiple,"Hemos encontrado {count} sitios parecidos en el catálogo","We found {count} similar places in the catalog"
+form.duplicate_single,"Ya existe un sitio muy parecido en el catálogo","A very similar place already exists in the catalog"
+form.duplicate_view_catalog,"Ver catálogo","View catalog"
+form.edit_status,"Estado del establecimiento","Place status"
+form.edit_title,"Editar establecimiento","Edit place"
+form.import_button,"Leer datos ⚡","Read data ⚡"
 form.import_hint,"Detectamos el nombre, coordenadas y dirección al pegar enlaces de Google Maps.","We detect the name, coordinates, and address when pasting Google Maps links."
-form.import_label,Autocompletar pegando enlace de Google Maps,Autocomplete by pasting a Google Maps link
-form.import_nothing,No se encontraron datos automáticos en la URL introducida.,No automatic data found in the provided URL.
-form.import_placeholder,https://maps.app.goo.gl/... o pega enlace compartido,https://maps.app.goo.gl/... or paste shared link
-form.import_reading,Leyendo enlace...,Reading link...
-form.location_address_label,Dirección o calle,Address or street
+form.import_label,"Autocompletar pegando enlace de Google Maps","Autocomplete by pasting a Google Maps link"
+form.import_nothing,"No se encontraron datos automáticos en la URL introducida.","No automatic data found in the provided URL."
+form.import_placeholder,"https://maps.app.goo.gl/... o pega enlace compartido","https://maps.app.goo.gl/... or paste shared link"
+form.import_reading,"Leyendo enlace...","Reading link..."
+form.location_address_label,"Dirección o calle","Address or street"
 form.location_address_placeholder,"Ej. Calle Mayor, 12","E.g. Main Street, 12"
-form.location_city_label,Ciudad o Municipio,City or Town
+form.location_city_label,"Ciudad o Municipio","City or Town"
 form.location_city_placeholder,"Ej. Madrid, Granada, Valencia...","E.g. Madrid, New York, London..."
 form.location_coords_label,"Coordenadas geográficas (Lat, Lng)","Geographic coordinates (Lat, Lng)"
-form.location_found,Ubicación encontrada,Location found
-form.location_search_btn,🔍 Buscar coordenadas en callejero,🔍 Search coordinates
-form.name_label,Nombre del sitio *,Place name *
+form.location_found,"Ubicación encontrada","Location found"
+form.location_search_btn,"🔍 Buscar coordenadas en callejero","🔍 Search coordinates"
+form.name_label,"Nombre del sitio *","Place name *"
 form.name_placeholder,"Ej. Casa Paco, Restaurante El Mirador...","E.g. The Grill House, Sakura Sushi..."
-form.notes_label,Notas / Recomendación,Notes / Recommendation
-form.notes_placeholder,Ej. Pedir la tarta de queso. Reservar con antelación...,E.g. Must try the cheesecake. Book in advance...
-form.occasions_label,¿Para qué plan es? (Puedes marcar varios),What plan is this for? (You can choose multiple)
-form.phone_label,Teléfono de contacto,Phone number
-form.price_label,Presupuesto aproximado,Approximate budget
-form.save_button,Guardar Sitio,Save Place
-form.save_changes,Guardar cambios,Save changes
-form.saving_button,Guardando...,Saving...
-form.share_groups_title,👥 Compartir con grupos privados (opcional):,👥 Share with private groups (optional):
-form.status_active,Activo,Active
-form.status_perm_closed,Cerrado perm.,Permanently closed
-form.status_temp_closed,Cerrado temp.,Temp. closed
-form.tags_label,Etiquetas,Tags
+form.notes_label,"Notas / Recomendación","Notes / Recommendation"
+form.notes_placeholder,"Ej. Pedir la tarta de queso. Reservar con antelación...","E.g. Must try the cheesecake. Book in advance..."
+form.occasions_label,"¿Para qué plan es? (Puedes marcar varios)","What plan is this for? (You can choose multiple)"
+form.phone_label,"Teléfono de contacto","Phone number"
+form.price_label,"Presupuesto aproximado","Approximate budget"
+form.save_button,"Guardar Sitio","Save Place"
+form.save_changes,"Guardar cambios","Save changes"
+form.saving_button,"Guardando...","Saving..."
+form.share_groups_title,"👥 Compartir con grupos privados (opcional):","👥 Share with private groups (optional):"
+form.status_active,"Activo","Active"
+form.status_perm_closed,"Cerrado perm.","Permanently closed"
+form.status_temp_closed,"Cerrado temp.","Temp. closed"
+form.tags_label,"Etiquetas","Tags"
 form.tags_placeholder,"Añadir etiqueta (ej. terraza, cócteles, postres caseros...)","Add tag (e.g. terrace, cocktails, homemade desserts...)"
-form.visibility_community,Comunidad (Todos),Community (Everyone)
-form.visibility_label,Visibilidad de la ficha,Place visibility
-form.visibility_private,Privado (Solo yo / Grupos),Private (Only me / Groups)
-form.website_label,Página web oficial,Official website
-groups.copied,¡Enlace copiado al portapapeles!,Invite link copied to clipboard!
-groups.copy_link,Copiar enlace,Copy link
-groups.create,Crear nuevo grupo,Create new group
-groups.delete,Eliminar grupo,Delete group
-groups.desc,Descripción (opcional),Description (optional)
-groups.expires,Caducidad,Expiration
-groups.expires_days,{days} días,{days} days
-groups.generate_link,Generar enlace de invitación,Generate invite link
-groups.invite_link,Enlace de invitación,Invite link
-groups.join_accept,Aceptar y unirme al grupo,Accept & join group
-groups.join_already_member,Ya formas parte del grupo «{name}».,"You are already a member of ""{name}""."
-groups.join_go_to_map,Ir al mapa principal,Go to main map
-groups.join_invalid,Invitación no válida o expirada,Invalid or expired invitation
-groups.join_invited_by,{owner} te ha invitado a unirte a:,{owner} has invited you to join:
-groups.join_joining,Uniéndote al grupo...,Joining group...
-groups.join_reject,Rechazar y volver al mapa,Decline and return to map
-groups.join_title,Invitación a Grupo Privado,Private Group Invitation
-groups.leave,Salir del grupo,Leave group
-groups.max_uses,Límite de usos,Max uses
-groups.members,Miembros,Members
-groups.name,Nombre del grupo,Group name
-groups.never_expires,No caduca,Never expires
-groups.title,Mis grupos privados,My private groups
-groups.unlimited,Sin límite,Unlimited
-invites.copied,¡Copiado!,Copied!
-invites.copy_link,Copiar enlace,Copy link
-invites.empty,No hay invitaciones activas.,No active invitations.
-invites.expired,Caducada,Expired
-invites.expires_in,Caducidad,Expires in
-invites.generate_btn,Generar Nueva Invitación,Generate New Invitation
-invites.generating,Generando...,Generating...
-invites.max_uses,Usos máximos,Max uses
-invites.pending,Pendiente,Pending
-invites.revoke,Revocar,Revoke
-invites.subtitle,Genera enlaces mágicos de invitación para que otros usuarios se registren,Generate magic invitation links for new users to register
-invites.title,Invitaciones al Sistema,System Invitations
-invites.used,Usada por,Used by
+form.visibility_community,"Comunidad (Todos)","Community (Everyone)"
+form.visibility_label,"Visibilidad de la ficha","Place visibility"
+form.visibility_private,"Privado (Solo yo / Grupos)","Private (Only me / Groups)"
+form.website_label,"Página web oficial","Official website"
+groups.copied,"¡Enlace copiado al portapapeles!","Invite link copied to clipboard!"
+groups.copied_btn,"✓ ¡Copiado!","✓ Copied!"
+groups.copy_btn,"Copiar","Copy"
+groups.copy_link,"Copiar enlace","Copy link"
+groups.create,"Crear nuevo grupo","Create new group"
+groups.delete,"Eliminar grupo","Delete group"
+groups.delete_group,"Eliminar grupo","Delete group"
+groups.desc,"Descripción (opcional)","Description (optional)"
+groups.empty_desc,"Crea uno arriba y genera un enlace de invitación para compartir recomendaciones solo con quien tú elijas.","Create one above and generate an invitation link to share recommendations only with people you choose."
+groups.empty_title,"Aún no tienes ningún grupo privado","You don""t have any private groups yet"
+groups.expires,"Caducidad","Expiration"
+groups.expires_days,"{days} días","{days} days"
+groups.expires_prefix,"Expira:","Expires:"
+groups.generate_link,"Generar enlace de invitación","Generate invite link"
+groups.invite_copied_banner,"¡Enlace de invitación generado y copiado al portapapeles! Ya puedes compartirlo.","Invitation link generated and copied to clipboard! You can now share it."
+groups.invite_link,"Enlace de invitación","Invite link"
+groups.invite_links_title,"Enlaces de invitación","Invitation links"
+groups.join_accept,"Aceptar y unirme al grupo","Accept & join group"
+groups.join_already_member,"Ya formas parte del grupo «{name}».","You are already a member of ""{name}""."
+groups.join_go_to_map,"Ir al mapa principal","Go to main map"
+groups.join_invalid,"Invitación no válida o expirada","Invalid or expired invitation"
+groups.join_invited_by,"{owner} te ha invitado a unirte a:","{owner} has invited you to join:"
+groups.join_joining,"Uniéndote al grupo...","Joining group..."
+groups.join_reject,"Rechazar y volver al mapa","Decline and return to map"
+groups.join_title,"Invitación a Grupo Privado","Private Group Invitation"
+groups.kick_member,"Expulsar del grupo","Remove from group"
+groups.leave,"Salir del grupo","Leave group"
+groups.leave_group,"Abandonar","Leave"
+groups.loading,"Cargando grupos...","Loading groups..."
+groups.max_uses,"Límite de usos","Max uses"
+groups.members,"Miembros","Members"
+groups.members_label,"MIEMBROS ({count}):","MEMBERS ({count}):"
+groups.name,"Nombre del grupo","Group name"
+groups.never_expires,"No caduca","Never expires"
+groups.new_link_btn,"+ Nuevo enlace","+ New link"
+groups.no_active_links,"No hay enlaces activos. Pulsa «+ Nuevo enlace» para invitar personas.","No active links. Click ""+ New link"" to invite people."
+groups.owner_badge,"Creador","Owner"
+groups.owner_star,"Propietario","Owner"
+groups.rename_group,"Renombrar grupo","Rename group"
+groups.revoke_link,"Revocar enlace","Revoke link"
+groups.title,"Mis grupos privados","My private groups"
+groups.unlimited,"Sin límite","Unlimited"
+groups.uses_prefix,"Usos:","Uses:"
+groups.yourself,"ti mismo","yourself"
+invites.active_badge,"ACTIVA 🟢","ACTIVE 🟢"
+invites.confirm_delete_expired,"¿Eliminar esta invitación caducada?","Delete this expired invitation?"
+invites.confirm_delete_used,"¿Eliminar este registro de invitación ya utilizada?","Delete this already used invitation record?"
+invites.confirm_revoke_active,"¿Revocar y eliminar esta invitación activa antes de su vencimiento? El enlace dejará de ser válido inmediatamente.","Revoke and delete this active invitation before its expiration? The link will become invalid immediately."
+invites.copied,"¡Copiado!","Copied!"
+invites.copied_btn,"✓ ¡Copiado!","✓ Copied!"
+invites.copy_link,"Copiar enlace","Copy link"
+invites.copy_link_btn,"📋 Copiar enlace","📋 Copy link"
+invites.copy_prompt,"Copia el enlace de invitación:","Copy invitation link:"
+invites.created_by_info,"Creada por @{user} el {date}","Created by @{user} on {date}"
+invites.delete_btn,"Eliminar","Delete"
+invites.delete_success,"Invitación eliminada correctamente.","Invitation deleted successfully."
+invites.deleting,"Eliminando...","Deleting..."
+invites.email_label,"Email del invitado (opcional, déjalo vacío para enlace libre reutilizable)","Guest email (optional, leave blank for free reusable link)"
+invites.email_placeholder,"amigo@email.com (o vacío para cualquiera con el enlace)","friend@email.com (or empty for anyone with link)"
+invites.empty,"No hay invitaciones activas.","No active invitations."
+invites.expired,"Caducada","Expired"
+invites.expired_badge,"CADUCADA ⏳","EXPIRED ⏳"
+invites.expired_on,"Caducó el {date}","Expired on {date}"
+invites.expires_in,"Caducidad","Expires in"
+invites.expires_on,"Vence el {date}","Expires on {date}"
+invites.generate_btn,"Generar Nueva Invitación","Generate New Invitation"
+invites.generate_success,"¡Enlace de invitación generado con éxito!","Invitation link generated successfully!"
+invites.generating,"Generando...","Generating..."
+invites.generating_btn,"Generando invitación...","Generating invitation..."
+invites.link_ready,"¡Enlace generado listo para compartir!","Link generated ready to share!"
+invites.loading_invites,"Cargando invitaciones...","Loading invitations..."
+invites.max_uses,"Usos máximos","Max uses"
+invites.new_invite_title,"NUEVA INVITACIÓN","NEW INVITATION"
+invites.no_invites,"No hay ninguna invitación registrada actualmente. Pulsa «➕ Crear nueva invitación» para generar la primera.","No invitations registered currently. Click ""➕ Generate New Invitation"" to create the first one."
+invites.open_link,"🌐 Enlace abierto","🌐 Open link"
+invites.pending,"Pendiente","Pending"
+invites.refresh,"🔄 Refrescar","🔄 Refresh"
+invites.refreshing,"Actualizando...","Refreshing..."
+invites.registered_links,"Enlaces de invitación registrados","Registered invitation links"
+invites.revoke,"Revocar","Revoke"
+invites.revoke_btn,"Revocar","Revoke"
+invites.role_admin,"Administrador","Administrator"
+invites.role_granted,"Rol otorgado","Role granted"
+invites.role_standard_user,"Usuario estándar","Standard user"
+invites.submit_btn,"Generar enlace de invitación","Generate invitation link"
+invites.subtitle,"Genera enlaces mágicos de invitación para que otros usuarios se registren","Generate magic invitation links for new users to register"
+invites.title,"Invitaciones al Sistema","System Invitations"
+invites.used,"Usada por","Used by"
+invites.used_badge,"UTILIZADA ✓","USED ✓"
+invites.used_on,"Usada el {date}","Used on {date}"
+invites.validity_time,"Tiempo de validez (días hasta caducidad)","Validity time (days until expiration)"
 location.address_label,"Dirección / Calle o Barrio (ej. Shibuya, Trastevere, Calle Navas...)","Address / Street or Area (e.g. Shibuya, Trastevere, Main St...)"
 location.address_placeholder,"Ej. Calle Navas 28, Times Square...","E.g. 28 Navas St, Times Square..."
-location.any_country,🌍 Cualquier país,🌍 Any country
-location.city_label,Ciudad / Población / País,City / Town / Country
+location.any_country,"🌍 Cualquier país","🌍 Any country"
+location.city_label,"Ciudad / Población / País","City / Town / Country"
 location.city_placeholder,"Ej. Tokio, Roma, Nueva York, Granada, París...","E.g. Tokyo, Rome, New York, London, Paris..."
 location.coords_label,"Coordenadas: {lat}, {lng}","Coordinates: {lat}, {lng}"
-location.municipality_label,Municipio,Municipality
-location.province_label,Provincia,Province
+location.municipality_label,"Municipio","Municipality"
+location.province_label,"Provincia","Province"
 location.search_placeholder,"🔎 Buscar calle, barrio, restaurante o ciudad del mundo...","🔎 Search street, neighborhood, restaurant or city..."
-location.spain_ine,🇪🇸 España (INE),🇪🇸 Spain (INE)
-location.title,Localización y Coordenadas,Location & Coordinates
-nav.admin,Administración,Admin
-nav.docs,Docs,Docs
-nav.documentation,Documentación,Documentation
-nav.donate,Donar,Donate
-nav.donate_paypal,Donar con PayPal,Donate with PayPal
-nav.groups,Grupos,Groups
-nav.logout,Cerrar sesión,Log out
-nav.my_groups,Mis grupos privados,My private groups
-nav.my_stats,Mis estadísticas y Wrapped,My statistics & Wrapped
-nav.profile,Editar mi perfil,Edit profile
-nav.stats,Stats,Stats
-nav.theme_dark,Oscuro,Dark
-nav.theme_light,Claro,Light
-notes_visits.no_rating,Sin nota,No rating
-notes_visits.no_visits,Aún no has registrado ninguna visita a este sitio.,You haven't logged any visits to this place yet.
-notes_visits.personal_notes_hint,Solo tú puedes ver esta nota y puntuación.,Only you can see this note and rating.
-notes_visits.personal_notes_title,Notas privadas y valoración,Private notes & rating
-notes_visits.rating_label,Puntuación (1 a 10),Rating (1 to 10)
-notes_visits.register_visit,Registrar nueva visita,Log new visit
-notes_visits.visit_date,Fecha de la visita,Visit date
-notes_visits.visit_notes,Comentarios de la visita,Visit comments
-notes_visits.visits_title,Mis visitas registradas,My recorded visits
-pagination.of,de,of
-pagination.places,sitios,places
-pagination.records,registros,records
-pagination.showing,Mostrando,Showing
-pagination.users,usuarios,users
-pagination.view,Ver:,Show:
-places.add_new,Añadir sitio,Add place
-places.all,Todos,All
-places.all_plans,Todos los planes,All plans
-places.assistant,Asistente,Assistant
-places.delete_confirm,¿Seguro que quieres eliminar este sitio?,Are you sure you want to delete this place?
-places.export_import,Importar / Exportar,Import / Export
-places.favorites,Favoritos,Favorites
-places.friends,De amigos,From friends
-places.get_directions,🗺️ Cómo llegar,🗺️ Directions
-places.groups_filter,Grupos,Groups
-places.jump_to_list,↓ Bajar a la lista,↓ Jump to list
-places.locale_single,sitio,place
-places.locales_count,sitios,places
-places.lock_map,📜 Deslizar lista,📜 Scroll list
-places.near_me,Cerca de mí,Near me
-places.next,Siguiente ▶,Next ▶
-places.no_results,No se encontraron sitios con estos filtros.,No places found matching these filters.
-places.page_of,Pág. {current} de {total},Page {current} of {total}
-places.plans_title,PLANES / CATEGORÍAS,PLANS / CATEGORIES
-places.previous,◀ Anterior,◀ Previous
-places.private_group_badge,Grupo,Group
-places.reset_filters,Restablecer todos los filtros,Reset all filters
-places.roulette,Ruleta,Roulette
+location.spain_ine,"🇪🇸 España (INE)","🇪🇸 Spain (INE)"
+location.title,"Localización y Coordenadas","Location & Coordinates"
+nav.admin,"Administración","Admin"
+nav.docs,"Docs","Docs"
+nav.documentation,"Documentación","Documentation"
+nav.donate,"Donar","Donate"
+nav.donate_paypal,"Donar con PayPal","Donate with PayPal"
+nav.groups,"Grupos","Groups"
+nav.logout,"Cerrar sesión","Log out"
+nav.my_groups,"Mis grupos privados","My private groups"
+nav.my_stats,"Mis estadísticas y Wrapped","My statistics & Wrapped"
+nav.profile,"Editar mi perfil","Edit profile"
+nav.stats,"Stats","Stats"
+nav.theme_dark,"Oscuro","Dark"
+nav.theme_light,"Claro","Light"
+notes_visits.no_rating,"Sin nota","No rating"
+notes_visits.no_visits,"Aún no has registrado ninguna visita a este sitio.","You haven't logged any visits to this place yet."
+notes_visits.personal_notes_hint,"Solo tú puedes ver esta nota y puntuación.","Only you can see this note and rating."
+notes_visits.personal_notes_title,"Notas privadas y valoración","Private notes & rating"
+notes_visits.rating_label,"Puntuación (1 a 10)","Rating (1 to 10)"
+notes_visits.register_visit,"Registrar nueva visita","Log new visit"
+notes_visits.visit_date,"Fecha de la visita","Visit date"
+notes_visits.visit_notes,"Comentarios de la visita","Visit comments"
+notes_visits.visits_title,"Mis visitas registradas","My recorded visits"
+pagination.of,"de","of"
+pagination.places,"sitios","places"
+pagination.records,"registros","records"
+pagination.showing,"Mostrando","Showing"
+pagination.users,"usuarios","users"
+pagination.view,"Ver:","Show:"
+places.add_new,"Añadir sitio","Add place"
+places.all,"Todos","All"
+places.all_plans,"Todos los planes","All plans"
+places.assistant,"Asistente","Assistant"
+places.clear_filter,"Limpiar","Clear"
+places.delete_confirm,"¿Seguro que quieres eliminar este sitio?","Are you sure you want to delete this place?"
+places.export_import,"Importar / Exportar","Import / Export"
+places.favorites,"Favoritos","Favorites"
+places.filter_by_group,"Filtrar por grupo privado:","Filter by private group:"
+places.friends,"De amigos","From friends"
+places.get_directions,"🗺️ Cómo llegar","🗺️ Directions"
+places.grid_mode,"⊞ Cuadrícula","⊞ Grid"
+places.group_count_multiple,"{count} grupos","{count} groups"
+places.group_count_single,"1 grupo","1 group"
+places.groups_filter,"Grupos","Groups"
+places.hide_search,"▲ Ocultar buscador","▲ Hide search"
+places.jump_to_list,"↓ Bajar a la lista","↓ Jump to list"
+places.locale_single,"sitio","place"
+places.locales_count,"sitios","places"
+places.lock_map,"📜 Deslizar lista","📜 Scroll list"
+places.near_me,"Cerca de mí","Near me"
+places.next,"Siguiente ▶","Next ▶"
+places.no_results,"No se encontraron sitios con estos filtros.","No places found matching these filters."
+places.no_tags_found,"No se encontró ninguna etiqueta con «{query}».","No tags found matching ""{query}""."
+places.page_of,"Pág. {current} de {total}","Page {current} of {total}"
+places.plans_title,"PLANES / CATEGORÍAS","PLANS / CATEGORIES"
+places.previous,"◀ Anterior","◀ Previous"
+places.private_group_badge,"Grupo","Group"
+places.remove_filter_multiple,"✕ Quitar filtros ({count})","✕ Remove filters ({count})"
+places.remove_filter_single,"✕ Quitar filtro","✕ Remove filter"
+places.reset_filters,"Restablecer todos los filtros","Reset all filters"
+places.roulette,"Ruleta","Roulette"
+places.row_mode,"↔ Modo fila","↔ Row mode"
+places.search_categories_btn,"Buscar","Search"
+places.search_categories_title,"Buscar categorías","Search categories"
+places.search_occasions_placeholder,"Buscar categoría o plan (ej. tapear, brunch, terraza...)","Search category or plan (e.g. tapas, brunch, terrace...)"
 places.search_placeholder,"Buscar restaurante, plato, ciudad (Roma, Tokio, Granada...)","Search restaurant, dish, city (Rome, Tokyo, Granada...)"
-places.show_less,▲ Ver menos,▲ Show less
-places.show_more,+ Mostrar más,+ Show more
-places.sort_alphabetical,Alfabético,Alphabetical
-places.sort_by,Ordenar por,Sort by
-places.sort_distance,Más cercanos,Nearest
-places.sort_price_asc,Más económicos,Price: low to high
-places.sort_price_desc,Más exclusivos,Price: high to low
-places.sort_rating,Mejor valorados,Top rated
-places.sort_recent,Recientes,Recent
-places.tags_search,Buscar / Mostrar más,Search / Show more
-places.tags_title,ETIQUETAS,TAGS
-places.undo,Deshacer,Undo
-places.unexplored,Sin estrenar,Unexplored
-places.unlock_map,🖐️ Mover mapa,🖐️ Pan map
-places.view_details,Ver ficha completa →,Full details →
-places.view_list,Lista,List
-places.view_map,Mapa,Map
-places.visited,Ya he ido,Visited
-places.want_to_go,Quiero ir,Want to go
-profile.change_password,Cambiar contraseña (opcional),Change password (optional)
-profile.confirm_password,Confirmar nueva contraseña,Confirm new password
-profile.current_password,Contraseña actual,Current password
-profile.email_label,Correo electrónico,Email address
-profile.name_label,Nombre completo,Full name
-profile.new_password,Nueva contraseña,New password
-profile.new_password_hint,Mínimo 6 caracteres,Minimum 6 characters
-profile.subtitle,Modifica tus datos de acceso o nombre de usuario,Update your account details or username
-profile.success,¡Perfil actualizado correctamente!,Profile updated successfully!
-profile.title,Editar mi perfil,Edit my profile
-profile.username_hint,Es el identificador público con el que firmarás tus sitios y comentarios.,The public handle used to sign your places and comments.
-profile.username_label,Nombre de usuario (@),Username (@)
-random.free_price,Precio libre,Any price
-random.no_places,No hay sitios que coincidan.,No places match your filters.
-random.open_maps,Abrir en Maps ↗,Open in Maps ↗
-random.spin_button,🔄 Volver a tirar,🔄 Spin again
-random.spinning,Girando la ruleta... 🌀,Spinning the wheel... 🌀
-random.subtitle,Elección al azar entre los {count} sitios de tus filtros,Random pick among {count} filtered places
-random.title,¿Dónde vamos hoy?,Where are we going today?
-random.view_on_map,Ver en mapa 🗺️,View on map 🗺️
-stats.overview_tab,📊 Resumen,📊 Overview
-stats.price_distribution,Distribución por precio,Price distribution
-stats.ratings_avg,Puntuación media personal,Personal average rating
-stats.subtitle,Resumen detallado de tu actividad gastronómica,Detailed summary of your foodie activity
-stats.title,Mis estadísticas,My statistics
-stats.top_cities,Ciudades más frecuentes,Top cities
-stats.top_occasions,Planes y categorías más usadas,Top plans and categories
-stats.top_tags,Etiquetas más recurrentes,Top tags
-stats.total_favorites,Sitios favoritos,Favorite places
-stats.total_pending,Quiero ir,Want to go
-stats.total_places,Total sitios guardados,Total places saved
-stats.total_visited,Sitios visitados,Places visited
-stats.wrapped_tab,🎁 Wrapped {year},🎁 Wrapped {year}
-theme.dark,Oscuro,Dark
-theme.light,Claro,Light
-theme.switch_to_dark,Cambiar a modo oscuro,Switch to dark mode
-theme.switch_to_light,Cambiar a modo claro,Switch to light mode
-theme.toggle_aria,Cambiar tema de color,Toggle color theme
+places.search_show_more,"🔍 Buscar / Mostrar más","🔍 Search / Show more"
+places.search_tags_placeholder,"Buscar entre las etiquetas más usadas...","Search among most popular tags..."
+places.show_less,"▲ Ver menos","▲ Show less"
+places.show_more,"+ Mostrar más","+ Show more"
+places.show_more_count,"+ Mostrar más ({count})","+ Show more ({count})"
+places.show_more_remaining,"+ Mostrar más ({count} restantes)","+ Show more ({count} remaining)"
+places.showing_all_categories,"Mostrando todas las categorías","Showing all categories"
+places.showing_all_tags,"Mostrando todas las etiquetas","Showing all tags"
+places.sort_alphabetical,"Alfabético","Alphabetical"
+places.sort_by,"Ordenar por","Sort by"
+places.sort_distance,"Más cercanos","Nearest"
+places.sort_price_asc,"Más económicos","Price: low to high"
+places.sort_price_desc,"Más exclusivos","Price: high to low"
+places.sort_rating,"Mejor valorados","Top rated"
+places.sort_recent,"Recientes","Recent"
+places.tags_search,"Buscar / Mostrar más","Search / Show more"
+places.tags_title,"ETIQUETAS","TAGS"
+places.undo,"Deshacer","Undo"
+places.unexplored,"Sin estrenar","Unexplored"
+places.unlock_map,"🖐️ Mover mapa","🖐️ Pan map"
+places.view_details,"Ver ficha completa →","Full details →"
+places.view_list,"Lista","List"
+places.view_map,"Mapa","Map"
+places.visited,"Ya he ido","Visited"
+places.want_to_go,"Quiero ir","Want to go"
+profile.change_password,"Cambiar contraseña (opcional)","Change password (optional)"
+profile.confirm_password,"Confirmar nueva contraseña","Confirm new password"
+profile.current_password,"Contraseña actual","Current password"
+profile.email_label,"Correo electrónico","Email address"
+profile.name_label,"Nombre completo","Full name"
+profile.new_password,"Nueva contraseña","New password"
+profile.new_password_hint,"Mínimo 6 caracteres","Minimum 6 characters"
+profile.subtitle,"Modifica tus datos de acceso o nombre de usuario","Update your account details or username"
+profile.success,"¡Perfil actualizado correctamente!","Profile updated successfully!"
+profile.title,"Editar mi perfil","Edit my profile"
+profile.username_hint,"Es el identificador público con el que firmarás tus sitios y comentarios.","The public handle used to sign your places and comments."
+profile.username_label,"Nombre de usuario (@)","Username (@)"
+random.free_price,"Precio libre","Any price"
+random.no_places,"No hay sitios que coincidan.","No places match your filters."
+random.open_maps,"Abrir en Maps ↗","Open in Maps ↗"
+random.spin_button,"🔄 Volver a tirar","🔄 Spin again"
+random.spinning,"Girando la ruleta... 🌀","Spinning the wheel... 🌀"
+random.subtitle,"Elección al azar entre los {count} sitios de tus filtros","Random pick among {count} filtered places"
+random.title,"¿Dónde vamos hoy?","Where are we going today?"
+random.view_on_map,"Ver en mapa 🗺️","View on map 🗺️"
+stats.overview_tab,"📊 Resumen","📊 Overview"
+stats.price_distribution,"Distribución por precio","Price distribution"
+stats.ratings_avg,"Puntuación media personal","Personal average rating"
+stats.subtitle,"Resumen detallado de tu actividad gastronómica","Detailed summary of your foodie activity"
+stats.title,"Mis estadísticas","My statistics"
+stats.top_cities,"Ciudades más frecuentes","Top cities"
+stats.top_occasions,"Planes y categorías más usadas","Top plans and categories"
+stats.top_tags,"Etiquetas más recurrentes","Top tags"
+stats.total_favorites,"Sitios favoritos","Favorite places"
+stats.total_pending,"Quiero ir","Want to go"
+stats.total_places,"Total sitios guardados","Total places saved"
+stats.total_visited,"Sitios visitados","Places visited"
+stats.wrapped_tab,"🎁 Wrapped {year}","🎁 Wrapped {year}"
+theme.dark,"Oscuro","Dark"
+theme.light,"Claro","Light"
+theme.switch_to_dark,"Cambiar a modo oscuro","Switch to dark mode"
+theme.switch_to_light,"Cambiar a modo claro","Switch to light mode"
+theme.toggle_aria,"Cambiar tema de color","Toggle color theme"

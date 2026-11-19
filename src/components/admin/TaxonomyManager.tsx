@@ -461,7 +461,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     type="text"
                     value={occasionSearch}
                     onChange={(e) => setOccasionSearch(e.target.value)}
-                    placeholder="🔍 Buscar categoría por nombre o id..."
+                    placeholder={t("admin_taxonomy.search_occasions")}
                     className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                   <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
@@ -489,14 +489,9 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                         ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 cursor-pointer"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
                     }`}
-                    title={
-                      emptyOccasions.length > 0
-                        ? `Eliminar las ${emptyOccasions.length} categorías sin locales asociados`
-                        : "No hay categorías vacías"
-                    }
                   >
                     <span>🧹</span>
-                    <span>Eliminar vacías ({emptyOccasions.length})</span>
+                    <span>{t("admin_taxonomy.delete_empty", { count: String(emptyOccasions.length) })}</span>
                   </button>
 
                   {/* Botón eliminar seleccionadas */}
@@ -507,7 +502,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                       className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span>🗑️</span>
-                      <span>Eliminar ({selectedOccasionIds.size})</span>
+                      <span>{t("admin_taxonomy.delete_selected", { count: String(selectedOccasionIds.size) })}</span>
                     </button>
                   )}
                 </div>
@@ -526,11 +521,11 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                       onChange={toggleAllVisibleOccasions}
                       className="w-3.5 h-3.5 rounded text-amber-500 focus:ring-0 cursor-pointer"
                     />
-                    <span>Seleccionar todas visibles ({filteredOccasions.length})</span>
+                    <span>{t("admin_taxonomy.select_all_visible", { count: String(filteredOccasions.length) })}</span>
                   </label>
                   {selectedOccasionIds.size > 0 && (
                     <span className="font-semibold text-amber-600 dark:text-amber-400">
-                      {selectedOccasionIds.size} seleccionada{selectedOccasionIds.size > 1 ? "s" : ""}
+                      {selectedOccasionIds.size}
                     </span>
                   )}
                 </div>
@@ -540,7 +535,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
               <div className="space-y-2">
                 {paginatedOccasions.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">
-                    No se encontró ninguna categoría con ese criterio.
+                    {t("admin_taxonomy.no_categories_found")}
                   </p>
                 ) : (
                   paginatedOccasions.map((occ) => {
@@ -569,11 +564,11 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               {occ.name}
                             </span>
                             <span className="ml-2 text-[11px] text-slate-400">
-                              ({occ.placesCount} {occ.placesCount === 1 ? "sitio" : "sitios"})
+                              ({occ.placesCount} {occ.placesCount === 1 ? t("places.locale_single") : t("places.locales_count")})
                             </span>
                             {isEmpty && (
                               <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                vacía
+                                {t("admin_taxonomy.empty_badge")}
                               </span>
                             )}
                           </div>
@@ -590,7 +585,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               })
                             }
                             className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] hover:bg-slate-300 transition cursor-pointer"
-                            title="Renombrar"
+                            title={t("common.edit")}
                           >
                             ✏️
                           </button>
@@ -601,7 +596,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               setMergeTarget(other?.id || "");
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
-                            title="Combinar / Fusionar con otra"
+                            title={t("admin_taxonomy.merge_title")}
                           >
                             🔀
                           </button>
@@ -618,7 +613,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               setDeleteMode(occ.placesCount > 0 ? "reassign" : "detach");
                             }}
                             className="px-2 py-1 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[11px] hover:bg-red-200 transition cursor-pointer"
-                            title="Eliminar"
+                            title={t("common.delete")}
                           >
                             🗑️
                           </button>
@@ -635,7 +630,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                 pageSize={occPageSize}
                 onPageChange={setOccPage}
                 onPageSizeChange={setOccPageSize}
-                itemLabel="categorías"
+                itemLabel={t("places.plans_title")}
               />
 
               {/* Formulario para añadir nueva categoría */}
@@ -644,7 +639,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                 className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-3"
               >
                 <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  ➕ Crear nueva categoría
+                  {t("admin_taxonomy.create_category_title")}
                 </h4>
                 <div className="flex gap-2">
                   <input
@@ -653,7 +648,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     required
                     value={newOccasionName}
                     onChange={(e) => setNewOccasionName(e.target.value)}
-                    placeholder="Nombre ej. Cervecería artesanal..."
+                    placeholder={t("admin_taxonomy.category_name_placeholder")}
                     className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                   <button
@@ -661,11 +656,11 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     disabled={loading || !newOccasionName.trim()}
                     className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition active:scale-95 disabled:opacity-40 cursor-pointer"
                   >
-                    Guardar
+                    {t("admin_taxonomy.save_btn")}
                   </button>
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-500 block mb-1">Elige un emoji:</span>
+                  <span className="text-[11px] text-slate-500 block mb-1">{t("admin_taxonomy.choose_emoji")}</span>
                   <div className="flex flex-wrap gap-1">
                     {EMOJI_SUGGESTIONS.map((emoji) => (
                       <button
@@ -698,7 +693,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                     type="text"
                     value={tagSearch}
                     onChange={(e) => setTagSearch(e.target.value)}
-                    placeholder="🔍 Buscar etiqueta por nombre..."
+                    placeholder={t("admin_taxonomy.search_tags")}
                     className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                   <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
@@ -726,14 +721,9 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                         ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 cursor-pointer"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
                     }`}
-                    title={
-                      emptyTags.length > 0
-                        ? `Eliminar las ${emptyTags.length} etiquetas sin locales asociados`
-                        : "No hay etiquetas vacías"
-                    }
                   >
                     <span>🧹</span>
-                    <span>Eliminar vacías ({emptyTags.length})</span>
+                    <span>{t("admin_taxonomy.delete_empty", { count: String(emptyTags.length) })}</span>
                   </button>
 
                   {/* Botón eliminar seleccionadas */}
@@ -744,7 +734,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                       className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span>🗑️</span>
-                      <span>Eliminar ({selectedTagIds.size})</span>
+                      <span>{t("admin_taxonomy.delete_selected", { count: String(selectedTagIds.size) })}</span>
                     </button>
                   )}
                 </div>
@@ -763,11 +753,11 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                       onChange={toggleAllVisibleTags}
                       className="w-3.5 h-3.5 rounded text-amber-500 focus:ring-0 cursor-pointer"
                     />
-                    <span>Seleccionar todas visibles ({filteredTags.length})</span>
+                    <span>{t("admin_taxonomy.select_all_visible", { count: String(filteredTags.length) })}</span>
                   </label>
                   {selectedTagIds.size > 0 && (
                     <span className="font-semibold text-amber-600 dark:text-amber-400">
-                      {selectedTagIds.size} seleccionada{selectedTagIds.size > 1 ? "s" : ""}
+                      {selectedTagIds.size}
                     </span>
                   )}
                 </div>
@@ -777,9 +767,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
               <div className="space-y-1.5">
                 {paginatedTags.length === 0 ? (
                   <p className="text-xs text-slate-400 text-center py-4">
-                    {initialTags.length === 0
-                      ? "No hay etiquetas creadas todavía."
-                      : "No se encontró ninguna etiqueta con ese criterio."}
+                    {t("admin_taxonomy.no_tags_found")}
                   </p>
                 ) : (
                   paginatedTags.map((tag) => {
@@ -807,11 +795,11 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               #{tag.name}
                             </span>
                             <span className="ml-2 text-[11px] text-slate-400">
-                              ({tag.placesCount} {tag.placesCount === 1 ? "sitio" : "sitios"})
+                              ({tag.placesCount} {tag.placesCount === 1 ? t("places.locale_single") : t("places.locales_count")})
                             </span>
                             {isEmpty && (
                               <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                vacía
+                                {t("admin_taxonomy.empty_badge")}
                               </span>
                             )}
                           </div>
@@ -823,7 +811,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               setEditingItem({ type: "tag", id: tag.id, name: tag.name })
                             }
                             className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] hover:bg-slate-300 transition cursor-pointer"
-                            title="Renombrar"
+                            title={t("common.edit")}
                           >
                             ✏️
                           </button>
@@ -834,7 +822,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               setMergeTarget(other?.id || "");
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
-                            title="Combinar / Fusionar con otra"
+                            title={t("admin_taxonomy.merge_title")}
                           >
                             🔀
                           </button>
@@ -851,7 +839,7 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
                               setDeleteMode(tag.placesCount > 0 ? "reassign" : "detach");
                             }}
                             className="px-2 py-1 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[11px] hover:bg-red-200 transition cursor-pointer"
-                            title="Eliminar"
+                            title={t("common.delete")}
                           >
                             🗑️
                           </button>

@@ -203,9 +203,9 @@ export async function updatePlaceAction(
   }
 
   const isOwner = existing.createdById === currentUser.id;
-  const isAdminOnCommunity = currentUser.role === "admin" && existing.communityPublished;
+  const isAdmin = currentUser.role === "admin";
 
-  if (!isOwner && !isAdminOnCommunity) {
+  if (!isOwner && !isAdmin) {
     return { error: "No tienes permiso para editar este establecimiento." };
   }
 

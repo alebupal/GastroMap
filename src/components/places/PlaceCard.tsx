@@ -58,8 +58,7 @@ export function PlaceCard({
   const [showEditModal, setShowEditModal] = useState(false);
 
   const canDelete = isAdmin || place.createdById === currentUserId;
-  const canEdit =
-    place.createdById === currentUserId || (isAdmin && place.communityPublished);
+  const canEdit = isAdmin || place.createdById === currentUserId;
 
   async function handleDelete() {
     if (!confirm(`¿Eliminar "${place.name}" de GastroMap?`)) return;

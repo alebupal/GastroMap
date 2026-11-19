@@ -530,10 +530,12 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
           </div>
 
           {loading ? (
-            <p className="text-xs text-slate-400 py-3 text-center">Cargando usuarios...</p>
+            <p className="text-xs text-slate-400 py-3 text-center">{t("admin_users.loading_users")}</p>
           ) : filteredUsers.length === 0 ? (
             <p className="text-xs text-slate-500 py-4 text-center italic">
-              No se encontraron usuarios {filterQuery ? `que coincidan con «${filterQuery}»` : ""}.
+              {t("admin_users.no_users_found", {
+                query: filterQuery ? t("admin_users.matching_query", { query: filterQuery }) : "",
+              })}
             </p>
           ) : (
             <div className="space-y-2">
@@ -556,7 +558,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         checked={isSelected}
                         onChange={() => handleToggleUser(u.id)}
                         disabled={isMe}
-                        title={isMe ? "No puedes seleccionarte a ti mismo" : "Seleccionar usuario"}
+                        title={isMe ? t("admin_users.cannot_select_self") : t("admin_users.select_user")}
                         className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                           }`}
                       />
@@ -568,7 +570,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           </span>
                           {isMe && (
                             <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40">
-                              TÚ
+                              {t("common.you").toUpperCase()}
                             </span>
                           )}
                           <span
@@ -581,7 +583,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           </span>
                           {u.status === "disabled" && (
                             <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-500/15 text-red-500 border border-red-500/30">
-                              INACTIVO
+                              {t("common.inactive").toUpperCase()}
                             </span>
                           )}
                         </div>
@@ -600,9 +602,9 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           ? "opacity-40 cursor-not-allowed text-slate-500"
                           : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
                           }`}
-                        title={isMe ? "No puedes cambiar tu propio rol" : "Cambiar rol"}
+                        title={isMe ? t("admin_users.role") : t("admin_users.role")}
                       >
-                        {u.role === "admin" ? "Hacer User" : "Hacer Admin"}
+                        {u.role === "admin" ? t("admin_users.make_user") : t("admin_users.make_admin")}
                       </button>
 
                       <button
@@ -615,13 +617,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                             ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 cursor-pointer"
                             : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer"
                           }`}
-                        title={
-                          isMe
-                            ? "No puedes desactivar tu propia cuenta"
-                            : u.status === "disabled"
-                              ? "Reactivar cuenta"
-                              : "Desactivar cuenta"
-                        }
+                        title={t("admin_users.btn_toggle_status")}
                       >
                         {u.status === "disabled" ? "▶️" : "⏸️"}
                       </button>
@@ -630,7 +626,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         type="button"
                         onClick={() => handleStartEdit(u)}
                         className="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-semibold text-amber-700 dark:text-amber-300 transition cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/60"
-                        title="Editar usuario (nombre, usuario, email, rol, contraseña)"
+                        title={t("admin_users.edit_tooltip")}
                       >
                         ✏️
                       </button>
@@ -642,7 +638,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           setNewPassword("");
                         }}
                         className="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-semibold text-blue-700 dark:text-blue-300 transition cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60"
-                        title="Restablecer contraseña rápida"
+                        title={t("admin_users.reset_password_btn_title")}
                       >
                         🔑
                       </button>
@@ -655,7 +651,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           ? "opacity-30 cursor-not-allowed text-slate-600"
                           : "text-slate-400 hover:text-red-500 cursor-pointer"
                           }`}
-                        title={isMe ? "No puedes eliminar tu propia cuenta" : "Eliminar usuario"}
+                        title={isMe ? t("admin_users.cannot_delete_self") : t("admin_users.delete_user_btn")}
                       >
                         🗑️
                       </button>
@@ -684,10 +680,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left"
           >
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
-              🔑 Restablecer contraseña
+              {t("admin_users.reset_password_title")}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              Introduce la nueva contraseña temporal para este usuario.
+              {t("admin_users.reset_password_desc")}
             </p>
 
             <input
@@ -696,7 +692,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               minLength={4}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Nueva contraseña (mín. 4 caracteres, ej. 1234)"
+              placeholder={t("admin_users.reset_password_input_placeholder")}
               className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-4"
             />
 
@@ -706,14 +702,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 onClick={() => setPasswordUserId(null)}
                 className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
               >
-                Cancelar
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={savingPassword}
                 className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
               >
-                {savingPassword ? "Guardando..." : "Actualizar"}
+                {savingPassword ? t("common.saving") : t("admin_users.reset_password_update_btn")}
               </button>
             </div>
           </form>
@@ -732,10 +728,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 <span className="text-xl">✏️</span>
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
-                    Editar usuario
+                    {t("admin_users.edit_title")}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Modifica datos de perfil, accesos y credenciales
+                    {t("admin_users.edit_subtitle")}
                   </p>
                 </div>
               </div>
@@ -751,21 +747,21 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             <div className="space-y-3">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Nombre completo
+                  {t("admin_users.full_name")}
                 </label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Nombre y apellidos"
+                  placeholder={t("admin_users.full_name_placeholder")}
                   className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Nombre de usuario (@username)
+                  {t("admin_users.username")}
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">@</span>
@@ -774,7 +770,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     required
                     value={editUsername}
                     onChange={(e) => setEditUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
-                    placeholder="usuario"
+                    placeholder={t("admin_users.username_placeholder")}
                     className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
@@ -782,14 +778,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Correo electrónico (email)
+                  {t("admin_users.email")}
                 </label>
                 <input
                   type="email"
                   required
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
-                  placeholder="correo@ejemplo.com"
+                  placeholder={t("admin_users.email_placeholder")}
                   className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
               </div>
@@ -797,7 +793,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Rol
+                    {t("admin_users.role")}
                   </label>
                   <select
                     value={editRole}
@@ -805,14 +801,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     disabled={editingUser.id === currentUserId}
                     className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
                   >
-                    <option value="user">Usuario</option>
-                    <option value="admin">Administrador</option>
+                    <option value="user">{t("admin_users.role_user_option")}</option>
+                    <option value="admin">{t("admin_users.role_admin_option")}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Estado de cuenta
+                    {t("admin_users.account_status")}
                   </label>
                   <select
                     value={editStatus}
@@ -820,25 +816,25 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     disabled={editingUser.id === currentUserId}
                     className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
                   >
-                    <option value="active">Activo 🟢</option>
-                    <option value="disabled">Inactivo / Bloqueado ⏸️</option>
+                    <option value="active">{t("admin_users.status_active_option")}</option>
+                    <option value="disabled">{t("admin_users.status_disabled_option")}</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Nueva contraseña (opcional)
+                  {t("admin_users.new_password_optional")}
                 </label>
                 <input
                   type="password"
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
-                  placeholder="Dejar en blanco para no cambiarla"
+                  placeholder={t("admin_users.new_password_leave_blank")}
                   className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 <span className="text-[10px] text-slate-400">
-                  Si escribes una contraseña aquí, se reemplazará la actual (mín. 4 caracteres).
+                  {t("admin_users.new_password_hint")}
                 </span>
               </div>
             </div>
@@ -849,14 +845,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 onClick={() => setEditingUser(null)}
                 className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
               >
-                Cancelar
+                {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={savingEdit}
                 className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition cursor-pointer disabled:opacity-50 shadow-xs"
               >
-                {savingEdit ? "Guardando..." : "Guardar cambios"}
+                {savingEdit ? t("common.saving") : t("admin_users.save_changes_btn")}
               </button>
             </div>
           </form>

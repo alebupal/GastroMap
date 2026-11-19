@@ -819,8 +819,8 @@ export function PlacesExplorer({
                 {selectedGroupFilterIds.length === 0
                   ? t("places.groups_filter")
                   : selectedGroupFilterIds.length === 1
-                  ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || "1 grupo"
-                  : `${selectedGroupFilterIds.length} grupos`}
+                  ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
+                  : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
               </span>
               <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
             </button>
@@ -830,7 +830,7 @@ export function PlacesExplorer({
               <div className="absolute top-full left-0 mt-2 z-50 w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100">
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Filtrar por grupo privado:
+                    {t("places.filter_by_group")}
                   </span>
                   {selectedGroupFilterIds.length > 0 && (
                     <button
@@ -838,7 +838,7 @@ export function PlacesExplorer({
                       onClick={() => setSelectedGroupFilterIds([])}
                       className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
                     >
-                      Limpiar
+                      {t("places.clear_filter")}
                     </button>
                   )}
                 </div>
@@ -916,7 +916,9 @@ export function PlacesExplorer({
                 onClick={() => setSelectedOccasions([])}
                 className="text-red-400 hover:underline font-bold cursor-pointer"
               >
-                ✕ Quitar {selectedOccasions.length === 1 ? "filtro" : `filtros (${selectedOccasions.length})`}
+                {selectedOccasions.length === 1
+                  ? t("places.remove_filter_single")
+                  : t("places.remove_filter_multiple", { count: selectedOccasions.length })}
               </button>
             )}
           </div>
@@ -929,10 +931,10 @@ export function PlacesExplorer({
                 className={`font-semibold transition cursor-pointer flex items-center gap-1 ${
                   isOccasionSearchOpen || occasionSearchQuery ? "text-amber-400" : "text-slate-400 hover:text-slate-200"
                 }`}
-                title="Buscar categorías"
+                title={t("places.search_categories_title")}
               >
                 <span>🔍</span>
-                <span className="hidden sm:inline">Buscar</span>
+                <span className="hidden sm:inline">{t("places.search_categories_btn")}</span>
               </button>
             )}
 
@@ -942,7 +944,7 @@ export function PlacesExplorer({
                 onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
                 className="font-semibold text-amber-400 hover:text-amber-300 transition cursor-pointer flex items-center gap-1"
               >
-                <span>{isOccasionsWrapped ? "↔ Modo fila" : "⊞ Cuadrícula"}</span>
+                <span>{isOccasionsWrapped ? t("places.row_mode") : t("places.grid_mode")}</span>
               </button>
             )}
           </div>
@@ -956,7 +958,7 @@ export function PlacesExplorer({
               type="text"
               value={occasionSearchQuery}
               onChange={(e) => setOccasionSearchQuery(e.target.value)}
-              placeholder="Buscar categoría o plan (ej. tapear, brunch, terraza...)"
+              placeholder={t("places.search_occasions_placeholder")}
               className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
             {occasionSearchQuery && (
@@ -1021,10 +1023,12 @@ export function PlacesExplorer({
                       onClick={() => setVisibleOccasionsCount((c) => c + 12)}
                       className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
                     >
-                      + Mostrar más ({filteredOccasions.length - visibleOccasionsCount} restantes)
+                      {t("places.show_more_remaining", {
+                        count: filteredOccasions.length - visibleOccasionsCount,
+                      })}
                     </button>
                   ) : (
-                    <span className="text-slate-400">Mostrando todas las categorías</span>
+                    <span className="text-slate-400">{t("places.showing_all_categories")}</span>
                   )}
                   {visibleOccasionsCount > 12 && (
                     <button
@@ -1032,7 +1036,7 @@ export function PlacesExplorer({
                       onClick={() => setVisibleOccasionsCount(12)}
                       className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                     >
-                      ▲ Ver menos
+                      {t("places.show_less")}
                     </button>
                   )}
                 </div>
@@ -1081,7 +1085,9 @@ export function PlacesExplorer({
                 onClick={() => setVisibleOccasionsCount((c) => c + 12)}
                 className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
               >
-                + Mostrar más ({filteredOccasions.length - visibleOccasionsCount})
+                {t("places.show_more_count", {
+                  count: filteredOccasions.length - visibleOccasionsCount,
+                })}
               </button>
             )}
           </HorizontalScroll>
@@ -1102,7 +1108,9 @@ export function PlacesExplorer({
                   onClick={() => setSelectedTags([])}
                   className="text-red-500 hover:underline font-bold cursor-pointer"
                 >
-                  ✕ Quitar {selectedTags.length === 1 ? "filtro" : `filtros (${selectedTags.length})`}
+                  {selectedTags.length === 1
+                    ? t("places.remove_filter_single")
+                    : t("places.remove_filter_multiple", { count: selectedTags.length })}
                 </button>
               )}
             </div>
@@ -1113,7 +1121,7 @@ export function PlacesExplorer({
                 onClick={() => setIsTagsExpanded(!isTagsExpanded)}
                 className="font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1"
               >
-                <span>{isTagsExpanded ? "▲ Ocultar buscador" : "🔍 Buscar / Mostrar más"}</span>
+                <span>{isTagsExpanded ? t("places.hide_search") : t("places.search_show_more")}</span>
               </button>
             </div>
           </div>
@@ -1126,7 +1134,7 @@ export function PlacesExplorer({
                   type="text"
                   value={tagSearchQuery}
                   onChange={(e) => setTagSearchQuery(e.target.value)}
-                  placeholder="Buscar entre las etiquetas más usadas..."
+                  placeholder={t("places.search_tags_placeholder")}
                   className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                 />
                 {tagSearchQuery && (
@@ -1143,7 +1151,7 @@ export function PlacesExplorer({
               <div className="flex flex-wrap gap-1.5">
                 {filteredTags.length === 0 ? (
                   <p className="text-[11px] text-slate-400 italic py-1">
-                    No se encontró ninguna etiqueta con «{tagSearchQuery}».
+                    {t("places.no_tags_found", { query: tagSearchQuery })}
                   </p>
                 ) : (
                   (tagSearchQuery.trim()
@@ -1181,10 +1189,12 @@ export function PlacesExplorer({
                         onClick={() => setVisibleTagsCount((c) => c + 24)}
                         className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
                       >
-                        + Mostrar más ({filteredTags.length - visibleTagsCount} restantes)
+                        {t("places.show_more_remaining", {
+                          count: filteredTags.length - visibleTagsCount,
+                        })}
                       </button>
                     ) : (
-                      <span className="text-slate-400">Mostrando todas las etiquetas</span>
+                      <span className="text-slate-400">{t("places.showing_all_tags")}</span>
                     )}
                     {visibleTagsCount > 24 && (
                       <button
@@ -1192,7 +1202,7 @@ export function PlacesExplorer({
                         onClick={() => setVisibleTagsCount(24)}
                         className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
                       >
-                        ▲ Ver menos
+                        {t("places.show_less")}
                       </button>
                     )}
                   </div>
@@ -1226,7 +1236,9 @@ export function PlacesExplorer({
                   onClick={() => setIsTagsExpanded(true)}
                   className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
                 >
-                  + Mostrar más ({sortedTags.length - defaultTags.length})
+                  {t("places.show_more_count", {
+                    count: sortedTags.length - defaultTags.length,
+                  })}
                 </button>
               )}
             </HorizontalScroll>

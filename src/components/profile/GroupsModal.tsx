@@ -23,7 +23,7 @@ interface GroupsModalProps {
 }
 
 export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [groups, setGroups] = useState<SharingGroupWithMembers[]>([]);
   const [loading, setLoading] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -85,7 +85,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
       await loadInvitesForGroup(groupId);
       if (res.token) {
         copyToClipboard(res.token);
-        setSuccessMessage("¡Enlace de invitación generado y copiado al portapapeles! Ya puedes compartirlo.");
+        setSuccessMessage(t("groups.invite_copied_banner"));
         setTimeout(() => setSuccessMessage(null), 5000);
       }
     }
@@ -241,15 +241,15 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
 
           {/* Listado de grupos */}
           {loading ? (
-            <p className="text-xs text-slate-400 text-center py-6">Cargando grupos...</p>
+            <p className="text-xs text-slate-400 text-center py-6">{t("groups.loading")}</p>
           ) : groups.length === 0 ? (
             <div className="text-center py-8 px-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
               <span className="text-3xl block mb-2">🤝</span>
               <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Aún no tienes ningún grupo privado
+                {t("groups.empty_title")}
               </p>
               <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
-                Crea uno arriba y genera un enlace de invitación para compartir recomendaciones solo con quien tú elijas.
+                {t("groups.empty_desc")}
               </p>
             </div>
           ) : (
@@ -296,7 +296,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             </h4>
                             {g.isOwner && (
                               <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                                Creador
+                                {t("groups.owner_badge")}
                               </span>
                             )}
                           </>
@@ -313,7 +313,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                 setRenameValue(g.name);
                               }}
                               className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs cursor-pointer rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700"
-                              title="Renombrar grupo"
+                              title={t("groups.rename_group")}
                             >
                               ✏️
                             </button>
@@ -321,7 +321,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                               type="button"
                               onClick={() => handleDeleteGroup(g)}
                               className="p-1.5 text-slate-400 hover:text-red-500 text-xs cursor-pointer rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-700"
-                              title="Eliminar grupo"
+                              title={t("groups.delete_group")}
                             >
                               🗑️
                             </button>
@@ -329,10 +329,10 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                         ) : (
                           <button
                             type="button"
-                            onClick={() => handleRemoveMember(g.id, currentUserId, "ti mismo")}
+                            onClick={() => handleRemoveMember(g.id, currentUserId, t("groups.yourself"))}
                             className="px-2 py-1 rounded-xl text-[11px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
                           >
-                            Abandonar
+                            {t("groups.leave_group")}
                           </button>
                         )}
                       </div>
@@ -341,7 +341,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                     {/* Miembros del grupo */}
                     <div className="space-y-1">
                       <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
-                        Miembros ({g.members.length}):
+                        {t("groups.members_label", { count: String(g.members.length) })}
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {g.members.map((m) => (
@@ -351,7 +351,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           >
                             <span>@{m.username || m.name}</span>
                             {m.userId === g.ownerUserId && (
-                              <span className="text-[9px] text-amber-500 font-bold" title="Propietario">
+                              <span className="text-[9px] text-amber-500 font-bold" title={t("groups.owner_star")}>
                                 ★
                               </span>
                             )}
@@ -362,7 +362,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                   handleRemoveMember(g.id, m.userId, `@${m.username || m.name}`)
                                 }
                                 className="text-slate-400 hover:text-red-500 cursor-pointer text-[10px] ml-0.5"
-                                title="Expulsar del grupo"
+                                title={t("groups.kick_member")}
                               >
                                 ✕
                               </button>
@@ -381,7 +381,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             onClick={() => toggleInvitesSection(g.id)}
                             className="text-[11px] font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer flex items-center gap-1"
                           >
-                            <span>🔗 Enlaces de invitación</span>
+                            <span>🔗 {t("groups.invite_links_title")}</span>
                             <span>{isExpanded ? "▲" : "▼"}</span>
                           </button>
 
@@ -392,7 +392,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             className="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer flex items-center gap-1"
                           >
                             <span>+</span>
-                            <span>{generatingInviteForGroup === g.id ? "Generando..." : "Nuevo enlace"}</span>
+                            <span>{generatingInviteForGroup === g.id ? t("common.loading") : t("groups.new_link_btn")}</span>
                           </button>
                         </div>
 
@@ -401,7 +401,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           <div className="mt-2.5 space-y-2 bg-white dark:bg-slate-900/80 p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
                             {invites.length === 0 ? (
                               <p className="text-[11px] text-slate-400 italic text-center py-1">
-                                No hay enlaces activos. Pulsa &ldquo;+ Nuevo enlace&rdquo; para invitar personas.
+                                {t("groups.no_active_links")}
                               </p>
                             ) : (
                               invites.map((inv) => {
@@ -416,12 +416,12 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                         .../groups/join/{inv.token.slice(0, 10)}...
                                       </p>
                                       <p className="text-[10px] text-slate-400">
-                                        Expira:{" "}
-                                        {new Date(inv.expiresAt).toLocaleDateString("es-ES", {
+                                        {t("groups.expires_prefix")}{" "}
+                                        {new Date(inv.expiresAt).toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
                                           day: "numeric",
                                           month: "short",
                                         })}{" "}
-                                        • Usos: {inv.usedCount}
+                                        • {t("groups.uses_prefix")} {inv.usedCount}
                                       </p>
                                     </div>
 
@@ -435,13 +435,13 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                             : "bg-amber-500 hover:bg-amber-600 text-slate-950"
                                         }`}
                                       >
-                                        {isCopied ? "✓ ¡Copiado!" : "Copiar"}
+                                        {isCopied ? t("groups.copied_btn") : t("groups.copy_btn")}
                                       </button>
                                       <button
                                         type="button"
                                         onClick={() => handleRevokeInvite(g.id, inv.id)}
                                         className="p-1 text-slate-400 hover:text-red-500 text-xs cursor-pointer"
-                                        title="Revocar enlace"
+                                        title={t("groups.revoke_link")}
                                       >
                                         ✕
                                       </button>

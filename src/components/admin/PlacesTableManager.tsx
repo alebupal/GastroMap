@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/places";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
+import { EditPlaceModal } from "@/components/places/EditPlaceModal";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
@@ -27,6 +28,7 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
   const [mergeSource, setMergeSource] = useState<PlaceWithDetails | null>(null);
   const [mergeTargetId, setMergeTargetId] = useState<string>("");
   const [mergeSearch, setMergeSearch] = useState<string>("");
+  const [editingPlace, setEditingPlace] = useState<PlaceWithDetails | null>(null);
 
   // Lista única de ciudades para el filtro rápido
   const cities = useMemo(() => {
@@ -368,6 +370,15 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
                           )}
                           <button
                             type="button"
+                            onClick={() => setEditingPlace(place)}
+                            disabled={loading}
+                            className="text-slate-400 hover:text-amber-400 text-xs transition cursor-pointer disabled:opacity-40"
+                            title={t("admin_places.edit_title")}
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => {
                               setMergeSource(place);
                               setMergeTargetId("");
@@ -501,6 +512,16 @@ export function PlacesTableManager({ places: initialPlaces }: PlacesTableManager
             </div>
           </div>
         </div>
+      )}
+      {/* Modal de edición administrativa del establecimiento */}
+      {editingPlace && (
+        <EditPlaceModal
+          place={editingPlace}
+          occasionsList={[]}
+          availableTags={Array.from(new Set(placesList.flatMap((p) => p.tags || [])))}
+          isOpen={true}
+          onClose={() => setEditingPlace(null)}
+        />
       )}
     </div>
   );
