@@ -6,6 +6,7 @@ import {
   varchar,
   doublePrecision,
   boolean,
+  jsonb,
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
@@ -17,6 +18,8 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: text("password_hash").notNull(),
   role: varchar("role", { length: 50 }).notNull().default("user"), // 'admin' | 'user'
+  status: varchar("status", { length: 20 }).notNull().default("active"), // 'active' | 'disabled'
+  lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -191,6 +194,73 @@ export const sharingGroupMembers = pgTable(
   ]
 );
 
+export const placeGroupAccess = pgTable(
+  "place_group_access",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => sharingGroups.id, { onDelete: "cascade" }),
+    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("place_group_access_unique_idx").on(table.placeId, table.groupId),
+    index("place_group_access_group_idx").on(table.groupId),
+  ]
+);
+
+export const placeUserAccess = pgTable(
+  "place_user_access",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("place_user_access_unique_idx").on(table.placeId, table.userId),
+    index("place_user_access_user_idx").on(table.userId),
+  ]
+);
+
+export const savedFilters = pgTable(
+  "saved_filters",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 100 }).notNull(),
+    criteria: jsonb("criteria").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("saved_filters_user_idx").on(table.userId)]
+);
+
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    actorUserId: uuid("actor_user_id").references(() => users.id, { onDelete: "set null" }),
+    entityType: varchar("entity_type", { length: 50 }).notNull(),
+    entityId: varchar("entity_id", { length: 100 }).notNull(),
+    action: varchar("action", { length: 50 }).notNull(),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("audit_logs_created_at_idx").on(table.createdAt)]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -206,3 +276,7 @@ export type UserPlace = typeof userPlaces.$inferSelect;
 export type PlaceComment = typeof placeComments.$inferSelect;
 export type SharingGroup = typeof sharingGroups.$inferSelect;
 export type SharingGroupMember = typeof sharingGroupMembers.$inferSelect;
+export type PlaceGroupAccess = typeof placeGroupAccess.$inferSelect;
+export type PlaceUserAccess = typeof placeUserAccess.$inferSelect;
+export type SavedFilter = typeof savedFilters.$inferSelect;
+export type AuditLog = typeof auditLogs.$inferSelect;

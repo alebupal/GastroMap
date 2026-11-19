@@ -15,6 +15,7 @@ import {
   type Place,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 import { resolveGoogleMapsUrl, parseGoogleMapsUrl } from "@/lib/maps";
 import {
   searchAddressNominatim,
@@ -265,6 +266,14 @@ export async function updatePlaceAction(
     );
   }
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: placeId,
+    action: "place_updated",
+    metadata: { name, status },
+  });
+
   revalidatePath("/");
   return { success: true };
 }
@@ -296,6 +305,13 @@ export async function deletePlaceAction(placeId: string) {
   await db.delete(placeOccasions).where(eq(placeOccasions.placeId, placeId));
   await db.delete(placeTags).where(eq(placeTags.placeId, placeId));
   await db.delete(places).where(eq(places.id, placeId));
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: placeId,
+    action: "place_deleted",
+    metadata: { name: place.name },
+  });
   revalidatePath("/");
   return { success: true };
 }
@@ -746,6 +762,18 @@ export async function mergePlacesAction(
   await db.delete(placeOccasions).where(eq(placeOccasions.placeId, duplicatePlaceId));
   await db.delete(placeTags).where(eq(placeTags.placeId, duplicatePlaceId));
   await db.delete(places).where(eq(places.id, duplicatePlaceId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: primaryPlaceId,
+    action: "place_merged",
+    metadata: {
+      primaryName: primary.name,
+      mergedDuplicateId: duplicatePlaceId,
+      mergedDuplicateName: duplicate.name,
+    },
+  });
 
   revalidatePath("/");
   return { success: true };

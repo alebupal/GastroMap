@@ -70,12 +70,17 @@ export async function createSession(userId: string): Promise<Session> {
     })
     .returning();
 
+  await db
+    .update(users)
+    .set({ lastLoginAt: new Date() })
+    .where(eq(users.id, userId));
+
   return session;
 }
 
 /**
  * Valida un token de sesión y devuelve el usuario si la sesión es válida.
- * Si ha expirado, la elimina automáticamente.
+ * Si ha expirado o la cuenta está desactivada, la elimina automáticamente.
  */
 export async function validateSessionToken(
   sessionId: string
@@ -93,8 +98,8 @@ export async function validateSessionToken(
 
   const { session, user } = result;
 
-  // Si la sesión ha expirado, la borramos y retornamos null
-  if (Date.now() >= session.expiresAt.getTime()) {
+  // Si la cuenta está desactivada o la sesión expiró, revocar y retornar null
+  if (user.status === "disabled" || Date.now() >= session.expiresAt.getTime()) {
     await db.delete(sessions).where(eq(sessions.id, sessionId));
     return null;
   }

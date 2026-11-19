@@ -99,6 +99,10 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return { error: "Credenciales incorrectas." };
   }
 
+  if (user.status === "disabled") {
+    return { error: "Tu cuenta está desactivada. Contacta con un administrador." };
+  }
+
   const isValid = await verifyPassword(user.passwordHash, password);
   if (!isValid) {
     return { error: "Credenciales incorrectas." };

@@ -15,6 +15,7 @@ import {
   type User,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export interface SafeUser {
   id: string;
@@ -22,6 +23,8 @@ export interface SafeUser {
   name: string;
   email: string;
   role: string;
+  status: string;
+  lastLoginAt: Date | null;
   createdAt: Date;
 }
 
@@ -41,12 +44,62 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
       name: users.name,
       email: users.email,
       role: users.role,
+      status: users.status,
+      lastLoginAt: users.lastLoginAt,
       createdAt: users.createdAt,
     })
     .from(users)
     .orderBy(users.createdAt);
 
   return rows;
+}
+
+/**
+ * Activa o desactiva la cuenta de un usuario ('active' | 'disabled').
+ * Al desactivar, revoca inmediatamente todas sus sesiones activas.
+ */
+export async function toggleUserStatusAction(userId: string) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado." };
+  }
+
+  if (userId === currentUser.id) {
+    return { error: "No puedes desactivar tu propia cuenta de administrador." };
+  }
+
+  const [target] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!target) {
+    return { error: "Usuario no encontrado." };
+  }
+
+  const nextStatus = target.status === "disabled" ? "active" : "disabled";
+
+  await db
+    .update(users)
+    .set({ status: nextStatus, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+
+  // Si se desactiva, revocar todas las sesiones activas inmediatamente
+  if (nextStatus === "disabled") {
+    await db.delete(sessions).where(eq(sessions.userId, userId));
+  }
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: userId,
+    action: nextStatus === "disabled" ? "user_disabled" : "user_enabled",
+    metadata: { username: target.username || target.email },
+  });
+
+  revalidatePath("/");
+  return { success: true, status: nextStatus };
 }
 
 /**

@@ -3,6 +3,7 @@ import { countUsers, getCurrentUser } from "@/lib/auth";
 import { getAllPlaces } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getSetting } from "@/lib/actions/settings";
+import { getSavedFiltersAction } from "@/lib/actions/saved-filters";
 import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
@@ -21,11 +22,12 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, cartoApiKey] = await Promise.all([
+  const [places, occasionsList, tagsList, cartoApiKey, savedFiltersList] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
     getSetting("carto_api_key"),
+    getSavedFiltersAction(),
   ]);
 
   const version = versionService.getLocalVersion();
@@ -56,6 +58,7 @@ export default async function Home() {
             isAdmin={currentUser.role === "admin"}
             occasionMap={occasionMap}
             cartoApiKey={cartoApiKey}
+            initialSavedFilters={savedFiltersList}
           />
         </section>
 

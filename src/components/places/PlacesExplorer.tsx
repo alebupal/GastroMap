@@ -7,6 +7,11 @@ import { RandomPickerModal } from "./RandomPickerModal";
 import { DecisionAssistantModal } from "./DecisionAssistantModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import type { PlaceWithDetails } from "@/lib/actions/places";
+import {
+  createSavedFilterAction,
+  deleteSavedFilterAction,
+  type SavedFilterItem,
+} from "@/lib/actions/saved-filters";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -16,6 +21,7 @@ interface PlacesExplorerProps {
   isAdmin: boolean;
   occasionMap: Record<string, { name: string; icon: string }>;
   cartoApiKey?: string | null;
+  initialSavedFilters?: SavedFilterItem[];
 }
 
 /**
@@ -49,6 +55,7 @@ export function PlacesExplorer({
   isAdmin,
   occasionMap,
   cartoApiKey,
+  initialSavedFilters = [],
 }: PlacesExplorerProps) {
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
@@ -85,6 +92,56 @@ export function PlacesExplorer({
   const [isTagsExpanded, setIsTagsExpanded] = useState(false);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
   const [visibleTagsCount, setVisibleTagsCount] = useState(24);
+
+  // Filtros guardados personales
+  const [savedFilters, setSavedFilters] = useState<SavedFilterItem[]>(initialSavedFilters);
+  const [isSaveFilterOpen, setIsSaveFilterOpen] = useState(false);
+  const [newFilterName, setNewFilterName] = useState("");
+  const [savingFilter, setSavingFilter] = useState(false);
+
+  async function handleSaveCurrentFilter(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newFilterName.trim() || savingFilter) return;
+    setSavingFilter(true);
+    const res = await createSavedFilterAction(newFilterName, {
+      textSearch: textSearch.trim() || undefined,
+      selectedOccasions,
+      selectedTags,
+      selectedPrices,
+      experienceFilter,
+      radiusKm,
+      sortBy,
+    });
+    setSavingFilter(false);
+    if (res.success && res.filter) {
+      setSavedFilters((prev) => [res.filter!, ...prev]);
+      setNewFilterName("");
+      setIsSaveFilterOpen(false);
+    }
+  }
+
+  function handleApplySavedFilter(item: SavedFilterItem) {
+    const c = item.criteria || {};
+    setTextSearch(c.textSearch || "");
+    setSelectedOccasions(c.selectedOccasions || []);
+    setSelectedTags(c.selectedTags || []);
+    setSelectedPrices(c.selectedPrices || []);
+    setExperienceFilter(c.experienceFilter || "all");
+    if (c.sortBy) setSortBy(c.sortBy);
+    if (c.radiusKm) {
+      setRadiusKm(c.radiusKm);
+      if (!userLocation) handleRequestLocation();
+    } else {
+      setRadiusKm(null);
+    }
+  }
+
+  async function handleDeleteSavedFilter(filterId: string) {
+    const res = await deleteSavedFilterAction(filterId);
+    if (res.success) {
+      setSavedFilters((prev) => prev.filter((f) => f.id !== filterId));
+    }
+  }
 
   // Alternar selección de ocasión acumulable
   function toggleOccasion(occId: string) {
@@ -450,16 +507,88 @@ export function PlacesExplorer({
             )}
 
             {activeFiltersCount > 0 && (
-              <button
-                type="button"
-                onClick={resetAllFilters}
-                className="text-xs text-slate-400 hover:text-red-400 underline cursor-pointer"
-              >
-                Limpiar filtros
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsSaveFilterOpen((v) => !v)}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+                  title="Guardar esta combinación de filtros"
+                >
+                  <span>💾</span>
+                  <span className="hidden sm:inline">Guardar filtro</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-xs text-slate-400 hover:text-red-400 underline cursor-pointer"
+                >
+                  Limpiar
+                </button>
+              </>
             )}
           </div>
         </div>
+
+        {/* Mini formulario para guardar combinación actual de filtros */}
+        {isSaveFilterOpen && (
+          <form
+            onSubmit={handleSaveCurrentFilter}
+            className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 animate-in fade-in duration-150"
+          >
+            <input
+              type="text"
+              value={newFilterName}
+              onChange={(e) => setNewFilterName(e.target.value)}
+              placeholder="Ej. Tapear sin estrenar, Citas baratas..."
+              autoFocus
+              className="flex-1 px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <button
+              type="submit"
+              disabled={savingFilter || newFilterName.trim().length < 2}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
+            >
+              {savingFilter ? "..." : "Guardar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSaveFilterOpen(false)}
+              className="px-2 py-1.5 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+            >
+              ✕
+            </button>
+          </form>
+        )}
+
+        {/* Barra de filtros guardados del usuario */}
+        {savedFilters.length > 0 && (
+          <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/60 overflow-x-auto no-scrollbar">
+            <span className="text-[11px] font-bold text-slate-400 shrink-0">🔖 Mis filtros:</span>
+            {savedFilters.map((sf) => (
+              <div
+                key={sf.id}
+                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 text-[11px] shrink-0 overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleApplySavedFilter(sf)}
+                  className="px-2.5 py-1 font-semibold text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
+                  title="Aplicar filtro guardado"
+                >
+                  {sf.name}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSavedFilter(sf.id)}
+                  className="pr-2 pl-0.5 py-1 text-slate-400 hover:text-red-500 transition cursor-pointer text-[10px]"
+                  title="Eliminar filtro guardado"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {locationError && (

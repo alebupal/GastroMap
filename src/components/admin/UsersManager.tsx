@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   getAllUsersAction,
   updateUserRoleAction,
+  toggleUserStatusAction,
   resetUserPasswordAction,
   deleteUserAction,
   deleteMultipleUsersAction,
@@ -115,6 +116,31 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
       next.add(userId);
     }
     setSelectedUserIds(next);
+  }
+
+  async function handleToggleStatus(user: SafeUser) {
+    const isCurrentlyDisabled = user.status === "disabled";
+    if (
+      !isCurrentlyDisabled &&
+      !confirm(
+        `¿Desactivar la cuenta de @${user.username || user.name}? Sus sesiones activas se cerrarán inmediatamente, pero se conservarán sus datos.`
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    setSuccess(null);
+    const res = await toggleUserStatusAction(user.id);
+    if (res.error) {
+      setError(res.error);
+    } else {
+      setSuccess(
+        res.status === "disabled"
+          ? `Cuenta de @${user.username || user.name} desactivada.`
+          : `Cuenta de @${user.username || user.name} reactivada.`
+      );
+      loadUsers();
+    }
   }
 
   async function handleDeleteMultiple() {
@@ -506,6 +532,11 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           >
                             {u.role.toUpperCase()}
                           </span>
+                          {u.status === "disabled" && (
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-500/15 text-red-500 border border-red-500/30">
+                              INACTIVO
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-slate-400 truncate">
                           {u.name} • {u.email}
@@ -526,6 +557,28 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         title={isMe ? "No puedes cambiar tu propio rol" : "Cambiar rol"}
                       >
                         {u.role === "admin" ? "Hacer User" : "Hacer Admin"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(u)}
+                        disabled={isMe}
+                        className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition ${
+                          isMe
+                            ? "opacity-30 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
+                            : u.status === "disabled"
+                            ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 cursor-pointer"
+                            : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer"
+                        }`}
+                        title={
+                          isMe
+                            ? "No puedes desactivar tu propia cuenta"
+                            : u.status === "disabled"
+                            ? "Reactivar cuenta"
+                            : "Desactivar cuenta"
+                        }
+                      >
+                        {u.status === "disabled" ? "▶️" : "⏸️"}
                       </button>
 
                       <button

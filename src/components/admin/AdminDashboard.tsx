@@ -7,6 +7,7 @@ import { InviteManager } from "@/components/InviteManager";
 import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
 import { PlacesTableManager } from "./PlacesTableManager";
+import { AuditLogViewer } from "./AuditLogViewer";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
@@ -27,7 +28,7 @@ export function AdminDashboard({
 }: AdminDashboardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<
-    "places" | "users" | "taxonomy" | "invites" | "settings" | "demo"
+    "places" | "users" | "taxonomy" | "invites" | "audit" | "settings" | "demo"
   >("places");
 
   return (
@@ -70,6 +71,7 @@ export function AdminDashboard({
               { id: "users", label: "👥 Usuarios" },
               { id: "taxonomy", label: "🏷️ Taxonomía" },
               { id: "invites", label: "🎟️ Invitaciones" },
+              { id: "audit", label: "📜 Auditoría" },
               { id: "settings", label: "🔑 API Keys" },
               { id: "demo", label: "🌱 Sitios Demo" },
             ].map((tab) => {
@@ -99,6 +101,7 @@ export function AdminDashboard({
               <TaxonomyManager initialOccasions={initialOccasions} initialTags={initialTags} />
             )}
             {activeTab === "invites" && <InviteManager />}
+            {activeTab === "audit" && <AuditLogViewer />}
             {activeTab === "settings" && <SettingsManager initialCartoApiKey={cartoApiKey} />}
             {activeTab === "demo" && <DemoPlacesSeeder />}
           </div>
