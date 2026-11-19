@@ -17,6 +17,7 @@ import {
 } from "@/lib/actions/saved-filters";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry } from "@/lib/location";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -62,7 +63,7 @@ export function PlacesExplorer({
   cartoApiKey,
   initialSavedFilters = [],
 }: PlacesExplorerProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
   // Filtros acumulables
@@ -307,6 +308,29 @@ export function PlacesExplorer({
 
     return { allCountries: countries, availableCities: cities };
   }, [initialPlaces, selectedCountry]);
+
+  const countryOptions = useMemo(() => {
+    return allCountries.map((c) => {
+      const countryData = findCountry(c);
+      const isEn = locale === "en";
+      const title = isEn && countryData ? countryData.nameEn : c;
+      const subtitle = countryData ? (isEn ? countryData.name : countryData.nameEn) : undefined;
+      return {
+        value: c,
+        label: title,
+        icon: countryData?.flag || "🌍",
+        subtitle: subtitle !== title ? subtitle : undefined,
+      };
+    });
+  }, [allCountries, locale]);
+
+  const cityOptions = useMemo(() => {
+    return availableCities.map((city) => ({
+      value: city,
+      label: city,
+      icon: "📍",
+    }));
+  }, [availableCities]);
 
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
@@ -916,45 +940,42 @@ export function PlacesExplorer({
 
         {/* Línea 2: Filtro rápido de precio numérico (acumulable en su propia línea o continuación en desktop) */}
         <HorizontalScroll className="flex items-center gap-1.5 text-xs">
-          {/* Filtros de País y Ciudad */}
+          {/* Filtros de País y Ciudad con selector y buscador integrado */}
           {allCountries.length > 0 && (
-            <select
+            <SearchableSelect
               value={selectedCountry}
-              onChange={(e) => {
-                setSelectedCountry(e.target.value);
+              onChange={(val) => {
+                setSelectedCountry(val);
                 setSelectedCity("all");
                 setCurrentPage(1);
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0 outline-none"
-            >
-              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
-              {allCountries.map((c) => {
-                const flag = findCountry(c)?.flag;
-                return (
-                  <option key={c} value={c}>
-                    {flag ? `${flag} ` : ""}{c}
-                  </option>
-                );
-              })}
-            </select>
+              options={countryOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_countries")} (${allCountries.length})`,
+                icon: "🌍",
+              }}
+              searchPlaceholder={t("location.country_placeholder")}
+              className="shrink-0"
+            />
           )}
 
           {availableCities.length > 0 && (
-            <select
+            <SearchableSelect
               value={selectedCity}
-              onChange={(e) => {
-                setSelectedCity(e.target.value);
+              onChange={(val) => {
+                setSelectedCity(val);
                 setCurrentPage(1);
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0 outline-none"
-            >
-              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
-              {availableCities.map((city) => (
-                <option key={city} value={city}>
-                  📍 {city}
-                </option>
-              ))}
-            </select>
+              options={cityOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_cities")} (${availableCities.length})`,
+                icon: "🏙️",
+              }}
+              searchPlaceholder={t("location.city_placeholder")}
+              className="shrink-0"
+            />
           )}
 
           <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>

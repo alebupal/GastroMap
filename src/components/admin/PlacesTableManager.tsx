@@ -11,6 +11,7 @@ import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
 import { parseCityCountry, findCountry } from "@/lib/location";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
@@ -21,7 +22,7 @@ export function PlacesTableManager({
   places: initialPlaces,
   occasionsList = [],
 }: PlacesTableManagerProps) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,6 +57,29 @@ export function PlacesTableManager({
 
     return { allCountries: countries, availableCities: cities };
   }, [placesList, countryFilter]);
+
+  const countryOptions = useMemo(() => {
+    return allCountries.map((c) => {
+      const countryData = findCountry(c);
+      const isEn = locale === "en";
+      const title = isEn && countryData ? countryData.nameEn : c;
+      const subtitle = countryData ? (isEn ? countryData.name : countryData.nameEn) : undefined;
+      return {
+        value: c,
+        label: title,
+        icon: countryData?.flag || "🌍",
+        subtitle: subtitle !== title ? subtitle : undefined,
+      };
+    });
+  }, [allCountries, locale]);
+
+  const cityOptions = useMemo(() => {
+    return availableCities.map((city) => ({
+      value: city,
+      label: city,
+      icon: "📍",
+    }));
+  }, [availableCities]);
   // Sitios filtrados en la tabla
   const filteredPlaces = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -225,43 +249,42 @@ export function PlacesTableManager({
           </div>
 
           {allCountries.length > 0 && (
-            <select
+            <SearchableSelect
               value={countryFilter}
-              onChange={(e) => {
-                setCountryFilter(e.target.value);
+              onChange={(val) => {
+                setCountryFilter(val);
                 setCityFilter("all");
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0 cursor-pointer outline-none font-medium"
-            >
-              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
-              {allCountries.map((c) => {
-                const flag = findCountry(c)?.flag;
-                return (
-                  <option key={c} value={c}>
-                    {flag ? `${flag} ` : ""}{c}
-                  </option>
-                );
-              })}
-            </select>
+              options={countryOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_countries")} (${allCountries.length})`,
+                icon: "🌍",
+              }}
+              searchPlaceholder={t("location.country_placeholder")}
+              className="shrink-0"
+              buttonClassName="bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700"
+            />
           )}
 
           {availableCities.length > 0 && (
-            <select
+            <SearchableSelect
               value={cityFilter}
-              onChange={(e) => {
-                setCityFilter(e.target.value);
+              onChange={(val) => {
+                setCityFilter(val);
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0 cursor-pointer outline-none font-medium"
-            >
-              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
-              {availableCities.map((city) => (
-                <option key={city} value={city}>
-                  📍 {city}
-                </option>
-              ))}
-            </select>
+              options={cityOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_cities")} (${availableCities.length})`,
+                icon: "🏙️",
+              }}
+              searchPlaceholder={t("location.city_placeholder")}
+              className="shrink-0"
+              buttonClassName="bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700"
+            />
           )}
         </div>
 
