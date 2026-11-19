@@ -41,6 +41,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [addEmail, setAddEmail] = useState("");
   const [addPassword, setAddPassword] = useState("");
   const [addRole, setAddRole] = useState<"user" | "admin">("user");
+  const [addLocale, setAddLocale] = useState<string>("es");
   const [addingUser, setAddingUser] = useState(false);
 
   // Modal para cambiar contraseña
@@ -55,6 +56,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [editEmail, setEditEmail] = useState("");
   const [editRole, setEditRole] = useState<"user" | "admin">("user");
   const [editStatus, setEditStatus] = useState<"active" | "disabled">("active");
+  const [editLocale, setEditLocale] = useState<string>("es");
   const [editPassword, setEditPassword] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -65,6 +67,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     setEditEmail(u.email);
     setEditRole(u.role === "admin" ? "admin" : "user");
     setEditStatus(u.status === "disabled" ? "disabled" : "active");
+    setEditLocale(u.locale || "es");
     setEditPassword("");
     setError(null);
     setSuccess(null);
@@ -83,6 +86,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
       email: editEmail,
       role: editRole,
       status: editStatus,
+      locale: editLocale,
       newPassword: editPassword.trim() || undefined,
     });
 
@@ -291,6 +295,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     formData.append("email", addEmail);
     formData.append("password", addPassword);
     formData.append("role", addRole);
+    formData.append("locale", addLocale);
 
     const res = await createUserDirectlyAction(formData);
     if (res.error) {
@@ -302,6 +307,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
       setAddEmail("");
       setAddPassword("");
       setAddRole("user");
+      setAddLocale("es");
       setIsAddUserOpen(false);
       loadUsers();
     }
@@ -446,17 +452,31 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                <div>
                   <label className="block text-[11px] font-semibold text-slate-400 mb-1">
                     Rol en la aplicación
                   </label>
                   <select
                     value={addRole}
                     onChange={(e) => setAddRole(e.target.value as "user" | "admin")}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
                   >
                     <option value="user">Usuario estándar (puede ver y añadir sitios)</option>
                     <option value="admin">Administrador (acceso total a configuración y gestión)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    {t("common.language")}
+                  </label>
+                  <select
+                    value={addLocale}
+                    onChange={(e) => setAddLocale(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                  >
+                    <option value="es">🇪🇸 Español (es)</option>
+                    <option value="en">🇬🇧 English (en)</option>
                   </select>
                 </div>
               </div>
@@ -580,6 +600,9 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                               }`}
                           >
                             {u.role.toUpperCase()}
+                          </span>
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            {u.locale === "en" ? "🇬🇧 EN" : "🇪🇸 ES"}
                           </span>
                           {u.status === "disabled" && (
                             <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-500/15 text-red-500 border border-red-500/30">
@@ -820,6 +843,20 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     <option value="disabled">{t("admin_users.status_disabled_option")}</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  {t("common.language")}
+                </label>
+                <select
+                  value={editLocale}
+                  onChange={(e) => setEditLocale(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                >
+                  <option value="es">🇪🇸 Español (es)</option>
+                  <option value="en">🇬🇧 English (en)</option>
+                </select>
               </div>
 
               <div>

@@ -18,6 +18,7 @@ interface UserHeaderProps {
     name: string;
     email: string;
     role: string;
+    locale?: string | null;
   };
 }
 

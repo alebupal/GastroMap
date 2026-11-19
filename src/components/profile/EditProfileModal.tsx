@@ -12,6 +12,7 @@ interface EditProfileModalProps {
     username?: string | null;
     name: string;
     email: string;
+    locale?: string | null;
   };
 }
 
@@ -20,10 +21,11 @@ export function EditProfileModal({
   onClose,
   currentUser,
 }: EditProfileModalProps) {
-  const { t } = useT();
+  const { t, locale: currentContextLocale } = useT();
   const [username, setUsername] = useState(currentUser.username || "");
   const [name, setName] = useState(currentUser.name || "");
   const [email, setEmail] = useState(currentUser.email || "");
+  const [userLocale, setUserLocale] = useState(currentUser.locale || currentContextLocale || "es");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -152,6 +154,22 @@ export function EditProfileModal({
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
+          </div>
+
+          {/* Idioma preferido */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              {t("common.language")}
+            </label>
+            <select
+              name="locale"
+              value={userLocale}
+              onChange={(e) => setUserLocale(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium cursor-pointer"
+            >
+              <option value="es">🇪🇸 Español</option>
+              <option value="en">🇬🇧 English</option>
+            </select>
           </div>
 
           {/* Sección de cambio de contraseña */}

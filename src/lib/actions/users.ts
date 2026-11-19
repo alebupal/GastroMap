@@ -24,6 +24,7 @@ export interface SafeUser {
   email: string;
   role: string;
   status: string;
+  locale: string;
   lastLoginAt: Date | null;
   createdAt: Date;
 }
@@ -45,6 +46,7 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
       email: users.email,
       role: users.role,
       status: users.status,
+      locale: users.locale,
       lastLoginAt: users.lastLoginAt,
       createdAt: users.createdAt,
     })
@@ -138,6 +140,7 @@ export interface UpdateUserData {
   email: string;
   role?: "admin" | "user";
   status?: "active" | "disabled";
+  locale?: string;
   newPassword?: string;
 }
 
@@ -218,6 +221,10 @@ export async function updateUserByAdminAction(userId: string, data: UpdateUserDa
     if (data.status === "disabled") {
       await db.delete(sessions).where(eq(sessions.userId, userId));
     }
+  }
+
+  if (data.locale && (data.locale === "es" || data.locale === "en")) {
+    updateFields.locale = data.locale;
   }
 
   if (data.newPassword && data.newPassword.trim().length > 0) {
@@ -362,6 +369,17 @@ export async function updateMyProfileAction(formData: FormData) {
     updatedAt: new Date(),
   };
 
+  const locale = (formData.get("locale") as string)?.trim().toLowerCase();
+  if (locale && (locale === "es" || locale === "en")) {
+    updateData.locale = locale;
+    const cookieStore = await (await import("next/headers")).cookies();
+    cookieStore.set("gastromap_locale", locale, {
+      path: "/",
+      maxAge: 31536000,
+      sameSite: "lax",
+    });
+  }
+
   // Si se desea cambiar la contraseña
   if (newPassword || currentPassword) {
     if (!currentPassword) {
@@ -446,6 +464,8 @@ export async function createUserDirectlyAction(formData: FormData) {
 
   const passwordHash = await hashPassword(password);
   const id = crypto.randomUUID();
+  const rawLocale = (formData.get("locale") as string)?.trim().toLowerCase();
+  const locale = rawLocale === "en" ? "en" : "es";
 
   await db.insert(users).values({
     id,
@@ -454,6 +474,7 @@ export async function createUserDirectlyAction(formData: FormData) {
     email,
     passwordHash,
     role,
+    locale,
     createdAt: new Date(),
     updatedAt: new Date(),
   });
