@@ -373,32 +373,46 @@ export function TaxonomyManager({ initialOccasions, initialTags, section }: Taxo
     setBulkDeleteModal(null);
   }
 
+  const headerIcon =
+    section === "occasions" ? "🍽️" : section === "tags" ? "🏷️" : "🏷️";
+  const headerTitle =
+    section === "occasions"
+      ? `Categorías / Planes (${initialOccasions.length})`
+      : section === "tags"
+      ? `Etiquetas / Especialidades (${initialTags.length})`
+      : "Taxonomía y Clasificaciones";
+  const headerDesc =
+    section === "occasions"
+      ? "Crea, renombra, combina, elimina varias y limpia categorías vacías"
+      : section === "tags"
+      ? "Renombra, combina, elimina varias y limpia etiquetas vacías"
+      : "Administra, renombra, combina, elimina varias y limpia categorías y etiquetas vacías";
+
   return (
     <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs text-left">
-      {!section && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🏷️</span>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                Taxonomía y Clasificaciones
-              </h3>
-              <p className="text-xs text-slate-500">
-                Administra, renombra, combina, elimina varias y limpia categorías y etiquetas vacías
-              </p>
-            </div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-xl shrink-0">{headerIcon}</span>
+          <div className="min-w-0">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+              {headerTitle}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+              {headerDesc}
+            </p>
           </div>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 transition active:scale-95 cursor-pointer"
-          >
-            {isOpen ? "Cerrar" : "Gestionar"}
-          </button>
         </div>
-      )}
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition active:scale-95 cursor-pointer shrink-0"
+        >
+          {isOpen ? "Ocultar" : "Gestionar"}
+        </button>
+      </div>
 
-      {(section || isOpen) && (
-        <div className={section ? "space-y-4" : "mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4"}>
+      {isOpen && (
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
           {/* Mensajes de feedback */}
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
