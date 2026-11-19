@@ -10,7 +10,8 @@ import {
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
-import { parseCityCountry } from "@/lib/location";
+import { parseCityCountry, findCountry } from "@/lib/location";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
@@ -56,6 +57,21 @@ export function PlacesTableManager({
 
     return { allCountries: countries, availableCities: cities };
   }, [placesList, countryFilter]);
+  const countryOptions = useMemo(() => {
+    return allCountries.map((c) => ({
+      value: c,
+      label: c,
+      icon: findCountry(c)?.flag || "🌍",
+    }));
+  }, [allCountries]);
+
+  const cityOptions = useMemo(() => {
+    return availableCities.map((city) => ({
+      value: city,
+      label: city,
+      icon: "📍",
+    }));
+  }, [availableCities]);
 
   // Sitios filtrados en la tabla
   const filteredPlaces = useMemo(() => {
@@ -226,40 +242,40 @@ export function PlacesTableManager({
           </div>
 
           {allCountries.length > 0 && (
-            <select
+            <SearchableSelect
               value={countryFilter}
-              onChange={(e) => {
-                setCountryFilter(e.target.value);
+              onChange={(val) => {
+                setCountryFilter(val);
                 setCityFilter("all");
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
-            >
-              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
-              {allCountries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={countryOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_countries")} (${allCountries.length})`,
+                icon: "🌍",
+              }}
+              searchPlaceholder={t("places.search_country_placeholder")}
+              className="shrink-0"
+            />
           )}
 
           {availableCities.length > 0 && (
-            <select
+            <SearchableSelect
               value={cityFilter}
-              onChange={(e) => {
-                setCityFilter(e.target.value);
+              onChange={(val) => {
+                setCityFilter(val);
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 shrink-0"
-            >
-              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
-              {availableCities.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={cityOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_cities")} (${availableCities.length})`,
+                icon: "🏙️",
+              }}
+              searchPlaceholder={t("places.search_city_placeholder")}
+              className="shrink-0"
+            />
           )}
         </div>
 

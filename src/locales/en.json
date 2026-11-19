@@ -90,6 +90,8 @@
     "group_count_multiple": "{count} groups",
     "all_countries": "All countries",
     "all_cities": "All cities",
+    "search_country_placeholder": "Search country...",
+    "search_city_placeholder": "Search city...",
     "country_filter": "Country",
     "city_filter": "City",
     "remove_favorite": "Remove from favorites",
@@ -121,6 +123,7 @@
   },
   "location": {
     "title": "Location & Coordinates",
+    "search_label": "Search address on map",
     "any_country": "🌍 Any country",
     "spain_ine": "🇪🇸 Spain (INE)",
     "search_placeholder": "🔎 Search street, neighborhood, restaurant or city...",

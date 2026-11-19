@@ -16,7 +16,8 @@ import {
   type SavedFilterItem,
 } from "@/lib/actions/saved-filters";
 import { getMyGroupsAction } from "@/lib/actions/groups";
-import { parseCityCountry } from "@/lib/location";
+import { parseCityCountry, findCountry } from "@/lib/location";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -307,6 +308,22 @@ export function PlacesExplorer({
 
     return { allCountries: countries, availableCities: cities };
   }, [initialPlaces, selectedCountry]);
+
+  const countryOptions = useMemo(() => {
+    return allCountries.map((c) => ({
+      value: c,
+      label: c,
+      icon: findCountry(c)?.flag || "🌍",
+    }));
+  }, [allCountries]);
+
+  const cityOptions = useMemo(() => {
+    return availableCities.map((city) => ({
+      value: city,
+      label: city,
+      icon: "📍",
+    }));
+  }, [availableCities]);
 
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
@@ -916,42 +933,42 @@ export function PlacesExplorer({
 
         {/* Línea 2: Filtro rápido de precio numérico (acumulable en su propia línea o continuación en desktop) */}
         <HorizontalScroll className="flex items-center gap-1.5 text-xs">
-          {/* Filtros de País y Ciudad */}
+          {/* Filtros de País y Ciudad con buscador */}
           {allCountries.length > 0 && (
-            <select
+            <SearchableSelect
               value={selectedCountry}
-              onChange={(e) => {
-                setSelectedCountry(e.target.value);
+              onChange={(val) => {
+                setSelectedCountry(val);
                 setSelectedCity("all");
                 setCurrentPage(1);
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0"
-            >
-              <option value="all">🌍 {t("places.all_countries")} ({allCountries.length})</option>
-              {allCountries.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={countryOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_countries")} (${allCountries.length})`,
+                icon: "🌍",
+              }}
+              searchPlaceholder={t("places.search_country_placeholder")}
+              className="shrink-0"
+            />
           )}
 
           {availableCities.length > 0 && (
-            <select
+            <SearchableSelect
               value={selectedCity}
-              onChange={(e) => {
-                setSelectedCity(e.target.value);
+              onChange={(val) => {
+                setSelectedCity(val);
                 setCurrentPage(1);
               }}
-              className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer shadow-xs shrink-0"
-            >
-              <option value="all">🏙️ {t("places.all_cities")} ({availableCities.length})</option>
-              {availableCities.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              options={cityOptions}
+              allOption={{
+                value: "all",
+                label: `${t("places.all_cities")} (${availableCities.length})`,
+                icon: "🏙️",
+              }}
+              searchPlaceholder={t("places.search_city_placeholder")}
+              className="shrink-0"
+            />
           )}
 
           <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>

@@ -90,6 +90,8 @@
     "group_count_multiple": "{count} grupos",
     "all_countries": "Todos los países",
     "all_cities": "Todas las ciudades",
+    "search_country_placeholder": "Buscar país...",
+    "search_city_placeholder": "Buscar ciudad...",
     "country_filter": "País",
     "city_filter": "Ciudad",
     "remove_favorite": "Quitar de favoritos",
@@ -121,6 +123,7 @@
   },
   "location": {
     "title": "Localización y Coordenadas",
+    "search_label": "Buscador de dirección en mapa",
     "any_country": "🌍 Cualquier país",
     "spain_ine": "🇪🇸 España (INE)",
     "search_placeholder": "🔎 Buscar calle, barrio, restaurante o ciudad del mundo...",
