@@ -48,7 +48,11 @@ export function PlaceCard({
   async function handleDelete() {
     if (!confirm(`¿Eliminar "${place.name}" de GastroMap?`)) return;
     setDeleting(true);
-    await deletePlaceAction(place.id);
+    const res = await deletePlaceAction(place.id);
+    if (res?.error) {
+      setDeleting(false);
+      alert(res.error);
+    }
   }
 
   async function handleToggleFavorite() {
@@ -107,12 +111,23 @@ export function PlaceCard({
               </span>
             )}
 
-            {/* Indicador de ficha privada */}
-            {!place.communityPublished && (
+            {/* Indicador de ficha privada o compartida con grupos */}
+            {!place.communityPublished &&
+              place.sharedGroupNames &&
+              place.sharedGroupNames.length > 0 ? (
+              place.sharedGroupNames.map((gName) => (
+                <span
+                  key={gName}
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60"
+                >
+                  👥 {gName}
+                </span>
+              ))
+            ) : !place.communityPublished ? (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                 🔒 Privado
               </span>
-            )}
+            ) : null}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { logoutAction } from "@/lib/actions/auth";
 import { EditProfileModal } from "./EditProfileModal";
+import { GroupsModal } from "./GroupsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface UserHeaderProps {
@@ -17,6 +18,7 @@ interface UserHeaderProps {
 
 export function UserHeader({ currentUser }: UserHeaderProps) {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isGroupsOpen, setIsGroupsOpen] = useState(false);
 
   const displayUsername = currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "");
 
@@ -44,6 +46,17 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Selector de modo claro / modo oscuro */}
           <ThemeToggle />
+
+          {/* Mis Grupos Privados */}
+          <button
+            type="button"
+            onClick={() => setIsGroupsOpen(true)}
+            className="w-8 h-8 sm:w-auto p-1.5 sm:px-2.5 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+            title="Mis grupos privados"
+          >
+            <span className="text-sm">👥</span>
+            <span className="hidden md:inline text-[11px] font-bold">Grupos</span>
+          </button>
 
           {/* Enlaces de comunidad: GitHub y PayPal */}
           <div className="hidden sm:flex items-center gap-1.5 mr-1">
@@ -116,6 +129,13 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
         currentUser={currentUser}
+      />
+
+      {/* Modal de gestión de grupos privados */}
+      <GroupsModal
+        isOpen={isGroupsOpen}
+        onClose={() => setIsGroupsOpen(false)}
+        currentUserId={currentUser.id}
       />
     </>
   );

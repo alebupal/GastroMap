@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
+import { getMyGroupsAction } from "@/lib/actions/groups";
 import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
@@ -48,10 +49,20 @@ export function EditPlaceModal({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(place.occasions || []);
   const [notes, setNotes] = useState(place.notes || "");
   const [communityPublished, setCommunityPublished] = useState<boolean>(place.communityPublished);
+  const [availableGroups, setAvailableGroups] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(place.sharedGroupIds || []);
 
   const [resolving, setResolving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getMyGroupsAction()
+        .then((groups) => setAvailableGroups(groups.map((g) => ({ id: g.id, name: g.name }))))
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -102,6 +113,9 @@ export function EditPlaceModal({
 
     formData.delete("occasions");
     selectedOccasions.forEach((occ) => formData.append("occasions", occ));
+
+    formData.delete("sharedGroups");
+    selectedGroupIds.forEach((gid) => formData.append("sharedGroups", gid));
 
     const res = await updatePlaceAction(place.id, formData);
     setSaving(false);
@@ -343,6 +357,40 @@ export function EditPlaceModal({
                 <span>Privado (Solo yo)</span>
               </button>
             </div>
+
+            {availableGroups.length > 0 && (
+              <div className="mt-2.5 space-y-1.5">
+                <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  👥 Compartir con grupos privados:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {availableGroups.map((g) => {
+                    const active = selectedGroupIds.includes(g.id);
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedGroupIds((prev) =>
+                            prev.includes(g.id)
+                              ? prev.filter((id) => id !== g.id)
+                              : [...prev, g.id]
+                          )
+                        }
+                        className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${
+                          active
+                            ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                            : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                        }`}
+                      >
+                        <span>👥 {g.name}</span>
+                        {active && <span className="text-[10px]">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Acciones */}

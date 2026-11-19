@@ -25,6 +25,7 @@ interface NewPlaceFormProps {
   initialTitle?: string;
   availableOccasions: Occasion[];
   popularTags?: string[];
+  availableGroups?: Array<{ id: string; name: string }>;
 }
 
 export function NewPlaceForm({
@@ -32,6 +33,7 @@ export function NewPlaceForm({
   initialTitle = "",
   availableOccasions,
   popularTags = [],
+  availableGroups = [],
 }: NewPlaceFormProps) {
   const [url, setUrl] = useState(initialUrl);
   const [name, setName] = useState(initialTitle);
@@ -45,6 +47,7 @@ export function NewPlaceForm({
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
   const [isCommunityPublished, setIsCommunityPublished] = useState(true);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -345,6 +348,42 @@ export function NewPlaceForm({
           name="communityPublished"
           value={isCommunityPublished ? "true" : "false"}
         />
+
+        {/* Compartición con grupos privados (opcional, acumulable) */}
+        {availableGroups.length > 0 && (
+          <div className="mt-2.5 space-y-1.5">
+            <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              👥 Compartir con grupos privados (opcional):
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {availableGroups.map((g) => {
+                const active = selectedGroupIds.includes(g.id);
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedGroupIds((prev) =>
+                        prev.includes(g.id) ? prev.filter((id) => id !== g.id) : [...prev, g.id]
+                      )
+                    }
+                    className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${
+                      active
+                        ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    <span>👥 {g.name}</span>
+                    {active && <span className="text-[10px]">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+            {selectedGroupIds.map((gid) => (
+              <input key={gid} type="hidden" name="sharedGroups" value={gid} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Botones de acción */}

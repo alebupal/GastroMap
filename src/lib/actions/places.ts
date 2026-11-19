@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq, desc, and, isNotNull, sql, inArray } from "drizzle-orm";
+import { eq, ne, desc, and, or, isNotNull, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import {
   places,
@@ -12,6 +12,10 @@ import {
   users,
   userPlaces,
   placeComments,
+  sharingGroups,
+  sharingGroupMembers,
+  placeGroupAccess,
+  placeUserAccess,
   type Place,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -36,6 +40,8 @@ export interface PlaceWithDetails extends Place {
   privateNotes?: string | null;
   commentsCount?: number;
   experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
+  sharedGroupIds?: string[];
+  sharedGroupNames?: string[];
 }
 
 export interface UserCoordinates {
@@ -143,12 +149,34 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
 
   const uniqueTags = Array.from(new Set(formTags));
   if (uniqueTags.length > 0) {
+    await db
+      .insert(tags)
+      .values(uniqueTags.map((t) => ({ id: t, name: t })))
+      .onConflictDoNothing();
+
     await db.insert(placeTags).values(
       uniqueTags.map((t) => ({
         placeId: newPlace.id,
         tag: t,
       }))
     );
+  }
+
+  // 4. Compartición con grupos privados seleccionados
+  const sharedGroupIds = Array.from(
+    new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean))
+  );
+  if (sharedGroupIds.length > 0) {
+    await db
+      .insert(placeGroupAccess)
+      .values(
+        sharedGroupIds.map((groupId) => ({
+          placeId: newPlace.id,
+          groupId,
+          grantedBy: currentUser.id,
+        }))
+      )
+      .onConflictDoNothing();
   }
 
   revalidatePath("/");
@@ -213,6 +241,38 @@ export async function updatePlaceAction(
     .map((t) => t.trim().toLowerCase())
     .filter((t) => t.length > 0);
   const uniqueTags = Array.from(new Set(formTags));
+  const sharedGroupIds = Array.from(
+    new Set((formData.getAll("sharedGroups") as string[]).filter(Boolean))
+  );
+
+  // Regla 4.5: si un usuario no-admin intenta pasar a estrictamente privado una ficha
+  // comunitaria que ya tiene colecciones o comentarios de otros usuarios, proteger los datos ajenos
+  if (
+    currentUser.role !== "admin" &&
+    existing.communityPublished &&
+    !communityPublished &&
+    sharedGroupIds.length === 0
+  ) {
+    const [otherSaves, otherComments] = await Promise.all([
+      db
+        .select({ id: userPlaces.id })
+        .from(userPlaces)
+        .where(and(eq(userPlaces.placeId, placeId), ne(userPlaces.userId, currentUser.id)))
+        .limit(1),
+      db
+        .select({ id: placeComments.id })
+        .from(placeComments)
+        .where(and(eq(placeComments.placeId, placeId), ne(placeComments.userId, currentUser.id)))
+        .limit(1),
+    ]);
+
+    if (otherSaves.length > 0 || otherComments.length > 0) {
+      return {
+        error:
+          "Otros usuarios ya tienen guardado o comentado este sitio. No se puede pasar a estrictamente privado para no perder sus datos.",
+      };
+    }
+  }
 
   // 1. Actualizar ficha principal
   await db
@@ -266,6 +326,23 @@ export async function updatePlaceAction(
     );
   }
 
+  // 4. Sincronizar compartición con grupos privados (solo el propietario controla la compartición)
+  if (isOwner) {
+    await db.delete(placeGroupAccess).where(eq(placeGroupAccess.placeId, placeId));
+    if (sharedGroupIds.length > 0) {
+      await db
+        .insert(placeGroupAccess)
+        .values(
+          sharedGroupIds.map((groupId) => ({
+            placeId,
+            groupId,
+            grantedBy: currentUser.id,
+          }))
+        )
+        .onConflictDoNothing();
+    }
+  }
+
   await logAudit({
     actorUserId: currentUser.id,
     entityType: "place",
@@ -299,7 +376,33 @@ export async function deletePlaceAction(placeId: string) {
     return { error: "No tienes permiso para eliminar este establecimiento." };
   }
 
+  // Regla 4.5: si un usuario no-admin intenta borrar una ficha compartida con actividad ajena,
+  // proteger los datos de otros miembros
+  if (currentUser.role !== "admin") {
+    const [otherSaves, otherComments] = await Promise.all([
+      db
+        .select({ id: userPlaces.id })
+        .from(userPlaces)
+        .where(and(eq(userPlaces.placeId, placeId), ne(userPlaces.userId, currentUser.id)))
+        .limit(1),
+      db
+        .select({ id: placeComments.id })
+        .from(placeComments)
+        .where(and(eq(placeComments.placeId, placeId), ne(placeComments.userId, currentUser.id)))
+        .limit(1),
+    ]);
+
+    if (otherSaves.length > 0 || otherComments.length > 0) {
+      return {
+        error:
+          "Otros usuarios ya tienen guardado o comentado este establecimiento. No puedes eliminarlo directamente; pide a un administrador que lo gestione.",
+      };
+    }
+  }
+
   // Limpieza en cascada explícita de registros dependientes para garantizar integridad total
+  await db.delete(placeGroupAccess).where(eq(placeGroupAccess.placeId, placeId));
+  await db.delete(placeUserAccess).where(eq(placeUserAccess.placeId, placeId));
   await db.delete(placeComments).where(eq(placeComments.placeId, placeId));
   await db.delete(userPlaces).where(eq(userPlaces.placeId, placeId));
   await db.delete(placeOccasions).where(eq(placeOccasions.placeId, placeId));
@@ -363,13 +466,59 @@ export async function getAllPlaces(
   const whereConditions = [];
   const currentUser = await getCurrentUser();
 
-  // Regla de privacidad: mostrar si es público en la comunidad o si pertenece al usuario logueado
+  // Matriz acumulativa de permisos en servidor:
+  // Comunidad OR Propietario OR Grupo donde pertenece OR Acceso directo
   if (currentUser) {
-    whereConditions.push(
-      sql`(${places.communityPublished} = true OR ${places.createdById} = ${currentUser.id})`
+    const [memberGroups, ownedGroups, directAccessRows] = await Promise.all([
+      db
+        .select({ groupId: sharingGroupMembers.groupId })
+        .from(sharingGroupMembers)
+        .where(eq(sharingGroupMembers.userId, currentUser.id)),
+      db
+        .select({ groupId: sharingGroups.id })
+        .from(sharingGroups)
+        .where(eq(sharingGroups.ownerUserId, currentUser.id)),
+      db
+        .select({ placeId: placeUserAccess.placeId })
+        .from(placeUserAccess)
+        .where(eq(placeUserAccess.userId, currentUser.id)),
+    ]);
+
+    const userGroupIds = Array.from(
+      new Set([
+        ...memberGroups.map((g) => g.groupId),
+        ...ownedGroups.map((g) => g.groupId),
+      ])
     );
+
+    let groupPlaceIds: string[] = [];
+    if (userGroupIds.length > 0) {
+      const groupAccessRows = await db
+        .select({ placeId: placeGroupAccess.placeId })
+        .from(placeGroupAccess)
+        .where(inArray(placeGroupAccess.groupId, userGroupIds));
+      groupPlaceIds = groupAccessRows.map((r) => r.placeId);
+    }
+
+    const sharedPlaceIds = Array.from(
+      new Set([...directAccessRows.map((r) => r.placeId), ...groupPlaceIds])
+    );
+
+    if (sharedPlaceIds.length > 0) {
+      whereConditions.push(
+        or(
+          eq(places.communityPublished, true),
+          eq(places.createdById, currentUser.id),
+          inArray(places.id, sharedPlaceIds)
+        )!
+      );
+    } else {
+      whereConditions.push(
+        or(eq(places.communityPublished, true), eq(places.createdById, currentUser.id))!
+      );
+    }
   } else {
-    whereConditions.push(sql`${places.communityPublished} = true`);
+    whereConditions.push(eq(places.communityPublished, true));
   }
 
   if (hasCoords && userCoords.radiusKm && userCoords.radiusKm > 0) {
@@ -416,11 +565,21 @@ export async function getAllPlaces(
         .from(placeTags)
         .where(eq(placeTags.placeId, place.id));
 
-      // Comentarios
-      const comments = await db
-        .select({ id: placeComments.id })
-        .from(placeComments)
-        .where(eq(placeComments.placeId, place.id));
+      // Comentarios y grupos con acceso
+      const [comments, groupLinks] = await Promise.all([
+        db
+          .select({ id: placeComments.id })
+          .from(placeComments)
+          .where(eq(placeComments.placeId, place.id)),
+        db
+          .select({
+            groupId: sharingGroups.id,
+            groupName: sharingGroups.name,
+          })
+          .from(placeGroupAccess)
+          .innerJoin(sharingGroups, eq(placeGroupAccess.groupId, sharingGroups.id))
+          .where(eq(placeGroupAccess.placeId, place.id)),
+      ]);
 
       // Interacción del usuario actual
       let isFavorite = false;
@@ -484,6 +643,8 @@ export async function getAllPlaces(
         privateNotes,
         commentsCount: comments.length,
         experienceStatus,
+        sharedGroupIds: groupLinks.map((g) => g.groupId),
+        sharedGroupNames: groupLinks.map((g) => g.groupName),
       };
     })
   );

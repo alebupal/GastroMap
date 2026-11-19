@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
+import { getMyGroupsAction } from "@/lib/actions/groups";
 import { NewPlaceForm } from "@/components/places/NewPlaceForm";
 
 export const dynamic = "force-dynamic";
@@ -19,12 +20,14 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     redirect("/login");
   }
 
-  const [occasions, allTags, params] = await Promise.all([
+  const [occasions, allTags, myGroups, params] = await Promise.all([
     getOccasions(),
     getTagsWithCount(),
+    getMyGroupsAction(),
     searchParams,
   ]);
   const popularTags = allTags.map((t) => t.name);
+  const availableGroups = myGroups.map((g) => ({ id: g.id, name: g.name }));
 
   // Extraer URL si venía en el texto compartido (habitual en WhatsApp/Twitter/Instagram)
   let initialUrl = params.url || "";
@@ -65,6 +68,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
           initialTitle={initialTitle}
           availableOccasions={occasions}
           popularTags={popularTags}
+          availableGroups={availableGroups}
         />
       </div>
     </div>
