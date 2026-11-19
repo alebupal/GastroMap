@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { PlaceCard } from "./PlaceCard";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { RandomPickerModal } from "./RandomPickerModal";
@@ -77,35 +78,47 @@ export function PlacesExplorer({
 
   // Grupos privados
   const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
+  const [mounted, setMounted] = useState(false);
   const [selectedGroupFilterIds, setSelectedGroupFilterIds] = useState<string[]>([]);
   const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
   const groupBtnRef = useRef<HTMLButtonElement>(null);
   const groupMenuRef = useRef<HTMLDivElement>(null);
   const [groupCoords, setGroupCoords] = useState<{ top: number; left: number } | null>(null);
 
-  // Posicionar menú emergente de grupos con coordenadas fijas (evita cortes de overflow-x)
   useEffect(() => {
-    function updateGroupCoords() {
-      if (groupBtnRef.current) {
-        const rect = groupBtnRef.current.getBoundingClientRect();
-        const popupWidth = window.innerWidth < 640 ? 256 : 288;
-        let left = rect.left;
-        if (left + popupWidth > window.innerWidth - 12) {
-          left = window.innerWidth - popupWidth - 12;
-        }
-        if (left < 12) left = 12;
-        setGroupCoords({
-          top: rect.bottom + 6,
-          left,
-        });
-      }
-    }
+    setMounted(true);
+  }, []);
 
-    if (isGroupFilterOpen) {
-      updateGroupCoords();
-      window.addEventListener("scroll", updateGroupCoords, true);
-      window.addEventListener("resize", updateGroupCoords);
+  // Posicionar menú emergente de grupos con coordenadas fijas (evita cortes de overflow-x)
+  const updateGroupCoords = () => {
+    if (groupBtnRef.current) {
+      const rect = groupBtnRef.current.getBoundingClientRect();
+      const popupWidth = window.innerWidth < 640 ? 256 : 288;
+      let left = rect.left;
+      if (left + popupWidth > window.innerWidth - 12) {
+        left = window.innerWidth - popupWidth - 12;
+      }
+      if (left < 12) left = 12;
+
+      const estimatedHeight = 260;
+      let top = rect.bottom + 6;
+      if (top + estimatedHeight > window.innerHeight - 12 && rect.top > estimatedHeight + 12) {
+        top = rect.top - estimatedHeight - 6;
+      }
+
+      setGroupCoords({
+        top,
+        left,
+      });
     }
+  };
+
+  useEffect(() => {
+    if (!isGroupFilterOpen) return;
+
+    updateGroupCoords();
+    window.addEventListener("scroll", updateGroupCoords, true);
+    window.addEventListener("resize", updateGroupCoords);
     return () => {
       window.removeEventListener("scroll", updateGroupCoords, true);
       window.removeEventListener("resize", updateGroupCoords);
@@ -934,7 +947,14 @@ export function PlacesExplorer({
               <button
                 ref={groupBtnRef}
                 type="button"
-                onClick={() => setIsGroupFilterOpen((prev) => !prev)}
+                onClick={() => {
+                  if (!isGroupFilterOpen) {
+                    updateGroupCoords();
+                    setIsGroupFilterOpen(true);
+                  } else {
+                    setIsGroupFilterOpen(false);
+                  }
+                }}
                 className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
                   ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
                   : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
@@ -951,59 +971,61 @@ export function PlacesExplorer({
                 <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
               </button>
 
-              {/* Popover desplegable visual de grupos privados (posición fixed flotante) */}
-              {isGroupFilterOpen && (
-                <div
-                  ref={groupMenuRef}
-                  style={{
-                    position: "fixed",
-                    top: groupCoords ? `${groupCoords.top}px` : "auto",
-                    left: groupCoords ? `${groupCoords.left}px` : "auto",
-                  }}
-                  className="z-[9999] w-64 sm:w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100"
-                >
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {t("places.filter_by_group")}
-                    </span>
-                    {selectedGroupFilterIds.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedGroupFilterIds([])}
-                        className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
-                      >
-                        {t("places.clear_filter")}
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-1">
-                    {myGroups.map((g) => {
-                      const isSelected = selectedGroupFilterIds.includes(g.id);
-                      return (
+              {/* Popover desplegable visual de grupos privados (renderizado en portal) */}
+              {mounted && isGroupFilterOpen && groupCoords &&
+                createPortal(
+                  <div
+                    ref={groupMenuRef}
+                    style={{
+                      position: "fixed",
+                      top: `${groupCoords.top}px`,
+                      left: `${groupCoords.left}px`,
+                    }}
+                    className="z-[9999] w-64 sm:w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100"
+                  >
+                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        {t("places.filter_by_group")}
+                      </span>
+                      {selectedGroupFilterIds.length > 0 && (
                         <button
-                          key={g.id}
                           type="button"
-                          onClick={() => {
-                            setSelectedGroupFilterIds((prev) =>
-                              prev.includes(g.id)
-                                ? prev.filter((id) => id !== g.id)
-                                : [...prev, g.id]
-                            );
-                          }}
-                          className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
-                            ? "bg-blue-600 text-white font-bold"
-                            : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                            }`}
+                          onClick={() => setSelectedGroupFilterIds([])}
+                          className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
                         >
-                          <span className="truncate">👥 {g.name}</span>
-                          {isSelected && <span className="text-xs">✓</span>}
+                          {t("places.clear_filter")}
                         </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      {myGroups.map((g) => {
+                        const isSelected = selectedGroupFilterIds.includes(g.id);
+                        return (
+                          <button
+                            key={g.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedGroupFilterIds((prev) =>
+                                prev.includes(g.id)
+                                  ? prev.filter((id) => id !== g.id)
+                                  : [...prev, g.id]
+                              );
+                            }}
+                            className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
+                              ? "bg-blue-600 text-white font-bold"
+                              : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                              }`}
+                          >
+                            <span className="truncate">👥 {g.name}</span>
+                            {isSelected && <span className="text-xs">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>,
+                  document.body
+                )}
             </div>
           )}
 
