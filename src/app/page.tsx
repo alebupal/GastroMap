@@ -9,7 +9,6 @@ import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
-import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
 
@@ -133,9 +132,6 @@ export default async function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Botón flotante discreto para subir arriba */}
-      <ScrollToTop />
     </div>
   );
 }

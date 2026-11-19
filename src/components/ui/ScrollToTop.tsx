@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import { useT } from "@/lib/i18n/client";
 
-export function ScrollToTop() {
+interface ScrollToTopProps {
+  className?: string;
+}
+
+export function ScrollToTop({ className = "" }: ScrollToTopProps) {
   const { t } = useT();
   const [visible, setVisible] = useState(false);
 
@@ -33,11 +37,11 @@ export function ScrollToTop() {
       onClick={scrollToTop}
       aria-label={t("common.scroll_to_top")}
       title={t("common.scroll_to_top")}
-      className={`fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 text-slate-300 hover:text-white dark:text-slate-200 border border-slate-700/60 dark:border-slate-700/80 shadow-md shadow-black/20 backdrop-blur-md transition-all duration-300 ease-out flex items-center justify-center cursor-pointer active:scale-90 ${
+      className={`fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900/80 hover:bg-slate-900 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 text-slate-300 hover:text-white dark:text-slate-200 border border-slate-700/60 dark:border-slate-700/80 shadow-md shadow-black/20 backdrop-blur-md transition-all duration-300 ease-out flex items-center justify-center cursor-pointer active:scale-90 ${
         visible
           ? "opacity-100 translate-y-0 pointer-events-auto"
           : "opacity-0 translate-y-3 pointer-events-none"
-      }`}
+      } ${className}`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

@@ -19,6 +19,7 @@ import {
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { ScrollToTop } from "@/components/ui/ScrollToTop";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -1721,7 +1722,7 @@ export function PlacesExplorer({
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}
       {selectedPlace && activeMobileView === "map" && (
-        <div className="lg:hidden fixed bottom-4 left-3 right-3 z-40 p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
+        <div className="lg:hidden fixed bottom-4 left-3 right-3 z-50 p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -1798,6 +1799,11 @@ export function PlacesExplorer({
           </div>
         </div>
       )}
+
+      {/* Botón flotante para subir arriba: en móvil solo en vista lista y si no hay tarjeta abierta */}
+      <ScrollToTop
+        className={activeMobileView === "map" || Boolean(selectedPlace) ? "hidden lg:flex" : "flex"}
+      />
     </div>
   );
 }
