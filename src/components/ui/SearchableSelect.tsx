@@ -49,6 +49,10 @@ export function SearchableSelect({
     return options.find((opt) => opt.value === value) || (allOption ? allOption : null);
   }, [value, options, allOption]);
 
+  const isFiltered = Boolean(
+    value && value !== "all" && (allOption ? value !== allOption.value : true)
+  );
+
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
   const displayIcon = selectedOption ? selectedOption.icon : undefined;
 
@@ -141,7 +145,11 @@ export function SearchableSelect({
           setIsOpen(!isOpen);
           setQuery("");
         }}
-        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 font-bold outline-none focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer shadow-xs transition shrink-0 ${buttonClassName}`}
+        className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold outline-none focus:outline-none focus:ring-0 focus-visible:outline-none cursor-pointer shadow-xs transition shrink-0 ${
+          isFiltered
+            ? "border-amber-500/50 bg-amber-500/15 text-amber-700 dark:text-amber-300"
+            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+        } ${buttonClassName}`}
       >
         <span className="flex items-center gap-1.5 truncate">
           {displayIcon && <span className="text-base shrink-0">{displayIcon}</span>}

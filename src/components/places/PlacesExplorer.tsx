@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { PlaceCard } from "./PlaceCard";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { RandomPickerModal } from "./RandomPickerModal";
@@ -79,6 +79,66 @@ export function PlacesExplorer({
   const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedGroupFilterIds, setSelectedGroupFilterIds] = useState<string[]>([]);
   const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
+  const groupBtnRef = useRef<HTMLButtonElement>(null);
+  const groupMenuRef = useRef<HTMLDivElement>(null);
+  const [groupCoords, setGroupCoords] = useState<{ top: number; left: number } | null>(null);
+
+  // Posicionar menú emergente de grupos con coordenadas fijas (evita cortes de overflow-x)
+  useEffect(() => {
+    function updateGroupCoords() {
+      if (groupBtnRef.current) {
+        const rect = groupBtnRef.current.getBoundingClientRect();
+        const popupWidth = window.innerWidth < 640 ? 256 : 288;
+        let left = rect.left;
+        if (left + popupWidth > window.innerWidth - 12) {
+          left = window.innerWidth - popupWidth - 12;
+        }
+        if (left < 12) left = 12;
+        setGroupCoords({
+          top: rect.bottom + 6,
+          left,
+        });
+      }
+    }
+
+    if (isGroupFilterOpen) {
+      updateGroupCoords();
+      window.addEventListener("scroll", updateGroupCoords, true);
+      window.addEventListener("resize", updateGroupCoords);
+    }
+    return () => {
+      window.removeEventListener("scroll", updateGroupCoords, true);
+      window.removeEventListener("resize", updateGroupCoords);
+    };
+  }, [isGroupFilterOpen]);
+
+  // Cerrar popover de grupos al hacer clic fuera o pulsar Escape
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
+      if (
+        groupBtnRef.current &&
+        !groupBtnRef.current.contains(target) &&
+        groupMenuRef.current &&
+        !groupMenuRef.current.contains(target)
+      ) {
+        setIsGroupFilterOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setIsGroupFilterOpen(false);
+      }
+    }
+    if (isGroupFilterOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isGroupFilterOpen]);
 
   // Paginación en modo lista
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -832,114 +892,121 @@ export function PlacesExplorer({
         </div>
       )}
 
-      {/* Píldoras Rápidas de Colección y Experiencia */}
-      <HorizontalScroll className="flex items-center gap-1.5 pb-1 text-xs">
-        {[
-          { key: "all", label: t("places.all"), icon: "🌐" },
-          { key: "favorite", label: t("places.favorites"), icon: "⭐" },
-          { key: "pending", label: t("places.want_to_go"), icon: "🕒" },
-          { key: "visited_by_me", label: t("places.visited"), icon: "✅" },
-          { key: "visited_by_others", label: t("places.friends"), icon: "👥" },
-          { key: "untried", label: t("places.unexplored"), icon: "✨" },
-        ].map((item) => {
-          const active = experienceFilter === item.key;
-          return (
-            <button
-              key={item.key}
-              type="button"
-              onClick={() =>
-                setExperienceFilter(
-                  active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter)
-                )
-              }
-              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs ${active
-                ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-950 shadow-md"
-                : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
-                }`}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </HorizontalScroll>
-
-      {/* Filtros Específicos: Grupos Privados y Rangos de Precio (En líneas distintas en móvil para mayor claridad) */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 pb-1 text-xs">
-        {/* Línea 1: Filtro por Grupos Privados (si el usuario tiene grupos) */}
-        {myGroups.length > 0 && (
-          <div className="relative shrink-0 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsGroupFilterOpen((prev) => !prev)}
-              className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
-                ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
-            >
-              <span>👥</span>
-              <span>
-                {selectedGroupFilterIds.length === 0
-                  ? t("places.groups_filter")
-                  : selectedGroupFilterIds.length === 1
-                    ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
-                    : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
-              </span>
-              <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
-            </button>
-
-            {/* Popover desplegable visual de grupos privados */}
-            {isGroupFilterOpen && (
-              <div className="absolute top-full left-0 mt-2 z-50 w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100">
-                <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    {t("places.filter_by_group")}
-                  </span>
-                  {selectedGroupFilterIds.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedGroupFilterIds([])}
-                      className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
-                    >
-                      {t("places.clear_filter")}
-                    </button>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  {myGroups.map((g) => {
-                    const isSelected = selectedGroupFilterIds.includes(g.id);
-                    return (
-                      <button
-                        key={g.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedGroupFilterIds((prev) =>
-                            prev.includes(g.id)
-                              ? prev.filter((id) => id !== g.id)
-                              : [...prev, g.id]
-                          );
-                        }}
-                        className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
-                          ? "bg-blue-600 text-white font-bold"
-                          : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                          }`}
-                      >
-                        <span className="truncate">👥 {g.name}</span>
-                        {isSelected && <span className="text-xs">✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
-          </div>
-        )}
-
-        {/* Línea 2: Filtro rápido de precio numérico (acumulable en su propia línea o continuación en desktop) */}
+      {/* Contenedor ordenado de filtros de colección y segmentación */}
+      <div className="space-y-1.5 pb-1">
+        {/* Fila 1: Píldoras Rápidas de Colección y Experiencia */}
         <HorizontalScroll className="flex items-center gap-1.5 text-xs">
+          {[
+            { key: "all", label: t("places.all"), icon: "🌐" },
+            { key: "favorite", label: t("places.favorites"), icon: "⭐" },
+            { key: "pending", label: t("places.want_to_go"), icon: "🕒" },
+            { key: "visited_by_me", label: t("places.visited"), icon: "✅" },
+            { key: "visited_by_others", label: t("places.friends"), icon: "👥" },
+            { key: "untried", label: t("places.unexplored"), icon: "✨" },
+          ].map((item) => {
+            const active = experienceFilter === item.key;
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() =>
+                  setExperienceFilter(
+                    active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter)
+                  )
+                }
+                className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs ${active
+                  ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-950 shadow-md"
+                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
+                  }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </HorizontalScroll>
+
+        {/* Fila 2: Segmentación por Grupos, Ubicación (País/Ciudad) y Presupuesto */}
+        <HorizontalScroll className="flex items-center gap-1.5 text-xs">
+          {/* Filtro por Grupos Privados */}
+          {myGroups.length > 0 && (
+            <div className="relative shrink-0">
+              <button
+                ref={groupBtnRef}
+                type="button"
+                onClick={() => setIsGroupFilterOpen((prev) => !prev)}
+                className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
+                  ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
+                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                  }`}
+              >
+                <span>👥</span>
+                <span>
+                  {selectedGroupFilterIds.length === 0
+                    ? t("places.groups_filter")
+                    : selectedGroupFilterIds.length === 1
+                      ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
+                      : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
+                </span>
+                <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
+              </button>
+
+              {/* Popover desplegable visual de grupos privados (posición fixed flotante) */}
+              {isGroupFilterOpen && (
+                <div
+                  ref={groupMenuRef}
+                  style={{
+                    position: "fixed",
+                    top: groupCoords ? `${groupCoords.top}px` : "auto",
+                    left: groupCoords ? `${groupCoords.left}px` : "auto",
+                  }}
+                  className="z-[9999] w-64 sm:w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100"
+                >
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                      {t("places.filter_by_group")}
+                    </span>
+                    {selectedGroupFilterIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedGroupFilterIds([])}
+                        className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
+                      >
+                        {t("places.clear_filter")}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    {myGroups.map((g) => {
+                      const isSelected = selectedGroupFilterIds.includes(g.id);
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedGroupFilterIds((prev) =>
+                              prev.includes(g.id)
+                                ? prev.filter((id) => id !== g.id)
+                                : [...prev, g.id]
+                            );
+                          }}
+                          className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
+                            ? "bg-blue-600 text-white font-bold"
+                            : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            }`}
+                        >
+                          <span className="truncate">👥 {g.name}</span>
+                          {isSelected && <span className="text-xs">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Filtros de País y Ciudad con selector y buscador integrado */}
           {allCountries.length > 0 && (
             <SearchableSelect
@@ -978,8 +1045,9 @@ export function PlacesExplorer({
             />
           )}
 
-          <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
 
+          {/* Filtros de Rango de Precio */}
           {[
             { id: "€", label: "< 15 €" },
             { id: "€€", label: "15 - 30 €" },
@@ -992,7 +1060,7 @@ export function PlacesExplorer({
                 key={item.id}
                 type="button"
                 onClick={() => togglePrice(item.id)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${active
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${active
                   ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
                   : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
