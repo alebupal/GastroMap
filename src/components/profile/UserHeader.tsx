@@ -37,9 +37,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                 v0.1.0
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-              Gestor Gastronómico Privado
-            </p>
           </div>
         </a>
 
