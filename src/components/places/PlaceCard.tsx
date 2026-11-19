@@ -31,6 +31,7 @@ interface PlaceCardProps {
   onSelectOnMap?: () => void;
   isCompared?: boolean;
   onToggleCompare?: () => void;
+  isSelected?: boolean;
 }
 
 export function PlaceCard({
@@ -43,6 +44,7 @@ export function PlaceCard({
   onSelectOnMap,
   isCompared = false,
   onToggleCompare,
+  isSelected = false,
 }: PlaceCardProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -91,7 +93,11 @@ export function PlaceCard({
   return (
     <div
       id={`place-card-${place.id}`}
-      className="w-full p-4 sm:p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl transition-all duration-200 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs"
+      className={`w-full p-4 sm:p-5 rounded-3xl border transition-all duration-300 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs ${
+        isSelected
+          ? "border-amber-500 ring-2 ring-amber-500/50 shadow-xl bg-amber-500/5 dark:bg-amber-500/10"
+          : "border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl"
+      }`}
     >
       <div>
         {/* Fila superior: Estado personal, Experiencia, Favorito y Precio */}
