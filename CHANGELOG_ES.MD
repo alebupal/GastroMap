@@ -85,3 +85,23 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Vistas adaptadas para smartphones: conmutador rápido «🗺️ Mapa» y «📋 Lista», `ResizeObserver` para recálculo de dimensiones del mapa sin pérdidas de tiles y scrolls táctiles fluidos.
 - **Donación PayPal y Enlaces al estilo TVSpy**:
   - Enlaces a GitHub, Docker Hub y botón de donación con PayPal (`paypal.me/alebupal`).
+- **Edición de Sitios, Estado del Local, Detección de Duplicados y Fusión**:
+  - Modal de edición completa de establecimientos (`EditPlaceModal`) incluyendo estado del local (`active`, `temporarily_closed`, `permanently_closed`, `unverified`), visibilidad y grupos de compartición.
+  - Detección automática de posibles duplicados en el alta (`/new`) por similitud de nombre y cercanía, más fusión administrativa de establecimientos (`mergePlacesAction`) preservando comentarios, visitas, colecciones y taxonomías.
+  - Edición inline de comentarios propios (`PlaceCommentsThread`) y selector de ordenación de lista (Recientes, Cercanía, Mi valoración, A-Z, Precio).
+- **Clustering Dinámico en Mapa, Badges Personales y Filtros Escalables**:
+  - Clustering nativo en Leaflet (`MapView.tsx`) con badges de estado personal (favorito, visitado, pendiente) directamente en los marcadores.
+  - Buscador en vivo, ordenación por frecuencia de uso y carga progresiva «Mostrar más» para etiquetas y categorías en explorador y formularios (`TagInput`, `OccasionPicker`, `PlacesExplorer`).
+  - Paginación reutilizable (`PaginationBar`) en tablas de administración (`PlacesTableManager`, `UsersManager`, `TaxonomyManager`) y pestaña de Taxonomía reorganizada en dos bloques independientes ya desplegados (Categorías y Etiquetas).
+- **Filtros Guardados, Grupos Privados, Gestión de Usuarios y Auditoría**:
+  - Filtros guardados (`saved_filters`) por usuario para recuperar combinaciones habituales en un clic.
+  - Grupos privados de compartición (`GroupsModal`, `place_group_access`) con permisos acumulativos en servidor y protección al privatizar o borrar fichas con actividad ajena.
+  - Activación/desactivación de usuarios (`status`, `last_login_at`) y registro + visor de auditoría administrativa (`audit_logs`, `AuditLogViewer`).
+- **Historial de Visitas, Estadísticas de Usuario/Admin y Resumen Anual «Wrapped»**:
+  - Diario detallado de visitas por establecimiento (`place_visits`, `PlaceVisitsModal`) con fecha, nota y valoración opcional.
+  - Panel de estadísticas personales (`StatsModal`) accesible para cualquier usuario con resumen global y **«Wrapped»** anual interactivo con selector de año.
+  - Panel de estadísticas globales completas para administradores (`AdminStatsPanel`) con KPIs de plataforma, pulso de los últimos 30 días, top contribuidores, sitios más populares y distribuciones del catálogo.
+- **Importación / Exportación, Comparador y Caché Offline PWA**:
+  - Exportación multiformato (JSON, CSV, GeoJSON, KML) e importación con vista previa (JSON, GeoJSON, Google Takeout, CSV) desde `ExportImportModal`.
+  - Comparador de establecimientos lado a lado (`ComparePlacesModal`) para hasta 3 sitios con barra flotante de selección.
+  - Service Worker (`/sw.js`) con estrategia Network-First, caché local de favoritos/pendientes y aviso de modo sin conexión.

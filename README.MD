@@ -31,18 +31,27 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **🔒 Privacy & Community:**
   * Self-hosted on your own infrastructure (Docker).
-  * Invitation-only access for your inner circle.
-  * Space for private personal notes as well as collaborative shared comments on each place.
+  * Invitation-only access for your inner circle and **private sharing groups** (`👥 Groups`) with cumulative server-side permissions.
+  * Private personal notes, detailed **visit history log** (`📅`), and collaborative editable comments on each place.
 
-* **📱 Mobile Experience (PWA) & Dark/Light Mode:**
-  * Installable on iOS and Android home screens as a Progressive Web App.
+* **📊 Personal Statistics, Annual «Wrapped» & Admin Analytics:**
+  * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary by year.
+  * Extended platform-wide analytics for administrators: KPIs, 30-day activity pulse, top contributors, popular places, and catalog breakdowns.
+
+* **⚖️ Comparator, Saved Filters & Import / Export:**
+  * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
+  * Saved filter presets (`💾`), multi-criteria sorting, and live searchable taxonomies with progressive «Show more» loading.
+  * Export in **JSON, CSV, GeoJSON, and KML** and import from **JSON, GeoJSON, Google Takeout, and CSV** with preview.
+
+* **📱 Mobile Experience (PWA), Offline Cache & Dark/Light Mode:**
+  * Installable on iOS and Android home screens as a Progressive Web App with **Service Worker offline caching** (`/sw.js`) for favorites and pending places.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage and high-contrast color palettes tailored for day and night use.
-  * Single-hand touch optimization, ultra-compact header for narrow smartphone screens, mobile map/list split toggle, and smooth swipe carousels.
+  * Single-hand touch optimization, ultra-compact header for narrow smartphone screens, prominent mobile map/list switcher, and smooth swipe carousels.
 
 * **🛠️ Admin Dashboard & Database Integrity:**
-  * Interactive global places table manager with real-time search and multi-select bulk deletion.
-  * Strict taxonomy management: bulk delete categories/tags and «🧹 Delete empty» with pre-confirmation modals.
-  * Cascade deletion integrity: removing a place or user atomically purges all comments, notes, and relational dependencies without leaving orphaned records.
+  * Paginated global places table with duplicate merging, bulk deletion, user activation/deactivation, and an administrative **Audit Log**.
+  * Strict taxonomy management: dedicated Categories and Tags sections, bulk delete, and «🧹 Delete empty» with pre-confirmation modals.
+  * Cascade deletion integrity: removing a place or user atomically purges all comments, notes, visits, and relational dependencies without leaving orphaned records.
 
 ---
 

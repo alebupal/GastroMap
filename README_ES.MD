@@ -29,18 +29,27 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **🔒 Privacidad y Comunidad:**
   * Despliegue privado bajo servidor propio (Docker).
-  * Acceso por invitación para tu círculo cercano (familia, pareja, amigos).
-  * Espacios para notas personales privadas y comentarios colaborativos compartidos en cada ficha.
+  * Acceso por invitación para tu círculo cercano y **grupos privados de compartición** (`👥 Grupos`) con permisos acumulativos en servidor.
+  * Notas personales privadas, **historial detallado de visitas** (`📅`) y comentarios colaborativos editables en cada ficha.
 
-* **📱 Experiencia Móvil (PWA) y Modo Oscuro / Claro:**
-  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App.
+* **📊 Estadísticas Personales, «Wrapped» Anual y Analítica Admin:**
+  * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año.
+  * Panel de estadísticas globales completas para administradores: KPIs de plataforma, pulso de los últimos 30 días, top contribuidores, sitios más populares y distribuciones del catálogo.
+
+* **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
+  * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
+  * Filtros guardados (`💾`), ordenación multicriterio y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
+  * Exportación en **JSON, CSV, GeoJSON y KML** e importación desde **JSON, GeoJSON, Google Takeout y CSV** con vista previa.
+
+* **📱 Experiencia Móvil (PWA), Caché Offline y Modo Oscuro / Claro:**
+  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline** (`/sw.js`) para consultar favoritos y pendientes sin conexión.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC) y con paletas cromáticas de alto contraste optimizadas para lectura diurna y nocturna.
-  * Interfaz optimizada para uso táctil con una sola mano, cabecera responsive ultra-compacta para teléfonos estrechos, alternador dinámico Mapa/Lista y carruseles con scroll fluido.
+  * Interfaz optimizada para uso táctil con una sola mano, cabecera responsive ultra-compacta, selector prominente Mapa/Lista y carruseles con scroll fluido.
 
 * **🛠️ Panel de Administración y Limpieza:**
-  * Tabla interactiva de gestión global de establecimientos con buscador y eliminación múltiple masiva.
-  * Limpieza estricta de taxonomía: borrado masivo de categorías/tags y botón «🧹 Eliminar vacías» con confirmación.
-  * Integridad referencial con borrado en cascada: al eliminar un usuario o local se purgan de forma atómica todos sus comentarios, reseñas y referencias sin dejar registros huérfanos.
+  * Tabla paginada de gestión global de establecimientos con fusión de duplicados, eliminación masiva, activación/desactivación de usuarios y **registro de auditoría**.
+  * Gestión avanzada de taxonomía con bloques independientes para Categorías y Etiquetas, borrado masivo y botón «🧹 Eliminar vacías» con confirmación.
+  * Integridad referencial con borrado en cascada: al eliminar un usuario o local se purgan de forma atómica todos sus comentarios, visitas, reseñas y referencias sin dejar registros huérfanos.
 
 ---
 

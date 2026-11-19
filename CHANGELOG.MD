@@ -80,3 +80,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Mobile split-view with fluid switching between «🗺️ Map» and «📋 List», touch-friendly scroll carousels, and responsive map layout recalculations with `ResizeObserver`.
 - **PayPal Support & TVSpy-style Ecosystem Links**:
   - Subtle PayPal donation button (`paypal.me/alebupal`), GitHub repository, and Docker Hub links.
+- **Place Editing, Status, Duplicate Detection & Admin Merging**:
+  - Full establishment editing modal (`EditPlaceModal`) with operational status (`active`, `temporarily_closed`, `permanently_closed`, `unverified`), visibility scope, and sharing groups.
+  - Real-time duplicate detection during place creation (`/new`) based on name similarity and proximity, plus administrative place merging (`mergePlacesAction`) consolidating comments, visits, user collections, and taxonomies.
+  - Inline editing of own comments (`PlaceCommentsThread`) and multi-criteria list sorting (Recent, Distance, Personal rating, A-Z, Price).
+- **Dynamic Map Clustering, Personal Badges & Scalable Taxonomy Filters**:
+  - Native viewport-aware marker clustering in Leaflet (`MapView.tsx`) with personal status badges (favorite, visited, pending) on pins.
+  - Live search, frequency-based ordering, and progressive «Show more» loading for categories and tags across explorer and forms (`TagInput`, `OccasionPicker`, `PlacesExplorer`).
+  - Reusable pagination (`PaginationBar`) across admin tables (`PlacesTableManager`, `UsersManager`, `TaxonomyManager`) and dedicated expanded sections for Categories and Tags inside the Taxonomy tab.
+- **Saved Filters, Sharing Groups, User Lifecycle & Audit Log**:
+  - Saved filter presets (`saved_filters`) per user for one-click access to favorite search combinations.
+  - Private sharing groups (`GroupsModal`, `place_group_access`) with cumulative server-side permissions and protection against privatizing/deleting places with activity from other users.
+  - User account activation/deactivation (`status`, `last_login_at`) and centralized administrative audit log (`audit_logs`, `AuditLogViewer`).
+- **Visit History, User & Admin Statistics + Annual Wrapped**:
+  - Detailed visit history log per establishment (`place_visits`, `PlaceVisitsModal`) with date, optional note, and rating.
+  - Personal statistics modal (`StatsModal`) with overview KPIs, distributions, and an interactive annual **«Wrapped»** summary with year selector.
+  - Complete platform-wide Admin Statistics panel (`AdminStatsPanel`) with global KPIs, 30-day activity pulse, top contributors, most popular places, and catalog breakdowns.
+- **Import / Export, Side-by-Side Comparator & Offline PWA Cache**:
+  - Multi-format export (JSON, CSV, GeoJSON, KML) and import with preview (JSON, GeoJSON, Google Takeout, CSV) via `ExportImportModal`.
+  - Side-by-side establishment comparator (`ComparePlacesModal`) for up to 3 places with floating selection bar.
+  - Service Worker (`/sw.js`) with Network-First caching and offline mode banner for consulting cached favorites and pending places without connectivity.
