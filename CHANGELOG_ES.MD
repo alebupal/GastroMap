@@ -110,3 +110,7 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Selector interactivo de idioma (Español 🇪🇸 / Inglés 🇬🇧) con lectura desde los ficheros locales del repositorio y fallback a GitHub Raw.
   - Renderizado visual estilizado de Markdown con insignias de versiones (`🏷️`), viñetas con check (`✓`), bloques de código y banner de apoyo/donación.
   - Accesos directos integrados en la cabecera de usuario (`📚 Docs`) y en el pie de página.
+- **Edición Completa de Usuarios por Admin y Gestión de Invitaciones**:
+  - Modal interactivo de edición de usuarios para administradores (`updateUserByAdminAction`, `UsersManager`) que permite modificar en caliente nombre, @username, email, rol, estado y nueva contraseña.
+  - Registro y listado completo de invitaciones en `InviteManager` con insignias de estado (Activa 🟢, Utilizada ✓, Caducada ⏳), email de destino, autor y fecha de caducidad.
+  - Posibilidad de copiar enlaces de invitación activos en cualquier momento y revocar o eliminar invitaciones antes de su vencimiento.

@@ -9,6 +9,7 @@ import {
   deleteUserAction,
   deleteMultipleUsersAction,
   createUserDirectlyAction,
+  updateUserByAdminAction,
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
@@ -44,6 +45,54 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [passwordUserId, setPasswordUserId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Modal completo para editar usuario por el admin
+  const [editingUser, setEditingUser] = useState<SafeUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editRole, setEditRole] = useState<"user" | "admin">("user");
+  const [editStatus, setEditStatus] = useState<"active" | "disabled">("active");
+  const [editPassword, setEditPassword] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  function handleStartEdit(u: SafeUser) {
+    setEditingUser(u);
+    setEditName(u.name);
+    setEditUsername(u.username || "");
+    setEditEmail(u.email);
+    setEditRole(u.role === "admin" ? "admin" : "user");
+    setEditStatus(u.status === "disabled" ? "disabled" : "active");
+    setEditPassword("");
+    setError(null);
+    setSuccess(null);
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingUser) return;
+    setSavingEdit(true);
+    setError(null);
+    setSuccess(null);
+
+    const res = await updateUserByAdminAction(editingUser.id, {
+      name: editName,
+      username: editUsername,
+      email: editEmail,
+      role: editRole,
+      status: editStatus,
+      newPassword: editPassword.trim() || undefined,
+    });
+
+    setSavingEdit(false);
+    if (res.error) {
+      setError(res.error);
+    } else {
+      setSuccess(`Usuario @${editUsername || editName} actualizado correctamente.`);
+      setEditingUser(null);
+      loadUsers();
+    }
+  }
 
   async function loadUsers() {
     setLoading(true);
@@ -583,12 +632,21 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
                       <button
                         type="button"
+                        onClick={() => handleStartEdit(u)}
+                        className="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-semibold text-amber-700 dark:text-amber-300 transition cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/60"
+                        title="Editar usuario (nombre, usuario, email, rol, contraseña)"
+                      >
+                        ✏️
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => {
                           setPasswordUserId(u.id);
                           setNewPassword("");
                         }}
                         className="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-semibold text-blue-700 dark:text-blue-300 transition cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60"
-                        title="Restablecer contraseña"
+                        title="Restablecer contraseña rápida"
                       >
                         🔑
                       </button>
@@ -661,6 +719,149 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
               >
                 {savingPassword ? "Guardando..." : "Actualizar"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Modal interactivo para edición completa de usuario por el Admin */}
+      {editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <form
+            onSubmit={handleSaveEdit}
+            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left space-y-4"
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">✏️</span>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                    Editar usuario
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Modifica datos de perfil, accesos y credenciales
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold p-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Nombre completo
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Nombre y apellidos"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Nombre de usuario (@username)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">@</span>
+                  <input
+                    type="text"
+                    required
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
+                    placeholder="usuario"
+                    className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Correo electrónico (email)
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
+                  placeholder="correo@ejemplo.com"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Rol
+                  </label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value as "user" | "admin")}
+                    disabled={editingUser.id === currentUserId}
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                  >
+                    <option value="user">Usuario</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    Estado de cuenta
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as "active" | "disabled")}
+                    disabled={editingUser.id === currentUserId}
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                  >
+                    <option value="active">Activo 🟢</option>
+                    <option value="disabled">Inactivo / Bloqueado ⏸️</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  Nueva contraseña (opcional)
+                </label>
+                <input
+                  type="password"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Dejar en blanco para no cambiarla"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+                <span className="text-[10px] text-slate-400">
+                  Si escribes una contraseña aquí, se reemplazará la actual (mín. 4 caracteres).
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingUser(null)}
+                className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={savingEdit}
+                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition cursor-pointer disabled:opacity-50 shadow-xs"
+              >
+                {savingEdit ? "Guardando..." : "Guardar cambios"}
               </button>
             </div>
           </form>

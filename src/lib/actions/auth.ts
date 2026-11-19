@@ -1,10 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import crypto from "crypto";
-import { eq, and, or, isNull, gt } from "drizzle-orm";
+import { eq, and, or, isNull, gt, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { users, invitations } from "@/db/schema";
+import { logAudit } from "@/lib/audit";
 import {
   hashPassword,
   verifyPassword,
@@ -248,3 +250,77 @@ export async function registerWithInvitationAction(
 
   redirect("/");
 }
+
+export interface SafeInvitation {
+  id: string;
+  token: string;
+  email: string | null;
+  role: string;
+  expiresAt: Date;
+  usedAt: Date | null;
+  createdAt: Date;
+  createdByName: string | null;
+  createdByUsername: string | null;
+}
+
+/**
+ * Obtiene todas las invitaciones del sistema (solo accesible por administradores)
+ */
+export async function getAllInvitationsAction(): Promise<SafeInvitation[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return [];
+  }
+
+  const rows = await db
+    .select({
+      id: invitations.id,
+      token: invitations.token,
+      email: invitations.email,
+      role: invitations.role,
+      expiresAt: invitations.expiresAt,
+      usedAt: invitations.usedAt,
+      createdAt: invitations.createdAt,
+      createdByName: users.name,
+      createdByUsername: users.username,
+    })
+    .from(invitations)
+    .leftJoin(users, eq(invitations.createdById, users.id))
+    .orderBy(desc(invitations.createdAt));
+
+  return rows;
+}
+
+/**
+ * Elimina o revoca una invitación antes de que expire (solo accesible por administradores)
+ */
+export async function deleteInvitationAction(invitationId: string): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden gestionar invitaciones." };
+  }
+
+  const [invitation] = await db
+    .select()
+    .from(invitations)
+    .where(eq(invitations.id, invitationId))
+    .limit(1);
+
+  if (!invitation) {
+    return { error: "La invitación no existe o ya ha sido eliminada." };
+  }
+
+  await db.delete(invitations).where(eq(invitations.id, invitationId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "invitation",
+    entityId: invitationId,
+    action: "invitation_deleted",
+    metadata: { token: invitation.token, email: invitation.email },
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}
+

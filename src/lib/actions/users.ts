@@ -132,6 +132,115 @@ export async function updateUserRoleAction(userId: string, newRole: "admin" | "u
   return { success: true };
 }
 
+export interface UpdateUserData {
+  name: string;
+  username: string;
+  email: string;
+  role?: "admin" | "user";
+  status?: "active" | "disabled";
+  newPassword?: string;
+}
+
+/**
+ * Edita los datos de cualquier usuario (nombre, username, email, rol, estado y contraseña) por un administrador
+ */
+export async function updateUserByAdminAction(userId: string, data: UpdateUserData) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden editar usuarios." };
+  }
+
+  const name = data.name?.trim();
+  const rawUsername = data.username?.trim().toLowerCase().replace(/^@/, "");
+  const email = data.email?.trim().toLowerCase();
+
+  if (!name || name.length < 2) {
+    return { error: "El nombre debe tener al menos 2 caracteres." };
+  }
+
+  const username = rawUsername || email?.split("@")[0]?.replace(/[^a-z0-9_-]/g, "");
+  if (!username || username.length < 3) {
+    return { error: "El nombre de usuario (@username) debe tener al menos 3 caracteres." };
+  }
+
+  if (!email || !email.includes("@")) {
+    return { error: "Introduce un correo electrónico válido." };
+  }
+
+  // Comprobar si el email ya existe para otro usuario
+  const existingEmail = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.email, email), ne(users.id, userId)))
+    .limit(1);
+
+  if (existingEmail.length > 0) {
+    return { error: "El correo electrónico ya está registrado por otro usuario." };
+  }
+
+  // Comprobar si el username ya existe para otro usuario
+  const existingUsername = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(and(eq(users.username, username), ne(users.id, userId)))
+    .limit(1);
+
+  if (existingUsername.length > 0) {
+    return { error: `El nombre de usuario "@${username}" ya está ocupado por otro usuario.` };
+  }
+
+  const updateFields: Partial<User> = {
+    name,
+    username,
+    email,
+    updatedAt: new Date(),
+  };
+
+  if (data.role) {
+    if (data.role !== "admin") {
+      const adminCount = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.role, "admin"));
+
+      if (Number(adminCount[0]?.count ?? 0) <= 1 && userId === currentUser.id) {
+        return { error: "No puedes quitar el último administrador del sistema." };
+      }
+    }
+    updateFields.role = data.role;
+  }
+
+  if (data.status) {
+    if (data.status === "disabled" && userId === currentUser.id) {
+      return { error: "No puedes desactivar tu propia cuenta de administrador." };
+    }
+    updateFields.status = data.status;
+    if (data.status === "disabled") {
+      await db.delete(sessions).where(eq(sessions.userId, userId));
+    }
+  }
+
+  if (data.newPassword && data.newPassword.trim().length > 0) {
+    if (data.newPassword.length < 4) {
+      return { error: "La nueva contraseña debe tener al menos 4 caracteres." };
+    }
+    updateFields.passwordHash = await hashPassword(data.newPassword);
+  }
+
+  await db.update(users).set(updateFields).where(eq(users.id, userId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: userId,
+    action: "user_updated_by_admin",
+    metadata: { username, email, role: data.role, status: data.status, passwordChanged: !!data.newPassword },
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}
+
 /**
  * Cambia o resetea la contraseña de un usuario (solo admin)
  */

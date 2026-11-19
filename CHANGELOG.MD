@@ -105,3 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Interactive language switcher (Spanish 🇪🇸 / English 🇬🇧) reading local repository markdown or GitHub Raw fallback.
   - Rich Markdown renderer with version tags (`🏷️`), styled checkboxes (`✓`), code blocks, and support banner.
   - Direct access links added to the user header (`📚 Docs`) and footer.
+- **Admin User Editing & Complete Invitation Management**:
+  - Comprehensive user editing modal for administrators (`updateUserByAdminAction`, `UsersManager`) allowing direct modification of name, @username, email, role, status, and new password.
+  - Full invitation registry view in `InviteManager` listing all issued tokens with status badges (Active 🟢, Used ✓, Expired ⏳), recipient info, creation date, and expiration tracking.
+  - Ability to copy active invite links on demand and revoke/delete invitations before their expiration date.
