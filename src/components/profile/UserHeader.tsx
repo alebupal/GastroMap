@@ -70,45 +70,12 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         </a>
 
         {/* User profile pill & controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Selector de modo claro / modo oscuro siempre visible */}
           <ThemeToggle />
 
-          {/* Accesos directos rápidos (Visibles en pantallas medianas y grandes) */}
-          <div className="hidden md:flex items-center gap-1.5">
-            {/* Mis Grupos Privados */}
-            <button
-              type="button"
-              onClick={() => setIsGroupsOpen(true)}
-              className="p-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
-              title="Mis grupos privados"
-            >
-              <span className="text-sm">👥</span>
-              <span className="text-[11px] font-bold">Grupos</span>
-            </button>
-
-            {/* Mis Estadísticas y Wrapped */}
-            <button
-              type="button"
-              onClick={() => setIsStatsOpen(true)}
-              className="p-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
-              title="Mis estadísticas y Wrapped"
-            >
-              <span className="text-sm">📊</span>
-              <span className="text-[11px] font-bold">Stats</span>
-            </button>
-
-            {/* Documentación y Changelog */}
-            <Link
-              href="/docs"
-              className="p-1.5 px-2.5 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 transition active:scale-95 flex items-center justify-center gap-1.5 shrink-0"
-              title="Documentación y Changelog"
-            >
-              <span className="text-sm">📚</span>
-              <span className="text-[11px] font-bold">Docs</span>
-            </Link>
-
-            {/* Repositorio GitHub */}
+          {/* Enlaces de comunidad en desktop: GitHub y Donar */}
+          <div className="hidden sm:flex items-center gap-1.5">
             <a
               href="https://github.com/alebupal/GastroMap"
               target="_blank"
@@ -121,7 +88,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
               </svg>
             </a>
 
-            {/* Donar con PayPal */}
             <a
               href="https://www.paypal.me/alebupal"
               target="_blank"
@@ -134,7 +100,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             </a>
           </div>
 
-          {/* Pastilla / Menú de Usuario (Totalmente adaptado a móvil y desktop) */}
+          {/* Menú de Usuario Unificado (Móvil y Escritorio) */}
           <div className="relative shrink-0" ref={menuRef}>
             <button
               type="button"
@@ -262,18 +228,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
               </div>
             )}
           </div>
-
-          {/* Botón de salir directo (visible en tablet / desktop) */}
-          <form action={logoutAction} className="hidden sm:block">
-            <button
-              type="submit"
-              className="p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-800 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 transition cursor-pointer active:scale-95 flex items-center gap-1 shrink-0"
-              title="Cerrar sesión"
-            >
-              <span className="text-xs">🚪</span>
-              <span className="hidden sm:inline">Salir</span>
-            </button>
-          </form>
         </div>
       </header>
 
