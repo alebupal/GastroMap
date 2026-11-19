@@ -391,7 +391,6 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             disabled={generatingInviteForGroup === g.id}
                             className="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer flex items-center gap-1"
                           >
-                            <span>+</span>
                             <span>{generatingInviteForGroup === g.id ? t("common.loading") : t("groups.new_link_btn")}</span>
                           </button>
                         </div>
