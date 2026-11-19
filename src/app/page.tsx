@@ -114,15 +114,6 @@ export default async function Home() {
               >
                 Docker
               </a>
-              <span>•</span>
-              <a
-                href="https://www.paypal.me/alebupal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-amber-500 font-semibold transition"
-              >
-                PayPal
-              </a>
             </div>
           </div>
         </div>
