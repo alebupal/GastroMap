@@ -27,7 +27,11 @@ interface MapViewProps {
   occasionMap?: Record<string, { name: string; icon: string }>;
   className?: string;
   cartoApiKey?: string | null;
+  isFiltered?: boolean;
 }
+
+const SPAIN_CENTER: [number, number] = [40.4168, -3.7038];
+const SPAIN_DEFAULT_ZOOM = 6;
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 15 €",
@@ -95,6 +99,7 @@ export default function MapView({
   occasionMap = {},
   className = "w-full h-[60vh] sm:h-[500px]",
   cartoApiKey,
+  isFiltered = false,
 }: MapViewProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -102,17 +107,19 @@ export default function MapView({
   const clusterMarkersRef = useRef<L.Marker[]>([]);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const radiusCircleRef = useRef<L.Circle | null>(null);
+  const hasInitializedBoundsRef = useRef(false);
+  const lastCenteredIdRef = useRef<string | null>(null);
 
   // 1. Inicialización única del mapa Leaflet
   useEffect(() => {
     if (!mapContainerRef.current) return;
     if (mapInstanceRef.current) return;
 
-    // Centro inicial: Madrid por defecto o coordenadas del usuario si existen
+    // Centro inicial: coordenadas del usuario si existen o España por defecto
     const initialCenter: [number, number] = userLocation
       ? [userLocation.latitude, userLocation.longitude]
-      : [40.4168, -3.7038];
-    const initialZoom = userLocation ? 14 : 6;
+      : SPAIN_CENTER;
+    const initialZoom = userLocation ? 14 : SPAIN_DEFAULT_ZOOM;
 
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
@@ -377,30 +384,44 @@ export default function MapView({
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    const bounds: [number, number][] = [];
-    if (userLocation) {
-      bounds.push([userLocation.latitude, userLocation.longitude]);
-    }
-    places.forEach((place) => {
-      if (place.latitude == null || place.longitude == null) return;
-      const lat =
-        typeof place.latitude === "number"
-          ? place.latitude
-          : parseFloat(String(place.latitude));
-      const lng =
-        typeof place.longitude === "number"
-          ? place.longitude
-          : parseFloat(String(place.longitude));
-      if (!isNaN(lat) && !isNaN(lng)) {
-        bounds.push([lat, lng]);
-      }
-    });
+    // Si el contenedor no está visible (display: none en móvil), evitar cálculos de tamaño y límites
+    const container = map.getContainer();
+    if (!container || container.offsetParent === null) return;
+    map.invalidateSize();
 
-    if (bounds.length > 0 && !selectedPlaceId) {
-      if (bounds.length === 1) {
-        map.setView(bounds[0], 15);
-      } else {
-        map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40], maxZoom: 16 });
+    // Si NO hay filtros activos, centrar en España por defecto
+    if (!isFiltered) {
+      if (!hasInitializedBoundsRef.current && !userLocation && !selectedPlaceId) {
+        map.setView(SPAIN_CENTER, SPAIN_DEFAULT_ZOOM);
+        hasInitializedBoundsRef.current = true;
+      }
+    } else {
+      // Si hay filtros activos (búsqueda, país, ciudad, categorías...), ajustar límites a los resultados
+      const bounds: [number, number][] = [];
+      if (userLocation) {
+        bounds.push([userLocation.latitude, userLocation.longitude]);
+      }
+      places.forEach((place) => {
+        if (place.latitude == null || place.longitude == null) return;
+        const lat =
+          typeof place.latitude === "number"
+            ? place.latitude
+            : parseFloat(String(place.latitude));
+        const lng =
+          typeof place.longitude === "number"
+            ? place.longitude
+            : parseFloat(String(place.longitude));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          bounds.push([lat, lng]);
+        }
+      });
+
+      if (bounds.length > 0 && !selectedPlaceId) {
+        if (bounds.length === 1) {
+          map.setView(bounds[0], 15);
+        } else {
+          map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40], maxZoom: 16 });
+        }
       }
     }
 
@@ -410,12 +431,20 @@ export default function MapView({
     return () => {
       map.off("zoomend", renderMarkersAndClusters);
     };
-  }, [places, selectedPlaceId, userLocation, renderMarkersAndClusters]);
+  }, [places, selectedPlaceId, userLocation, isFiltered, renderMarkersAndClusters]);
 
   // 4. Centrar cuando cambia la selección externa
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !selectedPlaceId) return;
+    if (!map) return;
+
+    if (!selectedPlaceId) {
+      lastCenteredIdRef.current = null;
+      return;
+    }
+
+    // Evitar volver a volar/centrar el mismo ID ya centrado (previene errores en cascada al cambiar favorito o estado)
+    if (lastCenteredIdRef.current === selectedPlaceId) return;
 
     const place = places.find((p) => p.id === selectedPlaceId);
     if (!place || place.latitude == null || place.longitude == null) return;
@@ -430,7 +459,15 @@ export default function MapView({
         : parseFloat(String(place.longitude));
     if (isNaN(lat) || isNaN(lng)) return;
 
+    // Verificar que el contenedor esté en pantalla y tenga dimensiones mayores a 0 antes de flyTo
+    const container = map.getContainer();
+    if (!container || container.offsetParent === null) return;
+
     map.invalidateSize();
+    const size = map.getSize();
+    if (!size || size.x === 0 || size.y === 0) return;
+
+    lastCenteredIdRef.current = selectedPlaceId;
     map.flyTo([lat, lng], 16, { animate: true, duration: 0.6 });
 
     const openSelectedPopup = () => {

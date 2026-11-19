@@ -610,6 +610,33 @@ export function PlacesExplorer({
     }
   }
 
+  // Manejar selección de un lugar desde una chincheta del mapa
+  function handleSelectPlaceFromMap(placeId: string | null) {
+    setSelectedPlaceId(placeId);
+    if (!placeId) return;
+
+    // 1. Encontrar la página donde está este lugar dentro de los resultados filtrados
+    const placeIndex = filteredPlaces.findIndex((p) => p.id === placeId);
+    if (placeIndex !== -1) {
+      const targetPage = Math.floor(placeIndex / pageSize) + 1;
+      if (targetPage !== currentPage) {
+        setCurrentPage(targetPage);
+      }
+    }
+
+    // 2. En pantallas de escritorio (donde la lista siempre está visible), desplazar suavemente hasta la tarjeta
+    if (typeof window !== "undefined" && window.innerWidth >= 1024) {
+      const scrollToCard = () => {
+        const el = document.getElementById(`place-card-${placeId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      };
+      setTimeout(scrollToCard, 50);
+      setTimeout(scrollToCard, 150);
+    }
+  }
+
   // Categorías ordenadas por frecuencia de locales asociados (las más usadas primero)
   const sortedOccasions = useMemo(() => {
     return [...occasionsList].sort(
@@ -662,6 +689,8 @@ export function PlacesExplorer({
     (experienceFilter !== "all" ? 1 : 0) +
     (userLocation ? 1 : 0) +
     (textSearch.trim() ? 1 : 0);
+
+  const isFiltered = activeFiltersCount > 0 || selectedGroupFilterIds.length > 0 || radiusKm != null;
 
   return (
     <div className="w-full space-y-4">
@@ -1492,11 +1521,12 @@ export function PlacesExplorer({
               <MapContainerWrapper
                 places={filteredPlaces}
                 selectedPlaceId={selectedPlaceId}
-                onSelectPlace={(id) => setSelectedPlaceId(id)}
+                onSelectPlace={handleSelectPlaceFromMap}
                 userLocation={userLocation}
                 radiusKm={radiusKm}
                 occasionMap={occasionMap}
                 cartoApiKey={cartoApiKey}
+                isFiltered={isFiltered}
                 className="w-full h-[58vh] sm:h-[520px] lg:h-[calc(100vh-14rem)] min-h-[380px]"
               />
             </div>
