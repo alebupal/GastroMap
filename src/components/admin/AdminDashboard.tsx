@@ -43,9 +43,6 @@ export function AdminDashboard({
           <div>
             <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center gap-2">
               Panel de Administración
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 dark:text-amber-400 border border-amber-500/30">
-                PRO
-              </span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Gestión centralizada de usuarios, taxonomía, invitaciones, API keys y datos de prueba
