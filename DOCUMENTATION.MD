@@ -123,7 +123,7 @@ When launching on a clean database:
 ### 💬 Collaborative Comments & Detail Modals
 - **WYSIWYG Rich Editor**: Support for bold, italics, lists, blockquotes, and dish highlights.
 - **Private Notes & Rating (1 to 10)**: Personal notes invisible to all other users.
-- **Visit History (`📅`)**: Chronological visit logs with dates and personal scores.
+- **Action Buttons with Explicit Text Labels**: Each card displays clear, named buttons at the bottom: `💬 Comments`, `🗺️ Map`, `📍 Maps ↗`, `⚖️ Compare`, `✏️ Edit`, and `🗑️ Delete` (strictly restricted to administrators).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.
 
 ---
@@ -157,6 +157,7 @@ When launching on a clean database:
 In the **Import / Export** modal (`📦`):
 
 ### 📤 Export Formats
+- **PDF (PDF 1.4 Standard)**: Native, dependency-free generator producing a printable A4 catalog with Helvetica typography, running headers, and dynamic pagination.
 - **JSON**: Full structured data dump with tags and categories.
 - **CSV**: Spreadsheet friendly format.
 - **GeoJSON**: Standard GIS spatial format.
@@ -166,8 +167,11 @@ In the **Import / Export** modal (`📦`):
 ### 📥 Import Formats
 - Import `.json`, `.geojson`, `.kml`, `.gpx`, and `.csv` files with duplicate detection and preview.
 
-### 🛡️ Full Database Backup (Admin)
-- One-click full JSON database export from **Admin Dashboard > Settings > Backup** with audit logging.
+### 🛡️ Backups and Advanced Administration (Admin)
+- **Bulk Places Backup**: Checkbox selection in admin table to export JSON backups of selected places.
+- **Selective Demo Cleanup**: Button to wipe only the 50 demo places and demo community users without affecting custom places.
+- **Danger Zone — Reset Application**: Administrative wipe clearing all places, comments, groups, invitations, and collaborator accounts while preserving the current administrator account.
+- **Full Database Backup**: One-click full JSON database export from **Admin Dashboard > Settings > Backup** with audit logging.
 
 ---
 

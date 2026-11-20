@@ -123,7 +123,7 @@ Al acceder por primera vez a una instancia limpia:
 ### 💬 Comentarios Colaborativos y Ficha Enriquecida
 - **Editor WYSIWYG**: Editor de texto enriquecido con formato de negrita, cursiva, viñetas, citas destacadas y recomendaciones de platos.
 - **Notas y Puntuación Privada (1 al 10)**: Cada usuario puede anotar sus opiniones secretas, trucos o platos favoritos que nadie más puede ver.
-- **Historial de Visitas (`📅`)**: Registro cronológico de visitas con fecha y valoración individual.
+- **Acciones Rápidas con Etiquetas de Texto Explícitas**: Cada ficha cuenta en su parte inferior con botones legibles para interactuar: `💬 Comentarios`, `🗺️ Mapa`, `📍 Maps ↗`, `⚖️ Comparar`, `✏️ Editar` y `🗑️ Eliminar` (este último reservado estrictamente a administradores).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.
 
 ---
@@ -159,6 +159,7 @@ GastroMap permite organizar recomendaciones en círculos cerrados (pareja, cuadr
 En el modal de **Importar / Exportar** (`📦`) dispones de herramientas completas para migrar o respaldar tu catálogo:
 
 ### 📤 Formatos de Exportación
+- **PDF (Estándar 1.4)**: Generador nativo que produce un catálogo imprimible en A4 con tipografía Helvetica, cabecera formal, paginación dinámica y soporte completo de acentos y caracteres especiales.
 - **JSON**: Volcado estructurado con todas las propiedades, etiquetas y categorías.
 - **CSV**: Compatible con Excel, Google Sheets y LibreOffice Calc.
 - **GeoJSON**: Formato estándar para SIG (Sistemas de Información Geográfica) como QGIS o ArcGIS.
@@ -169,8 +170,11 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 - Archivos `.json`, `.geojson`, `.kml`, `.gpx` y `.csv`.
 - Detección automática de duplicados por nombre y proximidad de coordenadas con vista previa interactiva antes de confirmar la importación.
 
-### 🛡️ Copia de Seguridad Integral (Panel Admin)
-- En el **Panel de Administración > Ajustes > Copia de Seguridad**, los administradores pueden descargar con un clic una copia íntegra en JSON de todas las tablas relacionales (`places`, `users`, `groups`, `comments`, `visits`, etc.) con registro de auditoría.
+### 🛡️ Copia de Seguridad y Administración Avanzada (Panel Admin)
+- **Backup por Lote de Sitios**: Desde la tabla de establecimientos, los administradores pueden seleccionar casillas de verificación de sitios específicos y descargar una copia de seguridad JSON exclusiva de los mismos.
+- **Borrado Selectivo de Datos Demo**: Permite limpiar los 50 establecimientos y usuarios predefinidos de la semilla de prueba sin alterar los sitios propios ni los grupos creados por el usuario.
+- **Zona de Peligro — Resetear Aplicación**: Herramienta irreversible para vaciar completamente la base de datos (sitios, comentarios, grupos, miembros e invitaciones) conservando únicamente la cuenta del administrador actual.
+- **Copia de Seguridad Integral**: En el Panel de Administración > Ajustes > Copia de Seguridad, descarga íntegra en JSON de todas las tablas relacionales.
 
 ---
 

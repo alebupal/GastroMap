@@ -34,7 +34,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **🔒 Privacy & Community:**
   * Self-hosted on your own infrastructure (Docker).
   * Invitation-only access for your inner circle and **private sharing groups** (`👥 Groups`) with cumulative server-side permissions.
-  * Private personal notes, detailed **visit history log** (`📅`), and collaborative editable comments on each place.
+  * Private personal notes and collaborative comments on each place. Deletion is restricted to administrators.
 
 * **📊 Personal Statistics, Annual «Wrapped» & Admin Analytics:**
   * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary by year.
@@ -43,7 +43,8 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
   * Saved filter presets (`💾`), multi-criteria sorting, and live searchable taxonomies with progressive «Show more» loading.
-  * Export in **JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview.
+  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview.
+  * Bulk place backup downloads directly from the admin management table.
 
 * **🌐 Multi-language System (i18n):**
   * Full support for multiple languages (Spanish 🇪🇸 / English 🇬🇧) powered by JSON dictionaries and CSV sync architecture.

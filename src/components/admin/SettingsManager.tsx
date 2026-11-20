@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { saveSettingAction } from "@/lib/actions/settings";
+import { saveSettingAction, resetApplicationAction } from "@/lib/actions/settings";
 import { useT } from "@/lib/i18n/client";
 
 interface SettingsManagerProps {
@@ -17,6 +17,34 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [restoring, setRestoring] = useState(false);
   const [restoreMessage, setRestoreMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [resetting, setResetting] = useState(false);
+  const [resetMessage, setResetMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  async function handleResetApp() {
+    const confirmation = prompt(
+      '⚠️ ZONA DE PELIGRO ⚠️\n\nEsta acción borrará TODOS los establecimientos, comentarios, notas, grupos de compartición, invitaciones y usuarios colaboradores de la base de datos.\n\nÚNICAMENTE se conservará tu cuenta de administrador.\n\nPara confirmar el reseteo completo, escribe "RESETEAR" en mayúsculas:'
+    );
+
+    if (confirmation !== "RESETEAR") {
+      return;
+    }
+
+    setResetting(true);
+    setResetMessage(null);
+
+    const res = await resetApplicationAction();
+    setResetting(false);
+
+    if (res?.error) {
+      setResetMessage({ type: "error", text: res.error });
+    } else {
+      setResetMessage({ type: "success", text: "Aplicación reseteada con éxito. Recargando..." });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -189,6 +217,44 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
           }`}
         >
           {restoreMessage.text}
+        </div>
+      )}
+    </div>
+
+    {/* Zona de Peligro: Resetear aplicación */}
+    <div className="rounded-2xl border border-red-200 dark:border-red-950/60 bg-red-50/50 dark:bg-red-950/20 p-4 shadow-xs space-y-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">⚠️</span>
+          <div>
+            <h3 className="text-sm font-bold text-red-900 dark:text-red-300">
+              Zona de Peligro — Resetear aplicación
+            </h3>
+            <p className="text-xs text-red-700/80 dark:text-red-400/80 max-w-lg">
+              Borra toda la base de datos (todos los sitios, opiniones, comentarios, grupos y usuarios), conservando únicamente tu usuario actual.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={resetting}
+          onClick={handleResetApp}
+          className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/30 transition disabled:opacity-50 cursor-pointer active:scale-95"
+        >
+          {resetting ? "Reseteando aplicación..." : "🗑️ Resetear aplicación"}
+        </button>
+      </div>
+
+      {resetMessage && (
+        <div
+          className={`p-3 rounded-xl text-xs font-semibold ${
+            resetMessage.type === "success"
+              ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
+              : "bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300"
+          }`}
+        >
+          {resetMessage.text}
         </div>
       )}
     </div>

@@ -778,7 +778,7 @@ export function PlacesExplorer({
               title={t("places.export_import_tooltip")}
             >
               <span>📦</span>
-              <span className="hidden sm:inline">{t("places.export_import")}</span>
+              <span>{t("places.export_import")}</span>
             </button>
           </div>
 

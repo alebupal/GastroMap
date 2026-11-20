@@ -10,7 +10,6 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
-import { PlaceVisitsModal } from "./PlaceVisitsModal";
 import { EditPlaceModal } from "./EditPlaceModal";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
@@ -58,10 +57,9 @@ export function PlaceCard({
   const [commentsCount, setCommentsCount] = useState(place.commentsCount ?? 0);
   const [showComments, setShowComments] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
-  const [showVisitsModal, setShowVisitsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const canDelete = isAdmin || place.createdById === currentUserId;
+  const canDelete = isAdmin;
   const canEdit = isAdmin || place.createdById === currentUserId;
 
   async function handleDelete() {
@@ -303,7 +301,7 @@ export function PlaceCard({
           {t("cards.by_author", { author: place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "") })}
         </span>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           {/* Botón de comentarios */}
           <button
             type="button"
@@ -312,18 +310,34 @@ export function PlaceCard({
             className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
             title={t("cards.comments")}
           >
-            💬 {commentsCount > 0 ? commentsCount : ""}
+            <span>💬</span>
+            <span>{commentsCount > 0 ? `Comentarios (${commentsCount})` : "Comentarios"}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setShowVisitsModal(true)}
-            aria-label={t("cards.visits_tooltip")}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
-            title={t("cards.visits_tooltip")}
-          >
-            📅
-          </button>
+          {hasCoords && onSelectOnMap && (
+            <button
+              onClick={onSelectOnMap}
+              type="button"
+              aria-label={t("places.view_map")}
+              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
+            >
+              <span>🗺️</span>
+              <span>{t("places.view_map")}</span>
+            </button>
+          )}
+
+          {place.googleMapsUrl && (
+            <a
+              href={place.googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Maps: ${place.name}`}
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1"
+            >
+              <span>📍</span>
+              <span>Maps ↗</span>
+            </a>
+          )}
 
           {onToggleCompare && (
             <button
@@ -336,55 +350,9 @@ export function PlaceCard({
                 }`}
               title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
             >
-              ⚖️
+              <span>⚖️</span>
+              <span>Comparar</span>
             </button>
-          )}
-
-          {hasCoords && onSelectOnMap && (
-            <button
-              onClick={onSelectOnMap}
-              type="button"
-              aria-label={t("places.view_map")}
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
-            >
-              🗺️ {t("places.view_map")}
-            </button>
-          )}
-
-          {place.website && (
-            <a
-              href={place.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t("cards.website_tooltip")}
-              className="text-slate-500 hover:text-amber-500 text-xs transition p-1"
-              title={t("cards.website_tooltip")}
-            >
-              🌐
-            </a>
-          )}
-
-          {place.phone && (
-            <a
-              href={`tel:${place.phone}`}
-              aria-label={t("cards.phone_tooltip", { phone: place.phone })}
-              className="text-slate-500 hover:text-emerald-500 text-xs transition p-1"
-              title={t("cards.phone_tooltip", { phone: place.phone })}
-            >
-              📞
-            </a>
-          )}
-
-          {place.googleMapsUrl && (
-            <a
-              href={place.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Maps: ${place.name}`}
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1"
-            >
-              Maps ↗
-            </a>
           )}
 
           {canEdit && (
@@ -392,10 +360,11 @@ export function PlaceCard({
               type="button"
               onClick={() => setShowEditModal(true)}
               aria-label={t("cards.edit_tooltip")}
-              className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer p-1"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer p-1"
               title={t("cards.edit_tooltip")}
             >
-              ✏️
+              <span>✏️</span>
+              <span>Editar</span>
             </button>
           )}
 
@@ -404,10 +373,11 @@ export function PlaceCard({
               onClick={handleDelete}
               disabled={deleting}
               aria-label={t("cards.delete_tooltip")}
-              className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40 p-1"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 p-1"
               title={t("cards.delete_tooltip")}
             >
-              🗑️
+              <span>🗑️</span>
+              <span>Eliminar</span>
             </button>
           )}
         </div>
@@ -434,18 +404,6 @@ export function PlaceCard({
         onSave={(newRating, newNotes) => {
           setRating(newRating);
           setPrivateNotes(newNotes);
-        }}
-      />
-
-      {/* Modal de historial de visitas con fecha */}
-      <PlaceVisitsModal
-        placeId={place.id}
-        placeName={place.name}
-        isOpen={showVisitsModal}
-        onClose={() => setShowVisitsModal(false)}
-        onVisitAdded={(newRating) => {
-          setPersonalStatus("visited");
-          if (newRating !== null) setRating(newRating);
         }}
       />
 

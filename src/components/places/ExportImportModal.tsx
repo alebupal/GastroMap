@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
+import { generatePlacesPdf } from "@/lib/pdf";
 import { useT } from "@/lib/i18n/client";
 
 interface ExportImportModalProps {
@@ -237,13 +238,24 @@ export function ExportImportModal({ isOpen, onClose, places }: ExportImportModal
       priceRange: p.priceRange,
       status: p.status,
       googleMapsUrl: p.googleMapsUrl,
-      website: p.website,
-      phone: p.phone,
       notes: p.notes,
       occasions: p.occasions,
       tags: p.tags,
     }));
     downloadFile(JSON.stringify(data, null, 2), `gastromap-${dateStamp}.json`, "application/json");
+  }
+
+  function handleExportPdf() {
+    const pdfBytes = generatePlacesPdf(places);
+    const blob = new Blob([pdfBytes as unknown as BlobPart], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gastromap-${dateStamp}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function handleExportCsv() {
@@ -463,10 +475,24 @@ ${wpts}
                   className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
                 >
                   <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                    📄 JSON
+                    💾 JSON
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
                     {t("export_import.json_desc")}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={places.length === 0}
+                  className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:border-amber-500 transition text-left cursor-pointer disabled:opacity-40"
+                >
+                  <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                    📄 PDF
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5">
+                    Catálogo imprimible con listado completo y datos
                   </div>
                 </button>
 

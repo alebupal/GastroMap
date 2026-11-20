@@ -40,8 +40,6 @@ export function EditPlaceModal({
   const { t } = useT();
   const [name, setName] = useState(place.name);
   const [googleMapsUrl, setGoogleMapsUrl] = useState(place.googleMapsUrl || "");
-  const [website, setWebsite] = useState(place.website || "");
-  const [phone, setPhone] = useState(place.phone || "");
   const [city, setCity] = useState(place.city || "");
   const [address, setAddress] = useState(place.address || "");
   const [lat, setLat] = useState(place.latitude != null ? String(place.latitude) : "");
@@ -114,8 +112,6 @@ export function EditPlaceModal({
     const formData = new FormData(e.currentTarget);
     formData.set("name", name);
     formData.set("googleMapsUrl", googleMapsUrl);
-    formData.set("website", website);
-    formData.set("phone", phone);
     formData.set("city", city);
     formData.set("address", address);
     formData.set("latitude", lat);
@@ -263,34 +259,6 @@ export function EditPlaceModal({
               setLng(loc.longitude);
             }}
           />
-
-          {/* Web y Teléfono */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                {t("form.website_label")}
-              </label>
-              <input
-                type="url"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                {t("form.phone_label")}
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+34 600 000 000"
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
-            </div>
-          </div>
 
           {/* Planes / Ocasiones (con buscador y Mostrar más) */}
           <OccasionPicker

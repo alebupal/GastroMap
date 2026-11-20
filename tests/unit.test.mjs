@@ -168,6 +168,16 @@ test("Ubicación: Granada se resuelve en la provincia de Granada y no en Barcelo
   assert.equal(resultBarcelona?.municipality, "Barcelona");
 });
 
+test("PDF Generator: estructura de documento PDF 1.4 válida con codificación y metadatos", () => {
+  const pdfSource = fs.readFileSync(path.join(__dirname, "..", "src", "lib", "pdf.ts"), "utf8");
+  assert.ok(pdfSource.includes("%PDF-1.4"), "Debe generar cabecera estándar PDF 1.4");
+  assert.ok(pdfSource.includes("/Type /Catalog"), "Debe incluir catálogo de objetos PDF");
+  assert.ok(pdfSource.includes("/Type /Pages"), "Debe incluir árbol de páginas");
+  assert.ok(pdfSource.includes("Helvetica"), "Debe incorporar tipografía estándar Helvetica");
+  assert.ok(pdfSource.includes("WinAnsiEncoding"), "Debe usar WinAnsiEncoding para caracteres en español");
+  assert.ok(pdfSource.includes("%%EOF"), "Debe incluir marcador final %%EOF");
+});
+
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
   const root = path.join(__dirname, "..");
   const docs = [

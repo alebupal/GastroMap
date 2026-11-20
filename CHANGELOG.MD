@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-11-20
+
+### Added
+- **Native PDF Document Export (PDF 1.4 Standard)**:
+  - Dependency-free client-side PDF generator (`src/lib/pdf.ts`) creating formatted, printable A4 catalogs with Helvetica vector typography, running headers, dynamic pagination, and WinAnsi encoding for special and accented characters.
+  - Quick export button added to the Import/Export modal dialog (`ExportImportModal.tsx`).
+- **Bulk Places Backup from Admin Table**:
+  - Ability to download a JSON backup file containing only specifically selected places using checkboxes in the administration table (`PlacesTableManager.tsx`).
+- **Selective Demo Data Cleanup**:
+  - Administrative action to delete only the 50 demo places, demo users, and demo comments, leaving all manually created places and groups intact.
+- **Danger Zone: Complete Application Reset**:
+  - Administrative tool in settings (`SettingsManager.tsx`) to wipe all places, comments, groups, invitations, and collaborator accounts while strictly preserving the current administrator account.
+- **Explicit Text Labels on Place Card Action Buttons**:
+  - Clear labels on all bottom card actions (`💬 Comments`, `🗺️ Map`, `📍 Maps ↗`, `⚖️ Compare`, `✏️ Edit`, `🗑️ Delete`).
+- **Visible Mobile Title for Import / Export**:
+  - Label text visible on mobile screens matching Roulette and Assistant buttons.
+
+### Changed and Fixed
+- **Admin-Only Place Deletion Restriction**:
+  - Non-admin users cannot delete places even if they created them; deletion is strictly restricted to administrator accounts in both UI and server action (`deletePlaceAction`).
+- **Scroll-to-Top Button Overlap Fix**:
+  - Fixed CSS class collision in `ScrollToTop.tsx` (`flex` vs `hidden`) so the floating button is never rendered on mobile while viewing the map or interacting with the bottom sheet.
+- **Cleaned Up Phone, Website, and Visit Log**:
+  - Removed phone and website fields from forms, place cards, and demo seed data.
+  - Removed individual visits modal and log from place cards.
+
 ## [0.1.0] - 2026-11-19
 
 ### Added

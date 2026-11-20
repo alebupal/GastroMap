@@ -5,6 +5,32 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.1.0] - 2026-11-20
+
+### Añadido
+- **Exportación en Formato PDF Nativo (Estándar PDF 1.4)**:
+  - Generador PDF nativo sin dependencias externas (`src/lib/pdf.ts`) que produce catálogos vectoriales imprimibles en formato A4 con tipografía Helvetica, cabecera formal, paginación dinámica y soporte completo de codificación WinAnsi para caracteres españoles y acentos.
+  - Botón de exportación rápida a PDF integrado en el modal de importación/exportación (`ExportImportModal.tsx`).
+- **Copia de Seguridad (Backup) por Lote de Sitios Seleccionados en Administración**:
+  - Posibilidad de descargar una copia de seguridad en formato JSON de establecimientos específicos seleccionados mediante casillas de verificación en la tabla de administración (`PlacesTableManager.tsx`).
+- **Limpieza Selectiva de Datos Demo**:
+  - Nueva acción administrativa para eliminar exclusivamente los 50 establecimientos, usuarios y comentarios generados por la semilla de demostración, manteniendo intactos todos los sitios, notas y grupos creados manualmente por el usuario.
+- **Zona de Peligro: Reseteo Completo de la Aplicación**:
+  - Herramienta de reseteo administrativo en la configuración (`SettingsManager.tsx`) que vacía completamente la base de datos (sitios, comentarios, relaciones, invitaciones y usuarios colaboradores) protegiendo y conservando únicamente la cuenta del administrador que ejecuta la acción.
+- **Etiquetas de Texto Explícitas en las Acciones de las Tarjetas**:
+  - Nombres legibles en todos los botones inferiores de cada establecimiento (`💬 Comentarios`, `🗺️ Mapa`, `📍 Maps ↗`, `⚖️ Comparar`, `✏️ Editar`, `🗑️ Eliminar`).
+- **Título en Móvil para el Botón de Exportar / Importar**:
+  - Visibilidad del texto «Importar / Exportar» en pantallas móviles al igual que las opciones de «Ruleta» y «Asistente».
+
+### Cambiado y Corregido
+- **Restricción de Eliminación Estricta a Administradores**:
+  - Los usuarios regulares ya no pueden eliminar establecimientos aunque sean propietarios de la ficha; el borrado queda estrictamente reservado para administradores tanto en interfaz como en la acción del servidor (`deletePlaceAction`).
+- **Corrección de Solapamiento del Botón Flotante «Subir Arriba»**:
+  - En `ScrollToTop.tsx`, corrección de la colisión de especificidad de clases Tailwind (`flex` vs `hidden`) garantizando que en móvil no se muestre mientras se interactúa con el mapa o con la ficha inferior abierta.
+- **Simplificación de Campos y Eliminación de Teléfono, Web y Visitas**:
+  - Retirada de los campos de teléfono y página web en formularios, fichas y datos demo, enfocando la aplicación en la experiencia gastronómica y localización directa.
+  - Supresión del modal y registro individual de visitas de las tarjetas de sitios.
+
 ## [0.1.0] - 2026-11-19
 
 ### Añadido

@@ -32,7 +32,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **🔒 Privacidad y Comunidad:**
   * Despliegue privado bajo servidor propio (Docker).
   * Acceso por invitación para tu círculo cercano y **grupos privados de compartición** (`👥 Grupos`) con permisos acumulativos en servidor.
-  * Notas personales privadas, **historial detallado de visitas** (`📅`) y comentarios colaborativos editables en cada ficha.
+  * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Solo los administradores pueden eliminar lugares.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Analítica Admin:**
   * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año.
@@ -41,7 +41,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
   * Filtros guardados (`💾`), ordenación multicriterio y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
-  * Exportación en **JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa.
+  * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa.
+  * Copia de seguridad (backup) en lote de sitios seleccionados desde la tabla de administración.
 
 * **🌐 Sistema Multi-idioma (i18n):**
   * Soporte completo para múltiples idiomas (Español 🇪🇸 / English 🇬🇧) con arquitectura extensible por JSON y CSV.

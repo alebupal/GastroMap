@@ -150,6 +150,23 @@ export function PlacesTableManager({
     }
   }
 
+  // Backup masivo de los sitios seleccionados
+  function handleBulkBackup() {
+    const selectedPlaces = placesList.filter((p) => selectedIds.has(p.id));
+    if (selectedPlaces.length === 0) return;
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const jsonStr = JSON.stringify(selectedPlaces, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gastromap-backup-sitios-${selectedPlaces.length}-${dateStamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // Eliminación masiva / en bloque
   async function handleBulkDelete() {
     const count = selectedIds.size;
@@ -300,15 +317,27 @@ export function PlacesTableManager({
         {/* Acciones por lote */}
         <div className="flex items-center gap-2 shrink-0">
           {selectedIds.size > 0 && (
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition cursor-pointer disabled:opacity-50 shadow-md shadow-red-600/20"
-            >
-              <span>🗑️</span>
-              <span>{t("admin_places.delete_selected")} ({selectedIds.size})</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleBulkBackup}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer shadow-md shadow-amber-500/20"
+                title="Descargar copia de seguridad JSON de los sitios seleccionados"
+              >
+                <span>💾</span>
+                <span>Backup ({selectedIds.size})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition cursor-pointer disabled:opacity-50 shadow-md shadow-red-600/20"
+              >
+                <span>🗑️</span>
+                <span>{t("admin_places.delete_selected")} ({selectedIds.size})</span>
+              </button>
+            </>
           )}
 
           <span className="text-xs text-slate-400 font-medium">

@@ -372,32 +372,8 @@ export async function deletePlaceAction(placeId: string) {
     return { error: "Establecimiento no encontrado." };
   }
 
-  if (place.createdById !== currentUser.id && currentUser.role !== "admin") {
-    return { error: "No tienes permiso para eliminar este establecimiento." };
-  }
-
-  // Regla 4.5: si un usuario no-admin intenta borrar una ficha compartida con actividad ajena,
-  // proteger los datos de otros miembros
   if (currentUser.role !== "admin") {
-    const [otherSaves, otherComments] = await Promise.all([
-      db
-        .select({ id: userPlaces.id })
-        .from(userPlaces)
-        .where(and(eq(userPlaces.placeId, placeId), ne(userPlaces.userId, currentUser.id)))
-        .limit(1),
-      db
-        .select({ id: placeComments.id })
-        .from(placeComments)
-        .where(and(eq(placeComments.placeId, placeId), ne(placeComments.userId, currentUser.id)))
-        .limit(1),
-    ]);
-
-    if (otherSaves.length > 0 || otherComments.length > 0) {
-      return {
-        error:
-          "Otros usuarios ya tienen guardado o comentado este establecimiento. No puedes eliminarlo directamente; pide a un administrador que lo gestione.",
-      };
-    }
+    return { error: "Solo los administradores pueden eliminar establecimientos." };
   }
 
   // Limpieza en cascada explícita de registros dependientes para garantizar integridad total
