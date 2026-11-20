@@ -81,6 +81,15 @@ cd GastroMap && <comando>
 
 ---
 
+## 📝 Regla Estricta de Documentación (.MDs) ante Cambios o Novedades
+> ⚠️ **REGLA OBLIGATORIA:** Cada vez que se desarrolle una nueva funcionalidad, se modifique el comportamiento existente o se añada una mejora visible, **ES OBLIGATORIO ACTUALIZAR LOS ARCHIVOS .MD**:
+>
+> 1. **`CHANGELOG_ES.MD` y `CHANGELOG.MD`**: Registrar los cambios detallados en su versión correspondiente (`[0.1.0]`) bajo la sección adecuada (`### Añadido`, `### Cambiado y Corregido`, etc.) tanto en español como en inglés.
+> 2. **`README_ES.MD` y `README.MD`**: Resumen público de lo que hace la aplicación para quien la descubra en GitHub. **No debe incluir detalles técnicos de implementación interna**, sino describir de forma atractiva las capacidades y el valor de la app.
+> 3. **`DOCUMENTACION.MD` y `DOCUMENTATION.MD`**: Guía y manual completo sobre **cómo usar la web**, flujos de trabajo, pantallas, importación/exportación y administración, enfocado en el uso práctico del usuario y administrador (sin tecnicismos de código fuente).
+
+---
+
 ## 🌐 Internacionalización Obligatoria (i18n)
 > ⚠️ **REGLA ESTRICTA:** Siempre que se añada o modifique cualquier texto, botón, mensaje, diálogo, tooltip o elemento visible de la interfaz, **DEBE AÑADIRSE OBLIGATORIAMENTE EN AMBOS IDIOMAS** (`src/locales/es.json` y `src/locales/en.json`) y sincronizarse en `src/locales/translations.csv` ejecutando `npm run i18n:export`. Nunca dejar textos literales hardcodeados en los componentes.
 

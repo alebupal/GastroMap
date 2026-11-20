@@ -20,9 +20,11 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Automatic coordinate and link normalization.
   * Fast classification by occasion (*Tapas, Full Meal, Trendy/Rooftops, Drinks, Coffee/Dessert*) and price range (`€` to `€€€€` or `???` so unknown places aren't left out).
 
-* **🔍 Decision Assistant & Advanced Filters:**
+* **🔍 Decision Assistant & Universal Search:**
+  * **Universal live search**: Search across any field — name, city, public or private notes, tags, occasions, creator, or collaborative comment contents.
   * Real distance filters (*Nearby within 1, 5, 10, or 25 km*) powered by **PostGIS**.
   * Worldwide country selector (195+ countries with emoji flags & instant search) and available cities filter with floating popovers.
+  * Flexible pagination with page size options (10, 20, 50, or All).
   * Filter by occasion, culinary tags, private sharing groups, and past experience (*Visited*, *Tried by others*, *Untested*).
   * Streamlined two-row responsive layout for mobile and desktop without awkward wrapping.
   * **🎲 Random Picker Button**: When nobody can agree, let the app pick a spot from your filtered list.

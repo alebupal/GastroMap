@@ -93,7 +93,7 @@ Al acceder por primera vez a una instancia limpia:
 ## 4. Módulos y Funcionalidades
 
 ### 🍽️ Explorador Gastronómico (Vista Principal)
-- **Buscador Instantáneo**: Búsqueda en vivo por nombre de establecimiento, plato estrella, notas, ciudad o dirección.
+- **Buscador Universal Integral**: Búsqueda instantánea en vivo por cualquier dato: nombre del establecimiento, ciudad, dirección, notas públicas, notas privadas personales, categorías/ocasiones, etiquetas, autor y el contenido completo de los comentarios colaborativos, con soporte multi-término.
 - **Filtros por Experiencia (Fila 1)**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
@@ -114,7 +114,7 @@ Al acceder por primera vez a una instancia limpia:
 - **Pestañas Exclusivas sin Duplicidades**: Alternancia limpia en la cabecera móvil mediante `[🗺️ Mapa] | [📋 Lista]` que muestra la vista seleccionada de forma limpia y despejada.
 - **Tarjeta Flotante Inferior y Salto Sincronizado**: Al pulsar cualquier chincheta en el mapa móvil, se despliega una tarjeta resumen inferior (*Bottom Card*) con nombre, rango de precio, botón de navegación directa en Google Maps (`🗺️ Cómo llegar`) y acceso a la ficha completa. Al pulsar *"Ver ficha completa →"*, la aplicación calcula automáticamente la página de paginación correcta, cambia a la lista y hace un scroll suave y centrado resaltando la tarjeta con un halo dorado.
 - **Botón Flotante «Subir Arriba»**: Botón circular sutil y minimalista con estética *glassmorphism* que aparece de forma no invasiva al desplazarse más de 300px hacia abajo para volver inmediatamente a la parte superior.
-- **Paginación Inteligente**: En modo lista los locales se muestran paginados de 10 en 10 con selector de página para navegación ultra ágil.
+- **Paginación Inteligente**: En modo lista los locales se muestran paginados con selector de tamaño configurable (10, 20, 50 o Todos) y selector de página para navegación ultra ágil.
 
 ### 🎲 Asistente de Decisión y Ruleta
 - **Ruleta / Selector Aleatorio**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos.
