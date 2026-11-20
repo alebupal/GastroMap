@@ -430,18 +430,32 @@ export function PlacesExplorer({
       };
     });
 
-    // 0. Búsqueda por texto libre
+    // 0. Búsqueda por texto libre universal (nombre, ciudad, dirección, notas, notas privadas, tags, ocasiones, autor y comentarios)
     if (textSearch.trim().length > 0) {
       const q = textSearch.toLowerCase().trim();
-      result = result.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.city && p.city.toLowerCase().includes(q)) ||
-          (p.address && p.address.toLowerCase().includes(q)) ||
-          (p.notes && p.notes.toLowerCase().includes(q)) ||
-          p.tags.some((t) => t.toLowerCase().includes(q)) ||
-          p.occasions.some((occ) => occ.toLowerCase().includes(q))
-      );
+      const tokens = q.split(/\s+/).filter(Boolean);
+      result = result.filter((p) => {
+        const searchableText = [
+          p.name,
+          p.city || "",
+          p.address || "",
+          p.notes || "",
+          p.privateNotes || "",
+          p.createdByName || "",
+          p.createdByUsername || "",
+          ...p.tags,
+          ...p.occasions,
+          ...(p.commentsTexts || []),
+          ...(p.sharedGroupNames || []),
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return (
+          searchableText.includes(q) ||
+          (tokens.length > 1 && tokens.every((tok) => searchableText.includes(tok)))
+        );
+      });
     }
 
     // 1. Filtro por Ocasiones acumulables (OR entre ocasiones seleccionadas)

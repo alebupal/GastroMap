@@ -178,6 +178,56 @@ test("PDF Generator: estructura de documento PDF 1.4 válida con codificación y
   assert.ok(pdfSource.includes("%%EOF"), "Debe incluir marcador final %%EOF");
 });
 
+test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, ocasiones y comentarios", () => {
+  const dummyPlace = {
+    name: "Mesón de Cándido",
+    city: "Segovia, España",
+    address: "Plaza del Azoguejo, 5",
+    notes: "Famoso por el cochinillo asado al horno de leña",
+    privateNotes: "Pedir mesa junto a la ventana",
+    createdByName: "Alejandro",
+    createdByUsername: "alebupal",
+    tags: ["cochinillo", "asador", "tradicional"],
+    occasions: ["comer", "familiar"],
+    commentsTexts: ["El postre ponche segoviano es imprescindible"],
+  };
+
+  const matches = (place, query) => {
+    const q = query.toLowerCase().trim();
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const searchableText = [
+      place.name,
+      place.city || "",
+      place.address || "",
+      place.notes || "",
+      place.privateNotes || "",
+      place.createdByName || "",
+      place.createdByUsername || "",
+      ...place.tags,
+      ...place.occasions,
+      ...(place.commentsTexts || []),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return (
+      searchableText.includes(q) ||
+      (tokens.length > 1 && tokens.every((tok) => searchableText.includes(tok)))
+    );
+  };
+
+  assert.ok(matches(dummyPlace, "cándido"), "Debe encontrar por nombre");
+  assert.ok(matches(dummyPlace, "segovia"), "Debe encontrar por ciudad");
+  assert.ok(matches(dummyPlace, "azoguejo"), "Debe encontrar por dirección");
+  assert.ok(matches(dummyPlace, "cochinillo"), "Debe encontrar por nota y tag");
+  assert.ok(matches(dummyPlace, "ventana"), "Debe encontrar por notas privadas");
+  assert.ok(matches(dummyPlace, "familiar"), "Debe encontrar por ocasión");
+  assert.ok(matches(dummyPlace, "alebupal"), "Debe encontrar por autor");
+  assert.ok(matches(dummyPlace, "ponche segoviano"), "Debe encontrar por texto de comentario");
+  assert.ok(matches(dummyPlace, "segovia ponche"), "Debe encontrar combinación de ciudad y comentario");
+  assert.equal(matches(dummyPlace, "sushi"), false, "No debe encontrar términos no presentes");
+});
+
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
   const root = path.join(__dirname, "..");
   const docs = [

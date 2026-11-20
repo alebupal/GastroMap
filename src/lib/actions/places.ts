@@ -39,6 +39,7 @@ export interface PlaceWithDetails extends Place {
   rating?: number | null;
   privateNotes?: string | null;
   commentsCount?: number;
+  commentsTexts?: string[];
   experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
   sharedGroupIds?: string[];
   sharedGroupNames?: string[];
@@ -544,7 +545,7 @@ export async function getAllPlaces(
       // Comentarios y grupos con acceso
       const [comments, groupLinks] = await Promise.all([
         db
-          .select({ id: placeComments.id })
+          .select({ id: placeComments.id, content: placeComments.content })
           .from(placeComments)
           .where(eq(placeComments.placeId, place.id)),
         db
@@ -618,6 +619,7 @@ export async function getAllPlaces(
         rating,
         privateNotes,
         commentsCount: comments.length,
+        commentsTexts: comments.map((c) => c.content).filter(Boolean),
         experienceStatus,
         sharedGroupIds: groupLinks.map((g) => g.groupId),
         sharedGroupNames: groupLinks.map((g) => g.groupName),

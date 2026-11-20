@@ -8,6 +8,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Búsqueda Universal Integral (Comentarios, Notas Privadas, Ocasiones y Autores)**:
+  - El buscador principal del catálogo (`PlacesExplorer.tsx`) y de la tabla de administración (`PlacesTableManager.tsx`) ahora busca en todo el contenido disponible: nombre, ciudad, dirección, notas públicas, notas privadas del usuario, etiquetas, ocasiones/categorías, autor/creador y contenido completo de comentarios colaborativos, con soporte multi-término inteligente.
 - **Auto-creación y Sincronización de Ocasiones al Importar Sitios**:
   - Al importar establecimientos desde JSON (`importPlacesAction`) o scripts masivos (`scripts/import-user-places.mjs`), todas las categorías/ocasiones asignadas se registran automáticamente en el catálogo global de `occasions` si no existían previamente.
   - Sincronización automática en `getOccasions()` para descubrir e insertar cualquier ocasión huérfana referenciada en `place_occasions`.

@@ -94,13 +94,26 @@ export function PlacesTableManager({
       }
 
       if (!q) return true;
-      const matchName = p.name.toLowerCase().includes(q);
-      const matchAddr = p.address?.toLowerCase().includes(q);
-      const matchCityName = p.city?.toLowerCase().includes(q);
-      const matchAuthor = (p.createdByUsername || p.createdByName)?.toLowerCase().includes(q);
-      const matchTags = p.tags.some((t) => t.toLowerCase().includes(q));
+      const tokens = q.split(/\s+/).filter(Boolean);
+      const searchableText = [
+        p.name,
+        p.city || "",
+        p.address || "",
+        p.notes || "",
+        p.privateNotes || "",
+        p.createdByName || "",
+        p.createdByUsername || "",
+        ...p.tags,
+        ...p.occasions,
+        ...(p.commentsTexts || []),
+      ]
+        .join(" ")
+        .toLowerCase();
 
-      return matchName || matchAddr || matchCityName || matchAuthor || matchTags;
+      return (
+        searchableText.includes(q) ||
+        (tokens.length > 1 && tokens.every((tok) => searchableText.includes(tok)))
+      );
     });
   }, [placesList, searchQuery, countryFilter, cityFilter]);
 

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Universal Multi-field Search (Comments, Private Notes, Occasions & Authors)**:
+  - The live search input across the places catalog (`PlacesExplorer.tsx`) and admin table (`PlacesTableManager.tsx`) now indexes all available place fields: name, city, address, public notes, user private notes, tags, occasions/categories, author/creator, and full collaborative comments text, with intelligent multi-token matching.
 - **Auto-creation & Synchronization of Occasions upon Import**:
   - When importing places from JSON (`importPlacesAction`) or batch scripts (`scripts/import-user-places.mjs`), all assigned categories/occasions are automatically registered in the global `occasions` catalog if not already present.
   - Automatic synchronization in `getOccasions()` to discover and populate any orphaned occasions referenced in `place_occasions`.
