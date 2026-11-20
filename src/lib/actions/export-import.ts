@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { places, occasions, placeOccasions, placeTags, tags, userPlaces, placeComments } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
-import { KNOWN_OCCASIONS } from "@/lib/actions/taxonomy";
+import { KNOWN_OCCASIONS } from "@/data/occasions";
 
 export interface ImportPlacePayload {
   name: string;

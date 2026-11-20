@@ -5,6 +5,7 @@ import { eq, and, sql, notInArray, inArray, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { occasions, tags, placeOccasions, placeTags, type Occasion } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { KNOWN_OCCASIONS } from "@/data/occasions";
 
 const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
   { id: "tapear", name: "Tapear", icon: "🍢" },
@@ -19,20 +20,6 @@ const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
   { id: "terraza", name: "Terraza / Vistas", icon: "☀️" },
 ];
 
-export const KNOWN_OCCASIONS: Record<string, { name: string; icon: string }> = {
-  tapear: { name: "Tapear", icon: "🍢" },
-  comer: { name: "Comer", icon: "🍽️" },
-  desayuno: { name: "Desayuno / Brunch", icon: "🥞" },
-  dulce: { name: "Un dulce", icon: "🍰" },
-  cafe: { name: "Café", icon: "☕" },
-  copas: { name: "Copas", icon: "🍸" },
-  postureo: { name: "Postureo", icon: "✨" },
-  casual: { name: "Casual / Rápido", icon: "🍔" },
-  cita: { name: "Cita / Especial", icon: "🕯️" },
-  terraza: { name: "Terraza / Vistas", icon: "☀️" },
-  bar: { name: "Bar / Tapas", icon: "🍻" },
-  restaurante: { name: "Restaurante", icon: "🍽️" },
-};
 
 /**
  * Obtiene todas las ocasiones junto con el conteo de establecimientos asociados.
