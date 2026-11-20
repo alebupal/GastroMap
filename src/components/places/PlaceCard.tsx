@@ -107,11 +107,6 @@ export function PlaceCard({
                 ✨ {t("cards.untried_badge")}
               </span>
             )}
-            {place.experienceStatus === "visited_by_others" && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/50">
-                👥 {t("cards.friends_badge")}
-              </span>
-            )}
             {place.experienceStatus === "visited_by_me" && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
                 ✅ {t("cards.visited_badge")}
@@ -298,18 +293,18 @@ export function PlaceCard({
       </div>
 
       {/* Pie de tarjeta: Autor, comentarios, Maps y Borrar */}
-      <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-x-3 gap-y-2">
+      <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
         <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
           {t("cards.by_author", { author: place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "") })}
         </span>
 
-        <div className="flex items-center justify-end gap-x-2.5 gap-y-1.5 flex-wrap flex-1 min-w-0">
+        <div className="flex items-center gap-x-2 gap-y-1.5 flex-wrap justify-start sm:justify-end">
           {/* Botón de comentarios */}
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
             aria-label={`${t("cards.comments")} (${commentsCount})`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg whitespace-nowrap"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap"
             title={t("cards.comments")}
           >
             <span>💬</span>
@@ -321,7 +316,7 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg whitespace-nowrap"
+              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap"
             >
               <span>🗺️</span>
               <span>{t("places.view_map")}</span>
@@ -334,7 +329,7 @@ export function PlaceCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Maps: ${place.name}`}
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1 whitespace-nowrap"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline px-1.5 py-0.5 whitespace-nowrap"
             >
               <span>📍</span>
               <span>Maps ↗</span>
@@ -346,7 +341,7 @@ export function PlaceCard({
               type="button"
               onClick={onToggleCompare}
               aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
-              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-1 rounded-lg whitespace-nowrap ${isCompared
+              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap ${isCompared
                 ? "bg-amber-500 text-slate-950 font-bold"
                 : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
                 }`}
@@ -362,7 +357,7 @@ export function PlaceCard({
               type="button"
               onClick={() => setShowEditModal(true)}
               aria-label={t("cards.edit_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer p-1 whitespace-nowrap"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 whitespace-nowrap"
               title={t("cards.edit_tooltip")}
             >
               <span>✏️</span>
@@ -375,7 +370,7 @@ export function PlaceCard({
               onClick={handleDelete}
               disabled={deleting}
               aria-label={t("cards.delete_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 p-1 whitespace-nowrap"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 px-1.5 py-0.5 whitespace-nowrap"
               title={t("cards.delete_tooltip")}
             >
               <span>🗑️</span>

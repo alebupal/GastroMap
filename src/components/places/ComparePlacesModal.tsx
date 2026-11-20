@@ -114,9 +114,7 @@ export function ComparePlacesModal({
                       <span className="font-semibold text-slate-700 dark:text-slate-300">
                         {p.experienceStatus === "visited_by_me"
                           ? `✅ ${t("cards.visited_badge")}`
-                          : p.experienceStatus === "visited_by_others"
-                            ? `👥 ${t("cards.friends_badge")}`
-                            : `✨ ${t("cards.untried_badge")}`}
+                          : `✨ ${t("cards.untried_badge")}`}
                       </span>
                     </div>
 

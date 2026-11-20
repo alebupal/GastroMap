@@ -99,8 +99,7 @@ When launching on a clean database:
   - `⭐ Favorites`: Starred places for instant recall.
   - `🕒 Want to go`: Wishlist of restaurants to visit.
   - `✅ Visited`: Places you have already attended.
-  - `👥 From friends`: Community and group recommendations.
-  - `✨ Unexplored`: Hidden gems that nobody in your circle has tested yet.
+  - `✨ To discover`: Places in the catalog you haven't visited yet.
 - **Segmentation Filters (Row 2)**:
   - `👥 Groups`: Dropdown selector with multi-group support for private clusters.
   - `🌍 Countries (195+)`: Searchable dropdown selector with all world countries and emoji flags.

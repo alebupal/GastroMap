@@ -8,6 +8,15 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Filtros de Experiencia Simplificados y «✨ Por descubrir»**:
+  - Eliminado el filtro «👥 De amigos» para una interfaz más limpia y directa.
+  - El filtro «Sin estrenar» se renueva como «✨ Por descubrir», permitiendo filtrar dinámicamente todos los locales que el usuario aún no ha visitado.
+- **Limpieza y Robustez en Eliminación de Categorías y Etiquetas Vacías**:
+  - Corrección en `deleteEmptyOccasionsAction` y `getOccasions()` para limpiar referencias huérfanas y vincular solo con establecimientos activos, evitando que categorías vacías eliminadas se re-creen automáticamente al refrescar la página.
+- **Ajuste Responsive en Botones de Tarjetas de Locales**:
+  - Corrección del desbordamiento en la barra de acciones inferior de las tarjetas (`PlaceCard.tsx`), asegurando que botones como `🗑️ Eliminar` hagan salto de línea fluido sin cortarse en tarjetas estrechas o con mapa dividido.
+- **Normalización de Precios y Enlace a Maps en Exportación PDF**:
+  - Corrección del texto de rangos de precio en la exportación PDF evitando cadenas residuales tipo `[EUREUREUR]` y mostrando formato limpio `€€€ (30 - 50 €)` junto con el enlace directo a Google Maps.
 - **Búsqueda Universal Integral (Comentarios, Notas Privadas, Ocasiones y Autores)**:
   - El buscador principal del catálogo (`PlacesExplorer.tsx`) y de la tabla de administración (`PlacesTableManager.tsx`) ahora busca en todo el contenido disponible: nombre, ciudad, dirección, notas públicas, notas privadas del usuario, etiquetas, ocasiones/categorías, autor/creador y contenido completo de comentarios colaborativos, con soporte multi-término inteligente.
 - **Auto-creación y Sincronización de Ocasiones al Importar Sitios**:

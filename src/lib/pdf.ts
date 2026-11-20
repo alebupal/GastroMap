@@ -186,15 +186,20 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
 
     // 1. Título y Rango de Precio formateado correctamente
     const nameStr = `${index + 1}. ${place.name}`;
+    let rawPrice = (place.priceRange || "").trim();
+    if (rawPrice.toUpperCase().includes("EUR")) {
+      const eurCount = (rawPrice.match(/EUR/gi) || []).length;
+      rawPrice = "€".repeat(Math.min(4, Math.max(1, eurCount)));
+    }
     const priceMap: Record<string, string> = {
-      "€": "< 15 \u20AC",
-      "€€": "15 - 30 \u20AC",
-      "€€€": "30 - 50 \u20AC",
-      "€€€€": "> 50 \u20AC",
+      "€": "< 15 €",
+      "€€": "15 - 30 €",
+      "€€€": "30 - 50 €",
+      "€€€€": "> 50 €",
     };
-    const priceStr = place.priceRange && priceMap[place.priceRange]
-      ? `${place.priceRange} (${priceMap[place.priceRange]})`
-      : (place.priceRange ? `[${place.priceRange}]` : "");
+    const priceStr = rawPrice && priceMap[rawPrice]
+      ? `${rawPrice} (${priceMap[rawPrice]})`
+      : (rawPrice ? `[${rawPrice}]` : "");
 
     currentPage.commands.push(
       `BT`,

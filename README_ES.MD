@@ -23,7 +23,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Filtros por distancia real (*Cerca de mí a 1, 5, 10 o 25 km*) impulsados por **PostGIS**.
   * Selector mundial de países (+195 con banderas y buscador) y filtro por ciudades disponibles con selectores emergentes flotantes.
   * Paginación flexible con selector de tamaño (10, 20, 50 o Todos).
-  * Búsqueda por ocasión, etiquetas gastronómicas, grupos privados y experiencia (*Visitado*, *Probado por otros*, *Sin estrenar*).
+  * Búsqueda por ocasión, etiquetas gastronómicas, grupos privados y experiencia (*Favoritos*, *Quiero ir*, *Ya he ido*, *Por descubrir*).
   * Organización visual optimizada en dos filas para móvil y PC sin elementos desalineados.
   * **🎲 Botón «Elegir al azar»**: Cuando no hay acuerdo sobre dónde ir, la app selecciona una opción entre los resultados filtrados.
 

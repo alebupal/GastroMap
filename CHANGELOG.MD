@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Simplified Experience Filters & «✨ To discover»**:
+  - Removed «👥 Friends» filter for a cleaner, more intuitive workflow.
+  - Renamed and enhanced «Unexplored» to «✨ To discover», dynamically displaying all establishments the current user has not visited yet.
+- **Robust Cleanup for Empty Categories and Tags**:
+  - Enhanced `deleteEmptyOccasionsAction` and `getOccasions()` to scrub orphaned references and join against active places, preventing deleted empty categories from resurrecting upon page refresh.
+- **Responsive Layout Fix for Place Card Action Buttons**:
+  - Fixed visual truncation of bottom action buttons (`PlaceCard.tsx`) such as `🗑️ Delete`, wrapping fluidly across narrow viewports and split-screen map layouts.
+- **Price Range Normalization and Google Maps Links in PDF Export**:
+  - Fixed price text in exported PDFs avoiding artifacts like `[EUREUREUR]`, outputting clean `€€€ (30 - 50 €)` format alongside direct Google Maps links.
 - **Universal Multi-field Search (Comments, Private Notes, Occasions & Authors)**:
   - The live search input across the places catalog (`PlacesExplorer.tsx`) and admin table (`PlacesTableManager.tsx`) now indexes all available place fields: name, city, address, public notes, user private notes, tags, occasions/categories, author/creator, and full collaborative comments text, with intelligent multi-token matching.
 - **Auto-creation & Synchronization of Occasions upon Import**:

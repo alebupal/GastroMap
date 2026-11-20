@@ -166,7 +166,7 @@ export function PlacesExplorer({
   const [isCompareOpen, setIsCompareOpen] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [experienceFilter, setExperienceFilter] = useState<
-    "all" | "visited_by_me" | "visited_by_others" | "untried" | "favorite" | "pending"
+    "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
 
   // Registro PWA Service Worker y caché offline de favoritos / pendientes
@@ -271,7 +271,9 @@ export function PlacesExplorer({
     setSelectedOccasions(c.selectedOccasions || []);
     setSelectedTags(c.selectedTags || []);
     setSelectedPrices(c.selectedPrices || []);
-    setExperienceFilter(c.experienceFilter || "all");
+    setExperienceFilter(
+      c.experienceFilter === "visited_by_others" ? "all" : (c.experienceFilter || "all")
+    );
     if (c.sortBy) setSortBy(c.sortBy);
     if (c.radiusKm) {
       setRadiusKm(c.radiusKm);
@@ -488,10 +490,10 @@ export function PlacesExplorer({
       result = result.filter(
         (p) => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)
       );
-    } else if (experienceFilter === "visited_by_others") {
-      result = result.filter((p) => p.experienceStatus === "visited_by_others");
     } else if (experienceFilter === "untried") {
-      result = result.filter((p) => p.experienceStatus === "untried");
+      result = result.filter(
+        (p) => p.personalStatus !== "visited" && (!p.rating || p.rating === 0)
+      );
     }
 
     // 5. Filtro por Radio en Km
@@ -958,7 +960,6 @@ export function PlacesExplorer({
             { key: "favorite", label: t("places.favorites"), icon: "⭐" },
             { key: "pending", label: t("places.want_to_go"), icon: "🕒" },
             { key: "visited_by_me", label: t("places.visited"), icon: "✅" },
-            { key: "visited_by_others", label: t("places.friends"), icon: "👥" },
             { key: "untried", label: t("places.unexplored"), icon: "✨" },
           ].map((item) => {
             const active = experienceFilter === item.key;

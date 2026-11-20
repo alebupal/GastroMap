@@ -25,7 +25,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Real distance filters (*Nearby within 1, 5, 10, or 25 km*) powered by **PostGIS**.
   * Worldwide country selector (195+ countries with emoji flags & instant search) and available cities filter with floating popovers.
   * Flexible pagination with page size options (10, 20, 50, or All).
-  * Filter by occasion, culinary tags, private sharing groups, and past experience (*Visited*, *Tried by others*, *Untested*).
+  * Filter by occasion, culinary tags, private sharing groups, and past experience (*Favorites*, *Want to go*, *Visited*, *To discover*).
   * Streamlined two-row responsive layout for mobile and desktop without awkward wrapping.
   * **🎲 Random Picker Button**: When nobody can agree, let the app pick a spot from your filtered list.
 

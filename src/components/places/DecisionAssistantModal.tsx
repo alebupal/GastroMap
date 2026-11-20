@@ -10,8 +10,8 @@ interface DecisionAssistantModalProps {
   onSelectOccasions: (occs: string[]) => void;
   selectedPrice: string | null;
   onSelectPrice: (price: string | null) => void;
-  experienceFilter: "all" | "visited_by_me" | "visited_by_others" | "untried" | "favorite" | "pending";
-  onSelectExperience: (exp: "all" | "visited_by_me" | "visited_by_others" | "untried" | "favorite" | "pending") => void;
+  experienceFilter: "all" | "visited_by_me" | "untried" | "favorite" | "pending";
+  onSelectExperience: (exp: "all" | "visited_by_me" | "untried" | "favorite" | "pending") => void;
   nearMeActive: boolean;
   onToggleNearMe: () => void;
   radiusKm: number;
@@ -179,18 +179,6 @@ export function DecisionAssistantModal({
             >
               <span>✨</span>
               <span>{t("assistant.untried")}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onSelectExperience(experienceFilter === "visited_by_others" ? "all" : "visited_by_others")}
-              className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "visited_by_others"
-                ? "bg-cyan-600 border-cyan-600 text-white shadow-sm"
-                : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
-                }`}
-            >
-              <span>👥</span>
-              <span>{t("assistant.friends")}</span>
             </button>
 
             <button

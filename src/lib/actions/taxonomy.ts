@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { eq, and, sql, notInArray, inArray, desc } from "drizzle-orm";
 import { db } from "@/db";
-import { occasions, tags, placeOccasions, placeTags, type Occasion } from "@/db/schema";
+import { occasions, tags, placeOccasions, placeTags, places, type Occasion } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
 
@@ -26,13 +26,15 @@ const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
  * Auto-sincroniza cualquier ocasión que esté asignada en place_occasions pero aún no en la tabla occasions.
  */
 export async function getOccasions(): Promise<Array<Occasion & { placesCount: number }>> {
+  // Solo sincronizar ocasiones que realmente tengan establecimientos existentes asociados
   const usedOccasions = await db
-    .selectDistinct({ occasion: placeOccasions.occasion })
-    .from(placeOccasions);
+    .selectDistinct({ occasion: sql<string>`lower(trim(${placeOccasions.occasion}))` })
+    .from(placeOccasions)
+    .innerJoin(places, eq(placeOccasions.placeId, places.id));
 
   if (usedOccasions.length > 0) {
     const existingList = await db.select({ id: occasions.id }).from(occasions);
-    const existingIds = new Set(existingList.map((o) => o.id));
+    const existingIds = new Set(existingList.map((o) => o.id.toLowerCase().trim()));
     const missing = usedOccasions
       .map((u) => u.occasion.trim().toLowerCase())
       .filter((occ) => occ && !existingIds.has(occ));
@@ -58,20 +60,21 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
 
   const list = await db.select().from(occasions).orderBy(occasions.createdAt);
 
-  // Contar sitios asociados a cada ocasión
+  // Contar sitios asociados a cada ocasión uniendo con places para exactitud
   const counts = await db
     .select({
-      occasion: placeOccasions.occasion,
-      count: sql<number>`cast(count(*) as integer)`,
+      occasion: sql<string>`lower(trim(${placeOccasions.occasion}))`,
+      count: sql<number>`cast(count(distinct ${places.id}) as integer)`,
     })
     .from(placeOccasions)
-    .groupBy(placeOccasions.occasion);
+    .innerJoin(places, eq(placeOccasions.placeId, places.id))
+    .groupBy(sql`lower(trim(${placeOccasions.occasion}))`);
 
   const countMap = new Map(counts.map((c) => [c.occasion, c.count]));
 
   return list.map((occ) => ({
     ...occ,
-    placesCount: countMap.get(occ.id) || 0,
+    placesCount: countMap.get(occ.id.toLowerCase().trim()) || 0,
   }));
 }
 
@@ -242,8 +245,10 @@ export async function deleteOccasionAction(id: string, replacementId?: string) {
     return await mergeOccasionsAction(id, replacementId);
   }
 
-  // Desvincular de todos los sitios asociados
-  await db.delete(placeOccasions).where(eq(placeOccasions.occasion, id));
+  // Desvincular de todos los sitios asociados (case-insensitive)
+  await db
+    .delete(placeOccasions)
+    .where(sql`lower(trim(${placeOccasions.occasion})) = ${id.toLowerCase().trim()}`);
 
   // Eliminar la categoría
   await db.delete(occasions).where(eq(occasions.id, id));
@@ -405,8 +410,14 @@ export async function deleteMultipleOccasionsAction(ids: string[]) {
 
   if (ids.length === 0) return { success: true, count: 0 };
 
+  const cleanIds = ids.map((id) => id.toLowerCase().trim());
+
   // 1. Desvincular de todos los sitios asociados
-  await db.delete(placeOccasions).where(inArray(placeOccasions.occasion, ids));
+  for (const cleanId of cleanIds) {
+    await db
+      .delete(placeOccasions)
+      .where(sql`lower(trim(${placeOccasions.occasion})) = ${cleanId}`);
+  }
 
   // 2. Eliminar categorías
   await db.delete(occasions).where(inArray(occasions.id, ids));
@@ -428,8 +439,14 @@ export async function deleteMultipleTagsAction(tagIds: string[]) {
 
   if (tagIds.length === 0) return { success: true, count: 0 };
 
+  const cleanTags = tagIds.map((t) => t.toLowerCase().trim());
+
   // 1. Desvincular de todos los sitios
-  await db.delete(placeTags).where(inArray(placeTags.tag, tagIds));
+  for (const cleanTag of cleanTags) {
+    await db
+      .delete(placeTags)
+      .where(sql`lower(trim(${placeTags.tag})) = ${cleanTag}`);
+  }
 
   // 2. Borrar de tabla tags
   await db.delete(tags).where(inArray(tags.id, tagIds));
@@ -452,16 +469,24 @@ export async function deleteEmptyOccasionsAction(emptyIds?: string[]) {
   let targetsToDelete: string[] = [];
 
   if (emptyIds && emptyIds.length > 0) {
-    targetsToDelete = emptyIds;
+    targetsToDelete = emptyIds.map((id) => id.toLowerCase().trim());
   } else {
     const allOccs = await getOccasions();
-    targetsToDelete = allOccs.filter((o) => o.placesCount === 0).map((o) => o.id);
+    targetsToDelete = allOccs.filter((o) => o.placesCount === 0).map((o) => o.id.toLowerCase().trim());
   }
 
   if (targetsToDelete.length === 0) {
     return { success: true, count: 0, deleted: [] };
   }
 
+  // 1. Limpiar cualquier fila en place_occasions (incluyendo huérfanas)
+  for (const target of targetsToDelete) {
+    await db
+      .delete(placeOccasions)
+      .where(sql`lower(trim(${placeOccasions.occasion})) = ${target}`);
+  }
+
+  // 2. Eliminar de la tabla occasions
   await db.delete(occasions).where(inArray(occasions.id, targetsToDelete));
 
   revalidatePath("/");
@@ -482,16 +507,24 @@ export async function deleteEmptyTagsAction(emptyTags?: string[]) {
   let targetsToDelete: string[] = [];
 
   if (emptyTags && emptyTags.length > 0) {
-    targetsToDelete = emptyTags;
+    targetsToDelete = emptyTags.map((t) => t.toLowerCase().trim());
   } else {
     const allTags = await getTagsWithCount();
-    targetsToDelete = allTags.filter((t) => t.placesCount === 0).map((t) => t.id);
+    targetsToDelete = allTags.filter((t) => t.placesCount === 0).map((t) => t.id.toLowerCase().trim());
   }
 
   if (targetsToDelete.length === 0) {
     return { success: true, count: 0, deleted: [] };
   }
 
+  // 1. Limpiar referencias huérfanas en place_tags
+  for (const target of targetsToDelete) {
+    await db
+      .delete(placeTags)
+      .where(sql`lower(trim(${placeTags.tag})) = ${target}`);
+  }
+
+  // 2. Eliminar de la tabla tags
   await db.delete(tags).where(inArray(tags.id, targetsToDelete));
 
   revalidatePath("/");

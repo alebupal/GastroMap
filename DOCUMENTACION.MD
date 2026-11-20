@@ -99,8 +99,7 @@ Al acceder por primera vez a una instancia limpia:
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
   - `🕒 Quiero ir`: Establecimientos pendientes en tu lista de deseos.
   - `✅ Ya he ido`: Locales que ya has visitado.
-  - `👥 De amigos`: Recomendaciones aportadas por otros miembros de la comunidad o grupos.
-  - `✨ Sin estrenar`: Sitios que nadie en tu círculo ha visitado todavía.
+  - `✨ Por descubrir`: Locales del catálogo que aún no has visitado.
 - **Filtros de Segmentación (Fila 2)**:
   - `👥 Grupos`: Selector desplegable con soporte para filtrar por uno o varios grupos privados.
   - `🌍 Países (+195)`: Selector con buscador integrado de todos los países del mundo.
