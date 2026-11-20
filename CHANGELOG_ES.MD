@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Animación de Giro del Dado y Rediseño de Acciones en «Al azar»**:
+  - Animación continua de rotación en el dado (`animate-spin`) durante el proceso de tirada aleatoria.
+  - Distribución equilibrada en cuadrícula de 2 columnas para «Ver en el listado» y «Ver en el mapa» evitando saltos de línea antiestéticos y eliminando emojis duplicados en los botones.
 - **Renombrado a «🎲 Al azar» (`Random`)**:
   - Sustituido el término «Ruleta» por «Al azar» en el botón principal del catálogo, textos y animaciones del selector aleatorio para una denominación más natural y directa.
 - **Plantillas y Documentos de Ejemplo por Tipo en Importación**:

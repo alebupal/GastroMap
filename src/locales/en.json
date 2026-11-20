@@ -164,9 +164,9 @@
     "subtitle": "Random pick among {count} filtered places",
     "spin_button": "🔄 Spin again",
     "spinning": "Picking at random... 🎲",
-    "open_maps": "Open in Maps ↗",
-    "view_on_map": "View on map 🗺️",
-    "view_in_list": "View in list 📋",
+    "open_maps": "Open in Google Maps ↗",
+    "view_on_map": "View on map",
+    "view_in_list": "View in list",
     "no_places": "No places match your filters.",
     "free_price": "Any price"
   },

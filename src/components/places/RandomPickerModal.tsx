@@ -56,7 +56,13 @@ export function RandomPickerModal({
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col items-center text-center">
         {/* Encabezado */}
         <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl mb-3 shadow-inner">
-          🎲
+          <span
+            className={`inline-block select-none transition-transform duration-150 ${
+              isSpinning ? "animate-spin" : "scale-100"
+            }`}
+          >
+            🎲
+          </span>
         </div>
         <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
           {t("random.title")}
@@ -115,52 +121,60 @@ export function RandomPickerModal({
             type="button"
             onClick={spin}
             disabled={isSpinning || places.length === 0}
-            className="w-full py-3 px-4 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/20 transition cursor-pointer disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/20 transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isSpinning ? t("random.spinning") : t("random.spin_button")}
+            <span className={`inline-block text-base ${isSpinning ? "animate-spin" : ""}`}>
+              🔄
+            </span>
+            <span>{isSpinning ? t("random.spinning") : t("random.spin_button")}</span>
           </button>
 
-          <div className="flex gap-2 flex-wrap w-full">
-            {selectedPlace && onSelectInList && (
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectInList(selectedPlace.id);
-                  onClose();
-                }}
-                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-              >
-                <span>📋</span>
-                <span>{t("random.view_in_list")}</span>
-              </button>
-            )}
+          {/* Opciones del sitio seleccionado */}
+          {selectedPlace && (
+            <div className="flex flex-col gap-2 w-full pt-1">
+              <div className="grid grid-cols-2 gap-2 w-full">
+                {onSelectInList && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectInList(selectedPlace.id);
+                      onClose();
+                    }}
+                    className="py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                  >
+                    <span>📋</span>
+                    <span>{t("random.view_in_list")}</span>
+                  </button>
+                )}
 
-            {selectedPlace && onSelectOnMap && (
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectOnMap(selectedPlace.id);
-                  onClose();
-                }}
-                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
-              >
-                <span>🗺️</span>
-                <span>{t("random.view_on_map")}</span>
-              </button>
-            )}
+                {onSelectOnMap && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectOnMap(selectedPlace.id);
+                      onClose();
+                    }}
+                    className="py-2.5 px-3 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap"
+                  >
+                    <span>🗺️</span>
+                    <span>{t("random.view_on_map")}</span>
+                  </button>
+                )}
+              </div>
 
-            {selectedPlace?.googleMapsUrl && (
-              <a
-                href={selectedPlace.googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition text-center flex items-center justify-center gap-1.5"
-              >
-                <span>📍</span>
-                <span>{t("random.open_maps")}</span>
-              </a>
-            )}
-          </div>
+              {selectedPlace.googleMapsUrl && (
+                <a
+                  href={selectedPlace.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition text-center flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700/60 shadow-2xs whitespace-nowrap"
+                >
+                  <span>📍</span>
+                  <span>{t("random.open_maps")}</span>
+                </a>
+              )}
+            </div>
+          )}
 
           <button
             type="button"

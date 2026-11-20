@@ -164,9 +164,9 @@
     "subtitle": "Elección al azar entre los {count} sitios de tus filtros",
     "spin_button": "🔄 Volver a tirar",
     "spinning": "Eligiendo al azar... 🎲",
-    "open_maps": "Abrir en Maps ↗",
-    "view_on_map": "Ver en mapa 🗺️",
-    "view_in_list": "Ver en el listado 📋",
+    "open_maps": "Abrir en Google Maps ↗",
+    "view_on_map": "Ver en el mapa",
+    "view_in_list": "Ver en el listado",
     "no_places": "No hay sitios que coincidan.",
     "free_price": "Precio libre"
   },

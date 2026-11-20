@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Spinning Dice Animation & Modal Action Redesign in «Random»**:
+  - Continuous rotating animation on the header dice (`animate-spin`) while picking a random place.
+  - Balanced 2-column grid layout for «View in list» and «View on map» eliminating awkward text breaks and removing duplicated emojis.
 - **Renamed to «🎲 Random» (`Al azar`)**:
   - Replaced «Roulette» terminology with «Random» across catalog action buttons, modals, and animation labels for a more intuitive and direct experience.
 - **Complete Sample Templates per Import Format**:
