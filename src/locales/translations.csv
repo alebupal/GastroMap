@@ -670,7 +670,7 @@
 "random.free_price","Precio libre","Any price"
 "random.no_places","No hay sitios que coincidan.","No places match your filters."
 "random.open_maps","Abrir en Google Maps ↗","Open in Google Maps ↗"
-"random.spin_button","🔄 Volver a tirar","🔄 Spin again"
+"random.spin_button","Volver a tirar","Spin again"
 "random.spinning","Eligiendo al azar... 🎲","Picking at random... 🎲"
 "random.subtitle","Elección al azar entre los {count} sitios de tus filtros","Random pick among {count} filtered places"
 "random.title","¿Dónde vamos hoy?","Where are we going today?"

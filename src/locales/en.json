@@ -162,7 +162,7 @@
   "random": {
     "title": "Where are we going today?",
     "subtitle": "Random pick among {count} filtered places",
-    "spin_button": "🔄 Spin again",
+    "spin_button": "Spin again",
     "spinning": "Picking at random... 🎲",
     "open_maps": "Open in Google Maps ↗",
     "view_on_map": "View on map",
