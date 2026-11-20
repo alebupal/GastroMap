@@ -119,8 +119,17 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
         website: item.website ? String(item.website) : null,
         phone: item.phone ? String(item.phone) : null,
         notes: item.notes ? String(item.notes) : null,
+        comments: Array.isArray(item.comments)
+          ? item.comments.map(String)
+          : item.comment
+          ? [String(item.comment)]
+          : undefined,
         occasions: Array.isArray(item.occasions) ? item.occasions.map(String) : [],
         tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
+        personalStatus:
+          item.personalStatus === "visited" || item.personalStatus === "pending"
+            ? item.personalStatus
+            : null,
       }));
   }
 
@@ -492,7 +501,7 @@ ${wpts}
                     📄 PDF
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5">
-                    Catálogo imprimible con listado completo y datos
+                    {t("export_import.pdf_desc")}
                   </div>
                 </button>
 

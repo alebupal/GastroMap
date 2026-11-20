@@ -36,3 +36,8 @@ next-env.d.ts
 
 # Documentación privada local
 /docs
+
+# Personal
+/lugares
+lugares/
+lugares*

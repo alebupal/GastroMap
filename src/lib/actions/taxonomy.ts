@@ -19,16 +19,57 @@ const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
   { id: "terraza", name: "Terraza / Vistas", icon: "☀️" },
 ];
 
+export const KNOWN_OCCASIONS: Record<string, { name: string; icon: string }> = {
+  tapear: { name: "Tapear", icon: "🍢" },
+  comer: { name: "Comer", icon: "🍽️" },
+  desayuno: { name: "Desayuno / Brunch", icon: "🥞" },
+  dulce: { name: "Un dulce", icon: "🍰" },
+  cafe: { name: "Café", icon: "☕" },
+  copas: { name: "Copas", icon: "🍸" },
+  postureo: { name: "Postureo", icon: "✨" },
+  casual: { name: "Casual / Rápido", icon: "🍔" },
+  cita: { name: "Cita / Especial", icon: "🕯️" },
+  terraza: { name: "Terraza / Vistas", icon: "☀️" },
+  bar: { name: "Bar / Tapas", icon: "🍻" },
+  restaurante: { name: "Restaurante", icon: "🍽️" },
+};
+
 /**
  * Obtiene todas las ocasiones junto con el conteo de establecimientos asociados.
+ * Auto-sincroniza cualquier ocasión que esté asignada en place_occasions pero aún no en la tabla occasions.
  */
 export async function getOccasions(): Promise<Array<Occasion & { placesCount: number }>> {
-  let list = await db.select().from(occasions).orderBy(occasions.createdAt);
+  const usedOccasions = await db
+    .selectDistinct({ occasion: placeOccasions.occasion })
+    .from(placeOccasions);
 
-  if (list.length === 0) {
-    await db.insert(occasions).values(INITIAL_OCCASIONS);
-    list = await db.select().from(occasions).orderBy(occasions.createdAt);
+  if (usedOccasions.length > 0) {
+    const existingList = await db.select({ id: occasions.id }).from(occasions);
+    const existingIds = new Set(existingList.map((o) => o.id));
+    const missing = usedOccasions
+      .map((u) => u.occasion.trim().toLowerCase())
+      .filter((occ) => occ && !existingIds.has(occ));
+
+    if (missing.length > 0) {
+      await db
+        .insert(occasions)
+        .values(
+          missing.map((occId) => {
+            const known = KNOWN_OCCASIONS[occId];
+            return {
+              id: occId,
+              name: known
+                ? known.name
+                : occId.charAt(0).toUpperCase() + occId.slice(1).replace(/[-_]/g, " "),
+              icon: known ? known.icon : "🍽️",
+            };
+          })
+        )
+        .onConflictDoNothing();
+    }
   }
+
+  const list = await db.select().from(occasions).orderBy(occasions.createdAt);
 
   // Contar sitios asociados a cada ocasión
   const counts = await db
@@ -121,6 +162,7 @@ export async function createOccasionAction(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -146,6 +188,7 @@ export async function renameOccasionAction(id: string, newName: string, newIcon?
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -194,6 +237,7 @@ export async function mergeOccasionsAction(sourceId: string, targetId: string) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -219,6 +263,7 @@ export async function deleteOccasionAction(id: string, replacementId?: string) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -258,6 +303,7 @@ export async function renameTagAction(oldTag: string, newTag: string) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -311,6 +357,7 @@ export async function mergeTagsAction(sourceTag: string, targetTag: string) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -335,6 +382,7 @@ export async function deleteTagAction(tag: string, replacementTag?: string) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -378,6 +426,7 @@ export async function deleteMultipleOccasionsAction(ids: string[]) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true, count: ids.length };
 }
 
@@ -400,6 +449,7 @@ export async function deleteMultipleTagsAction(tagIds: string[]) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true, count: tagIds.length };
 }
 
@@ -429,6 +479,7 @@ export async function deleteEmptyOccasionsAction(emptyIds?: string[]) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true, count: targetsToDelete.length, deleted: targetsToDelete };
 }
 
@@ -458,5 +509,6 @@ export async function deleteEmptyTagsAction(emptyTags?: string[]) {
 
   revalidatePath("/");
   revalidatePath("/new");
+  revalidatePath("/admin");
   return { success: true, count: targetsToDelete.length, deleted: targetsToDelete };
 }

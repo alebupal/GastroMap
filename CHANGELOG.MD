@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Auto-creation & Synchronization of Occasions upon Import**:
+  - When importing places from JSON (`importPlacesAction`) or batch scripts (`scripts/import-user-places.mjs`), all assigned categories/occasions are automatically registered in the global `occasions` catalog if not already present.
+  - Automatic synchronization in `getOccasions()` to discover and populate any orphaned occasions referenced in `place_occasions`.
+- **Automatic URL Detection & Linkification (LinkifiedText)**:
+  - New `LinkifiedText.tsx` component that parses and renders external URLs as secure clickable links (`target="_blank"`, `rel="noopener noreferrer"`) across notes and collaborative comments in cards, map sheets, assistant, and compare modals.
+- **Flexible Page Size Selector (10 / 20 / 50 / All)**:
+  - User-configurable pagination control (`PaginationBar.tsx` and `PlacesExplorer.tsx`) allowing users to choose between 10, 20, 50, or all items in place listings, categories, tags, and users.
+- **Enriched PDF Export**:
+  - Direct clickable Google Maps link (`[View on Google Maps]`) on every establishment entry in the generated PDF catalog and price range formatting cleanup without redundant currency symbols.
 - **Native PDF Document Export (PDF 1.4 Standard)**:
   - Dependency-free client-side PDF generator (`src/lib/pdf.ts`) creating formatted, printable A4 catalogs with Helvetica vector typography, running headers, dynamic pagination, and WinAnsi encoding for special and accented characters.
   - Quick export button added to the Import/Export modal dialog (`ExportImportModal.tsx`).
@@ -23,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Label text visible on mobile screens matching Roulette and Assistant buttons.
 
 ### Changed and Fixed
+- **Collapsed by Default for Taxonomy Sections in Administration**:
+  - In `TaxonomyManager.tsx`, `defaultOpen` defaults to `false` so «Plans & Occasions» and «Global Tags» start collapsed (`Manage`), keeping the taxonomy tab clean and uncluttered.
+- **Fixed Empty Category Deletion and Unexpected Re-seeding**:
+  - Removed auto-seeding logic in `getOccasions()` that re-inserted default categories when the table became empty. Added reactive local state in `TaxonomyManager.tsx` for immediate visual updates on single, bulk, and empty deletions.
+- **100% Comprehensive Translation (i18n es / en)**:
+  - Localized all administrative confirmation, deletion, and merge dialogs, empty search hints in the explorer, with 691 keys synchronized in `translations.csv`.
 - **Admin-Only Place Deletion Restriction**:
   - Non-admin users cannot delete places even if they created them; deletion is strictly restricted to administrator accounts in both UI and server action (`deletePlaceAction`).
 - **Scroll-to-Top Button Overlap Fix**:

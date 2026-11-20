@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/interactions";
 import { CommentSkeleton } from "@/components/ui/Skeleton";
 import { useT } from "@/lib/i18n/client";
+import { LinkifiedText } from "@/components/ui/LinkifiedText";
 
 interface PlaceCommentsThreadProps {
   placeId: string;
@@ -133,7 +134,7 @@ function InlineFormatted({ text }: { text: string }) {
           );
         }
 
-        return <span key={i}>{part}</span>;
+        return <LinkifiedText key={i} text={part} />;
       })}
     </>
   );
@@ -255,22 +256,20 @@ function RichTextarea({
           <button
             type="button"
             onClick={() => setTab("write")}
-            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${
-              tab === "write"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                : "text-slate-600 dark:text-slate-400"
-            }`}
+            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${tab === "write"
+              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+              : "text-slate-600 dark:text-slate-400"
+              }`}
           >
             {t ? t("comments.write") : "Escribir"}
           </button>
           <button
             type="button"
             onClick={() => setTab("preview")}
-            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${
-              tab === "preview"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                : "text-slate-600 dark:text-slate-400"
-            }`}
+            className={`px-2 py-0.5 rounded-md cursor-pointer transition ${tab === "preview"
+              ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+              : "text-slate-600 dark:text-slate-400"
+              }`}
           >
             {t ? t("comments.preview") : "Vista previa"}
           </button>

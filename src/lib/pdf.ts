@@ -7,6 +7,9 @@ export interface PdfPlaceItem {
   name: string;
   city?: string | null;
   address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  googleMapsUrl?: string | null;
   priceRange?: string | null;
   rating?: number | null;
   notes?: string | null;
@@ -50,7 +53,7 @@ function encodePdfString(str: string): string {
       case 220: out += "\\334"; break; // Ü
       case 191: out += "\\277"; break; // ¿
       case 161: out += "\\241"; break; // ¡
-      case 8364: out += "EUR"; break;  // €
+      case 8364: out += "\\200"; break;  // € (Euro en WinAnsiEncoding)
       default:
         if (code >= 32 && code <= 126) {
           out += str[i];
@@ -73,19 +76,28 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
   const MARGIN_BOTTOM = 50;
   const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
 
+  interface PageAnnot {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    url: string;
+  }
+
   interface PageContent {
     commands: string[];
+    annots: PageAnnot[];
   }
 
   const pages: PageContent[] = [];
-  let currentPage: PageContent = { commands: [] };
+  let currentPage: PageContent = { commands: [], annots: [] };
   let currentY = PAGE_HEIGHT - MARGIN_TOP;
 
   function startNewPage() {
     if (currentPage.commands.length > 0) {
       pages.push(currentPage);
     }
-    currentPage = { commands: [] };
+    currentPage = { commands: [], annots: [] };
     currentY = PAGE_HEIGHT - MARGIN_TOP;
   }
 
@@ -138,7 +150,12 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
   // Renderizar cada establecimiento
   places.forEach((place, index) => {
     // Estimación de altura necesaria para este establecimiento
-    let neededHeight = 50;
+    const locParts = [place.city, place.address].filter(Boolean).join(" • ");
+    const mapsUrl = place.googleMapsUrl || (place.latitude != null && place.longitude != null ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}` : null);
+
+    let neededHeight = 36;
+    if (locParts) neededHeight += 12;
+    if (mapsUrl) neededHeight += 12;
     if (place.occasions && place.occasions.length > 0) neededHeight += 12;
     if (place.tags && place.tags.length > 0) neededHeight += 12;
     if (place.notes) neededHeight += 16;
@@ -167,9 +184,18 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
       `${MARGIN_LEFT} ${currentY - boxHeight + 4} ${CONTENT_WIDTH} ${boxHeight} re S`
     );
 
-    // 1. Título y Precio
+    // 1. Título y Rango de Precio formateado correctamente
     const nameStr = `${index + 1}. ${place.name}`;
-    const priceStr = place.priceRange ? `[${place.priceRange}]` : "";
+    const priceMap: Record<string, string> = {
+      "€": "< 15 \u20AC",
+      "€€": "15 - 30 \u20AC",
+      "€€€": "30 - 50 \u20AC",
+      "€€€€": "> 50 \u20AC",
+    };
+    const priceStr = place.priceRange && priceMap[place.priceRange]
+      ? `${place.priceRange} (${priceMap[place.priceRange]})`
+      : (place.priceRange ? `[${place.priceRange}]` : "");
+
     currentPage.commands.push(
       `BT`,
       `/F2 11 Tf`,
@@ -182,9 +208,9 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
     if (priceStr) {
       currentPage.commands.push(
         `BT`,
-        `/F2 10 Tf`,
+        `/F2 9.5 Tf`,
         `0.85 0.45 0.05 rg`,
-        `${PAGE_WIDTH - MARGIN_RIGHT - 55} ${currentY - 12} Td`,
+        `${PAGE_WIDTH - MARGIN_RIGHT - 110} ${currentY - 12} Td`,
         `(${encodePdfString(priceStr)}) Tj`,
         `ET`
       );
@@ -192,7 +218,6 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
     currentY -= 20;
 
     // 2. Ciudad y Dirección
-    const locParts = [place.city, place.address].filter(Boolean).join(" • ");
     if (locParts) {
       currentPage.commands.push(
         `BT`,
@@ -202,6 +227,27 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
         `(${encodePdfString(locParts)}) Tj`,
         `ET`
       );
+      currentY -= 11;
+    }
+
+    // 2b. Enlace directo a Google Maps
+    if (mapsUrl) {
+      const displayUrl = mapsUrl.length > 70 ? mapsUrl.slice(0, 67) + "..." : mapsUrl;
+      currentPage.commands.push(
+        `BT`,
+        `/F1 8 Tf`,
+        `0.12 0.38 0.88 rg`,
+        `${MARGIN_LEFT + 8} ${currentY} Td`,
+        `(${encodePdfString(`📍 Maps: ${displayUrl}`)}) Tj`,
+        `ET`
+      );
+      currentPage.annots.push({
+        x1: MARGIN_LEFT + 8,
+        y1: currentY - 2,
+        x2: MARGIN_LEFT + 8 + Math.min(CONTENT_WIDTH - 20, displayUrl.length * 4.6),
+        y2: currentY + 9,
+        url: mapsUrl,
+      });
       currentY -= 11;
     }
 
@@ -322,9 +368,13 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
     const streamContent = pages[i].commands.join("\n") + "\n";
     const streamLength = streamContent.length;
 
+    const annotsStr = pages[i].annots.length > 0
+      ? ` /Annots [ ${pages[i].annots.map(a => `<< /Type /Annot /Subtype /Link /Rect [${Math.round(a.x1)} ${Math.round(a.y1)} ${Math.round(a.x2)} ${Math.round(a.y2)}] /Border [0 0 0] /A << /Type /Action /S /URI /URI (${a.url}) >> >>`).join(" ")} ]`
+      : "";
+
     // Page object
     offsets[pageId] = addChunk(
-      `${pageId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Contents ${contentId} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> >>\nendobj\n`
+      `${pageId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_WIDTH} ${PAGE_HEIGHT}] /Contents ${contentId} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >>${annotsStr} >>\nendobj\n`
     );
 
     // Stream object

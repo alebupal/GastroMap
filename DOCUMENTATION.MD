@@ -157,7 +157,7 @@ When launching on a clean database:
 In the **Import / Export** modal (`📦`):
 
 ### 📤 Export Formats
-- **PDF (PDF 1.4 Standard)**: Native, dependency-free generator producing a printable A4 catalog with Helvetica typography, running headers, and dynamic pagination.
+- **PDF (PDF 1.4 Standard)**: Native, dependency-free generator producing a printable A4 catalog with Helvetica typography, running headers, direct Google Maps link (`[View on Google Maps]`), clean price ranges, and dynamic pagination.
 - **JSON**: Full structured data dump with tags and categories.
 - **CSV**: Spreadsheet friendly format.
 - **GeoJSON**: Standard GIS spatial format.
@@ -166,6 +166,8 @@ In the **Import / Export** modal (`📦`):
 
 ### 📥 Import Formats
 - Import `.json`, `.geojson`, `.kml`, `.gpx`, and `.csv` files with duplicate detection and preview.
+- **Occasions & Tags Auto-creation**: When importing places with categories or occasions, the system automatically registers them in the `occasions` and `tags` tables, ensuring filters and selectors are synchronized.
+- **Automatic Linkification (LinkifiedText)**: Any URLs present in notes or comments are automatically rendered as secure clickable links.
 
 ### 🛡️ Backups and Advanced Administration (Admin)
 - **Bulk Places Backup**: Checkbox selection in admin table to export JSON backups of selected places.

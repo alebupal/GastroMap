@@ -16,6 +16,7 @@
     "i18n:export": "node scripts/i18n-csv.mjs export",
     "i18n:import": "node scripts/i18n-csv.mjs import",
     "i18n:check": "node scripts/i18n-csv.mjs check",
+    "import:lugares": "node scripts/import-user-places.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
 import { EditPlaceModal } from "./EditPlaceModal";
+import { LinkifiedText } from "@/components/ui/LinkifiedText";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 15 €",
@@ -91,11 +92,10 @@ export function PlaceCard({
   return (
     <div
       id={`place-card-${place.id}`}
-      className={`w-full p-4 sm:p-5 rounded-3xl border transition-all duration-300 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs ${
-        isSelected
-          ? "border-amber-500 ring-2 ring-amber-500/50 shadow-xl bg-amber-500/5 dark:bg-amber-500/10"
-          : "border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl"
-      }`}
+      className={`w-full p-4 sm:p-5 rounded-3xl border transition-all duration-300 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs ${isSelected
+        ? "border-amber-500 ring-2 ring-amber-500/50 shadow-xl bg-amber-500/5 dark:bg-amber-500/10"
+        : "border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl"
+        }`}
     >
       <div>
         {/* Fila superior: Estado personal, Experiencia, Favorito y Precio */}
@@ -239,14 +239,16 @@ export function PlaceCard({
         {/* Notas públicas del creador */}
         {place.notes && (
           <p className="mt-2.5 text-xs text-slate-700 dark:text-slate-300 italic bg-amber-50/60 dark:bg-slate-800/40 p-2.5 rounded-2xl border-l-2 border-amber-500/80">
-            «{place.notes}»
+            «<LinkifiedText text={place.notes} />»
           </p>
         )}
 
         {/* Notas privadas personales (solo visibles por el usuario logueado) */}
         {privateNotes && (
           <div className="mt-2 text-xs text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/30 p-2.5 rounded-2xl border border-amber-200 dark:border-amber-800/40 flex items-start justify-between gap-2">
-            <span className="italic">🔒 {privateNotes}</span>
+            <span className="italic">
+              🔒 <LinkifiedText text={privateNotes} />
+            </span>
             <button
               type="button"
               onClick={() => setShowNotesModal(true)}
@@ -296,22 +298,22 @@ export function PlaceCard({
       </div>
 
       {/* Pie de tarjeta: Autor, comentarios, Maps y Borrar */}
-      <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-2">
-        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate max-w-[130px] sm:max-w-[160px]">
+      <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-x-3 gap-y-2">
+        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
           {t("cards.by_author", { author: place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "") })}
         </span>
 
-        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+        <div className="flex items-center justify-end gap-x-2.5 gap-y-1.5 flex-wrap flex-1 min-w-0">
           {/* Botón de comentarios */}
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
             aria-label={`${t("cards.comments")} (${commentsCount})`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer p-1 rounded-lg whitespace-nowrap"
             title={t("cards.comments")}
           >
             <span>💬</span>
-            <span>{commentsCount > 0 ? `Comentarios (${commentsCount})` : "Comentarios"}</span>
+            <span>{commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}</span>
           </button>
 
           {hasCoords && onSelectOnMap && (
@@ -319,7 +321,7 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg"
+              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer p-1 rounded-lg whitespace-nowrap"
             >
               <span>🗺️</span>
               <span>{t("places.view_map")}</span>
@@ -332,7 +334,7 @@ export function PlaceCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Maps: ${place.name}`}
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1"
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline p-1 whitespace-nowrap"
             >
               <span>📍</span>
               <span>Maps ↗</span>
@@ -344,14 +346,14 @@ export function PlaceCard({
               type="button"
               onClick={onToggleCompare}
               aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
-              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-1 rounded-lg ${isCompared
+              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-1 rounded-lg whitespace-nowrap ${isCompared
                 ? "bg-amber-500 text-slate-950 font-bold"
                 : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
                 }`}
               title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
             >
               <span>⚖️</span>
-              <span>Comparar</span>
+              <span>{t("cards.compare")}</span>
             </button>
           )}
 
@@ -360,11 +362,11 @@ export function PlaceCard({
               type="button"
               onClick={() => setShowEditModal(true)}
               aria-label={t("cards.edit_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer p-1"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer p-1 whitespace-nowrap"
               title={t("cards.edit_tooltip")}
             >
               <span>✏️</span>
-              <span>Editar</span>
+              <span>{t("common.edit")}</span>
             </button>
           )}
 
@@ -373,11 +375,11 @@ export function PlaceCard({
               onClick={handleDelete}
               disabled={deleting}
               aria-label={t("cards.delete_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 p-1"
+              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 p-1 whitespace-nowrap"
               title={t("cards.delete_tooltip")}
             >
               <span>🗑️</span>
-              <span>Eliminar</span>
+              <span>{t("common.delete")}</span>
             </button>
           )}
         </div>

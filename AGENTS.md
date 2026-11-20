@@ -81,7 +81,9 @@ cd GastroMap && <comando>
 
 ---
 
-## 🌐 Internacionalización (i18n)
+## 🌐 Internacionalización Obligatoria (i18n)
+> ⚠️ **REGLA ESTRICTA:** Siempre que se añada o modifique cualquier texto, botón, mensaje, diálogo, tooltip o elemento visible de la interfaz, **DEBE AÑADIRSE OBLIGATORIAMENTE EN AMBOS IDIOMAS** (`src/locales/es.json` y `src/locales/en.json`) y sincronizarse en `src/locales/translations.csv` ejecutando `npm run i18n:export`. Nunca dejar textos literales hardcodeados en los componentes.
+
 - **Archivos fuente:** `src/locales/es.json` y `src/locales/en.json`.
 - **Sincronización:** `npm run i18n:export` actualiza `src/locales/translations.csv`.
 - **Consistencia:** Mantener siempre las mismas claves en `es.json` y `en.json`. Ejecutar `npm run i18n:check` para verificar 0 faltantes.

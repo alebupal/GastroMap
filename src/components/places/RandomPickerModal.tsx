@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { useT } from "@/lib/i18n/client";
+import { LinkifiedText } from "@/components/ui/LinkifiedText";
 
 interface RandomPickerModalProps {
   isOpen: boolean;
@@ -98,7 +99,7 @@ export function RandomPickerModal({
 
             {selectedPlace.notes && (
               <p className="mt-3 text-xs italic text-slate-600 dark:text-slate-300">
-                «{selectedPlace.notes}»
+                «<LinkifiedText text={selectedPlace.notes} />»
               </p>
             )}
           </div>

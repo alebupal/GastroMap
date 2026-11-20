@@ -18,7 +18,7 @@ export function PaginationBar({
   pageSize,
   onPageChange,
   onPageSizeChange,
-  pageSizeOptions = [10, 25, 50],
+  pageSizeOptions = [10, 20, 50, 10000],
   itemLabel,
 }: PaginationBarProps) {
   const { t } = useT();
@@ -56,7 +56,7 @@ export function PaginationBar({
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
-                  {opt}
+                  {opt >= 10000 ? t("places.all") : opt}
                 </option>
               ))}
             </select>

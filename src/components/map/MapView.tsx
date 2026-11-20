@@ -9,6 +9,7 @@ import {
   createUserLocationIcon,
   type PinPersonalBadge,
 } from "@/lib/map-icons";
+import { linkifyHtml } from "@/components/ui/LinkifiedText";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
 function getPersonalBadge(place: PlaceWithDetails): PinPersonalBadge {
@@ -77,7 +78,7 @@ function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
       ${distanceLabel ? `<div style="margin-top: 6px;">${distanceLabel}</div>` : ""}
       ${
         place.notes
-          ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 6px; border-radius: 6px;">«${place.notes}»</p>`
+          ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 6px; border-radius: 6px;">«${linkifyHtml(place.notes)}»</p>`
           : ""
       }
       <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">

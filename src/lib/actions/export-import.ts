@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { places, placeOccasions, placeTags, tags } from "@/db/schema";
+import { places, occasions, placeOccasions, placeTags, tags, userPlaces, placeComments } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { KNOWN_OCCASIONS } from "@/lib/actions/taxonomy";
 
 export interface ImportPlacePayload {
   name: string;
@@ -17,8 +18,11 @@ export interface ImportPlacePayload {
   website?: string | null;
   phone?: string | null;
   notes?: string | null;
+  comments?: string[] | null;
+  comment?: string | null;
   occasions?: string[];
   tags?: string[];
+  personalStatus?: "pending" | "visited" | null;
 }
 
 export async function importPlacesAction(
@@ -73,8 +77,30 @@ export async function importPlacesAction(
       })
       .returning();
 
-    const occs = Array.from(new Set((raw.occasions || []).filter(Boolean)));
+    const occs = Array.from(
+      new Set(
+        (raw.occasions || [])
+          .map((o) => (typeof o === "string" ? o.trim().toLowerCase() : ""))
+          .filter(Boolean)
+      )
+    );
     if (occs.length > 0) {
+      await db
+        .insert(occasions)
+        .values(
+          occs.map((occId) => {
+            const known = KNOWN_OCCASIONS[occId];
+            return {
+              id: occId,
+              name: known
+                ? known.name
+                : occId.charAt(0).toUpperCase() + occId.slice(1).replace(/[-_]/g, " "),
+              icon: known ? known.icon : "🍽️",
+            };
+          })
+        )
+        .onConflictDoNothing();
+
       await db.insert(placeOccasions).values(
         occs.map((occ) => ({ placeId: created.id, occasion: occ }))
       );
@@ -97,6 +123,41 @@ export async function importPlacesAction(
       );
     }
 
+    if (raw.personalStatus === "visited" || raw.personalStatus === "pending") {
+      await db
+        .insert(userPlaces)
+        .values({
+          userId: currentUser.id,
+          placeId: created.id,
+          personalStatus: raw.personalStatus,
+        })
+        .onConflictDoUpdate({
+          target: [userPlaces.userId, userPlaces.placeId],
+          set: { personalStatus: raw.personalStatus },
+        });
+    }
+
+    const rawComments: string[] = [];
+    if (typeof raw.comment === "string" && raw.comment.trim()) {
+      rawComments.push(raw.comment.trim());
+    }
+    if (Array.isArray(raw.comments)) {
+      for (const c of raw.comments) {
+        if (typeof c === "string" && c.trim()) {
+          rawComments.push(c.trim());
+        }
+      }
+    }
+    if (rawComments.length > 0) {
+      await db.insert(placeComments).values(
+        rawComments.map((content) => ({
+          placeId: created.id,
+          userId: currentUser.id,
+          content,
+        }))
+      );
+    }
+
     importedCount++;
   }
 
@@ -109,5 +170,6 @@ export async function importPlacesAction(
   });
 
   revalidatePath("/");
+  revalidatePath("/admin");
   return { success: true, importedCount, skippedCount };
 }

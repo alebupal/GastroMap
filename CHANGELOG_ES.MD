@@ -8,6 +8,15 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Auto-creación y Sincronización de Ocasiones al Importar Sitios**:
+  - Al importar establecimientos desde JSON (`importPlacesAction`) o scripts masivos (`scripts/import-user-places.mjs`), todas las categorías/ocasiones asignadas se registran automáticamente en el catálogo global de `occasions` si no existían previamente.
+  - Sincronización automática en `getOccasions()` para descubrir e insertar cualquier ocasión huérfana referenciada en `place_occasions`.
+- **Detección y Clicabilidad Automática de Enlaces (LinkifiedText)**:
+  - Nuevo componente `LinkifiedText.tsx` que parsea y renderiza URLs externas como enlaces clicables seguros (`target="_blank"`, `rel="noopener noreferrer"`) tanto en notas personales como en comentarios colaborativos de las tarjetas, mapa, asistente y comparador.
+- **Selector de Tamaño de Página Flexible (10 / 20 / 50 / Todos)**:
+  - Control de paginación configurable por el usuario (`PaginationBar.tsx` y `PlacesExplorer.tsx`) que permite elegir visualizar 10, 20, 50 o todos los elementos en listados de lugares, categorías, etiquetas y usuarios.
+- **Exportación en PDF Enriquecida**:
+  - Enlace directo a Google Maps (`[Ver en Google Maps]`) en cada ficha del catálogo PDF generado y corrección en el renderizado de rangos de precio eliminando sufijos de divisa redundantes.
 - **Exportación en Formato PDF Nativo (Estándar PDF 1.4)**:
   - Generador PDF nativo sin dependencias externas (`src/lib/pdf.ts`) que produce catálogos vectoriales imprimibles en formato A4 con tipografía Helvetica, cabecera formal, paginación dinámica y soporte completo de codificación WinAnsi para caracteres españoles y acentos.
   - Botón de exportación rápida a PDF integrado en el modal de importación/exportación (`ExportImportModal.tsx`).
@@ -23,6 +32,12 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Visibilidad del texto «Importar / Exportar» en pantallas móviles al igual que las opciones de «Ruleta» y «Asistente».
 
 ### Cambiado y Corregido
+- **Plegado por Defecto de Secciones de Taxonomía en Administración**:
+  - En `TaxonomyManager.tsx`, `defaultOpen` se establece en `false` para que «Planes y Ocasiones» y «Etiquetas Globales» aparezcan colapsadas de inicio (`Gestionar`), reduciendo el ruido visual en la pestaña de taxonomía.
+- **Corrección en Borrado de Categorías Vacías y Re-inserción Inesperada**:
+  - Eliminado el bloque de inicialización automática en `getOccasions()` que volvía a sembrar las 10 categorías demo cuando la tabla quedaba vacía. Estado local reactivo en `TaxonomyManager.tsx` para sincronización visual instantánea de borrados individuales, en lote y de vacías.
+- **Traducción Integral al 100% (i18n es / en)**:
+  - Localización de todos los modales de confirmación, eliminación y fusión en administración, mensaje de búsqueda vacía en el explorador y sincronización total de 691 claves en `translations.csv`.
 - **Restricción de Eliminación Estricta a Administradores**:
   - Los usuarios regulares ya no pueden eliminar establecimientos aunque sean propietarios de la ficha; el borrado queda estrictamente reservado para administradores tanto en interfaz como en la acción del servidor (`deletePlaceAction`).
 - **Corrección de Solapamiento del Botón Flotante «Subir Arriba»**:

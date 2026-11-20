@@ -22,9 +22,7 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
   const [resetMessage, setResetMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   async function handleResetApp() {
-    const confirmation = prompt(
-      '⚠️ ZONA DE PELIGRO ⚠️\n\nEsta acción borrará TODOS los establecimientos, comentarios, notas, grupos de compartición, invitaciones y usuarios colaboradores de la base de datos.\n\nÚNICAMENTE se conservará tu cuenta de administrador.\n\nPara confirmar el reseteo completo, escribe "RESETEAR" en mayúsculas:'
-    );
+    const confirmation = prompt(t("admin.reset_app.prompt"));
 
     if (confirmation !== "RESETEAR") {
       return;
@@ -39,7 +37,7 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
     if (res?.error) {
       setResetMessage({ type: "error", text: res.error });
     } else {
-      setResetMessage({ type: "success", text: "Aplicación reseteada con éxito. Recargando..." });
+      setResetMessage({ type: "success", text: t("admin.reset_app.success") });
       setTimeout(() => {
         window.location.reload();
       }, 1500);
@@ -228,10 +226,10 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
           <span className="text-xl">⚠️</span>
           <div>
             <h3 className="text-sm font-bold text-red-900 dark:text-red-300">
-              Zona de Peligro — Resetear aplicación
+              {t("admin.reset_app.title")}
             </h3>
             <p className="text-xs text-red-700/80 dark:text-red-400/80 max-w-lg">
-              Borra toda la base de datos (todos los sitios, opiniones, comentarios, grupos y usuarios), conservando únicamente tu usuario actual.
+              {t("admin.reset_app.desc")}
             </p>
           </div>
         </div>
@@ -242,7 +240,7 @@ export function SettingsManager({ initialCartoApiKey = "" }: SettingsManagerProp
           onClick={handleResetApp}
           className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/30 transition disabled:opacity-50 cursor-pointer active:scale-95"
         >
-          {resetting ? "Reseteando aplicación..." : "🗑️ Resetear aplicación"}
+          {resetting ? t("admin.reset_app.resetting") : t("admin.reset_app.button")}
         </button>
       </div>
 

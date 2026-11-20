@@ -35,11 +35,7 @@ export function DemoPlacesSeeder() {
   }
 
   async function handleDeleteDemo() {
-    if (
-      !confirm(
-        "¿Borrar únicamente los datos de la demo?\n\nSe eliminarán los 50 establecimientos predefinidos, sus comentarios y usuarios de prueba. Los sitios, comentarios y grupos que tú hayas añadido manualmente se conservarán intactos."
-      )
-    ) {
+    if (!confirm(t("admin_demo.delete_confirm"))) {
       return;
     }
 
@@ -52,7 +48,7 @@ export function DemoPlacesSeeder() {
     if (res.error) {
       setMessage(`❌ ${res.error}`);
     } else {
-      setMessage(`✓ Datos de la demo eliminados (${res.count} sitios borrados)`);
+      setMessage(t("admin_demo.delete_success", { count: res.count ?? 0 }));
       setTimeout(() => {
         window.location.reload();
       }, 1200);
@@ -93,9 +89,9 @@ export function DemoPlacesSeeder() {
           onClick={handleDeleteDemo}
           disabled={loading}
           className="px-3.5 py-2 text-xs font-bold rounded-xl bg-red-600/90 hover:bg-red-700 text-white transition active:scale-95 cursor-pointer disabled:opacity-50 shadow-sm"
-          title="Borrar solo los 50 sitios y datos de la demo manteniendo tus propios sitios"
+          title={t("admin_demo.delete_title")}
         >
-          🗑️ Borrar demo
+          {t("admin_demo.delete_btn")}
         </button>
       </div>
     </div>

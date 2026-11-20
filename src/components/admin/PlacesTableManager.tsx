@@ -322,10 +322,10 @@ export function PlacesTableManager({
                 type="button"
                 onClick={handleBulkBackup}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer shadow-md shadow-amber-500/20"
-                title="Descargar copia de seguridad JSON de los sitios seleccionados"
+                title={t("admin_places.bulk_backup_title")}
               >
                 <span>💾</span>
-                <span>Backup ({selectedIds.size})</span>
+                <span>{t("admin_places.bulk_backup", { count: selectedIds.size })}</span>
               </button>
 
               <button

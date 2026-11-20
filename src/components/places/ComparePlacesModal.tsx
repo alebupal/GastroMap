@@ -2,6 +2,7 @@
 
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { useT } from "@/lib/i18n/client";
+import { LinkifiedText } from "@/components/ui/LinkifiedText";
 
 interface ComparePlacesModalProps {
   isOpen: boolean;
@@ -50,11 +51,10 @@ export function ComparePlacesModal({
 
         <div className="p-5 overflow-auto flex-1">
           <div
-            className={`grid gap-3 ${
-              places.length === 2
-                ? "grid-cols-1 sm:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-3"
-            }`}
+            className={`grid gap-3 ${places.length === 2
+              ? "grid-cols-1 sm:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-3"
+              }`}
           >
             {places.map((p) => (
               <div
@@ -115,8 +115,8 @@ export function ComparePlacesModal({
                         {p.experienceStatus === "visited_by_me"
                           ? `✅ ${t("cards.visited_badge")}`
                           : p.experienceStatus === "visited_by_others"
-                          ? `👥 ${t("cards.friends_badge")}`
-                          : `✨ ${t("cards.untried_badge")}`}
+                            ? `👥 ${t("cards.friends_badge")}`
+                            : `✨ ${t("cards.untried_badge")}`}
                       </span>
                     </div>
 
@@ -161,7 +161,7 @@ export function ComparePlacesModal({
 
                   {p.notes && (
                     <p className="text-[11px] italic text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900/60 p-2 rounded-xl border-l-2 border-amber-500">
-                      «{p.notes}»
+                      «<LinkifiedText text={p.notes} />»
                     </p>
                   )}
                 </div>

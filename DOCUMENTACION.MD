@@ -159,7 +159,7 @@ GastroMap permite organizar recomendaciones en círculos cerrados (pareja, cuadr
 En el modal de **Importar / Exportar** (`📦`) dispones de herramientas completas para migrar o respaldar tu catálogo:
 
 ### 📤 Formatos de Exportación
-- **PDF (Estándar 1.4)**: Generador nativo que produce un catálogo imprimible en A4 con tipografía Helvetica, cabecera formal, paginación dinámica y soporte completo de acentos y caracteres especiales.
+- **PDF (Estándar 1.4)**: Generador nativo que produce un catálogo imprimible en A4 con tipografía Helvetica, cabecera formal, paginación dinámica, enlace directo a Google Maps (`[Ver en Google Maps]`), rangos de precio limpios y soporte completo de acentos y caracteres especiales.
 - **JSON**: Volcado estructurado con todas las propiedades, etiquetas y categorías.
 - **CSV**: Compatible con Excel, Google Sheets y LibreOffice Calc.
 - **GeoJSON**: Formato estándar para SIG (Sistemas de Información Geográfica) como QGIS o ArcGIS.
@@ -169,6 +169,8 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 ### 📥 Formatos de Importación
 - Archivos `.json`, `.geojson`, `.kml`, `.gpx` y `.csv`.
 - Detección automática de duplicados por nombre y proximidad de coordenadas con vista previa interactiva antes de confirmar la importación.
+- **Auto-creación de Ocasiones y Tags**: Al importar datos que contengan categorías u ocasiones temáticas, el sistema las registra automáticamente en el catálogo de `occasions` y `tags`, auto-sincronizando los selectores y filtros.
+- **Detección Automática de Enlaces (LinkifiedText)**: Cualquier URL presente en notas personales o comentarios se transforma automáticamente en un enlace web seguro clicable.
 
 ### 🛡️ Copia de Seguridad y Administración Avanzada (Panel Admin)
 - **Backup por Lote de Sitios**: Desde la tabla de establecimientos, los administradores pueden seleccionar casillas de verificación de sitios específicos y descargar una copia de seguridad JSON exclusiva de los mismos.

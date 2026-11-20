@@ -1553,7 +1553,7 @@ export function PlacesExplorer({
                 {t("places.no_results")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs mx-auto">
-                Prueba a ajustar tu búsqueda, ampliar el radio de distancia o limpiar los filtros.
+                {t("places.no_results_hint")}
               </p>
               <button
                 type="button"
@@ -1578,22 +1578,42 @@ export function PlacesExplorer({
                   {textSearch && <span className="hidden sm:inline text-slate-400">• «{textSearch}»</span>}
                 </div>
 
-                <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  <span className="hidden sm:inline">{t("places.sort_by")}:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
-                    aria-label={t("places.sort_by")}
-                  >
-                    <option value="recent">🕒 {t("places.sort_recent")}</option>
-                    {userLocation && <option value="distance">📍 {t("places.sort_distance")}</option>}
-                    <option value="rating">⭐ {t("places.sort_rating")}</option>
-                    <option value="name">🔤 {t("places.sort_alphabetical")}</option>
-                    <option value="price_asc">💶 {t("places.sort_price_asc")}</option>
-                    <option value="price_desc">💶 {t("places.sort_price_desc")}</option>
-                  </select>
-                </label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="hidden sm:inline">{t("places.page_size")}:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
+                      aria-label={t("places.page_size")}
+                    >
+                      <option value={10}>10 {t("places.per_page")}</option>
+                      <option value={20}>20 {t("places.per_page")}</option>
+                      <option value={50}>50 {t("places.per_page")}</option>
+                      <option value={10000}>{t("places.all")}</option>
+                    </select>
+                  </label>
+
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    <span className="hidden sm:inline">{t("places.sort_by")}:</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                      className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
+                      aria-label={t("places.sort_by")}
+                    >
+                      <option value="recent">🕒 {t("places.sort_recent")}</option>
+                      {userLocation && <option value="distance">📍 {t("places.sort_distance")}</option>}
+                      <option value="rating">⭐ {t("places.sort_rating")}</option>
+                      <option value="name">🔤 {t("places.sort_alphabetical")}</option>
+                      <option value="price_asc">💶 {t("places.sort_price_asc")}</option>
+                      <option value="price_desc">💶 {t("places.sort_price_desc")}</option>
+                    </select>
+                  </label>
+                </div>
               </div>
 
               {/* Tarjetas paginadas */}
@@ -1614,11 +1634,31 @@ export function PlacesExplorer({
               ))}
 
               {/* Barra de Paginación */}
-              {totalPages > 1 && (
+              {(totalPages > 1 || filteredPlaces.length > 10) && (
                 <div className="pt-3 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 text-xs">
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px]">
-                    Mostrando {startIndex + 1} - {Math.min(startIndex + pageSize, filteredPlaces.length)} de {filteredPlaces.length}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">
+                      {t("places.showing_range", {
+                        start: filteredPlaces.length > 0 ? startIndex + 1 : 0,
+                        end: Math.min(startIndex + pageSize, filteredPlaces.length),
+                        total: filteredPlaces.length,
+                      })}
+                    </span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => {
+                        setPageSize(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
+                      aria-label={t("places.page_size")}
+                    >
+                      <option value={10}>10 {t("places.per_page")}</option>
+                      <option value={20}>20 {t("places.per_page")}</option>
+                      <option value={50}>50 {t("places.per_page")}</option>
+                      <option value={10000}>{t("places.all")}</option>
+                    </select>
+                  </div>
 
                   <div className="flex items-center gap-1">
                     <button
@@ -1777,7 +1817,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setSelectedPlaceId(null)}
               className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs"
-              aria-label="Cerrar tarjeta flotante"
+              aria-label={t("common.close")}
             >
               ✕
             </button>
@@ -1791,7 +1831,7 @@ export function PlacesExplorer({
                 rel="noopener noreferrer"
                 className="flex-1 py-2 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-center border border-blue-200 dark:border-blue-900/40"
               >
-                🗺️ Cómo llegar
+                {t("places.get_directions")}
               </a>
             )}
             <button
@@ -1824,7 +1864,7 @@ export function PlacesExplorer({
               }}
               className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-center shadow-sm cursor-pointer"
             >
-              Ver ficha completa →
+              {t("places.view_details")}
             </button>
           </div>
         </div>
