@@ -115,8 +115,8 @@ When launching on a clean database:
 - **Floating «Back to Top» Button**: Subtle, non-intrusive circular button with glassmorphism styling that appears smoothly when scrolling past 300px for instant one-tap scroll to header.
 - **Smart Pagination**: Place listings feature a configurable page size selector (10, 20, 50, or All) and page buttons for ultra-responsive navigation.
 
-### 🎲 Decision Assistant & Roulette
-- **Random Roulette**: Automatically picks a restaurant among currently filtered results when friends cannot agree, with options to view on the interactive map, open in Google Maps, or jump directly to its place card in the catalog list (`View in list`).
+### 🎲 Decision Assistant & Random Pick
+- **🎲 Random Pick (Random Selector)**: Automatically picks a restaurant among currently filtered results when friends cannot agree, with options to view on the interactive map, open in Google Maps, or jump directly to its place card in the catalog list (`View in list`).
 - **Decision Wizard**: Step-by-step guidance defining budget, mood, distance radius, and visit state.
 
 ### 💬 Collaborative Comments & Detail Modals

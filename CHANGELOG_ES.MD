@@ -8,6 +8,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Renombrado a «🎲 Al azar» (`Random`)**:
+  - Sustituido el término «Ruleta» por «Al azar» en el botón principal del catálogo, textos y animaciones del selector aleatorio para una denominación más natural y directa.
 - **Plantillas y Documentos de Ejemplo por Tipo en Importación**:
   - Incorporada una sección de descarga con un clic de archivos de ejemplo completos y realistas para cada formato admitido: `JSON`, `CSV`, `GeoJSON`, `KML` y `GPX`, facilitando al usuario conocer la estructura exacta antes de importar sus datos.
 - **Opción «Ver en el listado» en el Selector Aleatorio**:

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Renamed to «🎲 Random» (`Al azar`)**:
+  - Replaced «Roulette» terminology with «Random» across catalog action buttons, modals, and animation labels for a more intuitive and direct experience.
 - **Complete Sample Templates per Import Format**:
   - Direct 1-click download section for realistic, fully structured example files across all 5 supported import formats: `JSON`, `CSV`, `GeoJSON`, `KML`, and `GPX`.
 - **«View in list» Option in Random Picker Modal**:

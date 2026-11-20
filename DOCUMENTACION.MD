@@ -115,8 +115,8 @@ Al acceder por primera vez a una instancia limpia:
 - **Botón Flotante «Subir Arriba»**: Botón circular sutil y minimalista con estética *glassmorphism* que aparece de forma no invasiva al desplazarse más de 300px hacia abajo para volver inmediatamente a la parte superior.
 - **Paginación Inteligente**: En modo lista los locales se muestran paginados con selector de tamaño configurable (10, 20, 50 o Todos) y selector de página para navegación ultra ágil.
 
-### 🎲 Asistente de Decisión y Ruleta
-- **Ruleta / Selector Aleatorio**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos, con opciones para ver en el mapa, abrir en Google Maps o navegar directamente al establecimiento seleccionado en el listado de resultados (`Ver en el listado`).
+### 🎲 Asistente de Decisión y Elección al Azar
+- **🎲 Al azar (Selector Aleatorio)**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos, con opciones para ver en el mapa, abrir en Google Maps o navegar directamente al establecimiento seleccionado en el listado de resultados (`Ver en el listado`).
 - **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, distancia máxima y estado de visita.
 
 ### 💬 Comentarios Colaborativos y Ficha Enriquecida
