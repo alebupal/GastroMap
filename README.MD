@@ -45,7 +45,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
   * Saved filter presets (`💾`), multi-criteria sorting, and live searchable taxonomies with progressive «Show more» loading.
-  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview.
+  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview and downloadable sample templates.
   * Bulk place backup downloads directly from the admin management table.
 
 * **🌐 Multi-language System (i18n):**

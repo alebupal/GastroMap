@@ -166,6 +166,7 @@
     "spinning": "Spinning the wheel... 🌀",
     "open_maps": "Open in Maps ↗",
     "view_on_map": "View on map 🗺️",
+    "view_in_list": "View in list 📋",
     "no_places": "No places match your filters.",
     "free_price": "Any price"
   },
@@ -367,7 +368,10 @@
     "import_btn": "Import {count} places",
     "success_msg": "Import completed! {count} places added.",
     "error_invalid_file": "No valid places found in file.",
-    "error_read": "Error reading file. Verify it is a valid JSON, GeoJSON or CSV."
+    "error_read": "Error reading file. Verify it is a valid JSON, GeoJSON or CSV.",
+    "sample_files_title": "Templates and complete examples",
+    "sample_files_hint": "Download a sample file with real data",
+    "sample_download": "Download {type} template"
   },
   "auth": {
     "login_title": "Sign in",

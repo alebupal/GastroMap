@@ -116,7 +116,7 @@ Al acceder por primera vez a una instancia limpia:
 - **Paginación Inteligente**: En modo lista los locales se muestran paginados con selector de tamaño configurable (10, 20, 50 o Todos) y selector de página para navegación ultra ágil.
 
 ### 🎲 Asistente de Decisión y Ruleta
-- **Ruleta / Selector Aleatorio**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos.
+- **Ruleta / Selector Aleatorio**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos, con opciones para ver en el mapa, abrir en Google Maps o navegar directamente al establecimiento seleccionado en el listado de resultados (`Ver en el listado`).
 - **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, distancia máxima y estado de visita.
 
 ### 💬 Comentarios Colaborativos y Ficha Enriquecida
@@ -167,6 +167,7 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 
 ### 📥 Formatos de Importación
 - Archivos `.json`, `.geojson`, `.kml`, `.gpx` y `.csv`.
+- **Plantillas y Archivos de Ejemplo Descargables**: La pestaña de importación incluye botones de descarga con un clic para obtener documentos de ejemplo completos y funcionales para cada uno de los formatos aceptados (`JSON`, `CSV`, `GeoJSON`, `KML`, `GPX`), facilitando preparar y verificar la estructura antes de importar.
 - Detección automática de duplicados por nombre y proximidad de coordenadas con vista previa interactiva antes de confirmar la importación.
 - **Auto-creación de Ocasiones y Tags**: Al importar datos que contengan categorías u ocasiones temáticas, el sistema las registra automáticamente en el catálogo de `occasions` y `tags`, auto-sincronizando los selectores y filtros.
 - **Detección Automática de Enlaces (LinkifiedText)**: Cualquier URL presente en notas personales o comentarios se transforma automáticamente en un enlace web seguro clicable.

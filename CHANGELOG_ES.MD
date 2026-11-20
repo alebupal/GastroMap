@@ -8,6 +8,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-20
 
 ### Añadido
+- **Plantillas y Documentos de Ejemplo por Tipo en Importación**:
+  - Incorporada una sección de descarga con un clic de archivos de ejemplo completos y realistas para cada formato admitido: `JSON`, `CSV`, `GeoJSON`, `KML` y `GPX`, facilitando al usuario conocer la estructura exacta antes de importar sus datos.
+- **Opción «Ver en el listado» en el Selector Aleatorio**:
+  - Nuevo botón en el modal aleatorio (`RandomPickerModal.tsx`) que enfoca el local elegido, conmuta a la vista lista si se está en móvil, cambia a la página correspondiente de la paginación y realiza un desplazamiento suave (`scrollIntoView`) hasta su tarjeta.
 - **Filtros de Experiencia Simplificados y «✨ Por descubrir»**:
   - Eliminado el filtro «👥 De amigos» para una interfaz más limpia y directa.
   - El filtro «Sin estrenar» se renueva como «✨ Por descubrir», permitiendo filtrar dinámicamente todos los locales que el usuario aún no ha visitado.

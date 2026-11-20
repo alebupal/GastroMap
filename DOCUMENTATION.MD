@@ -116,7 +116,7 @@ When launching on a clean database:
 - **Smart Pagination**: Place listings feature a configurable page size selector (10, 20, 50, or All) and page buttons for ultra-responsive navigation.
 
 ### 🎲 Decision Assistant & Roulette
-- **Random Roulette**: Automatically picks a restaurant among currently filtered results when friends cannot agree.
+- **Random Roulette**: Automatically picks a restaurant among currently filtered results when friends cannot agree, with options to view on the interactive map, open in Google Maps, or jump directly to its place card in the catalog list (`View in list`).
 - **Decision Wizard**: Step-by-step guidance defining budget, mood, distance radius, and visit state.
 
 ### 💬 Collaborative Comments & Detail Modals
@@ -165,6 +165,7 @@ In the **Import / Export** modal (`📦`):
 
 ### 📥 Import Formats
 - Import `.json`, `.geojson`, `.kml`, `.gpx`, and `.csv` files with duplicate detection and preview.
+- **Downloadable Complete Sample Templates**: The import tab includes direct 1-click downloads for realistic, fully structured example documents in all 5 accepted formats (`JSON`, `CSV`, `GeoJSON`, `KML`, `GPX`), making it easy to verify the expected format before importing.
 - **Occasions & Tags Auto-creation**: When importing places with categories or occasions, the system automatically registers them in the `occasions` and `tags` tables, ensuring filters and selectors are synchronized.
 - **Automatic Linkification (LinkifiedText)**: Any URLs present in notes or comments are automatically rendered as secure clickable links.
 

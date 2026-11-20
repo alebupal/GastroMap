@@ -626,6 +626,27 @@ export function PlacesExplorer({
     }
   }
 
+  // Manejar selección de un lugar para enfocarlo y hacer scroll en la lista
+  function handleSelectInList(placeId: string) {
+    setSelectedPlaceId(placeId);
+    setActiveMobileView("list");
+
+    const placeIndex = filteredPlaces.findIndex((p) => p.id === placeId);
+    if (placeIndex !== -1) {
+      const targetPage = Math.floor(placeIndex / pageSize) + 1;
+      if (targetPage !== currentPage) {
+        setCurrentPage(targetPage);
+      }
+    }
+
+    setTimeout(() => {
+      const el = document.getElementById(`place-card-${placeId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 150);
+  }
+
   // Manejar selección de un lugar desde una chincheta del mapa
   function handleSelectPlaceFromMap(placeId: string | null) {
     setSelectedPlaceId(placeId);
@@ -1768,6 +1789,7 @@ export function PlacesExplorer({
         onClose={() => setIsRandomModalOpen(false)}
         places={filteredPlaces}
         onSelectOnMap={(id) => handleSelectOnMap(id)}
+        onSelectInList={(id) => handleSelectInList(id)}
       />
 
       <DecisionAssistantModal

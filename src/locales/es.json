@@ -166,6 +166,7 @@
     "spinning": "Girando la ruleta... 🌀",
     "open_maps": "Abrir en Maps ↗",
     "view_on_map": "Ver en mapa 🗺️",
+    "view_in_list": "Ver en el listado 📋",
     "no_places": "No hay sitios que coincidan.",
     "free_price": "Precio libre"
   },
@@ -367,7 +368,10 @@
     "import_btn": "Importar {count} establecimientos",
     "success_msg": "¡Importación completada! {count} sitios añadidos.",
     "error_invalid_file": "No se encontraron establecimientos válidos en el archivo.",
-    "error_read": "Error al leer el archivo. Comprueba que es un JSON, GeoJSON o CSV válido."
+    "error_read": "Error al leer el archivo. Comprueba que es un JSON, GeoJSON o CSV válido.",
+    "sample_files_title": "Plantillas y ejemplos completos",
+    "sample_files_hint": "Descarga un archivo de muestra con datos reales",
+    "sample_download": "Descargar plantilla {type}"
   },
   "auth": {
     "login_title": "Iniciar sesión",

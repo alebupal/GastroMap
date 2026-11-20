@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-20
 
 ### Added
+- **Complete Sample Templates per Import Format**:
+  - Direct 1-click download section for realistic, fully structured example files across all 5 supported import formats: `JSON`, `CSV`, `GeoJSON`, `KML`, and `GPX`.
+- **«View in list» Option in Random Picker Modal**:
+  - New action in `RandomPickerModal.tsx` that navigates directly to the picked place card in the catalog, adjusting pagination page and smoothly scrolling into view.
 - **Simplified Experience Filters & «✨ To discover»**:
   - Removed «👥 Friends» filter for a cleaner, more intuitive workflow.
   - Renamed and enhanced «Unexplored» to «✨ To discover», dynamically displaying all establishments the current user has not visited yet.

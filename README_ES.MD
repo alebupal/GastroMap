@@ -43,7 +43,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
   * Filtros guardados (`💾`), ordenación multicriterio y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
-  * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa.
+  * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa y plantillas de ejemplo descargables por formato.
   * Copia de seguridad (backup) en lote de sitios seleccionados desde la tabla de administración.
 
 * **🌐 Sistema Multi-idioma (i18n):**

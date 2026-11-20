@@ -224,6 +224,146 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
   return [];
 }
 
+const SAMPLE_TEMPLATES = {
+  json: {
+    filename: "plantilla-gastromap.json",
+    mime: "application/json",
+    content: JSON.stringify(
+      [
+        {
+          name: "Bar El Tapeo Granadino",
+          city: "Granada",
+          address: "Calle Navas, 14",
+          latitude: 37.1742,
+          longitude: -3.5986,
+          priceRange: "€",
+          googleMapsUrl: "https://maps.google.com/?q=37.1742,-3.5986",
+          website: "https://eltapeo.ejemplo.es",
+          phone: "+34 958 123 456",
+          notes: "Tapa gratis abundante con cada consumición. Especialidad en berenjenas con miel de caña.",
+          comments: ["Pedir la tapa de cazón en adobo, brutal."],
+          occasions: ["tapear", "casual"],
+          tags: ["tapas", "andalucia", "terracita"],
+          personalStatus: "visited",
+        },
+        {
+          name: "Trattoria Romana",
+          city: "Madrid",
+          address: "Calle Mayor, 42",
+          latitude: 40.4168,
+          longitude: -3.7038,
+          priceRange: "€€",
+          googleMapsUrl: "https://maps.google.com/?q=40.4168,-3.7038",
+          website: "https://trattoriaromana.ejemplo.es",
+          phone: "+34 912 345 678",
+          notes: "Pasta fresca artesanal. La auténtica carbonara romana con guanciale y pecorino.",
+          occasions: ["comer", "cita"],
+          tags: ["pasta", "italiano", "carbonara"],
+          personalStatus: "pending",
+        },
+      ],
+      null,
+      2
+    ),
+  },
+  csv: {
+    filename: "plantilla-gastromap.csv",
+    mime: "text/csv;charset=utf-8",
+    content: `name,city,address,latitude,longitude,priceRange,googleMapsUrl,notes,tags\nBar El Tapeo Granadino,Granada,"Calle Navas, 14",37.1742,-3.5986,€,https://maps.google.com/?q=37.1742,-3.5986,"Tapa gratis abundante con cada consumición. Especialidad berenjenas con miel.",tapas;andalucia;terracita\nTrattoria Romana,Madrid,"Calle Mayor, 42",40.4168,-3.7038,€€,https://maps.google.com/?q=40.4168,-3.7038,"Pasta fresca al momento. La auténtica carbonara romana con guanciale.",pasta;italiano;carbonara\n`,
+  },
+  geojson: {
+    filename: "plantilla-gastromap.geojson",
+    mime: "application/geo+json",
+    content: JSON.stringify(
+      {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [-3.5986, 37.1742],
+            },
+            properties: {
+              name: "Bar El Tapeo Granadino",
+              city: "Granada",
+              address: "Calle Navas, 14",
+              priceRange: "€",
+              notes: "Tapa gratis abundante con cada consumición. Especialidad en berenjenas con miel de caña.",
+              occasions: ["tapear", "casual"],
+              tags: ["tapas", "andalucia"],
+              googleMapsUrl: "https://maps.google.com/?q=37.1742,-3.5986",
+            },
+          },
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [-3.7038, 40.4168],
+            },
+            properties: {
+              name: "Trattoria Romana",
+              city: "Madrid",
+              address: "Calle Mayor, 42",
+              priceRange: "€€",
+              notes: "Pasta fresca artesanal. Auténtica carbonara romana.",
+              occasions: ["comer", "cita"],
+              tags: ["pasta", "italiano"],
+              googleMapsUrl: "https://maps.google.com/?q=40.4168,-3.7038",
+            },
+          },
+        ],
+      },
+      null,
+      2
+    ),
+  },
+  kml: {
+    filename: "plantilla-gastromap.kml",
+    mime: "application/vnd.google-earth.kml+xml",
+    content: `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Plantilla GastroMap KML</name>
+    <description>Ejemplo de importación compatible con Google My Maps y Google Earth</description>
+    <Placemark>
+      <name>Bar El Tapeo Granadino</name>
+      <description>Tapa gratis abundante con cada consumición. Especialidad berenjenas con miel de caña.</description>
+      <Point>
+        <coordinates>-3.5986,37.1742,0</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Trattoria Romana</name>
+      <description>Pasta fresca italiana artesanal. Auténtica carbonara romana.</description>
+      <Point>
+        <coordinates>-3.7038,40.4168,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>`,
+  },
+  gpx: {
+    filename: "plantilla-gastromap.gpx",
+    mime: "application/gpx+xml",
+    content: `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="GastroMap" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Plantilla GastroMap GPX</name>
+    <desc>Ejemplo de waypoints para importar en GastroMap</desc>
+  </metadata>
+  <wpt lat="37.1742" lon="-3.5986">
+    <name>Bar El Tapeo Granadino</name>
+    <desc>Tapa gratis abundante con cada consumición. Especialidad en berenjenas con miel.</desc>
+  </wpt>
+  <wpt lat="40.4168" lon="-3.7038">
+    <name>Trattoria Romana</name>
+    <desc>Pasta fresca artesanal y carbonara tradicional.</desc>
+  </wpt>
+</gpx>`,
+  },
+};
+
 export function ExportImportModal({ isOpen, onClose, places }: ExportImportModalProps) {
   const { t } = useT();
   const [tab, setTab] = useState<"export" | "import">("export");
@@ -362,6 +502,13 @@ ${placemarks}
 ${wpts}
 </gpx>`;
     downloadFile(gpx, `gastromap-${dateStamp}.gpx`, "application/gpx+xml");
+  }
+
+  function handleDownloadSample(format: keyof typeof SAMPLE_TEMPLATES) {
+    const sample = SAMPLE_TEMPLATES[format];
+    if (sample) {
+      downloadFile(sample.content, sample.filename, sample.mime);
+    }
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -580,6 +727,33 @@ ${wpts}
                   className="hidden"
                 />
               </label>
+
+              {/* Plantillas de ejemplo descargables por cada tipo admitido */}
+              <div className="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 flex-wrap gap-1">
+                  <span className="flex items-center gap-1.5">
+                    <span>📄</span>
+                    <span>{t("export_import.sample_files_title")}</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
+                    {t("export_import.sample_files_hint")}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 pt-1">
+                  {(["json", "csv", "geojson", "kml", "gpx"] as const).map((fmt) => (
+                    <button
+                      key={fmt}
+                      type="button"
+                      onClick={() => handleDownloadSample(fmt)}
+                      className="py-1.5 px-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-amber-50 hover:border-amber-400 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer flex items-center justify-center gap-1 shadow-2xs"
+                      title={t("export_import.sample_download", { type: fmt.toUpperCase() })}
+                    >
+                      <span>📥</span>
+                      <span>{fmt.toUpperCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {previewItems.length > 0 && (
                 <div className="space-y-3">

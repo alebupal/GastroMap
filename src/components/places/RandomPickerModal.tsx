@@ -10,6 +10,7 @@ interface RandomPickerModalProps {
   onClose: () => void;
   places: PlaceWithDetails[];
   onSelectOnMap?: (placeId: string) => void;
+  onSelectInList?: (placeId: string) => void;
 }
 
 export function RandomPickerModal({
@@ -17,6 +18,7 @@ export function RandomPickerModal({
   onClose,
   places,
   onSelectOnMap,
+  onSelectInList,
 }: RandomPickerModalProps) {
   const { t } = useT();
   const [selectedPlace, setSelectedPlace] = useState<PlaceWithDetails | null>(null);
@@ -118,16 +120,19 @@ export function RandomPickerModal({
             {isSpinning ? t("random.spinning") : t("random.spin_button")}
           </button>
 
-          <div className="flex gap-2">
-            {selectedPlace?.googleMapsUrl && (
-              <a
-                href={selectedPlace.googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition text-center"
+          <div className="flex gap-2 flex-wrap w-full">
+            {selectedPlace && onSelectInList && (
+              <button
+                type="button"
+                onClick={() => {
+                  onSelectInList(selectedPlace.id);
+                  onClose();
+                }}
+                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
-                {t("random.open_maps")}
-              </a>
+                <span>📋</span>
+                <span>{t("random.view_in_list")}</span>
+              </button>
             )}
 
             {selectedPlace && onSelectOnMap && (
@@ -137,10 +142,23 @@ export function RandomPickerModal({
                   onSelectOnMap(selectedPlace.id);
                   onClose();
                 }}
-                className="flex-1 py-2.5 px-3 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer"
+                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm"
               >
-                {t("random.view_on_map")}
+                <span>🗺️</span>
+                <span>{t("random.view_on_map")}</span>
               </button>
+            )}
+
+            {selectedPlace?.googleMapsUrl && (
+              <a
+                href={selectedPlace.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-semibold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition text-center flex items-center justify-center gap-1.5"
+              >
+                <span>📍</span>
+                <span>{t("random.open_maps")}</span>
+              </a>
             )}
           </div>
 
