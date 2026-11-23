@@ -512,7 +512,7 @@ export function TaxonomyManager({
                     value={occasionSearch}
                     onChange={(e) => setOccasionSearch(e.target.value)}
                     placeholder={t("admin_taxonomy.search_occasions")}
-                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                   <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
                     🔍
@@ -597,7 +597,7 @@ export function TaxonomyManager({
                         key={occ.id}
                         className={`p-2.5 rounded-xl border transition flex items-center justify-between text-xs ${
                           isSelected
-                            ? "border-amber-400 dark:border-amber-600 bg-amber-500/10"
+                            ? "border-orange-500 dark:border-orange-600 bg-orange-500/10"
                             : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
                         }`}
                       >
@@ -699,12 +699,12 @@ export function TaxonomyManager({
                     value={newOccasionName}
                     onChange={(e) => setNewOccasionName(e.target.value)}
                     placeholder={t("admin_taxonomy.category_name_placeholder")}
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                   <button
                     type="submit"
                     disabled={loading || !newOccasionName.trim()}
-                    className="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition active:scale-95 disabled:opacity-40 cursor-pointer"
+                    className="px-4 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition active:scale-95 disabled:opacity-40 cursor-pointer"
                   >
                     {t("admin_taxonomy.save_btn")}
                   </button>
@@ -719,7 +719,7 @@ export function TaxonomyManager({
                         onClick={() => setNewOccasionIcon(emoji)}
                         className={`w-6 h-6 rounded text-xs flex items-center justify-center cursor-pointer ${
                           newOccasionIcon === emoji
-                            ? "bg-amber-500 text-white shadow-xs font-bold"
+                            ? "bg-orange-600 text-white shadow-xs font-bold"
                             : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200"
                         }`}
                       >
@@ -744,7 +744,7 @@ export function TaxonomyManager({
                     value={tagSearch}
                     onChange={(e) => setTagSearch(e.target.value)}
                     placeholder={t("admin_taxonomy.search_tags")}
-                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                   <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
                     🔍
@@ -829,7 +829,7 @@ export function TaxonomyManager({
                         key={tag.id}
                         className={`p-2 rounded-xl border transition flex items-center justify-between text-xs ${
                           isSelected
-                            ? "border-amber-400 dark:border-amber-600 bg-amber-500/10"
+                            ? "border-orange-500 dark:border-orange-600 bg-orange-500/10"
                             : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
                         }`}
                       >
@@ -1216,7 +1216,7 @@ export function TaxonomyManager({
                 type="button"
                 onClick={handleConfirmMerge}
                 disabled={loading || !mergeTarget}
-                className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
               >
                 {loading ? t("admin_taxonomy.merging") : t("admin_taxonomy.confirm_merge_btn")}
               </button>
@@ -1245,7 +1245,7 @@ export function TaxonomyManager({
                 type="text"
                 value={editingItem.name}
                 onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
 
@@ -1261,7 +1261,7 @@ export function TaxonomyManager({
                 type="button"
                 onClick={handleSaveRename}
                 disabled={loading || !editingItem.name.trim()}
-                className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
               >
                 {loading ? t("admin_taxonomy.saving") : t("admin_taxonomy.save")}
               </button>

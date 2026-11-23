@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Unified Color Palette Across the Entire App**:
+  - Added brand CSS tokens in `globals.css` and unified all primary buttons, active tabs, filter pills, modals, auth forms, documentation viewer, and `/admin` views to the official logo orange (`#ea580c` / `orange-600`, hover `orange-700` with white text), reserving amber for pending/favorites and emerald for prices/visited states.
 - **Dedicated Admin Panel Route (`/admin`) with Stitch UI/UX Design**:
   - New protected `/admin` route accessible exclusively to administrators (linked from `Admin Panel` in the header and mobile menu), keeping the main `/` explorer uncluttered.
   - Persistent sidebar navigation (with mobile drawer) featuring the official `GastroMap Admin` logo, quick links for **Statistics**, **Places Table** (with live count), **Users**, **Taxonomy**, **Invitations**, **Audit Log**, **Settings**, **Demo Places**, `View Explorer` shortcut, and pinned bottom user profile card with logout.

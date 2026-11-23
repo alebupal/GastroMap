@@ -187,13 +187,13 @@ export function NewPlaceForm({
               }
             }}
             placeholder={t("form.import_placeholder")}
-            className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
           <button
             type="button"
             onClick={() => handleAutoResolve()}
             disabled={resolving || !url}
-            className="px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold shrink-0 transition active:scale-95 disabled:opacity-40 cursor-pointer"
+            className="px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold shrink-0 transition active:scale-95 disabled:opacity-40 cursor-pointer"
           >
             {resolving ? t("form.import_reading") : t("form.import_button")}
           </button>
@@ -215,7 +215,7 @@ export function NewPlaceForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("form.name_placeholder")}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
         />
 
         {/* Aviso no bloqueante de posibles duplicados */}
@@ -259,7 +259,7 @@ export function NewPlaceForm({
                   </div>
                   <Link
                     href="/"
-                    className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-[11px] shrink-0 transition"
+                    className="px-2.5 py-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-[11px] shrink-0 transition"
                   >
                     {t("form.duplicate_view_catalog")}
                   </Link>
@@ -332,7 +332,7 @@ export function NewPlaceForm({
           name="notes"
           rows={2}
           placeholder={t("form.notes_placeholder")}
-          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
         />
       </div>
 
@@ -350,7 +350,7 @@ export function NewPlaceForm({
             }}
             className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
               isCommunityPublished
-                ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold"
+                ? "bg-orange-500/10 border-orange-600 text-orange-600 dark:text-orange-400 font-bold"
                 : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
             }`}
           >
@@ -363,7 +363,7 @@ export function NewPlaceForm({
             onClick={() => setIsCommunityPublished(false)}
             className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
               !isCommunityPublished
-                ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold"
+                ? "bg-orange-500/10 border-orange-600 text-orange-600 dark:text-orange-400 font-bold"
                 : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
             }`}
           >
@@ -425,7 +425,7 @@ export function NewPlaceForm({
         <button
           type="submit"
           disabled={submitting}
-          className="flex-2 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+          className="flex-2 py-3 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold text-sm shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
         >
           {submitting ? t("form.saving_button") : t("form.save_button")}
         </button>

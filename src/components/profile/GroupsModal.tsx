@@ -228,12 +228,12 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
               placeholder={`${t("groups.name")}...`}
-              className="flex-1 px-3.5 py-2 rounded-2xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="flex-1 px-3.5 py-2 rounded-2xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <button
               type="submit"
               disabled={creating || !newGroupName.trim()}
-              className="px-4 py-2 rounded-2xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
+              className="px-4 py-2 rounded-2xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
             >
               {creating ? t("common.loading") : t("groups.create")}
             </button>
@@ -277,7 +277,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             <button
                               type="button"
                               onClick={() => handleRename(g.id)}
-                              className="px-2 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold text-[11px] cursor-pointer"
+                              className="px-2 py-1 rounded-xl bg-orange-600 text-white font-bold text-[11px] cursor-pointer"
                             >
                               ✓
                             </button>
@@ -431,7 +431,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                         className={`px-2 py-1 rounded-lg text-[10px] font-bold transition cursor-pointer ${
                                           isCopied
                                             ? "bg-emerald-600 text-white"
-                                            : "bg-amber-500 hover:bg-amber-600 text-slate-950"
+                                            : "bg-orange-600 hover:bg-orange-700 text-white"
                                         }`}
                                       >
                                         {isCopied ? t("groups.copied_btn") : t("groups.copy_btn")}

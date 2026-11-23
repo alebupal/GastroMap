@@ -148,12 +148,12 @@ export function PlaceVisitsModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="¿Qué pedisteis? ¿Con quién fuiste? (solo visible para ti)"
-              className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+              className="w-full py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition cursor-pointer disabled:opacity-50"
             >
               {saving ? t("common.loading") : t("common.save")}
             </button>

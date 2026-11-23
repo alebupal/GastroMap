@@ -8,6 +8,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Paleta de Colores Unificada en Toda la Web**:
+  - Definidos tokens de marca en `globals.css` y unificados todos los botones principales, pestañas activas, filtros, modales, pantallas de autenticación, documentación y panel `/admin` bajo el naranja oficial del logotipo (`#ea580c` / `orange-600`, hover `orange-700` con texto blanco), reservando ámbar exclusivamente para estados de pendiente/favorito y esmeralda para precios/visitados.
 - **Panel de Administración en Ruta Dedicada (`/admin`) con Diseño Stitch UI/UX**:
   - Nueva ruta protegida `/admin` accesible exclusivamente para administradores (con acceso directo desde `Panel Admin` en la cabecera y el menú móvil) y portada `/` limpia enfocada al explorador.
   - Navegación lateral persistente (y cajón desplegable en móvil) con el logotipo oficial `GastroMap Admin`, accesos directos a **Estadísticas**, **Tabla Sitios** (con contador), **Usuarios**, **Taxonomía**, **Invitaciones**, **Auditoría**, **Configuración**, **Sitios Demo**, enlace `Ver Explorador` y tarjeta inferior de perfil con cierre de sesión.

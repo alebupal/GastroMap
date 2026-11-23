@@ -283,7 +283,7 @@ export function PlacesTableManager({
                 setCurrentPage(1);
               }}
               placeholder={t("admin_places.search_placeholder")}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
@@ -334,7 +334,7 @@ export function PlacesTableManager({
               <button
                 type="button"
                 onClick={handleBulkBackup}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer shadow-md shadow-amber-500/20"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer shadow-md shadow-orange-600/20"
                 title={t("admin_places.bulk_backup_title")}
               >
                 <span>💾</span>
@@ -387,7 +387,7 @@ export function PlacesTableManager({
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleSelectAll}
-                className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500"
+                className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500"
               />
               <span>{t("admin_places.col_select_all")}</span>
             </label>
@@ -418,7 +418,7 @@ export function PlacesTableManager({
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => toggleSelect(place.id)}
-                      className="mt-1 rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                      className="mt-1 rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 cursor-pointer"
                     />
                     <div className="min-w-0">
                       <div className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">
@@ -516,7 +516,7 @@ export function PlacesTableManager({
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
-                    className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 cursor-pointer"
                     title={t("admin_places.col_select_all")}
                   />
                 </th>
@@ -552,7 +552,7 @@ export function PlacesTableManager({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleSelect(place.id)}
-                          className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                          className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 cursor-pointer"
                         />
                       </td>
 
@@ -704,7 +704,7 @@ export function PlacesTableManager({
                 value={mergeSearch}
                 onChange={(e) => setMergeSearch(e.target.value)}
                 placeholder={t("admin_places.merge_modal_search")}
-                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
               <div className="overflow-y-auto max-h-52 space-y-1.5 pr-1">
                 {mergeCandidates.length === 0 ? (
@@ -751,7 +751,7 @@ export function PlacesTableManager({
                 type="button"
                 onClick={handleConfirmMerge}
                 disabled={loading || !mergeTargetId}
-                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-black transition cursor-pointer disabled:opacity-40"
+                className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition cursor-pointer disabled:opacity-40"
               >
                 {loading ? t("admin_places.merging") : `🔀 ${t("admin_places.merge_btn")}`}
               </button>

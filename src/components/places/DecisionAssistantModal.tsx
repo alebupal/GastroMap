@@ -85,7 +85,7 @@ export function DecisionAssistantModal({
                   type="button"
                   onClick={() => toggleOccasion(occ.id)}
                   className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition cursor-pointer ${active
-                    ? "bg-amber-500/10 border-amber-500 text-amber-500 font-bold dark:bg-amber-950/40"
+                    ? "bg-orange-500/10 border-orange-600 text-orange-600 dark:text-orange-400 font-bold dark:bg-amber-950/40"
                     : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                     }`}
                 >
@@ -197,7 +197,7 @@ export function DecisionAssistantModal({
               type="button"
               onClick={() => onSelectExperience(experienceFilter === "favorite" ? "all" : "favorite")}
               className={`p-2.5 rounded-xl border font-semibold flex items-center gap-1.5 transition cursor-pointer ${experienceFilter === "favorite"
-                ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-sm"
+                ? "bg-orange-600 border-orange-600 text-white font-bold shadow-sm"
                 : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
             >
@@ -219,7 +219,7 @@ export function DecisionAssistantModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer shadow-md shadow-amber-500/20"
+            className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer shadow-md shadow-orange-600/20"
           >
             {t("assistant.view_results")}
           </button>

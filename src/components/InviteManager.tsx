@@ -119,7 +119,7 @@ export function InviteManager() {
         <button
           type="button"
           onClick={() => setIsFormOpen(!isFormOpen)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
         >
           <span>{isFormOpen ? "✕" : `➕ ${t("invites.generate_btn")}`}</span>
         </button>
@@ -157,7 +157,7 @@ export function InviteManager() {
               type="email"
               name="email"
               placeholder={t("invites.email_placeholder")}
-              className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
@@ -169,7 +169,7 @@ export function InviteManager() {
               <select
                 name="role"
                 defaultValue="user"
-                className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
               >
                 <option value="user">{t("invites.role_standard_user")}</option>
                 <option value="admin">{t("invites.role_admin")}</option>
@@ -186,7 +186,7 @@ export function InviteManager() {
                 defaultValue={7}
                 min={1}
                 max={90}
-                className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
           </div>
@@ -194,7 +194,7 @@ export function InviteManager() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-xs"
+            className="w-full py-2.5 px-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-xs"
           >
             {loading ? t("invites.generating_btn") : t("invites.submit_btn")}
           </button>
@@ -214,7 +214,7 @@ export function InviteManager() {
                 <button
                   type="button"
                   onClick={() => handleCopy(createdUrl, "new-token")}
-                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 shrink-0 transition cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-orange-600 hover:bg-orange-700 text-white shrink-0 transition cursor-pointer"
                 >
                   {copiedToken === "new-token" ? t("invites.copied") : t("invites.copy_link")}
                 </button>

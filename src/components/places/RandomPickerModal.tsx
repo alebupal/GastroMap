@@ -121,7 +121,7 @@ export function RandomPickerModal({
             type="button"
             onClick={spin}
             disabled={isSpinning || places.length === 0}
-            className="w-full py-3 px-4 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/20 transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl font-bold bg-orange-600 hover:bg-orange-700 text-white shadow-md shadow-orange-600/20 transition cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <span className={`inline-block text-base ${isSpinning ? "animate-spin" : ""}`}>
               🔄

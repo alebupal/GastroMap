@@ -172,7 +172,7 @@ export function ComparePlacesModal({
                         onClose();
                         onSelectOnMap(p.id);
                       }}
-                      className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs cursor-pointer transition"
+                      className="flex-1 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs cursor-pointer transition"
                     >
                       🗺️ {t("compare.view_on_map")}
                     </button>

@@ -768,7 +768,7 @@ ${wpts}
                       type="button"
                       onClick={() => setImportPublic(true)}
                       className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${importPublic
-                        ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                        ? "bg-orange-500/15 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
                         : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
                         }`}
                     >
@@ -778,7 +778,7 @@ ${wpts}
                       type="button"
                       onClick={() => setImportPublic(false)}
                       className={`py-2 px-3 rounded-xl text-xs font-semibold border cursor-pointer ${!importPublic
-                        ? "bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                        ? "bg-orange-500/15 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
                         : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500"
                         }`}
                     >
@@ -790,7 +790,7 @@ ${wpts}
                     type="button"
                     onClick={handleConfirmImport}
                     disabled={importing}
-                    className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition cursor-pointer disabled:opacity-50"
+                    className="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs transition cursor-pointer disabled:opacity-50"
                   >
                     {importing
                       ? t("export_import.importing")

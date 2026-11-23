@@ -9,7 +9,7 @@ function AdminBarCard({
   icon,
   items,
   prefix = "",
-  barColor = "bg-[#c2410c]",
+  barColor = "bg-orange-600",
 }: {
   title: string;
   icon: string;
@@ -23,7 +23,7 @@ function AdminBarCard({
   return (
     <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-base text-[#c2410c] dark:text-orange-400">
+        <span className="material-symbols-outlined text-base text-orange-600 dark:text-orange-400">
           {icon}
         </span>
         <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -96,7 +96,7 @@ export function AdminStatsPanel() {
       {/* Cabecera estilo Stitch */}
       <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/60 dark:border-orange-900/50 text-[#c2410c] dark:text-orange-400 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/60 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-2xl">analytics</span>
           </div>
           <div>
@@ -230,7 +230,7 @@ export function AdminStatsPanel() {
       {/* Actividad últimos 30 días (Banner cálido Stitch) */}
       <div className="px-4 py-3 rounded-2xl bg-orange-50/90 dark:bg-orange-950/30 border border-orange-200/70 dark:border-orange-900/50 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5 font-bold text-slate-900 dark:text-orange-200">
-          <span className="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
+          <span className="w-7 h-7 rounded-full bg-orange-600 text-white flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-base leading-none">bolt</span>
           </span>
           <span>{t("admin_stats.pulse_title")}</span>
@@ -281,7 +281,7 @@ export function AdminStatsPanel() {
                     className="p-2.5 rounded-xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-xs"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-xs font-black text-[#c2410c] dark:text-orange-400 w-5 shrink-0">
+                      <span className="text-xs font-black text-orange-600 dark:text-orange-400 w-5 shrink-0">
                         #{idx + 1}
                       </span>
                       <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[11px] flex items-center justify-center shrink-0">
@@ -330,7 +330,7 @@ export function AdminStatsPanel() {
                   className="p-3 rounded-xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-xs"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xs font-black text-[#c2410c] dark:text-orange-400 shrink-0">
+                    <span className="text-xs font-black text-orange-600 dark:text-orange-400 shrink-0">
                       #{idx + 1}
                     </span>
                     <div className="min-w-0">
@@ -368,7 +368,7 @@ export function AdminStatsPanel() {
           title={t("admin_stats.by_city")}
           icon="location_city"
           items={stats.topCitiesGlobal}
-          barColor="bg-[#c2410c]"
+          barColor="bg-orange-600"
         />
         <AdminBarCard
           title={t("admin_stats.by_occasion")}

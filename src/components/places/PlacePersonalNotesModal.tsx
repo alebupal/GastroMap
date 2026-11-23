@@ -86,7 +86,7 @@ export function PlacePersonalNotesModal({
               }
             }}
             placeholder="Ej. 8.5"
-            className="w-24 px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-bold text-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-24 px-3 py-2 rounded-xl text-sm bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 font-bold text-amber-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
           />
           <span className="text-xs text-slate-400">/ 10 ⭐</span>
           {rating !== "" && (
@@ -109,7 +109,7 @@ export function PlacePersonalNotesModal({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Qué pedir, mesa favorita, precio aproximado, con quién fuiste..."
-          className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-4"
+          className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500 mb-4"
         />
 
         <div className="flex gap-2">
@@ -124,7 +124,7 @@ export function PlacePersonalNotesModal({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
+            className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50"
           >
             {saving ? t("common.loading") : t("common.save")}
           </button>

@@ -184,7 +184,7 @@ export function EditPlaceModal({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
@@ -209,7 +209,7 @@ export function EditPlaceModal({
                       ? opt.id === "active"
                         ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
                         : opt.id === "temporarily_closed"
-                          ? "bg-amber-500 border-amber-500 text-slate-950 shadow-xs"
+                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
                           : "bg-red-600 border-red-600 text-white shadow-xs"
                       : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                       }`}
@@ -233,7 +233,7 @@ export function EditPlaceModal({
                 value={googleMapsUrl}
                 onChange={(e) => setGoogleMapsUrl(e.target.value)}
                 placeholder="https://maps.app.goo.gl/..."
-                className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
               <button
                 type="button"
@@ -306,7 +306,7 @@ export function EditPlaceModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t("form.notes_placeholder")}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
             />
           </div>
 
@@ -323,7 +323,7 @@ export function EditPlaceModal({
                   setSelectedGroupIds([]);
                 }}
                 className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${communityPublished
-                  ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                  ? "bg-orange-500/10 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
                   : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                   }`}
               >
@@ -334,7 +334,7 @@ export function EditPlaceModal({
                 type="button"
                 onClick={() => setCommunityPublished(false)}
                 className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${!communityPublished
-                  ? "bg-amber-500/10 border-amber-500 text-amber-600 dark:text-amber-400 font-bold"
+                  ? "bg-orange-500/10 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
                   : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
                   }`}
               >
@@ -389,7 +389,7 @@ export function EditPlaceModal({
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              className="flex-1 py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               {saving ? t("common.loading") : t("form.save_changes")}
             </button>

@@ -330,7 +330,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 transition active:scale-95 cursor-pointer"
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-600 hover:bg-orange-700 text-white transition active:scale-95 cursor-pointer"
         >
           {isOpen ? t("common.collapse") : t("common.manage")}
         </button>
@@ -359,7 +359,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
                 placeholder={t("admin_users.search_placeholder")}
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
               {filterQuery && (
                 <button
@@ -402,7 +402,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={addName}
                     onChange={(e) => setAddName(e.target.value)}
                     placeholder="Ej. Carlos Gómez"
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>
 
@@ -418,7 +418,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                       value={addUsername}
                       onChange={(e) => setAddUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
                       placeholder="carlosg"
-                      className="w-full pl-6 pr-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                      className="w-full pl-6 pr-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                     />
                   </div>
                 </div>
@@ -433,7 +433,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={addEmail}
                     onChange={(e) => setAddEmail(e.target.value)}
                     placeholder="carlos@ejemplo.com"
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>
 
@@ -448,7 +448,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={addPassword}
                     onChange={(e) => setAddPassword(e.target.value)}
                     placeholder="Mínimo 4 caracteres (ej. 1234)"
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>
 
@@ -459,7 +459,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <select
                     value={addRole}
                     onChange={(e) => setAddRole(e.target.value as "user" | "admin")}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value="user">Usuario estándar (puede ver y añadir sitios)</option>
                     <option value="admin">Administrador (acceso total a configuración y gestión)</option>
@@ -473,7 +473,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <select
                     value={addLocale}
                     onChange={(e) => setAddLocale(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value="es">🇪🇸 Español (es)</option>
                     <option value="en">🇬🇧 English (en)</option>
@@ -492,7 +492,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 <button
                   type="submit"
                   disabled={addingUser}
-                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50"
                 >
                   {addingUser ? t("common.loading") : t("admin_users.create_user")}
                 </button>
@@ -509,7 +509,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   checked={allSelectableAreSelected}
                   onChange={handleToggleSelectAll}
                   disabled={selectableUsers.length === 0}
-                  className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer w-4 h-4"
+                  className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 cursor-pointer w-4 h-4"
                 />
                 <span>
                   {t("admin_places.col_select_all")} ({selectableUsers.length})
@@ -579,7 +579,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         onChange={() => handleToggleUser(u.id)}
                         disabled={isMe}
                         title={isMe ? t("admin_users.cannot_select_self") : t("admin_users.select_user")}
-                        className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                        className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 w-4 h-4 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                           }`}
                       />
 
@@ -716,7 +716,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder={t("admin_users.reset_password_input_placeholder")}
-              className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 mb-4"
+              className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 mb-4"
             />
 
             <div className="flex gap-2">
@@ -730,7 +730,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               <button
                 type="submit"
                 disabled={savingPassword}
-                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 transition cursor-pointer disabled:opacity-50"
+                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50"
               >
                 {savingPassword ? t("common.saving") : t("admin_users.reset_password_update_btn")}
               </button>
@@ -778,7 +778,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder={t("admin_users.full_name_placeholder")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
               </div>
 
@@ -794,7 +794,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={editUsername}
                     onChange={(e) => setEditUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
                     placeholder={t("admin_users.username_placeholder")}
-                    className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -809,7 +809,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
                   placeholder={t("admin_users.email_placeholder")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
               </div>
 
@@ -822,7 +822,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value as "user" | "admin")}
                     disabled={editingUser.id === currentUserId}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="user">{t("admin_users.role_user_option")}</option>
                     <option value="admin">{t("admin_users.role_admin_option")}</option>
@@ -837,7 +837,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value as "active" | "disabled")}
                     disabled={editingUser.id === currentUserId}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="active">{t("admin_users.status_active_option")}</option>
                     <option value="disabled">{t("admin_users.status_disabled_option")}</option>
@@ -852,7 +852,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 <select
                   value={editLocale}
                   onChange={(e) => setEditLocale(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                 >
                   <option value="es">🇪🇸 Español (es)</option>
                   <option value="en">🇬🇧 English (en)</option>
@@ -868,7 +868,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
                   placeholder={t("admin_users.new_password_leave_blank")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
                 <span className="text-[10px] text-slate-400">
                   {t("admin_users.new_password_hint")}
@@ -887,7 +887,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               <button
                 type="submit"
                 disabled={savingEdit}
-                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition cursor-pointer disabled:opacity-50 shadow-xs"
+                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50 shadow-xs"
               >
                 {savingEdit ? t("common.saving") : t("admin_users.save_changes_btn")}
               </button>

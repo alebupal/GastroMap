@@ -228,7 +228,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             onClick={() => handleLangChange("es")}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
               lang === "es"
-                ? "bg-amber-500 text-slate-950 shadow-xs"
+                ? "bg-orange-600 text-white shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
@@ -240,7 +240,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             onClick={() => handleLangChange("en")}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
               lang === "en"
-                ? "bg-amber-500 text-slate-950 shadow-xs"
+                ? "bg-orange-600 text-white shadow-xs"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
@@ -285,7 +285,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             onClick={() => handleTabChange("docs")}
             className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 border ${
               activeTab === "docs"
-                ? "bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20"
+                ? "bg-orange-600 text-white border-amber-400 shadow-md shadow-orange-600/20"
                 : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >
@@ -298,7 +298,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             onClick={() => handleTabChange("changelog")}
             className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 border ${
               activeTab === "changelog"
-                ? "bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20"
+                ? "bg-orange-600 text-white border-amber-400 shadow-md shadow-orange-600/20"
                 : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >
@@ -311,7 +311,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             onClick={() => handleTabChange("readme")}
             className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 border ${
               activeTab === "readme"
-                ? "bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20"
+                ? "bg-orange-600 text-white border-amber-400 shadow-md shadow-orange-600/20"
                 : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             }`}
           >

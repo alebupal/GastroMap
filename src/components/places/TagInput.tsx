@@ -146,7 +146,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                 key={tagId}
                 type="button"
                 onClick={() => toggleTag(tagId)}
-                className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-amber-500 text-slate-950 border border-amber-500 shadow-xs flex items-center gap-1 cursor-pointer hover:bg-amber-600 transition"
+                className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-orange-600 text-white border border-amber-500 shadow-xs flex items-center gap-1 cursor-pointer hover:bg-amber-600 transition"
                 title={t("form.tags_remove_title")}
               >
                 <span>{pill ? pill.label : `#${tagId}`}</span>
@@ -197,7 +197,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
             <button
               type="button"
               onClick={handleCreateFromSearch}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shrink-0 transition cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shrink-0 transition cursor-pointer"
             >
               + #{normalizedSearch}
             </button>
@@ -220,7 +220,7 @@ export function TagInput({ availableTags = [], initialTags = [] }: TagInputProps
                   onClick={() => toggleTag(pill.id)}
                   className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition active:scale-95 cursor-pointer border flex items-center gap-1 ${
                     isSelected
-                      ? "bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-xs"
+                      ? "bg-orange-600 text-white border-amber-500 font-bold shadow-xs"
                       : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
                   }`}
                 >

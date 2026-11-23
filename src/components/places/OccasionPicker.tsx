@@ -91,7 +91,7 @@ export function OccasionPicker({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("form.occasions_search_placeholder")}
-              className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             {searchQuery && (
               <button
@@ -119,7 +119,7 @@ export function OccasionPicker({
                   type="button"
                   onClick={() => onToggle(occ.id)}
                   className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${active
-                    ? "bg-amber-500 border-amber-500 text-slate-950 font-bold shadow-xs"
+                    ? "bg-orange-600 border-orange-600 text-white font-bold shadow-xs"
                     : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
                     }`}
                 >

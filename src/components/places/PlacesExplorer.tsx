@@ -1316,7 +1316,7 @@ export function PlacesExplorer({
                 type="button"
                 onClick={() => setSelectedOccasions([])}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${selectedOccasions.length === 0
-                  ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                  ? "bg-orange-600 text-white shadow-md font-black"
                   : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
                   }`}
               >
@@ -1333,7 +1333,7 @@ export function PlacesExplorer({
                     type="button"
                     onClick={() => toggleOccasion(occ.id)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${isSelected
-                      ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
+                      ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
                       : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
                       }`}
                   >
@@ -1382,7 +1382,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setSelectedOccasions([])}
               className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${selectedOccasions.length === 0
-                ? "bg-amber-500 text-slate-950 shadow-md font-black"
+                ? "bg-orange-600 text-white shadow-md font-black"
                 : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
                 }`}
             >
@@ -1399,7 +1399,7 @@ export function PlacesExplorer({
                   type="button"
                   onClick={() => toggleOccasion(occ.id)}
                   className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${isSelected
-                    ? "bg-amber-500 text-slate-950 shadow-md font-black ring-2 ring-amber-400/50"
+                    ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
                     : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
                     }`}
                 >
@@ -1415,7 +1415,7 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setVisibleOccasionsCount((c) => c + 12)}
-                className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
+                className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
               >
                 {t("places.show_more_count", {
                   count: filteredOccasions.length - visibleOccasionsCount,
@@ -1497,7 +1497,7 @@ export function PlacesExplorer({
                         type="button"
                         onClick={() => toggleTag(t.id)}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${isSelected
-                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                          ? "bg-orange-100 dark:bg-orange-500/20 border-orange-300 dark:border-orange-500/50 text-orange-900 dark:text-orange-300 font-bold ring-1 ring-orange-500/30 shadow-xs"
                           : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
                           }`}
                       >
@@ -1549,7 +1549,7 @@ export function PlacesExplorer({
                     type="button"
                     onClick={() => toggleTag(t.id)}
                     className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${isSelected
-                      ? "bg-amber-100 dark:bg-amber-500/20 border-amber-300 dark:border-amber-500/50 text-amber-900 dark:text-amber-300 font-bold ring-1 ring-amber-400/40 shadow-xs"
+                      ? "bg-orange-100 dark:bg-orange-500/20 border-orange-300 dark:border-orange-500/50 text-orange-900 dark:text-orange-300 font-bold ring-1 ring-orange-500/30 shadow-xs"
                       : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
                       }`}
                   >
@@ -1564,7 +1564,7 @@ export function PlacesExplorer({
                 <button
                   type="button"
                   onClick={() => setIsTagsExpanded(true)}
-                  className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-amber-400/70 dark:border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition cursor-pointer"
+                  className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
                 >
                   {t("places.show_more_count", {
                     count: sortedTags.length - defaultTags.length,
@@ -1587,7 +1587,7 @@ export function PlacesExplorer({
             type="button"
             onClick={() => setActiveMobileView("map")}
             className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeMobileView === "map"
-              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
+              ? "bg-orange-600 text-white shadow-md shadow-orange-600/25"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
           >
@@ -1607,7 +1607,7 @@ export function PlacesExplorer({
             type="button"
             onClick={() => setActiveMobileView("list")}
             className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeMobileView === "list"
-              ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/25"
+              ? "bg-orange-600 text-white shadow-md shadow-orange-600/25"
               : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
           >
@@ -1829,7 +1829,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setIsCompareOpen(true)}
               disabled={compareIds.length < 2}
-              className="px-3 py-1 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-black text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Abrir
             </button>
@@ -1961,7 +1961,7 @@ export function PlacesExplorer({
                 setTimeout(scrollToCard, 150);
                 setTimeout(scrollToCard, 350);
               }}
-              className="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-center shadow-sm cursor-pointer"
+              className="flex-1 py-2 px-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-center shadow-sm cursor-pointer"
             >
               {t("places.view_details")}
             </button>

@@ -191,7 +191,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       @{displayUsername}
                     </span>
                     {currentUser.role === "admin" && (
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 uppercase tracking-wider">
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
                         ADMIN
                       </span>
                     )}

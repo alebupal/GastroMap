@@ -315,7 +315,7 @@ function RichTextarea({
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting || !value.trim()}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs transition cursor-pointer disabled:opacity-40"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white shadow-xs transition cursor-pointer disabled:opacity-40"
           >
             {isSubmitting ? (t ? t("comments.saving") : "Guardando...") : submitLabel}
           </button>

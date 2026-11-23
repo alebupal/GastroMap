@@ -113,7 +113,7 @@ export function SettingsManager({
       {/* Cabecera de sección estilo Stitch */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-[#c2410c] dark:text-orange-400">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">
             <span className="material-symbols-outlined text-sm leading-none">tune</span>
             Panel de Control Maestro
           </span>
@@ -142,7 +142,7 @@ export function SettingsManager({
         <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-950/60 p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[#c2410c] dark:text-orange-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
                 <span className="material-symbols-outlined text-xl">settings</span>
               </div>
               <div>
@@ -190,7 +190,7 @@ export function SettingsManager({
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-5 py-2 rounded-full bg-[#a33900] hover:bg-[#8a3000] text-white font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {saving ? t("common.saving") : t("admin.settings.save_btn")}
                 </button>
@@ -230,7 +230,7 @@ export function SettingsManager({
                   type="button"
                   disabled={restoring}
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#a33900] hover:bg-[#8a3000] text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition disabled:opacity-50 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-base leading-none">upload</span>
                   <span>{restoring ? t("admin.backup.restoring") : t("admin.backup.restore_button")}</span>
@@ -305,7 +305,7 @@ export function SettingsManager({
       {/* 3 mini-tarjetas de estado inferior estilo Stitch */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-[#c2410c] dark:text-orange-400 flex items-center justify-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
             <span className="material-symbols-outlined text-xl">map</span>
           </div>
           <div className="min-w-0">
