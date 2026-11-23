@@ -241,7 +241,7 @@ export function PlaceCard({
             }`}
           >
             <span className="material-symbols-outlined text-base leading-none">schedule</span>
-            <span>{personalStatus === "pending" ? t("cards.pending") : t("cards.want_to_go")}</span>
+            <span>{t("cards.pending")}</span>
           </button>
 
           <button
@@ -254,7 +254,15 @@ export function PlaceCard({
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
             }`}
           >
-            <span className="material-symbols-outlined text-base leading-none text-emerald-600 dark:text-emerald-400">check_circle</span>
+            <span
+              className={`material-symbols-outlined text-base leading-none ${
+                personalStatus === "visited"
+                  ? "text-white"
+                  : "text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              check_circle
+            </span>
             <span>{t("cards.visited")}</span>
           </button>
 
