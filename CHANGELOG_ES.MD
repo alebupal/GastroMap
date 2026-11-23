@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Stitch del Modal de Estadísticas Personales y Wrapped Anual**:
+  - Pestañas segmentadas (`Resumen` y `Wrapped {año}`), 4 KPIs de gran formato, franja de resumen secundaria y gráficas 2x2 con resalte del primer elemento y rango de precio predominante.
+  - Nueva tarjeta Wrapped en degradado naranja oficial con 4 indicadores translúcidos, 3 tarjetas blancas destacadas (*Ciudad estrella*, *Plan predilecto*, *Especialidad*), descarga directa en imagen PNG (`Descargar tarjeta`) y botón `Compartir resumen`.
 - **Paleta de Colores Unificada en Toda la Web**:
   - Definidos tokens de marca en `globals.css` y unificados todos los botones principales, pestañas activas, filtros, modales, pantallas de autenticación, documentación y panel `/admin` bajo el naranja oficial del logotipo (`#ea580c` / `orange-600`, hover `orange-700` con texto blanco), reservando ámbar exclusivamente para estados de pendiente/favorito y esmeralda para precios/visitados.
 - **Panel de Administración en Ruta Dedicada (`/admin`) con Diseño Stitch UI/UX**:

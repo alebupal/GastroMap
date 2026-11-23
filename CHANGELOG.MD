@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Stitch Redesign of Personal Statistics & Annual Wrapped Modal**:
+  - Segmented pill tabs (`Overview` and `Wrapped {year}`), 4 large KPI cards, secondary summary bar, and 2x2 distribution charts highlighting the top item plus predominant price range badge.
+  - New official orange gradient Wrapped card with 4 translucent stat tiles, 3 crisp white highlight cards (*Star City*, *Favorite Plan*, *Specialty*), direct PNG image export (`Download card`), and `Share summary` button.
 - **Unified Color Palette Across the Entire App**:
   - Added brand CSS tokens in `globals.css` and unified all primary buttons, active tabs, filter pills, modals, auth forms, documentation viewer, and `/admin` views to the official logo orange (`#ea580c` / `orange-600`, hover `orange-700` with white text), reserving amber for pending/favorites and emerald for prices/visited states.
 - **Dedicated Admin Panel Route (`/admin`) with Stitch UI/UX Design**:
