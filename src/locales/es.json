@@ -731,7 +731,14 @@
     "col_user": "Usuario",
     "col_action": "Acción",
     "col_entity": "Entidad / ID",
-    "col_details": "Detalles"
+    "col_details": "Detalles",
+    "search_placeholder": "Buscar en detalles, usuario o ID...",
+    "filter_all_entities": "Todas las entidades",
+    "filter_all_users": "Todos los usuarios",
+    "date_all": "Cualquier fecha",
+    "date_today": "Hoy",
+    "date_7d": "Últimos 7 días",
+    "date_30d": "Últimos 30 días"
   },
   "admin_demo": {
     "title": "Generador de Datos de Demostración",

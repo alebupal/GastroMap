@@ -731,7 +731,14 @@
     "col_user": "User",
     "col_action": "Action",
     "col_entity": "Entity / ID",
-    "col_details": "Details"
+    "col_details": "Details",
+    "search_placeholder": "Search details, user or ID...",
+    "filter_all_entities": "All entities",
+    "filter_all_users": "All users",
+    "date_all": "Any date",
+    "date_today": "Today",
+    "date_7d": "Last 7 days",
+    "date_30d": "Last 30 days"
   },
   "admin_demo": {
     "title": "Demo Data Generator",
