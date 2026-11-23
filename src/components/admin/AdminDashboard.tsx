@@ -336,39 +336,7 @@ export function AdminDashboard({
           {activeTab === "stats" && <AdminStatsPanel />}
 
           {activeTab === "places" && (
-            <div className="space-y-5">
-              {/* Cabecera de sección Tabla Sitios estilo Stitch */}
-              <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/60 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-2xl">storefront</span>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-                        {t("admin.title")}
-                      </h1>
-                      <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
-                        {allPlaces.length} sitios
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {t("admin.subtitle")}
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/new"
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition shrink-0"
-                >
-                  <span className="material-symbols-outlined text-base leading-none">add_location_alt</span>
-                  <span>{t("ui.new_place")}</span>
-                </Link>
-              </div>
-
-              <PlacesTableManager places={allPlaces} occasionsList={initialOccasions} />
-            </div>
+            <PlacesTableManager places={allPlaces} occasionsList={initialOccasions} />
           )}
 
           {activeTab === "users" && <UsersManager currentUserId={currentUser.id} />}
