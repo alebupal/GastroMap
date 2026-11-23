@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { useT } from "@/lib/i18n/client";
@@ -62,12 +63,16 @@ export function EditPlaceModal({
   }, [occasionsList, place.occasions]);
 
   useEffect(() => {
-    if (isOpen) {
-      getMyGroupsAction()
-        .then((groups) => setAvailableGroups(groups.map((g) => ({ id: g.id, name: g.name }))))
-        .catch(() => { });
-    }
-  }, [isOpen]);
+    if (!isOpen) return;
+    getMyGroupsAction()
+      .then((groups) => setAvailableGroups(groups.map((g) => ({ id: g.id, name: g.name }))))
+      .catch(() => { });
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -132,9 +137,16 @@ export function EditPlaceModal({
 
   const mergedTags = Array.from(new Set([...availableTags, ...(place.tags || [])]));
 
-  return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left">
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden gm-modal-in">
+  if (typeof document === "undefined") return null;
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 !mt-0 z-[1200] flex items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full h-full sm:h-auto sm:max-w-2xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800 flex flex-col sm:max-h-[92vh] overflow-hidden gm-modal-in">
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -363,4 +375,6 @@ export function EditPlaceModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

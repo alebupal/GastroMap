@@ -414,7 +414,7 @@ export function LocationPicker({
         <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400">
           {t("location.address_label")}
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             name="address"
@@ -435,13 +435,13 @@ export function LocationPicker({
               }
             }}
             placeholder={t("location.address_placeholder")}
-            className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
           <button
             type="button"
             onClick={() => handleGeocodeAddress()}
             disabled={isGeocodingAddress || address.trim().length < 2}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shrink-0 transition disabled:opacity-40 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shrink-0 transition disabled:opacity-40 cursor-pointer"
             title={t("location.search_coords_btn")}
           >
             <span className={`material-symbols-outlined text-sm leading-none ${isGeocodingAddress ? "animate-spin" : ""}`}>
