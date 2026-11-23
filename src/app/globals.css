@@ -36,6 +36,12 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Evitar que los iconos Material Symbols hereden text-decoration: underline de enlaces/botones */
+.material-symbols-outlined {
+  display: inline-block;
+  text-decoration: none !important;
+}
+
 /* Estilos refinados para popups de Leaflet */
 .leaflet-popup-content-wrapper {
   border-radius: 1rem;

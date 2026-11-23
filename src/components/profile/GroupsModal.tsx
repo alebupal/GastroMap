@@ -435,12 +435,14 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           <button
                             type="button"
                             onClick={() => toggleInvitesSection(g.id)}
-                            className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer inline-flex items-center gap-1"
+                            className="group text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 cursor-pointer inline-flex items-center gap-1 transition"
                           >
                             <span className="material-symbols-outlined text-sm leading-none">
                               link
                             </span>
-                            <span>{t("groups.invite_links_title")}</span>
+                            <span className="group-hover:underline underline-offset-2">
+                              {t("groups.invite_links_title")}
+                            </span>
                             <span className="material-symbols-outlined text-sm leading-none">
                               {isExpanded ? "expand_less" : "expand_more"}
                             </span>
