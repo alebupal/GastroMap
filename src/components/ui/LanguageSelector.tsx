@@ -3,42 +3,71 @@
 import { useT } from "@/lib/i18n/client";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
 
-const DEFAULT_NAMES: Array<{ code: Locale; name: string }> = [
-  { code: "es", name: "🇪🇸 Español" },
-  { code: "en", name: "🇬🇧 English" },
+const DEFAULT_NAMES: Array<{ code: Locale; name: string; flag: string; short: string }> = [
+  { code: "es", name: "Español", flag: "🇪🇸", short: "ES" },
+  { code: "en", name: "English", flag: "🇬🇧", short: "EN" },
 ];
 
 export function LanguageSelector({
-  names = DEFAULT_NAMES,
+  names,
   className = "",
 }: {
   names?: Array<{ code: Locale; name: string }>;
   className?: string;
 } = {}) {
   const { locale, setLocale, t } = useT();
+
   const options =
     names && names.length
-      ? names
-      : LOCALES.map((c) => ({
-          code: c,
-          name: c === "es" ? "🇪🇸 Español" : "🇬🇧 English",
-        }));
+      ? names.map((o) => {
+          const base = DEFAULT_NAMES.find((d) => d.code === o.code);
+          return {
+            code: o.code,
+            name: o.name,
+            flag: base?.flag || "🌐",
+            short: o.code.toUpperCase(),
+          };
+        })
+      : LOCALES.map((c) => {
+          const base = DEFAULT_NAMES.find((d) => d.code === c);
+          return (
+            base || {
+              code: c,
+              name: c.toUpperCase(),
+              flag: "🌐",
+              short: c.toUpperCase(),
+            }
+          );
+        });
 
   return (
-    <label className={`relative inline-flex items-center ${className}`}>
-      <select
-        value={locale}
-        onChange={(e) => setLocale(e.target.value as Locale)}
-        aria-label={t("common.language")}
-        className="appearance-none rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-1.5 pl-2.5 pr-6 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition"
-      >
-        {options.map((o) => (
-          <option key={o.code} value={o.code}>
-            {o.name}
-          </option>
-        ))}
-      </select>
-      <span className="pointer-events-none absolute right-2 text-[9px] text-slate-400">▼</span>
-    </label>
+    <div
+      role="group"
+      aria-label={t("common.language")}
+      className={`inline-flex items-center bg-[#f2f3ff] dark:bg-slate-800/90 rounded-full p-0.5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs ${className}`}
+    >
+      {options.map((o) => {
+        const active = locale === o.code;
+        return (
+          <button
+            key={o.code}
+            type="button"
+            onClick={() => {
+              if (!active) setLocale(o.code);
+            }}
+            aria-pressed={active}
+            title={o.name}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+              active
+                ? "bg-orange-600 text-white shadow-xs"
+                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+            }`}
+          >
+            <span className="leading-none">{o.flag}</span>
+            <span>{o.short}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
