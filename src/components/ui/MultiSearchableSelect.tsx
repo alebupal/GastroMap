@@ -20,6 +20,7 @@ interface MultiSearchableSelectProps {
   searchPlaceholder?: string;
   emptyText?: string;
   icon?: ReactNode;
+  fullWidth?: boolean;
   className?: string;
 }
 
@@ -32,6 +33,7 @@ export function MultiSearchableSelect({
   searchPlaceholder = "Buscar...",
   emptyText = "Sin resultados",
   icon,
+  fullWidth = false,
   className = "",
 }: MultiSearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,12 +41,15 @@ export function MultiSearchableSelect({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 264 });
 
   const updateCoords = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const menuWidth = 264;
+      const maxViewportWidth = Math.max(220, window.innerWidth - 24);
+      const menuWidth = fullWidth
+        ? Math.min(Math.max(rect.width, 256), maxViewportWidth)
+        : Math.min(264, maxViewportWidth);
       let left = rect.left;
       if (left + menuWidth > window.innerWidth - 12) {
         left = Math.max(12, window.innerWidth - menuWidth - 12);
@@ -54,7 +59,7 @@ export function MultiSearchableSelect({
       if (top + estimatedHeight > window.innerHeight - 12 && rect.top > estimatedHeight + 12) {
         top = rect.top - estimatedHeight - 6;
       }
-      setCoords({ top, left });
+      setCoords({ top, left, width: menuWidth });
     }
   };
 
@@ -126,7 +131,7 @@ export function MultiSearchableSelect({
   const isActive = values.length > 0;
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${fullWidth ? "w-full" : ""} ${className}`}>
       <button
         ref={buttonRef}
         type="button"
@@ -135,26 +140,34 @@ export function MultiSearchableSelect({
           setQuery("");
         }}
         aria-expanded={isOpen}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer active:scale-95 ${
+        className={`${
+          fullWidth
+            ? "w-full justify-between px-3.5 py-2 rounded-2xl"
+            : "inline-flex px-3 py-1.5 rounded-full"
+        } flex items-center gap-1.5 text-xs font-semibold border transition cursor-pointer active:scale-[0.98] ${
           isActive
             ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+            : fullWidth
+            ? "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
         }`}
       >
-        {values.length === 1 && singleSelected?.icon ? (
-          <span className="inline-flex items-center leading-none shrink-0">
-            {singleSelected.icon}
-          </span>
-        ) : icon ? (
-          <span
-            className={`inline-flex items-center leading-none shrink-0 ${
-              isActive ? "text-white" : "text-orange-600 dark:text-orange-400"
-            }`}
-          >
-            {icon}
-          </span>
-        ) : null}
-        <span className="truncate max-w-[165px]">{buttonLabel}</span>
+        <span className="inline-flex items-center gap-1.5 min-w-0">
+          {values.length === 1 && singleSelected?.icon ? (
+            <span className="inline-flex items-center leading-none shrink-0">
+              {singleSelected.icon}
+            </span>
+          ) : icon ? (
+            <span
+              className={`inline-flex items-center leading-none shrink-0 ${
+                isActive ? "text-white" : "text-orange-600 dark:text-orange-400"
+              }`}
+            >
+              {icon}
+            </span>
+          ) : null}
+          <span className={`truncate ${fullWidth ? "" : "max-w-[165px]"}`}>{buttonLabel}</span>
+        </span>
         <span className="material-symbols-outlined text-sm leading-none opacity-75 shrink-0">
           {isOpen ? "expand_less" : "expand_more"}
         </span>
@@ -169,8 +182,9 @@ export function MultiSearchableSelect({
               position: "fixed",
               top: `${coords.top}px`,
               left: `${coords.left}px`,
+              width: `${coords.width}px`,
             }}
-            className="z-[9999] w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
+            className="z-[9999] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
           >
             <div className="relative shrink-0">
               <span className="material-symbols-outlined text-sm text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">

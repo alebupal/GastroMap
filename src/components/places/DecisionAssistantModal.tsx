@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useT } from "@/lib/i18n/client";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { MultiSearchableSelect, type MultiSelectOption } from "@/components/ui/MultiSearchableSelect";
 
 interface DecisionAssistantModalProps {
   isOpen: boolean;
@@ -21,12 +22,15 @@ interface DecisionAssistantModalProps {
   onToggleNearMe: () => void;
   radiusKm: number;
   onChangeRadius: (km: number) => void;
-  countries?: Array<{ value: string; label: string }>;
-  selectedCountry?: string;
-  onSelectCountry?: (country: string) => void;
-  cities?: string[];
-  selectedCity?: string;
-  onSelectCity?: (city: string) => void;
+  countries?: MultiSelectOption[];
+  selectedCountries?: string[];
+  onSelectCountries?: (countries: string[]) => void;
+  cities?: MultiSelectOption[];
+  selectedCities?: string[];
+  onSelectCities?: (cities: string[]) => void;
+  towns?: MultiSelectOption[];
+  selectedTowns?: string[];
+  onSelectTowns?: (towns: string[]) => void;
   matchingCount?: number;
   onReset: () => void;
 }
@@ -49,11 +53,14 @@ export function DecisionAssistantModal({
   radiusKm,
   onChangeRadius,
   countries = [],
-  selectedCountry = "all",
-  onSelectCountry,
+  selectedCountries = [],
+  onSelectCountries,
   cities = [],
-  selectedCity = "all",
-  onSelectCity,
+  selectedCities = [],
+  onSelectCities,
+  towns = [],
+  selectedTowns = [],
+  onSelectTowns,
   matchingCount,
   onReset,
 }: DecisionAssistantModalProps) {
@@ -301,47 +308,60 @@ export function DecisionAssistantModal({
             </label>
 
             {(countries.length > 0 || cities.length > 0) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {countries.length > 0 && onSelectCountry && (
-                  <label className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    <span className="material-symbols-outlined text-base text-orange-600 leading-none shrink-0">
-                      public
-                    </span>
-                    <select
-                      value={selectedCountry}
-                      onChange={(e) => onSelectCountry(e.target.value)}
-                      aria-label={t("places.country_filter")}
-                      className="w-full bg-transparent focus:outline-none cursor-pointer font-bold truncate"
-                    >
-                      <option value="all">{t("places.all_countries")}</option>
-                      {countries.map((c) => (
-                        <option key={c.value} value={c.value}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
+              <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {countries.length > 0 && onSelectCountries && (
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedCountries}
+                      onChange={onSelectCountries}
+                      options={countries}
+                      placeholder={`${t("places.all_countries")} (${countries.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("location.country_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-base leading-none">
+                          public
+                        </span>
+                      }
+                    />
+                  )}
 
-                {cities.length > 0 && onSelectCity && (
-                  <label className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200">
-                    <span className="material-symbols-outlined text-base text-orange-600 leading-none shrink-0">
-                      location_city
-                    </span>
-                    <select
-                      value={selectedCity}
-                      onChange={(e) => onSelectCity(e.target.value)}
-                      aria-label={t("places.city_filter")}
-                      className="w-full bg-transparent focus:outline-none cursor-pointer font-bold truncate"
-                    >
-                      <option value="all">{t("places.all_cities")}</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  {cities.length > 0 && onSelectCities && (
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedCities}
+                      onChange={onSelectCities}
+                      options={cities}
+                      placeholder={`${t("places.all_cities")} (${cities.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("location.city_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-base leading-none">
+                          location_city
+                        </span>
+                      }
+                    />
+                  )}
+                </div>
+
+                {selectedCities.length > 0 && towns.length > 1 && onSelectTowns && (
+                  <div className="gm-panel-reveal">
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedTowns}
+                      onChange={onSelectTowns}
+                      options={towns}
+                      placeholder={`${t("places.towns_filter")} (${towns.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("places.search_towns_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-base leading-none">
+                          holiday_village
+                        </span>
+                      }
+                    />
+                  </div>
                 )}
               </div>
             )}

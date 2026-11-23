@@ -1571,153 +1571,77 @@ export function PlacesExplorer({
 
           {/* Secciones estructuradas exclusivas de móvil: Ubicación, Presupuesto y Grupos */}
           <div className="lg:hidden space-y-3.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            {/* 1. Ubicación (Países, Ciudades y Pueblos multiselección en móvil) */}
+            {/* 1. Ubicación (Países, Ciudades y Pueblos buscables y multiselección en móvil) */}
             {(allCountries.length > 0 || availableCities.length > 0) && (
-              <div className="space-y-2.5">
-                {allCountries.length > 0 && (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between px-0.5">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-xs text-orange-600 leading-none">
+              <div className="space-y-2">
+                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
+                  {t("places.country_filter")} / {t("places.city_filter")}
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {allCountries.length > 0 && (
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedCountries}
+                      onChange={(vals) => {
+                        setSelectedCountries(vals);
+                        setSelectedCities([]);
+                        setSelectedTowns([]);
+                        setCurrentPage(1);
+                      }}
+                      options={countryOptions}
+                      placeholder={`${t("places.all_countries")} (${allCountries.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("location.country_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-[16px] leading-none">
                           public
                         </span>
-                        <span>
-                          {t("places.country_filter")} ({allCountries.length})
-                        </span>
-                      </span>
-                      {selectedCountries.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedCountries([]);
-                            setSelectedCities([]);
-                            setSelectedTowns([]);
-                          }}
-                          className="text-[10px] font-bold text-rose-500 cursor-pointer"
-                        >
-                          {t("places.clear_filter")} ({selectedCountries.length})
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {countryOptions.map((c) => {
-                        const active = selectedCountries.includes(c.value);
-                        return (
-                          <button
-                            key={c.value}
-                            type="button"
-                            onClick={() => toggleCountry(c.value)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
-                              active
-                                ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                                : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            }`}
-                          >
-                            <span>{c.icon}</span>
-                            <span>{c.label}</span>
-                            <span className={`text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}>
-                              {c.count}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                      }
+                    />
+                  )}
 
-                {availableCities.length > 0 && (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between px-0.5">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-xs text-orange-600 leading-none">
+                  {availableCities.length > 0 && (
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedCities}
+                      onChange={(vals) => {
+                        setSelectedCities(vals);
+                        setSelectedTowns([]);
+                        setCurrentPage(1);
+                      }}
+                      options={cityOptions}
+                      placeholder={`${t("places.all_cities")} (${availableCities.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("location.city_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-[16px] leading-none">
                           location_city
                         </span>
-                        <span>
-                          {t("places.city_filter")} ({availableCities.length})
-                        </span>
-                      </span>
-                      {selectedCities.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedCities([]);
-                            setSelectedTowns([]);
-                          }}
-                          className="text-[10px] font-bold text-rose-500 cursor-pointer"
-                        >
-                          {t("places.clear_filter")} ({selectedCities.length})
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-                      {cityOptions.map((city) => {
-                        const active = selectedCities.includes(city.value);
-                        return (
-                          <button
-                            key={city.value}
-                            type="button"
-                            onClick={() => toggleCity(city.value)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
-                              active
-                                ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                                : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            }`}
-                          >
-                            <span>{city.label}</span>
-                            <span className={`text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}>
-                              {city.count}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                      }
+                    />
+                  )}
+                </div>
 
-                {/* Pueblos / Municipios en móvil (multiselección cuando hay >1 localidad en España) */}
+                {/* Pueblos / Municipios buscables y multiselección en móvil */}
                 {selectedCities.length > 0 && availableTowns.length > 1 && (
-                  <div className="pt-1.5 space-y-1.5 gm-panel-reveal">
-                    <div className="flex items-center justify-between px-0.5">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-xs text-orange-600 leading-none">
+                  <div className="gm-panel-reveal">
+                    <MultiSearchableSelect
+                      fullWidth
+                      values={selectedTowns}
+                      onChange={(vals) => {
+                        setSelectedTowns(vals);
+                        setCurrentPage(1);
+                      }}
+                      options={townOptions}
+                      placeholder={`${t("places.towns_filter")} (${availableTowns.length})`}
+                      clearLabel={t("places.clear_filter")}
+                      searchPlaceholder={t("places.search_towns_placeholder")}
+                      icon={
+                        <span className="material-symbols-outlined text-[16px] leading-none">
                           holiday_village
                         </span>
-                        <span>
-                          {t("places.towns_filter")} ({availableTowns.length})
-                        </span>
-                      </span>
-                      {selectedTowns.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTowns([])}
-                          className="text-[10px] font-bold text-rose-500 cursor-pointer"
-                        >
-                          {t("places.clear_filter")} ({selectedTowns.length})
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-                      {availableTowns.map((tw) => {
-                        const active = selectedTowns.includes(tw.name);
-                        return (
-                          <button
-                            key={tw.name}
-                            type="button"
-                            onClick={() => toggleTown(tw.name)}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
-                              active
-                                ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                                : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                            }`}
-                          >
-                            <span>{tw.name}</span>
-                            <span className={`text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}>
-                              {tw.count}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                      }
+                    />
                   </div>
                 )}
               </div>
@@ -2696,19 +2620,22 @@ export function PlacesExplorer({
         }}
         radiusKm={radiusKm || 10}
         onChangeRadius={(km) => setRadiusKm(km)}
-        countries={countryOptions.map((c) => ({ value: c.value, label: c.label }))}
-        selectedCountry={selectedCountries[0] || "all"}
-        onSelectCountry={(country) => {
-          setSelectedCountries(country === "all" ? [] : [country]);
+        countries={countryOptions}
+        selectedCountries={selectedCountries}
+        onSelectCountries={(vals) => {
+          setSelectedCountries(vals);
           setSelectedCities([]);
           setSelectedTowns([]);
         }}
-        cities={availableCities}
-        selectedCity={selectedCities[0] || "all"}
-        onSelectCity={(city) => {
-          setSelectedCities(city === "all" ? [] : [city]);
+        cities={cityOptions}
+        selectedCities={selectedCities}
+        onSelectCities={(vals) => {
+          setSelectedCities(vals);
           setSelectedTowns([]);
         }}
+        towns={townOptions}
+        selectedTowns={selectedTowns}
+        onSelectTowns={(vals) => setSelectedTowns(vals)}
         matchingCount={filteredPlaces.length}
         onReset={resetAllFilters}
       />
