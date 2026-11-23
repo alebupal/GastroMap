@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Modal de Comentarios y Notas del Sitio estilo Stitch**:
+  - Convertido el hilo de comentarios en un modal dedicado centrado con avatar de iniciales del local, dirección, contador total de notas, pestañas de filtro (`Todos`, `Mis notas privadas`, `Comunidad`) y ordenación (`Más recientes` / `Más antiguos`).
+  - Editor enriquecido unificado con conmutador `Público` / `Nota privada`, tarjetas diferenciadas para apuntes confidenciales (borde ámbar) y reseñas comunitarias con insignias `TÚ` / `Nota pública`.
 - **Rediseño Stitch del Modal de Estadísticas Personales y Wrapped Anual**:
   - Pestañas segmentadas (`Resumen` y `Wrapped {año}`), 4 KPIs de gran formato, franja de resumen secundaria y gráficas 2x2 con resalte del primer elemento y rango de precio predominante.
   - Nueva tarjeta Wrapped en degradado naranja oficial con 4 indicadores translúcidos, 3 tarjetas blancas destacadas (*Ciudad estrella*, *Plan predilecto*, *Especialidad*), descarga directa en imagen PNG (`Descargar tarjeta`) y botón `Compartir resumen`.

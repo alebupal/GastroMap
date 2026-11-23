@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Stitch-styled Place Comments & Notes Modal**:
+  - Converted the inline comments thread into a dedicated centered modal featuring place initials badge, address, total notes counter, filter pills (`All`, `My private notes`, `Community`), and sorting (`Newest` / `Oldest`).
+  - Unified rich composer with `Public` / `Private note` toggle, distinct amber-accented cards for private notes, and community review cards with `YOU` / `Public note` badges.
 - **Stitch Redesign of Personal Statistics & Annual Wrapped Modal**:
   - Segmented pill tabs (`Overview` and `Wrapped {year}`), 4 large KPI cards, secondary summary bar, and 2x2 distribution charts highlighting the top item plus predominant price range badge.
   - New official orange gradient Wrapped card with 4 translucent stat tiles, 3 crisp white highlight cards (*Star City*, *Favorite Plan*, *Specialty*), direct PNG image export (`Download card`), and `Share summary` button.

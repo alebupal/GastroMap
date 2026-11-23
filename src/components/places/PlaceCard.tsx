@@ -348,14 +348,21 @@ export function PlaceCard({
         </div>
       </div>
 
-      {/* Hilo de comentarios colaborativos desplegable */}
+      {/* Modal de comentarios y notas estilo Stitch */}
       <PlaceCommentsThread
         placeId={place.id}
+        placeName={place.name}
+        placeCity={place.city}
+        placeAddress={place.address}
+        privateNotes={privateNotes}
+        personalRating={rating}
         currentUserId={currentUserId}
         isAdmin={isAdmin}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
         onCommentsCountChange={(count) => setCommentsCount(count)}
+        onPrivateNotesSaved={(newNotes) => setPrivateNotes(newNotes)}
+        onOpenPrivateNotesModal={() => setShowNotesModal(true)}
       />
 
       {/* Modal de notas y valoración privada */}
