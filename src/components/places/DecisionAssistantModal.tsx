@@ -251,7 +251,9 @@ export function DecisionAssistantModal({
                     onClick={() => setShowAllTags((prev) => !prev)}
                     className="px-3 py-1 rounded-full text-xs font-bold border border-dashed border-orange-400/70 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
                   >
-                    {showAllTags ? "Ver menos" : `+${tags.length - 14} más`}
+                    {showAllTags
+                      ? t("assistant.show_less")
+                      : t("assistant.more_tags", { count: tags.length - 14 })}
                   </button>
                 )}
               </div>

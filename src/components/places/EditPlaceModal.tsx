@@ -91,7 +91,7 @@ export function EditPlaceModal({
         if (parsed.locationDetails.city) setCity(parsed.locationDetails.city);
       }
     } catch {
-      setError("No pudimos leer automáticamente el enlace de Google Maps.");
+      setError(t("form.maps_parse_error"));
     } finally {
       setResolving(false);
     }

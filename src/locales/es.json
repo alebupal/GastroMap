@@ -129,7 +129,10 @@
     "radius_label": "Radio:",
     "locating": "Localizando...",
     "location_active": "Ubicación activa",
-    "new_badge": "Nuevo"
+    "new_badge": "Nuevo",
+    "geo_not_supported": "Tu navegador no soporta geolocalización.",
+    "geo_permission_denied": "Permiso de ubicación denegado.",
+    "geo_unavailable": "No se pudo obtener tu ubicación."
   },
   "cards": {
     "pending": "Pendiente",
@@ -181,7 +184,8 @@
     "other_country_label": "Nombre del país",
     "other_country_placeholder": "Escribe el nombre del país...",
     "select_country": "Seleccionar país...",
-    "no_countries_found": "No se encontraron países"
+    "no_countries_found": "No se encontraron países",
+    "hide_coords": "Ocultar"
   },
   "random": {
     "title": "¿Dónde vamos hoy?",
@@ -192,7 +196,10 @@
     "view_on_map": "Ver en el mapa",
     "view_in_list": "Ver en el listado",
     "no_places": "No hay sitios que coincidan.",
-    "free_price": "Precio libre"
+    "free_price": "Precio libre",
+    "available_places": "{count} locales disponibles",
+    "only_unexplored": "Solo \"Por descubrir\"",
+    "notes_heading": "Notas y recomendaciones"
   },
   "assistant": {
     "title": "Asistente: Encontrar un sitio",
@@ -209,7 +216,9 @@
     "visited_by_me": "Probado por mí",
     "favorites_only": "Solo Mis Favoritos",
     "reset": "Restablecer filtros",
-    "view_results": "Ver resultados"
+    "view_results": "Ver resultados",
+    "show_less": "Ver menos",
+    "more_tags": "+{count} más"
   },
   "form": {
     "import_label": "Autocompletar pegando enlace de Google Maps",
@@ -273,7 +282,14 @@
       "nothing": "No se encontraron datos automáticos en la URL introducida.",
       "reading": "Leyendo enlace...",
       "ok": "✓ Enlace procesado correctamente"
-    }
+    },
+    "quick_assistant": "Asistente Rápido",
+    "location_and_coords": "Ubicación y Coordenadas",
+    "occasions_hint": "Puedes marcar varios tipos de experiencia ({count} disponibles)",
+    "public_for_community": "Público para tu comunidad",
+    "visibility_hint": "Decide quién puede consultar este establecimiento en sus búsquedas.",
+    "price_no_estimate": "Sin estimación",
+    "maps_parse_error": "No pudimos leer automáticamente el enlace de Google Maps."
   },
   "profile": {
     "title": "Editar mi perfil",
@@ -287,7 +303,8 @@
     "new_password": "Nueva contraseña",
     "new_password_hint": "Mínimo 6 caracteres",
     "confirm_password": "Confirmar nueva contraseña",
-    "success": "¡Perfil actualizado correctamente!"
+    "success": "¡Perfil actualizado correctamente!",
+    "confirm_new_password": "Confirmar contraseña"
   },
   "stats": {
     "title": "Mis estadísticas",
@@ -309,7 +326,15 @@
     "wrapped_comments": "Comentarios",
     "cities_count": "Ciudades",
     "contributed": "Aportados",
-    "comments": "Comentarios"
+    "comments": "Comentarios",
+    "share_copied": "Resumen copiado al portapapeles",
+    "wrapped_star_city": "Ciudad estrella",
+    "wrapped_star_city_sub": "Donde más has explorado",
+    "wrapped_fav_plan": "Plan predilecto",
+    "wrapped_places_visited": "{count} locales visitados",
+    "wrapped_specialty": "Especialidad",
+    "wrapped_repeated_in": "Repetida en {count} locales",
+    "wrapped_year_favorite": "Tu favorito del año"
   },
   "admin": {
     "title": "Panel de Administración",
@@ -361,7 +386,13 @@
     "register_visit": "Registrar nueva visita",
     "visit_date": "Fecha de la visita",
     "visit_notes": "Comentarios de la visita",
-    "no_visits": "Aún no has registrado ninguna visita a este sitio."
+    "no_visits": "Aún no has registrado ninguna visita a este sitio.",
+    "delete_visit_confirm": "¿Eliminar este registro de visita?",
+    "visit_notes_placeholder": "¿Qué pedisteis? ¿Con quién fuiste? (solo visible para ti)",
+    "visits_history": "Historial de visitas",
+    "no_visits_yet": "Todavía no has registrado visitas con fecha en este local.",
+    "delete_visit_title": "Eliminar visita",
+    "personal_notes_placeholder": "Qué pedir, mesa favorita, precio aproximado, con quién fuiste..."
   },
   "compare": {
     "title": "Comparador de Establecimientos",
@@ -376,7 +407,22 @@
     "experience": "Experiencia",
     "comments": "Comentarios",
     "view_on_map": "Ver en mapa",
-    "open_maps": "Maps ↗"
+    "open_maps": "Maps ↗",
+    "places_count_one": "1 local (máx. 3)",
+    "places_count_other": "{count} locales (máx. 3)",
+    "status_and_plan": "Estado y plan",
+    "no_rating": "Sin nota",
+    "no_description": "Sin descripción registrada.",
+    "top_highlighted": "Más destacado:",
+    "top_highlighted_desc": "lidera en actividad con {count} comentarios",
+    "top_highlighted_rating": "y nota {rating}/10",
+    "cheapest_option": "Opción más económica:",
+    "closest_option": "Más cercano:",
+    "to_discover_option": "Para descubrir:",
+    "closest_distance": "a solo {distance}.",
+    "to_discover_desc": "es ideal para tachar un nuevo descubrimiento.",
+    "max_capacity": "Capacidad máxima alcanzada (3 de 3 locales seleccionados)",
+    "selected_capacity": "{count} de 3 locales seleccionados"
   },
   "export_import": {
     "title": "Importar / Exportar Catálogo",
@@ -506,7 +552,18 @@
     "cancel": "Cancelar",
     "edit_title": "Editar comentario",
     "delete_title": "Eliminar comentario",
-    "delete_confirm": "¿Eliminar este comentario?"
+    "delete_confirm": "¿Eliminar este comentario?",
+    "edit_tooltip": "Editar comentario",
+    "delete_tooltip": "Eliminar comentario",
+    "save_btn": "Guardar",
+    "bullet_list_tooltip": "Lista con viñetas",
+    "add_dish_tooltip": "Añadir plato recomendado",
+    "add_review_title": "Añadir reseña o apunte personal",
+    "confidential": "Confidencial",
+    "rating_prefix": "Valoración: {rating}/10",
+    "you_badge": "TÚ",
+    "public_note": "Nota pública",
+    "empty_private_notes": "Aún no tienes notas privadas en este sitio. Selecciona Nota privada arriba para añadir una."
   },
   "pagination": {
     "showing": "Mostrando",

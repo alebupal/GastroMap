@@ -400,7 +400,7 @@ export function PlacesExplorer({
   // Solicitar ubicación al navegador
   function handleRequestLocation() {
     if (!navigator.geolocation) {
-      setLocationError("Tu navegador no soporta geolocalización.");
+      setLocationError(t("places.geo_not_supported"));
       return;
     }
 
@@ -420,9 +420,9 @@ export function PlacesExplorer({
       (error) => {
         setIsLocating(false);
         if (error.code === error.PERMISSION_DENIED) {
-          setLocationError("Permiso de ubicación denegado.");
+          setLocationError(t("places.geo_permission_denied"));
         } else {
-          setLocationError("No se pudo obtener tu ubicación.");
+          setLocationError(t("places.geo_unavailable"));
         }
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
@@ -1126,7 +1126,7 @@ export function PlacesExplorer({
               disabled={savingFilter || newFilterName.trim().length < 2}
               className="px-3 py-1.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
             >
-              {savingFilter ? "..." : "Guardar"}
+              {savingFilter ? "..." : t("common.save")}
             </button>
             <button
               type="button"

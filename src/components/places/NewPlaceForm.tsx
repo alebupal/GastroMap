@@ -300,7 +300,7 @@ export function NewPlaceForm({
             <span className="material-symbols-outlined text-lg text-orange-600 leading-none">
               location_on
             </span>
-            <span>Ubicación y Coordenadas</span>
+            <span>{t("form.location_and_coords")}</span>
           </h2>
           <span className="px-2.5 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-extrabold uppercase tracking-wider">
             Paso clave
@@ -329,7 +329,7 @@ export function NewPlaceForm({
               {t("form.occasions_label")}
             </h2>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Puedes marcar varios tipos de experiencia ({availableOccasions.length} disponibles)
+              {t("form.occasions_hint", { count: availableOccasions.length })}
             </p>
           </div>
           {selectedOccasions.length > 0 && (
@@ -404,7 +404,7 @@ export function NewPlaceForm({
             {t("form.notes_label")}
           </label>
           <span className="text-[11px] text-slate-400 font-medium">
-            Público para tu comunidad
+            {t("form.public_for_community")}
           </span>
         </div>
         <textarea
@@ -422,7 +422,7 @@ export function NewPlaceForm({
             {t("form.visibility_label")}
           </h2>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Decide quién puede consultar este establecimiento en sus búsquedas.
+            {t("form.visibility_hint")}
           </p>
         </div>
 

@@ -127,7 +127,10 @@ export function ComparePlacesModal({
                   {t("compare.title")}
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-extrabold">
-                  • {places.length} {places.length === 1 ? "local" : "locales"} (máx. 3)
+                  •{" "}
+                  {places.length === 1
+                    ? t("compare.places_count_one")
+                    : t("compare.places_count_other", { count: places.length })}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
@@ -151,7 +154,7 @@ export function ComparePlacesModal({
               type="button"
               onClick={onClose}
               className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer"
-              aria-label="Cerrar comparativa"
+              aria-label={t("common.close")}
             >
               <span className="material-symbols-outlined text-lg leading-none">close</span>
             </button>
@@ -255,7 +258,7 @@ export function ComparePlacesModal({
                     {/* Estado y plan */}
                     <div className="space-y-1.5">
                       <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Estado y plan
+                        {t("compare.status_and_plan")}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         <span
@@ -326,7 +329,7 @@ export function ComparePlacesModal({
                         <span className="text-amber-600 dark:text-amber-400">
                           {p.rating !== null && p.rating !== undefined
                             ? `★ ${p.rating}/10`
-                            : "Sin nota"}
+                            : t("compare.no_rating")}
                         </span>
                       </div>
                       {p.notes ? (
@@ -335,7 +338,7 @@ export function ComparePlacesModal({
                         </p>
                       ) : (
                         <p className="text-[11px] italic text-slate-400">
-                          Sin descripción registrada.
+                          {t("compare.no_description")}
                         </p>
                       )}
                     </div>
@@ -392,12 +395,14 @@ export function ComparePlacesModal({
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
                     <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1">
                       <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
-                      <span>Más destacado:</span>
+                      <span>{t("compare.top_highlighted")}</span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                      <strong>{verdict.topActivity.name}</strong> lidera en actividad con{" "}
-                      {verdict.topActivity.commentsCount || 0} comentarios
-                      {verdict.topActivity.rating ? ` y nota ${verdict.topActivity.rating}/10` : ""}.
+                      <strong>{verdict.topActivity.name}</strong>{" "}
+                      {t("compare.top_highlighted_desc", { count: verdict.topActivity.commentsCount || 0 })}
+                      {verdict.topActivity.rating
+                        ? ` ${t("compare.top_highlighted_rating", { rating: verdict.topActivity.rating })}`
+                        : ""}.
                     </p>
                   </div>
                 )}
@@ -406,7 +411,7 @@ export function ComparePlacesModal({
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
                     <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1">
                       <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">bolt</span>
-                      <span>Opción más económica:</span>
+                      <span>{t("compare.cheapest_option")}</span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
                       <strong>{verdict.cheapest.name}</strong> ({formatPriceBracket(verdict.cheapest.priceRange)}).
@@ -420,17 +425,20 @@ export function ComparePlacesModal({
                       <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
                         {verdict.hasDistances ? "near_me" : "auto_awesome"}
                       </span>
-                      <span>{verdict.hasDistances ? "Más cercano:" : "Para descubrir:"}</span>
+                      <span>
+                        {verdict.hasDistances ? t("compare.closest_option") : t("compare.to_discover_option")}
+                      </span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                      <strong>{verdict.closest.name}</strong>
+                      <strong>{verdict.closest.name}</strong>{" "}
                       {verdict.hasDistances && typeof verdict.closest.distanceMeters === "number"
-                        ? ` a solo ${
-                            verdict.closest.distanceMeters < 1000
-                              ? `${verdict.closest.distanceMeters} m`
-                              : `${(verdict.closest.distanceMeters / 1000).toFixed(1)} km`
-                          }.`
-                        : " es ideal para tachar un nuevo descubrimiento."}
+                        ? t("compare.closest_distance", {
+                            distance:
+                              verdict.closest.distanceMeters < 1000
+                                ? `${verdict.closest.distanceMeters} m`
+                                : `${(verdict.closest.distanceMeters / 1000).toFixed(1)} km`,
+                          })
+                        : t("compare.to_discover_desc")}
                     </p>
                   </div>
                 )}
@@ -447,8 +455,8 @@ export function ComparePlacesModal({
             </span>
             <span>
               {places.length >= 3
-                ? "Capacidad máxima alcanzada (3 de 3 locales seleccionados)"
-                : `${places.length} de 3 locales seleccionados`}
+                ? t("compare.max_capacity")
+                : t("compare.selected_capacity", { count: places.length })}
             </span>
           </div>
 

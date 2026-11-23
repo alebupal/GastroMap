@@ -730,11 +730,11 @@ export function PlaceCommentsThread({
                                 </span>
                                 {isOwn && (
                                   <span className="px-1.5 py-0.5 rounded-full bg-orange-600 text-white text-[9px] font-black uppercase">
-                                    TÚ
+                                    {t("comments.you_badge")}
                                   </span>
                                 )}
                                 <span className="px-2 py-0.5 rounded-full bg-emerald-100/80 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
-                                  Nota pública
+                                  {t("comments.public_note")}
                                 </span>
                               </div>
                               <div className="text-[10px] text-slate-400 mt-0.5">
@@ -805,7 +805,7 @@ export function PlaceCommentsThread({
             <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-8 text-center">
               <span className="material-symbols-outlined text-3xl text-amber-400">lock</span>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                Aún no tienes notas privadas en este sitio. Selecciona <strong>Nota privada</strong> arriba para añadir una.
+                {t("comments.empty_private_notes")}
               </p>
             </div>
           )}

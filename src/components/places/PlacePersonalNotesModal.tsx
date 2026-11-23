@@ -207,7 +207,7 @@ export function PlacePersonalNotesModal({
               rows={4}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Qué pedir, mesa favorita, precio aproximado, con quién fuiste..."
+              placeholder={t("notes_visits.personal_notes_placeholder")}
               className="w-full px-4 py-3 rounded-2xl text-xs sm:text-sm bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 resize-y transition"
             />
           </div>

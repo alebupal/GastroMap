@@ -486,7 +486,7 @@ export function LocationPicker({
                 onClick={() => setShowManualCoords(false)}
                 className="text-[11px] text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
               >
-                ✕ Ocultar
+                ✕ {t("location.hide_coords")}
               </button>
             )}
           </div>

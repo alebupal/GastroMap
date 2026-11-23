@@ -68,7 +68,7 @@ export function PlaceVisitsModal({
   }
 
   async function handleDelete(visitId: string) {
-    if (!confirm("¿Eliminar este registro de visita?")) return;
+    if (!confirm(t("notes_visits.delete_visit_confirm"))) return;
     const res = await deletePlaceVisitAction(visitId);
     if (res.success) {
       setVisits((prev) => prev.filter((v) => v.id !== visitId));
@@ -149,7 +149,7 @@ export function PlaceVisitsModal({
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="¿Qué pedisteis? ¿Con quién fuiste? (solo visible para ti)"
+              placeholder={t("notes_visits.visit_notes_placeholder")}
               className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             <button
@@ -164,13 +164,13 @@ export function PlaceVisitsModal({
           {/* Historial */}
           <div className="space-y-2">
             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Historial de visitas
+              {t("notes_visits.visits_history")}
             </h4>
             {loading ? (
-              <p className="text-xs text-slate-400 text-center py-4">Cargando...</p>
+              <p className="text-xs text-slate-400 text-center py-4">{t("common.loading")}</p>
             ) : visits.length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-3">
-                Todavía no has registrado visitas con fecha en este local.
+                {t("notes_visits.no_visits_yet")}
               </p>
             ) : (
               visits.map((v) => (
@@ -201,7 +201,7 @@ export function PlaceVisitsModal({
                       type="button"
                       onClick={() => handleDelete(v.id)}
                       className="text-slate-400 hover:text-red-500 text-xs cursor-pointer"
-                      title="Eliminar visita"
+                      title={t("notes_visits.delete_visit_title")}
                     >
                       ✕
                     </button>

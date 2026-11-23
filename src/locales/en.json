@@ -129,7 +129,10 @@
     "radius_label": "Radius:",
     "locating": "Locating...",
     "location_active": "Location active",
-    "new_badge": "New"
+    "new_badge": "New",
+    "geo_not_supported": "Your browser does not support geolocation.",
+    "geo_permission_denied": "Location permission denied.",
+    "geo_unavailable": "Could not obtain your location."
   },
   "cards": {
     "pending": "Pending",
@@ -181,7 +184,8 @@
     "other_country_label": "Country name",
     "other_country_placeholder": "Type country name...",
     "select_country": "Select country...",
-    "no_countries_found": "No countries found"
+    "no_countries_found": "No countries found",
+    "hide_coords": "Hide"
   },
   "random": {
     "title": "Where are we going today?",
@@ -192,7 +196,10 @@
     "view_on_map": "View on map",
     "view_in_list": "View in list",
     "no_places": "No places match your filters.",
-    "free_price": "Any price"
+    "free_price": "Any price",
+    "available_places": "{count} places available",
+    "only_unexplored": "Only \"To discover\"",
+    "notes_heading": "Notes & recommendations"
   },
   "assistant": {
     "title": "Assistant: Find a place",
@@ -209,7 +216,9 @@
     "visited_by_me": "Tried by me",
     "favorites_only": "Favorites only",
     "reset": "Reset filters",
-    "view_results": "View results"
+    "view_results": "View results",
+    "show_less": "Show less",
+    "more_tags": "+{count} more"
   },
   "form": {
     "import_label": "Autocomplete by pasting a Google Maps link",
@@ -273,7 +282,14 @@
       "nothing": "No automatic data found in the provided URL.",
       "reading": "Reading link...",
       "ok": "✓ Link processed successfully"
-    }
+    },
+    "quick_assistant": "Quick Assistant",
+    "location_and_coords": "Location & Coordinates",
+    "occasions_hint": "You can select multiple experience types ({count} available)",
+    "public_for_community": "Public for your community",
+    "visibility_hint": "Choose who can see this place in their searches.",
+    "price_no_estimate": "No estimate",
+    "maps_parse_error": "We could not automatically parse the Google Maps link."
   },
   "profile": {
     "title": "Edit my profile",
@@ -287,7 +303,8 @@
     "new_password": "New password",
     "new_password_hint": "Minimum 6 characters",
     "confirm_password": "Confirm new password",
-    "success": "Profile updated successfully!"
+    "success": "Profile updated successfully!",
+    "confirm_new_password": "Confirm password"
   },
   "stats": {
     "title": "My statistics",
@@ -309,7 +326,15 @@
     "wrapped_comments": "Comments",
     "cities_count": "Cities",
     "contributed": "Contributed",
-    "comments": "Comments"
+    "comments": "Comments",
+    "share_copied": "Summary copied to clipboard",
+    "wrapped_star_city": "Star city",
+    "wrapped_star_city_sub": "Where you explored the most",
+    "wrapped_fav_plan": "Favorite plan",
+    "wrapped_places_visited": "{count} places visited",
+    "wrapped_specialty": "Specialty",
+    "wrapped_repeated_in": "Repeated in {count} places",
+    "wrapped_year_favorite": "Your favorite of the year"
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -361,7 +386,13 @@
     "register_visit": "Log new visit",
     "visit_date": "Visit date",
     "visit_notes": "Visit comments",
-    "no_visits": "You haven't logged any visits to this place yet."
+    "no_visits": "You haven't logged any visits to this place yet.",
+    "delete_visit_confirm": "Delete this visit record?",
+    "visit_notes_placeholder": "What did you order? Who did you go with? (only visible to you)",
+    "visits_history": "Visit history",
+    "no_visits_yet": "You have not logged any dated visits to this place yet.",
+    "delete_visit_title": "Delete visit",
+    "personal_notes_placeholder": "What to order, favorite table, approximate price, who you went with..."
   },
   "compare": {
     "title": "Place Comparison",
@@ -376,7 +407,22 @@
     "experience": "Experience",
     "comments": "Comments",
     "view_on_map": "View on map",
-    "open_maps": "Maps ↗"
+    "open_maps": "Maps ↗",
+    "places_count_one": "1 place (max 3)",
+    "places_count_other": "{count} places (max 3)",
+    "status_and_plan": "Status & plan",
+    "no_rating": "No rating",
+    "no_description": "No description recorded.",
+    "top_highlighted": "Most active:",
+    "top_highlighted_desc": "leads in activity with {count} comments",
+    "top_highlighted_rating": "and {rating}/10 rating",
+    "cheapest_option": "Most affordable option:",
+    "closest_option": "Closest:",
+    "to_discover_option": "To discover:",
+    "closest_distance": "just {distance} away.",
+    "to_discover_desc": "is ideal for checking off a new discovery.",
+    "max_capacity": "Max capacity reached (3 of 3 places selected)",
+    "selected_capacity": "{count} of 3 places selected"
   },
   "export_import": {
     "title": "Import / Export Catalog",
@@ -506,7 +552,18 @@
     "cancel": "Cancel",
     "edit_title": "Edit comment",
     "delete_title": "Delete comment",
-    "delete_confirm": "Delete this comment?"
+    "delete_confirm": "Delete this comment?",
+    "edit_tooltip": "Edit comment",
+    "delete_tooltip": "Delete comment",
+    "save_btn": "Save",
+    "bullet_list_tooltip": "Bullet list",
+    "add_dish_tooltip": "Add recommended dish",
+    "add_review_title": "Add review or personal note",
+    "confidential": "Confidential",
+    "rating_prefix": "Rating: {rating}/10",
+    "you_badge": "YOU",
+    "public_note": "Public note",
+    "empty_private_notes": "You do not have private notes for this place yet. Select Private note above to add one."
   },
   "pagination": {
     "showing": "Showing",

@@ -143,7 +143,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
         });
       } else if (typeof navigator !== "undefined" && navigator.clipboard) {
         await navigator.clipboard.writeText(text);
-        setShareFeedback("Resumen copiado al portapapeles");
+        setShareFeedback(t("stats.share_copied"));
         setTimeout(() => setShareFeedback(null), 2500);
       }
     } catch {
@@ -544,7 +544,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
-                          Ciudad estrella
+                          {t("stats.wrapped_star_city")}
                         </span>
                         <span className="material-symbols-outlined text-sm text-orange-500">location_on</span>
                       </div>
@@ -552,7 +552,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                         {stats.wrapped.topCity}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">
-                        Donde más has explorado
+                        {t("stats.wrapped_star_city_sub")}
                       </div>
                     </div>
                   )}
@@ -561,7 +561,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">
-                          Plan predilecto
+                          {t("stats.wrapped_fav_plan")}
                         </span>
                         <OccasionIcon icon={stats.wrapped.topOccasion.icon} className="text-sm" msClassName="text-base" />
                       </div>
@@ -569,7 +569,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                         {stats.wrapped.topOccasion.name}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">
-                        {stats.wrapped.topOccasion.count} locales visitados
+                        {t("stats.wrapped_places_visited", { count: stats.wrapped.topOccasion.count })}
                       </div>
                     </div>
                   )}
@@ -578,7 +578,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
-                          Especialidad
+                          {t("stats.wrapped_specialty")}
                         </span>
                         <span className="text-emerald-600 font-black text-xs">#</span>
                       </div>
@@ -586,7 +586,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                         #{stats.wrapped.topTag.name}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5">
-                        Repetida en {stats.wrapped.topTag.count} locales
+                        {t("stats.wrapped_repeated_in", { count: stats.wrapped.topTag.count })}
                       </div>
                     </div>
                   )}
@@ -596,7 +596,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                       <div className="min-w-0">
                         <div className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
                           <span className="material-symbols-outlined text-xs leading-none">emoji_events</span>
-                          <span>Tu favorito del año</span>
+                          <span>{t("stats.wrapped_year_favorite")}</span>
                         </div>
                         <div className="font-black text-sm mt-0.5 truncate">
                           {stats.wrapped.topRatedPlace.name}

@@ -153,12 +153,12 @@ export function RandomPickerModal({
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200">
               <span className="material-symbols-outlined text-xs text-orange-600">location_on</span>
-              <span>{eligiblePlaces.length} locales disponibles</span>
+              <span>{t("random.available_places", { count: eligiblePlaces.length })}</span>
             </span>
             {excludeVisited && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100/90 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
                 <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
-                <span>Solo &quot;Por descubrir&quot;</span>
+                <span>{t("random.only_unexplored")}</span>
               </span>
             )}
           </div>
@@ -269,7 +269,7 @@ export function RandomPickerModal({
                   </div>
                   <div className="min-w-0">
                     <div className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-                      Notas y recomendaciones
+                      {t("random.notes_heading")}
                     </div>
                     <p className="text-xs text-slate-700 dark:text-slate-300 mt-0.5 leading-relaxed line-clamp-3">
                       <LinkifiedText text={selectedPlace.notes} />
