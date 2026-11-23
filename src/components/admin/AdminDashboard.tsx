@@ -352,6 +352,9 @@ export function AdminDashboard({
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 Gastro<span className="text-[#ea580c]">Map</span>
               </span>
+              <span className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                v{APP_VERSION}
+              </span>
             </div>
             <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
               <Link href="/docs" className="hover:text-orange-600 transition">{t("nav.documentation")}</Link>

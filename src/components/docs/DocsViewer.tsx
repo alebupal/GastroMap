@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { APP_VERSION } from "@/lib/version";
 
 type DocTab = "docs" | "changelog" | "readme";
 
@@ -175,9 +176,8 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
         elements.push(
           <div
             key={idx}
-            className={`flex items-start gap-2 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 ${
-              isSubitem ? "pl-6 sm:pl-8 text-xs text-slate-500 dark:text-slate-400" : "pl-1 sm:pl-2"
-            }`}
+            className={`flex items-start gap-2 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 ${isSubitem ? "pl-6 sm:pl-8 text-xs text-slate-500 dark:text-slate-400" : "pl-1 sm:pl-2"
+              }`}
           >
             <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-xs mt-0.5">
               ✓
@@ -247,11 +247,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setLang("es")}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
-                  lang === "es"
+                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${lang === "es"
                     ? "bg-orange-600 text-white shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+                  }`}
               >
                 <span>🇪🇸</span>
                 <span className="hidden sm:inline">ES</span>
@@ -259,11 +258,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setLang("en")}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
-                  lang === "en"
+                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${lang === "en"
                     ? "bg-orange-600 text-white shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+                  }`}
               >
                 <span>🇬🇧</span>
                 <span className="hidden sm:inline">EN</span>
@@ -305,11 +303,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("docs")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                  activeTab === "docs"
+                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "docs"
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">book</span>
                 <span>Guía de uso</span>
@@ -318,11 +315,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("changelog")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                  activeTab === "changelog"
+                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "changelog"
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">history</span>
                 <span>Changelog</span>
@@ -331,11 +327,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("readme")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
-                  activeTab === "readme"
+                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "readme"
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">code</span>
                 <span>README</span>
@@ -386,6 +381,9 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             <GastroMapIcon className="w-5 h-5 shrink-0 shadow-xs rounded-[28%]" />
             <span className="font-bold text-slate-900 dark:text-slate-100">
               Gastro<span className="text-[#ea580c]">Map</span>
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              v{APP_VERSION}
             </span>
           </div>
 

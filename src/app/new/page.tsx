@@ -6,6 +6,7 @@ import { getMyGroupsAction } from "@/lib/actions/groups";
 import { NewPlaceForm } from "@/components/places/NewPlaceForm";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
+import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -96,6 +97,9 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
             <GastroMapIcon className="w-5 h-5 shrink-0 shadow-xs rounded-[28%]" />
             <span className="font-bold text-slate-900 dark:text-slate-100">
               Gastro<span className="text-[#ea580c]">Map</span>
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              v{APP_VERSION}
             </span>
           </div>
 
