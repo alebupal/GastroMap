@@ -18,14 +18,24 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         onClick={() => {
           if (theme !== "light") toggleTheme();
         }}
-        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+        className={`group flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer ${
           theme === "light"
             ? "bg-white text-slate-900 shadow-sm"
             : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
         }`}
         title={t("theme.switch_to_light")}
       >
-        <span className="material-symbols-outlined text-sm leading-none text-amber-500">light_mode</span>
+        <span
+          key={theme === "light" ? "sun-on" : "sun-off"}
+          className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${
+            theme === "light"
+              ? "text-amber-500 gm-sun-spin"
+              : "text-amber-500/80 group-hover:rotate-45"
+          }`}
+          style={theme === "light" ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          light_mode
+        </span>
         <span className="hidden sm:inline text-[11px]">{t("theme.light")}</span>
       </button>
       <button
@@ -33,14 +43,24 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         onClick={() => {
           if (theme !== "dark") toggleTheme();
         }}
-        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+        className={`group flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer ${
           theme === "dark"
             ? "bg-slate-900 text-amber-400 shadow-sm"
             : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
         }`}
         title={t("theme.switch_to_dark")}
       >
-        <span className="material-symbols-outlined text-sm leading-none">dark_mode</span>
+        <span
+          key={theme === "dark" ? "moon-on" : "moon-off"}
+          className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${
+            theme === "dark"
+              ? "text-amber-400 gm-moon-swing"
+              : "group-hover:-rotate-12"
+          }`}
+          style={theme === "dark" ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          dark_mode
+        </span>
         <span className="hidden sm:inline text-[11px]">{t("theme.dark")}</span>
       </button>
     </div>

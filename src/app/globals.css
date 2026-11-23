@@ -357,6 +357,38 @@ html:not(.dark) .leaflet-container {
   animation: gm-list-item-in 190ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes gm-sun-spin {
+  0% {
+    transform: rotate(-55deg) scale(0.82);
+  }
+  65% {
+    transform: rotate(10deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes gm-moon-swing {
+  0% {
+    transform: rotate(28deg) scale(0.82);
+  }
+  60% {
+    transform: rotate(-12deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.gm-sun-spin {
+  animation: gm-sun-spin 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.gm-moon-swing {
+  animation: gm-moon-swing 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .gm-shimmer {
   background: linear-gradient(
     90deg,
@@ -390,6 +422,8 @@ html:not(.dark) .leaflet-container {
   .gm-winner-reveal,
   .gm-list-item-in,
   .gm-tab-in,
+  .gm-sun-spin,
+  .gm-moon-swing,
   .gm-shimmer,
   .gm-animate-float,
   .gm-animate-float-delayed,
