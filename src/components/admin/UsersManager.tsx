@@ -13,7 +13,9 @@ import {
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
+import type { Locale } from "@/lib/i18n/config";
 
 interface UsersManagerProps {
   currentUserId?: string;
@@ -472,14 +474,11 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <label className="block text-[11px] font-semibold text-slate-400 mb-1">
                     {t("common.language")}
                   </label>
-                  <select
-                    value={addLocale}
-                    onChange={(e) => setAddLocale(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
-                  >
-                    <option value="es">🇪🇸 Español (es)</option>
-                    <option value="en">🇬🇧 English (en)</option>
-                  </select>
+                  <LanguageSelector
+                    value={(addLocale as Locale) || "es"}
+                    onChange={(next) => setAddLocale(next)}
+                    fullWidth
+                  />
                 </div>
               </div>
 
@@ -851,14 +850,11 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
                   {t("common.language")}
                 </label>
-                <select
-                  value={editLocale}
-                  onChange={(e) => setEditLocale(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
-                >
-                  <option value="es">🇪🇸 Español (es)</option>
-                  <option value="en">🇬🇧 English (en)</option>
-                </select>
+                <LanguageSelector
+                  value={(editLocale as Locale) || "es"}
+                  onChange={(next) => setEditLocale(next)}
+                  fullWidth
+                />
               </div>
 
               <div>
