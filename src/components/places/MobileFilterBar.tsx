@@ -27,6 +27,7 @@ interface MobileFilterBarProps {
   onToggleLocation: () => void;
   onOpenRandom: () => void;
   onOpenAssistant: () => void;
+  onResetFilters: () => void;
 }
 
 export function MobileFilterBar({
@@ -50,6 +51,7 @@ export function MobileFilterBar({
   onToggleLocation,
   onOpenRandom,
   onOpenAssistant,
+  onResetFilters,
 }: MobileFilterBarProps) {
   const { t } = useT();
 
@@ -288,6 +290,19 @@ export function MobileFilterBar({
             </span>
           )}
         </button>
+
+        {activeFiltersCount > 0 && (
+          <button
+            type="button"
+            onClick={onResetFilters}
+            title={t("places.reset_filters")}
+            aria-label={t("places.reset_filters")}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer bg-rose-50 dark:bg-rose-950/50 border border-rose-200/80 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 gm-popover-in"
+          >
+            <span className="material-symbols-outlined text-[15px] leading-none">filter_alt_off</span>
+            <span>{t("places.clear_filter")}</span>
+          </button>
+        )}
 
         <button
           type="button"

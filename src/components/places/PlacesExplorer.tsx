@@ -942,6 +942,7 @@ export function PlacesExplorer({
         onToggleLocation={userLocation ? handleDisableLocation : handleRequestLocation}
         onOpenRandom={() => setIsRandomModalOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
+        onResetFilters={resetAllFilters}
       />
 
       {/* =========================================================================
@@ -1496,6 +1497,19 @@ export function PlacesExplorer({
                 </span>
               )}
             </button>
+
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                title={t("places.reset_filters")}
+                aria-label={t("places.reset_filters")}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full font-bold transition active:scale-95 cursor-pointer bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 dark:hover:bg-rose-950/80 border border-rose-200/80 dark:border-rose-800/60 text-rose-600 dark:text-rose-400 gm-popover-in"
+              >
+                <span className="material-symbols-outlined text-sm leading-none">filter_alt_off</span>
+                <span>{t("places.clear_filter")}</span>
+              </button>
+            )}
           </div>
         </div>
       </section>
