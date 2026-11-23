@@ -334,6 +334,24 @@ export function PlaceCard({
             <span>{commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}</span>
           </button>
 
+          {onToggleCompare && (
+            <button
+              type="button"
+              onClick={onToggleCompare}
+              aria-pressed={isCompared}
+              aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
+              title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
+              className={`inline-flex items-center gap-1 transition cursor-pointer whitespace-nowrap ${
+                isCompared
+                  ? "px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-bold"
+                  : "px-1 py-0.5 hover:text-orange-600"
+              }`}
+            >
+              <span className="material-symbols-outlined text-sm leading-none">compare_arrows</span>
+              <span>{t("cards.compare")}</span>
+            </button>
+          )}
+
           {hasCoords && onSelectOnMap && (
             <button
               onClick={onSelectOnMap}
