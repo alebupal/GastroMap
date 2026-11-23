@@ -265,13 +265,35 @@ export function MobileFilterBar({
         })}
       </div>
 
-      {/* Fila 3: Tira compacta de accesos estrella (Cerca de mí, Al azar y Asistente) */}
+      {/* Fila 3: Tira compacta de accesos estrella (Filtros destacado, Cerca de mí y Al azar) */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
+        <button
+          type="button"
+          onClick={onToggleExtraFilters}
+          aria-expanded={showExtraFilters}
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-extrabold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer border ${
+            showExtraFilters || activeFiltersCount > 0
+              ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/25"
+              : "bg-orange-50 dark:bg-orange-950/50 border-orange-200/90 dark:border-orange-800/70 text-orange-700 dark:text-orange-300"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[15px] leading-none">tune</span>
+          <span>{t("places.more_filters").replace(/^\+\s*/, "")}</span>
+          {activeFiltersCount > 0 && (
+            <span
+              key={activeFiltersCount}
+              className="min-w-[16px] h-[16px] px-1 rounded-full bg-white text-orange-700 text-[10px] font-black inline-flex items-center justify-center leading-none gm-pop"
+            >
+              {activeFiltersCount}
+            </span>
+          )}
+        </button>
+
         <button
           type="button"
           onClick={onToggleLocation}
           disabled={isLocating}
-          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer border ${
+          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer border ${
             userLocation
               ? "bg-blue-600 border-blue-600 text-white shadow-xs"
               : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-orange-600 dark:text-orange-400"
@@ -287,23 +309,12 @@ export function MobileFilterBar({
           type="button"
           onClick={onOpenRandom}
           disabled={filteredPlacesCount === 0}
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer disabled:opacity-40"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer disabled:opacity-40"
         >
           <span className="material-symbols-outlined text-[15px] leading-none text-amber-500">
             casino
           </span>
           <span>{t("places.roulette")}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenAssistant}
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
-            assistant
-          </span>
-          <span>{t("places.assistant")}</span>
         </button>
       </div>
     </section>

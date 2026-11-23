@@ -31,6 +31,11 @@ interface DecisionAssistantModalProps {
   towns?: MultiSelectOption[];
   selectedTowns?: string[];
   onSelectTowns?: (towns: string[]) => void;
+  minRating?: number | null;
+  onSelectMinRating?: (rating: number | null) => void;
+  groups?: Array<{ id: string; name: string }>;
+  selectedGroupIds?: string[];
+  onToggleGroup?: (groupId: string) => void;
   matchingCount?: number;
   onReset: () => void;
 }
@@ -61,6 +66,11 @@ export function DecisionAssistantModal({
   towns = [],
   selectedTowns = [],
   onSelectTowns,
+  minRating = null,
+  onSelectMinRating,
+  groups = [],
+  selectedGroupIds = [],
+  onToggleGroup,
   matchingCount,
   onReset,
 }: DecisionAssistantModalProps) {
@@ -454,6 +464,70 @@ export function DecisionAssistantModal({
               </button>
             </div>
           </div>
+
+          {/* 6. Nota mínima */}
+          {onSelectMinRating && (
+            <div>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-2">
+                <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
+                <span>{t("places.min_rating_label")}</span>
+              </label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { val: null as number | null, label: t("places.min_rating_any") },
+                  { val: 7, label: "★ 7+" },
+                  { val: 8, label: "★ 8+" },
+                  { val: 9, label: "★ 9+" },
+                ].map((opt) => {
+                  const active = minRating === opt.val;
+                  return (
+                    <button
+                      key={String(opt.val)}
+                      type="button"
+                      onClick={() => onSelectMinRating(opt.val)}
+                      className={`py-2 px-2 rounded-full text-xs font-bold transition active:scale-95 cursor-pointer border ${
+                        active
+                          ? "bg-amber-500 border-amber-500 text-white shadow-xs"
+                          : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* 7. Grupos privados (solo si el usuario pertenece a grupos) */}
+          {groups.length > 0 && onToggleGroup && (
+            <div>
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-2">
+                <span className="material-symbols-outlined text-sm text-orange-600 leading-none">group</span>
+                <span>{t("places.groups_filter")}</span>
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {groups.map((g) => {
+                  const active = selectedGroupIds.includes(g.id);
+                  return (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => onToggleGroup(g.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition active:scale-95 cursor-pointer border ${
+                        active
+                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                          : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm leading-none">group</span>
+                      <span>{g.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Pie del modal */}

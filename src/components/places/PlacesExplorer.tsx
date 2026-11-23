@@ -919,8 +919,8 @@ export function PlacesExplorer({
       <MobileFilterBar
         textSearch={textSearch}
         onTextSearchChange={setTextSearch}
-        showExtraFilters={showExtraFilters}
-        onToggleExtraFilters={() => setShowExtraFilters((prev) => !prev)}
+        showExtraFilters={isAssistantOpen}
+        onToggleExtraFilters={() => setIsAssistantOpen((prev) => !prev)}
         activeFiltersCount={activeFiltersCount}
         activeMobileView={activeMobileView}
         onToggleMobileView={() =>
@@ -1520,9 +1520,9 @@ export function PlacesExplorer({
         </div>
       </section>
 
-      {/* Panel desplegable de Filtros Avanzados (en móvil con cabecera, secciones claras y pie de confirmación) */}
+      {/* Panel desplegable de Filtros Avanzados (en escritorio; en móvil se usa el modal unificado) */}
       {showExtraFilters && (
-        <div className="space-y-3.5 rounded-3xl lg:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-md lg:shadow-xs gm-panel-reveal">
+        <div className="hidden lg:block space-y-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-xs gm-panel-reveal">
           {/* Cabecera del panel de filtros en móvil */}
           <div className="lg:hidden flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
@@ -2630,6 +2630,15 @@ export function PlacesExplorer({
         towns={townOptions}
         selectedTowns={selectedTowns}
         onSelectTowns={(vals) => setSelectedTowns(vals)}
+        minRating={minRating}
+        onSelectMinRating={(val) => setMinRating(val)}
+        groups={myGroups}
+        selectedGroupIds={selectedGroupFilterIds}
+        onToggleGroup={(gid) =>
+          setSelectedGroupFilterIds((prev) =>
+            prev.includes(gid) ? prev.filter((id) => id !== gid) : [...prev, gid]
+          )
+        }
         matchingCount={filteredPlaces.length}
         onReset={resetAllFilters}
       />
