@@ -371,9 +371,12 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             <button
               type="button"
               onClick={() => setIsAddUserOpen(!isAddUserOpen)}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 text-xs font-bold transition cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer shrink-0 shadow-xs"
             >
-              <span>{isAddUserOpen ? "✕" : `➕ ${t("admin_users.add_user")}`}</span>
+              <span className="material-symbols-outlined text-sm leading-none">
+                {isAddUserOpen ? "close" : "person_add"}
+              </span>
+              <span>{isAddUserOpen ? t("common.cancel") : t("admin_users.add_user")}</span>
             </button>
           </div>
 
@@ -531,7 +534,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   disabled={deletingMultiple}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition cursor-pointer shadow-sm disabled:opacity-50"
                 >
-                  <span>🗑️</span>
+                  <span className="material-symbols-outlined text-sm leading-none">delete</span>
                   <span>
                     {deletingMultiple
                       ? t("common.loading")
@@ -627,24 +630,28 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         type="button"
                         onClick={() => handleToggleStatus(u)}
                         disabled={isMe}
-                        className={`px-2 py-1 rounded-lg border text-[11px] font-semibold transition ${isMe
+                        className={`p-1.5 rounded-lg border text-[11px] font-semibold transition inline-flex items-center justify-center ${isMe
                           ? "opacity-30 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
                           : u.status === "disabled"
                             ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 cursor-pointer"
                             : "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-100 cursor-pointer"
                           }`}
                         title={t("admin_users.btn_toggle_status")}
+                        aria-label={t("admin_users.btn_toggle_status")}
                       >
-                        {u.status === "disabled" ? "▶️" : "⏸️"}
+                        <span className="material-symbols-outlined text-[15px] leading-none">
+                          {u.status === "disabled" ? "play_arrow" : "pause"}
+                        </span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleStartEdit(u)}
-                        className="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-semibold text-amber-700 dark:text-amber-300 transition cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/60"
+                        className="p-1.5 rounded-lg bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-600 inline-flex items-center justify-center"
                         title={t("admin_users.edit_tooltip")}
+                        aria-label={t("admin_users.edit_tooltip")}
                       >
-                        ✏️
+                        <span className="material-symbols-outlined text-[15px] leading-none">edit</span>
                       </button>
 
                       <button
@@ -653,23 +660,25 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           setPasswordUserId(u.id);
                           setNewPassword("");
                         }}
-                        className="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] font-semibold text-blue-700 dark:text-blue-300 transition cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60"
+                        className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 transition cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/60 inline-flex items-center justify-center"
                         title={t("admin_users.reset_password_btn_title")}
+                        aria-label={t("admin_users.reset_password_btn_title")}
                       >
-                        🔑
+                        <span className="material-symbols-outlined text-[15px] leading-none">key</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => handleDeleteUser(u)}
                         disabled={isMe}
-                        className={`px-2 py-1 rounded-lg text-xs transition ${isMe
-                          ? "opacity-30 cursor-not-allowed text-slate-600"
-                          : "text-slate-400 hover:text-red-500 cursor-pointer"
+                        className={`p-1.5 rounded-lg transition inline-flex items-center justify-center ${isMe
+                          ? "opacity-30 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400"
+                          : "bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 hover:bg-red-200 cursor-pointer"
                           }`}
                         title={isMe ? t("admin_users.cannot_delete_self") : t("admin_users.delete_user_btn")}
+                        aria-label={isMe ? t("admin_users.cannot_delete_self") : t("admin_users.delete_user_btn")}
                       >
-                        🗑️
+                        <span className="material-symbols-outlined text-[15px] leading-none">delete</span>
                       </button>
                     </div>
                   </div>
@@ -739,8 +748,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left space-y-4"
           >
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">✏️</span>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-xl leading-none">manage_accounts</span>
+                </div>
                 <div>
                   <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
                     {t("admin_users.edit_title")}

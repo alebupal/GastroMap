@@ -304,7 +304,11 @@ export function PlacesTableManager({
               allOption={{
                 value: "all",
                 label: `${t("places.all_countries")} (${allCountries.length})`,
-                icon: "🌍",
+                icon: (
+                  <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                    public
+                  </span>
+                ),
               }}
               searchPlaceholder={t("location.country_placeholder")}
               className="shrink-0"
@@ -323,7 +327,11 @@ export function PlacesTableManager({
               allOption={{
                 value: "all",
                 label: `${t("places.all_cities")} (${availableCities.length})`,
-                icon: "🏙️",
+                icon: (
+                  <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                    location_city
+                  </span>
+                ),
               }}
               searchPlaceholder={t("location.city_placeholder")}
               className="shrink-0"
@@ -342,7 +350,7 @@ export function PlacesTableManager({
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer shadow-md shadow-orange-600/20"
                 title={t("admin_places.bulk_backup_title")}
               >
-                <span>💾</span>
+                <span className="material-symbols-outlined text-sm leading-none">download</span>
                 <span>{t("admin_places.bulk_backup", { count: selectedIds.size })}</span>
               </button>
 
@@ -352,7 +360,7 @@ export function PlacesTableManager({
                 disabled={loading}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition cursor-pointer disabled:opacity-50 shadow-md shadow-red-600/20"
               >
-                <span>🗑️</span>
+                <span className="material-symbols-outlined text-sm leading-none">delete</span>
                 <span>{t("admin_places.delete_selected")} ({selectedIds.size})</span>
               </button>
             </>
@@ -478,9 +486,10 @@ export function PlacesTableManager({
                       type="button"
                       onClick={() => setEditingPlace(place)}
                       disabled={loading}
-                      className="text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-orange-600 text-xs font-semibold cursor-pointer"
                     >
-                      ✏️ Editar
+                      <span className="material-symbols-outlined text-sm leading-none">edit</span>
+                      <span>{t("common.edit")}</span>
                     </button>
                     <button
                       type="button"
@@ -490,17 +499,19 @@ export function PlacesTableManager({
                         setMergeSearch("");
                       }}
                       disabled={loading || placesList.length < 2}
-                      className="text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-600 text-xs font-semibold cursor-pointer"
                     >
-                      🔀 Fusionar
+                      <span className="material-symbols-outlined text-sm leading-none">merge</span>
+                      <span>{t("admin_places.merge_btn")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteSingle(place)}
                       disabled={loading}
-                      className="text-slate-500 hover:text-red-500 text-xs font-semibold cursor-pointer"
+                      aria-label={t("admin_places.delete_title")}
+                      className="inline-flex items-center text-slate-500 hover:text-red-500 text-xs font-semibold cursor-pointer"
                     >
-                      🗑️
+                      <span className="material-symbols-outlined text-base leading-none">delete</span>
                     </button>
                   </div>
                 </div>
@@ -623,10 +634,11 @@ export function PlacesTableManager({
                             type="button"
                             onClick={() => setEditingPlace(place)}
                             disabled={loading}
-                            className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="p-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-orange-600 transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.edit_title")}
+                            aria-label={t("admin_places.edit_title")}
                           >
-                            ✏️
+                            <span className="material-symbols-outlined text-[15px] leading-none">edit</span>
                           </button>
                           <button
                             type="button"
@@ -636,19 +648,21 @@ export function PlacesTableManager({
                               setMergeSearch("");
                             }}
                             disabled={loading || placesList.length < 2}
-                            className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="p-1 rounded-lg bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.merge_title")}
+                            aria-label={t("admin_places.merge_title")}
                           >
-                            🔀
+                            <span className="material-symbols-outlined text-[15px] leading-none">merge</span>
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteSingle(place)}
                             disabled={loading}
-                            className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="p-1 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 hover:bg-red-200 transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.delete_title")}
+                            aria-label={t("admin_places.delete_title")}
                           >
-                            🗑️
+                            <span className="material-symbols-outlined text-[15px] leading-none">delete</span>
                           </button>
                         </div>
                       </td>
