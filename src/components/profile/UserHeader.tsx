@@ -112,7 +112,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
       )}
 
       <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-3 sm:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
-        {/* Brand / Logo + Pill Explorar Mapa */}
+        {/* Brand / Logo */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center group shrink-0">
             <GastroMapLogo
@@ -120,9 +120,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
               textClassName="text-lg sm:text-xl"
             />
           </Link>
-          <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-orange-600 text-white font-bold text-xs shadow-xs">
-            Explorar Mapa
-          </span>
         </div>
 
         {/* User profile pill & controls */}
@@ -138,10 +135,10 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             href="https://www.paypal.me/alebupal"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-orange-600 hover:text-white font-semibold text-xs transition shadow-xs"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold text-xs transition shadow-xs group"
             title={t("nav.donate_paypal")}
           >
-            <span className="material-symbols-outlined text-sm text-rose-500">favorite</span>
+            <span className="material-symbols-outlined text-sm text-rose-500 group-hover:text-white transition-colors">favorite</span>
             <span>{t("nav.donate")}</span>
           </a>
 
