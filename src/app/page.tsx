@@ -72,8 +72,6 @@ export default async function Home() {
             <span className="font-bold text-slate-900 dark:text-slate-100">
               Gastro<span className="text-[#ea580c]">Map</span>
             </span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>
           </div>
 
           <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">

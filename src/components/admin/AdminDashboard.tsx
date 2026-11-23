@@ -352,8 +352,6 @@ export function AdminDashboard({
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 Gastro<span className="text-[#ea580c]">Map</span>
               </span>
-              <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>
             </div>
             <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
               <Link href="/docs" className="hover:text-orange-600 transition">{t("nav.documentation")}</Link>
