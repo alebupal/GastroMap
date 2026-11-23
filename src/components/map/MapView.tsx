@@ -10,6 +10,7 @@ import {
   type PinPersonalBadge,
 } from "@/lib/map-icons";
 import { linkifyHtml } from "@/components/ui/LinkifiedText";
+import { useT } from "@/lib/i18n/client";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 
 function getPersonalBadge(place: PlaceWithDetails): PinPersonalBadge {
@@ -104,6 +105,7 @@ export default function MapView({
   cartoApiKey,
   isFiltered = false,
 }: MapViewProps) {
+  const { t } = useT();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
@@ -124,6 +126,7 @@ export default function MapView({
       : SPAIN_CENTER;
     const initialZoom = userLocation ? 14 : SPAIN_DEFAULT_ZOOM;
 
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
       zoom: initialZoom,
@@ -131,6 +134,8 @@ export default function MapView({
       worldCopyJump: true,
       zoomControl: true,
       attributionControl: false,
+      dragging: !isMobileViewport,
+      touchZoom: !isMobileViewport,
     });
 
     // Capa de tiles: si el usuario ha configurado Carto API Key usa Voyager, si no OpenStreetMap oficial sin marcas de agua
@@ -487,7 +492,7 @@ export default function MapView({
     };
   }, [selectedPlaceId, places]);
 
-  const [mapUnlocked, setMapUnlocked] = useState(true);
+  const [mapUnlocked, setMapUnlocked] = useState(false);
 
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
@@ -539,7 +544,7 @@ export default function MapView({
               : "bg-amber-500 text-slate-950 border-amber-400"
           }`}
         >
-          <span>{mapUnlocked ? "🖐️ Mover mapa" : "📜 Deslizar lista"}</span>
+          <span>{mapUnlocked ? t("places.unlock_map") : t("places.lock_map")}</span>
         </button>
       </div>
     </div>
