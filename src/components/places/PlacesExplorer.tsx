@@ -1589,16 +1589,19 @@ export function PlacesExplorer({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {occasionsList.length > 4 && (
               <button
                 type="button"
                 onClick={() => setIsOccasionSearchOpen(!isOccasionSearchOpen)}
-                className={`font-semibold transition cursor-pointer flex items-center gap-1 ${isOccasionSearchOpen || occasionSearchQuery ? "text-amber-400" : "text-slate-400 hover:text-slate-200"
-                  }`}
+                className={`font-semibold transition cursor-pointer inline-flex items-center gap-1 ${
+                  isOccasionSearchOpen || occasionSearchQuery
+                    ? "text-orange-600 dark:text-orange-400"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                }`}
                 title={t("places.search_categories_title")}
               >
-                <span>🔍</span>
+                <span className="material-symbols-outlined text-[15px] leading-none">search</span>
                 <span className="hidden sm:inline">{t("places.search_categories_btn")}</span>
               </button>
             )}
@@ -1607,9 +1610,17 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
-                className="font-semibold text-amber-400 hover:text-amber-300 transition cursor-pointer flex items-center gap-1"
+                className="font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition cursor-pointer inline-flex items-center gap-1"
               >
-                <span>{isOccasionsWrapped ? t("places.row_mode") : t("places.grid_mode")}</span>
+                <span className="material-symbols-outlined text-[15px] leading-none">
+                  {isOccasionsWrapped ? "view_carousel" : "grid_view"}
+                </span>
+                <span>
+                  {(isOccasionsWrapped ? t("places.row_mode") : t("places.grid_mode")).replace(
+                    /^[↔⊞]\s*/,
+                    ""
+                  )}
+                </span>
               </button>
             )}
           </div>
@@ -1618,13 +1629,15 @@ export function PlacesExplorer({
         {/* Buscador de categorías si está abierto */}
         {isOccasionSearchOpen && (
           <div className="relative animate-in fade-in duration-150">
-            <span className="absolute left-3 top-2 text-xs text-slate-400 dark:text-slate-500">🔍</span>
+            <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+              search
+            </span>
             <input
               type="text"
               value={occasionSearchQuery}
               onChange={(e) => setOccasionSearchQuery(e.target.value)}
               placeholder={t("places.search_occasions_placeholder")}
-              className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
+              className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
             />
             {occasionSearchQuery && (
               <button
@@ -1780,9 +1793,17 @@ export function PlacesExplorer({
               <button
                 type="button"
                 onClick={() => setIsTagsExpanded(!isTagsExpanded)}
-                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer flex items-center gap-1"
+                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer inline-flex items-center gap-1"
               >
-                <span>{isTagsExpanded ? t("places.hide_search") : t("places.search_show_more")}</span>
+                <span className="material-symbols-outlined text-[15px] leading-none">
+                  {isTagsExpanded ? "expand_less" : "search"}
+                </span>
+                <span>
+                  {(isTagsExpanded
+                    ? t("places.hide_search")
+                    : t("places.search_show_more")
+                  ).replace(/^[🔍▲]\s*/, "")}
+                </span>
               </button>
             </div>
           </div>
@@ -1790,13 +1811,15 @@ export function PlacesExplorer({
           {isTagsExpanded ? (
             <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-150">
               <div className="relative">
-                <span className="absolute left-3 top-2 text-xs text-slate-400 dark:text-slate-500">🔍</span>
+                <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                  search
+                </span>
                 <input
                   type="text"
                   value={tagSearchQuery}
                   onChange={(e) => setTagSearchQuery(e.target.value)}
                   placeholder={t("places.search_tags_placeholder")}
-                  className="w-full pl-8 pr-8 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
+                  className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
                 />
                 {tagSearchQuery && (
                   <button
