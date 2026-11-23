@@ -23,7 +23,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * **Filtros por experiencia segmentados (Fila 1) y Enlaces Compartibles**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), sincronización automática de filtros en la URL con botón **«Compartir vista»**, chip de filtro activo (`✕`) y botón `💾 Guardar`.
   * **Segmentación en dos niveles (Fila 2)**: Selectores desplegables de ciudades, países (+195), rangos de precio explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`) y categorías destacadas con botón `🎛️ + Filtros`.
   * **Tarjetas de locales estilo Stitch**: Avatar con iniciales en degradado terracota/ámbar, dirección con pin, badge de precio esmeralda, botón favorito (`favorite`), botones de colección (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`) y pie completo con autor y acciones.
-  * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa (`Granada Centro: X locales`) e indicador de sincronización local `Cache First` con coordenadas en tiempo real.
+  * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa e indicador de sincronización local `Cache First`, con modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll cómodamente sin quedar atrapado en el mapa.
 
 * **🗺️ Mapa interactivo Leaflet:**
   * Teselas ligeras de OpenStreetMap / CartoDB (sin coste ni cuotas de Google Maps API).
@@ -46,7 +46,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **🌐 Sistema Multi-idioma (i18n):**
   * Soporte completo para múltiples idiomas (Español 🇪🇸 / English 🇬🇧) con arquitectura extensible por JSON y CSV.
-  * Selector integrado en la cabecera persistente y scripts CLI para sincronizar con hojas de cálculo (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
+  * Desplegable de idioma personalizado y escalable (con buscador automático a partir de 6 idiomas) integrado en cabecera, perfil y panel admin, además de scripts CLI (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
   * Rediseño visual de alta gama con tipografía **Plus Jakarta Sans**, selector dual segmentado de tema, franja de estado PWA y tarjetas con avatares de iniciales gastronómicas.

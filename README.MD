@@ -25,7 +25,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * **Segmented experience filters (Row 1) & Shareable Views**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), live URL query param sync with a **«Share view»** button, active filter chip (`✕`), and `💾 Save` button.
   * **Two-tier segmentation (Row 2)**: Searchable dropdowns for cities, countries (+195), explicit price range chips (`<15€`, `15-30€`, `30-50€`, `>50€`), and featured tags with `🎛️ + Filters`.
   * **Stitch-styled place cards**: Initials avatar in terracotta/amber gradient, address with pin, emerald price badge, favorite button (`favorite`), collection buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`), and author footer with actions.
-  * **Modern pagination & synced map**: Circular pill buttons, live map floating count (`Granada Centro: X locales`), and `Cache First` local sync status bar with real-time coordinates.
+  * **Modern pagination & synced map**: Circular pill buttons, live map floating count, and `Cache First` local sync status bar, defaulting to **«Scroll list»** mode on mobile for effortless scrolling without getting trapped inside the map.
 
 * **🗺️ Interactive Leaflet Map:**
   * Free, lightweight OpenStreetMap / CartoDB tiles (zero Google Maps API billing or quotas).
@@ -48,7 +48,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **🌐 Multi-language System (i18n):**
   * Full support for multiple languages (Spanish 🇪🇸 / English 🇬🇧) powered by JSON dictionaries and CSV sync architecture.
-  * Header language selector persisted via cookies, plus CLI synchronization scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
+  * Custom scalable language dropdown (with built-in search for 6+ languages) across header, profile, and admin panels, plus CLI sync scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Mobile Experience (PWA), Full Offline Cache & Dark/Light Mode:**
   * High-end visual redesign featuring **Plus Jakarta Sans** typography, segmented dual theme switcher, PWA status strip, and place cards with culinary initials avatars.

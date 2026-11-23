@@ -114,9 +114,9 @@ Al acceder por primera vez a una instancia limpia:
   - Botones horizontales de colección rápida (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`).
   - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Ver en mapa`, `Google Maps ↗`, `Editar`, `Eliminar`).
 - **Mapa Interactivo con Sincronización Local**:
-  - Insignia flotante superior derecha con recuento local en tiempo real (`Granada Centro: X locales`).
-  - Barra de estado inferior con indicador `Cache First` de base de datos sincronizada localmente y coordenadas latitud/longitud en vivo.
-  - Ventanas emergentes (popups) de mapa con diseño y estilo unificados con las tarjetas.
+  - Insignia flotante superior derecha con recuento local en tiempo real.
+  - Barra de estado inferior con indicador `Cache First` de base de datos sincronizada localmente y modo **«Deslizar lista»** activado por defecto en móvil.
+  - Ventanas emergentes (popups) de mapa traducidas y con diseño unificado con las tarjetas.
 - **Paginación Moderna**: Botones de paginación circulares tipo píldora (`< Anterior`, `1`, `2`, `...`, `Siguiente >`) con selector de tamaño y ordenación.
 
 ### 📱 Experiencia Móvil Optimizada (Diseño Stitch)
@@ -128,7 +128,7 @@ Al acceder por primera vez a una instancia limpia:
 
 ### 🎲 Asistente de Decisión y Elección al Azar
 - **🎲 Al azar (Selector Aleatorio)**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos, con opciones para ver en el mapa, abrir en Google Maps o navegar directamente al establecimiento seleccionado en el listado de resultados (`Ver en el listado`).
-- **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, distancia máxima y estado de visita.
+- **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, país, ciudad, distancia máxima y estado de visita.
 
 ### 💬 Comentarios Colaborativos y Ficha Enriquecida
 - **Editor WYSIWYG**: Editor de texto enriquecido con formato de negrita, cursiva, viñetas, citas destacadas y recomendaciones de platos.

@@ -114,9 +114,9 @@ When launching on a clean database:
   - Horizontal collection action buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`).
   - Card footer with author badge and complete actions (`Comments`, `View on map`, `Google Maps ↗`, `Edit`, `Delete`).
 - **Interactive Map with Local Synchronization**:
-  - Floating top-right badge displaying live count (`Granada Centro: X locales`).
-  - Bottom local database sync bar (`Cache First`) with real-time latitude and longitude coordinates.
-  - Customized card popups matching the place card aesthetic.
+  - Floating top-right badge displaying live count.
+  - Bottom local database sync bar (`Cache First`) and default **«Scroll list»** mode on mobile for smooth scrolling.
+  - Fully localized map popups matching the place card aesthetic.
 - **Modern Pagination**: Circular pill buttons (`< Previous`, `1`, `2`, `...`, `Next >`) with page size and sorting selectors.
 
 ### 📱 Optimized Mobile Experience (Stitch Design)
@@ -128,7 +128,7 @@ When launching on a clean database:
 
 ### 🎲 Decision Assistant & Random Pick
 - **🎲 Random Pick (Random Selector)**: Automatically picks a restaurant among currently filtered results when friends cannot agree, with options to view on the interactive map, open in Google Maps, or jump directly to its place card in the catalog list (`View in list`).
-- **Decision Wizard**: Step-by-step guidance defining budget, mood, distance radius, and visit state.
+- **Decision Wizard**: Step-by-step guidance defining budget, mood, country, city, distance radius, and visit state.
 
 ### 💬 Collaborative Comments & Detail Modals
 - **WYSIWYG Rich Editor**: Support for bold, italics, lists, blockquotes, and dish highlights.
