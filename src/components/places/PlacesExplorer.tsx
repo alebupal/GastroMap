@@ -452,14 +452,14 @@ export function PlacesExplorer({
   const { allCountries, availableCities } = useMemo(() => {
     const cSet = new Set<string>();
     initialPlaces.forEach((p) => {
-      const parsed = parseCityCountry(p.city);
+      const parsed = parseCityCountry(p.city, p.address);
       if (parsed.country) cSet.add(parsed.country);
     });
     const countries = Array.from(cSet).sort((a, b) => a.localeCompare(b));
 
     const citySet = new Set<string>();
     initialPlaces.forEach((p) => {
-      const parsed = parseCityCountry(p.city);
+      const parsed = parseCityCountry(p.city, p.address);
       if (selectedCountry === "all" || parsed.country === selectedCountry) {
         if (parsed.city) citySet.add(parsed.city);
       }
@@ -599,12 +599,16 @@ export function PlacesExplorer({
 
     // 7. Filtro por País
     if (selectedCountry !== "all") {
-      result = result.filter((p) => parseCityCountry(p.city).country === selectedCountry);
+      result = result.filter(
+        (p) => parseCityCountry(p.city, p.address).country === selectedCountry
+      );
     }
 
     // 8. Filtro por Ciudad
     if (selectedCity !== "all") {
-      result = result.filter((p) => parseCityCountry(p.city).city === selectedCity);
+      result = result.filter(
+        (p) => parseCityCountry(p.city, p.address).city === selectedCity
+      );
     }
 
     // Ordenación configurable por el usuario
