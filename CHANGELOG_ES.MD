@@ -8,6 +8,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Stitch de la Ventana Comparativa de Sitios**:
+  - Cabecera con logotipo oficial, contador de locales (máx. 3) y botón `Limpiar comparativa`.
+  - Tarjetas comparadas con avatares de iniciales, cajas de distancia/ciudad y rango de precio, píldoras de estado/ocasiones, nube de especialidades y bloque de notas/comentarios.
+  - Nuevo bloque dinámico **Veredicto Rápido de GastroMap** (más destacado, opción más económica y más cercano/por descubrir) y botón `Iniciar ruta gastronómica` con ruta multi-parada directa en Google Maps.
 - **Rediseño Stitch del Selector Al Azar («Modo Indecisión»)**:
   - Nuevo modal con insignia `🎲 Modo Indecisión`, bloque *Universo de decisión* con acceso rápido a modificar filtros, tarjeta *Destino Recomendado* con avatar de iniciales naranja, notas destacadas y 3 botones de acción (`Ver en el mapa`, `Ver en listado`, `Maps`).
   - Interruptor interactivo en el pie para **excluir sitios ya visitados** (`Solo "Por descubrir"`) con recálculo instantáneo.

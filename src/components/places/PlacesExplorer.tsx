@@ -1887,6 +1887,10 @@ export function PlacesExplorer({
         occasionMap={occasionMap}
         onRemovePlace={(id) => toggleComparePlace(id)}
         onSelectOnMap={handleSelectOnMap}
+        onClearAll={() => {
+          setCompareIds([]);
+          setIsCompareOpen(false);
+        }}
       />
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}

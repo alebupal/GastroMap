@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Stitch Redesign of Place Comparison Modal**:
+  - Header featuring the official logo, selected places counter (max 3), and `Clear comparison` button.
+  - Side-by-side cards with initials avatars, distance/city & price metric boxes, status/occasion pills, specialty tags, and notes/comments box.
+  - Dynamic **GastroMap Quick Verdict** summary (top activity, most budget-friendly, and closest/untried) plus `Start food tour` multi-stop Google Maps route button.
 - **Stitch Redesign of Random Picker Modal («Indecision Mode»)**:
   - Revamped modal with `🎲 Indecision Mode` badge, *Decision Universe* chips, *Recommended Destination* card featuring orange initials avatar, highlighted notes, and 3 quick action pills (`View on map`, `View in list`, `Maps`).
   - Interactive bottom switch to **exclude already visited places** (`"To discover" only`) with instant re-spin.
