@@ -2404,6 +2404,15 @@ export function PlacesExplorer({
         }}
         radiusKm={radiusKm || 10}
         onChangeRadius={(km) => setRadiusKm(km)}
+        countries={countryOptions.map((c) => ({ value: c.value, label: c.label }))}
+        selectedCountry={selectedCountry}
+        onSelectCountry={(country) => {
+          setSelectedCountry(country);
+          setSelectedCity("all");
+        }}
+        cities={availableCities}
+        selectedCity={selectedCity}
+        onSelectCity={(city) => setSelectedCity(city)}
         matchingCount={filteredPlaces.length}
         onReset={resetAllFilters}
       />
