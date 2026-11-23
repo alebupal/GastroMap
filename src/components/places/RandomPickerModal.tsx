@@ -224,10 +224,40 @@ export function RandomPickerModal({
                         {occ}
                       </span>
                     ))}
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                      <span className="material-symbols-outlined text-[11px] leading-none">verified</span>
-                      <span>Recomendado por tu red</span>
-                    </span>
+                    {selectedPlace.isFavorite ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                        <span>⭐</span>
+                        <span>En tus favoritos</span>
+                      </span>
+                    ) : selectedPlace.personalStatus === "visited" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                        <span>✅</span>
+                        <span>Ya lo has probado</span>
+                      </span>
+                    ) : selectedPlace.personalStatus === "pending" ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                        <span>🕒</span>
+                        <span>En tu lista de deseos</span>
+                      </span>
+                    ) : !selectedPlace.communityPublished ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
+                        <span>🔒</span>
+                        <span>Ficha privada</span>
+                      </span>
+                    ) : (selectedPlace.commentsCount || 0) > 0 ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                        <span>💬</span>
+                        <span>
+                          {selectedPlace.commentsCount}{" "}
+                          {selectedPlace.commentsCount === 1 ? "reseña en tu red" : "reseñas en tu red"}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
+                        <span>✨</span>
+                        <span>Por descubrir</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
