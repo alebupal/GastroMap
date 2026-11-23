@@ -339,11 +339,11 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="inline-flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer px-1 py-0.5 whitespace-nowrap"
+              className="group inline-flex items-center gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-bold cursor-pointer px-1 py-0.5 whitespace-nowrap transition"
               title="Centrar en mapa"
             >
-              <span className="material-symbols-outlined text-sm leading-none">explore</span>
-              <span>{t("places.view_map")}</span>
+              <span className="material-symbols-outlined text-sm leading-none no-underline">explore</span>
+              <span className="group-hover:underline underline-offset-2">{t("places.view_map")}</span>
             </button>
           )}
 
