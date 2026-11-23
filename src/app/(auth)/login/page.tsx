@@ -3,6 +3,7 @@ import { countUsers, getCurrentUser } from "@/lib/auth";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
 
@@ -33,9 +34,10 @@ export default async function LoginPage() {
         className="pointer-events-none absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-amber-400/20 dark:bg-amber-600/10 blur-3xl"
       />
 
-      {/* Selector de tema flotante arriba a la derecha */}
-      <div className="fixed top-4 right-4 z-20">
+      {/* Selector de tema e idioma flotante arriba a la derecha */}
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <LanguageSelector />
       </div>
 
       {/* Tarjeta principal dividida (Split-Screen en escritorio) */}

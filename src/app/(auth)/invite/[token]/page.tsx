@@ -5,6 +5,7 @@ import { invitations } from "@/db/schema";
 import { RegisterInviteForm } from "@/components/auth/RegisterInviteForm";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -32,8 +33,9 @@ export default async function InvitePage({ params }: InvitePageProps) {
   if (!invitation) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-[#faf8ff] dark:bg-[#0b1120] text-center transition-colors duration-200">
-        <div className="fixed top-4 right-4 z-20">
+        <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
           <ThemeToggle />
+          <LanguageSelector />
         </div>
         <div className="gm-animate-fade-up w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8">
           <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center">
@@ -59,8 +61,9 @@ export default async function InvitePage({ params }: InvitePageProps) {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-[#faf8ff] dark:bg-[#0b1120] transition-colors duration-200">
-      <div className="fixed top-4 right-4 z-20">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <LanguageSelector />
       </div>
       <div className="gm-animate-fade-up w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8">
         <div className="text-center mb-6 space-y-3">

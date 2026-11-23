@@ -3,6 +3,7 @@ import { countUsers } from "@/lib/auth";
 import { SetupAdminForm } from "@/components/auth/SetupAdminForm";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -16,8 +17,9 @@ export default async function SetupPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-[#faf8ff] dark:bg-[#0b1120] relative overflow-hidden transition-colors duration-200">
-      <div className="fixed top-4 right-4 z-20">
+      <div className="fixed top-4 right-4 z-20 flex items-center gap-2">
         <ThemeToggle />
+        <LanguageSelector />
       </div>
 
       <div className="gm-animate-fade-up w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8">
