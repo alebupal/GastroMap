@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Stitch Redesign of Random Picker Modal («Indecision Mode»)**:
+  - Revamped modal with `🎲 Indecision Mode` badge, *Decision Universe* chips, *Recommended Destination* card featuring orange initials avatar, highlighted notes, and 3 quick action pills (`View on map`, `View in list`, `Maps`).
+  - Interactive bottom switch to **exclude already visited places** (`"To discover" only`) with instant re-spin.
 - **Stitch-styled Place Comments & Notes Modal**:
   - Converted the inline comments thread into a dedicated centered modal featuring place initials badge, address, total notes counter, filter pills (`All`, `My private notes`, `Community`), and sorting (`Newest` / `Oldest`).
   - Unified rich composer with `Public` / `Private note` toggle, distinct amber-accented cards for private notes, and community review cards with `YOU` / `Public note` badges.

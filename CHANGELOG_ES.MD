@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Stitch del Selector Al Azar («Modo Indecisión»)**:
+  - Nuevo modal con insignia `🎲 Modo Indecisión`, bloque *Universo de decisión* con acceso rápido a modificar filtros, tarjeta *Destino Recomendado* con avatar de iniciales naranja, notas destacadas y 3 botones de acción (`Ver en el mapa`, `Ver en listado`, `Maps`).
+  - Interruptor interactivo en el pie para **excluir sitios ya visitados** (`Solo "Por descubrir"`) con recálculo instantáneo.
 - **Modal de Comentarios y Notas del Sitio estilo Stitch**:
   - Convertido el hilo de comentarios en un modal dedicado centrado con avatar de iniciales del local, dirección, contador total de notas, pestañas de filtro (`Todos`, `Mis notas privadas`, `Comunidad`) y ordenación (`Más recientes` / `Más antiguos`).
   - Editor enriquecido unificado con conmutador `Público` / `Nota privada`, tarjetas diferenciadas para apuntes confidenciales (borde ámbar) y reseñas comunitarias con insignias `TÚ` / `Nota pública`.
