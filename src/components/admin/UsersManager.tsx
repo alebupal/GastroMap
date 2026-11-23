@@ -352,20 +352,22 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
           {/* Barra de cabecera con buscador y botón de añadir usuario */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
-            <div className="relative flex-1 max-w-sm">
-              <span className="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
+            <div className="relative flex-1 w-full sm:max-w-sm">
+              <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                search
+              </span>
               <input
                 type="text"
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                placeholder={t("admin_users.search_placeholder")}
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                placeholder={t("admin_users.search_placeholder").replace(/^🔍\s*/, "")}
+                className="w-full pl-9 pr-8 py-2 rounded-full text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
               {filterQuery && (
                 <button
                   type="button"
                   onClick={() => setFilterQuery("")}
-                  className="absolute right-2.5 top-2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -566,12 +568,12 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                 return (
                   <div
                     key={u.id}
-                    className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 text-xs ${isSelected
+                    className={`p-3.5 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs ${isSelected
                       ? "border-amber-500/60 bg-amber-500/10"
                       : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40"
                       }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
                       {/* Checkbox para borrado masivo (deshabilitado para el propio usuario admin) */}
                       <input
                         type="checkbox"
@@ -579,44 +581,44 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         onChange={() => handleToggleUser(u.id)}
                         disabled={isMe}
                         title={isMe ? t("admin_users.cannot_select_self") : t("admin_users.select_user")}
-                        className={`rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 w-4 h-4 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                        className={`mt-0.5 sm:mt-0 rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-orange-500 w-4 h-4 shrink-0 ${isMe ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                           }`}
                       />
 
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                          <span className="font-bold text-slate-900 dark:text-slate-100 break-all">
                             @{u.username || u.name}
                           </span>
                           {isMe && (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40">
+                            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 whitespace-nowrap">
                               {t("common.you").toUpperCase()}
                             </span>
                           )}
                           <span
-                            className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${u.role === "admin"
-                              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                            className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap ${u.role === "admin"
+                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
                               : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                               }`}
                           >
                             {u.role.toUpperCase()}
                           </span>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                             {u.locale === "en" ? "🇬🇧 EN" : "🇪🇸 ES"}
                           </span>
                           {u.status === "disabled" && (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-red-500/15 text-red-500 border border-red-500/30">
+                            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-500/15 text-red-500 border border-red-500/30 whitespace-nowrap">
                               {t("common.inactive").toUpperCase()}
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-400 truncate">
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           {u.name} • {u.email}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center justify-end sm:justify-start gap-1.5 flex-wrap pt-2.5 border-t border-slate-200/70 dark:border-slate-800 sm:pt-0 sm:border-0 shrink-0">
                       <button
                         type="button"
                         onClick={() => handleToggleRole(u)}
