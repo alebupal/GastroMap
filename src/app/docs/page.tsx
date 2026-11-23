@@ -17,7 +17,7 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
     params.tab === "readme" || params.tab === "changelog" ? params.tab : "docs";
 
   return (
-    <div className="min-h-screen bg-slate-100/60 dark:bg-slate-950 px-3 sm:px-6 py-6 transition-colors">
+    <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       <DocsViewer initialTab={initialTab} />
     </div>
   );

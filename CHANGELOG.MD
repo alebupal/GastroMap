@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Documentation Screen (`/docs`) Redesign Following `DESIGN.md`**:
+  - Unified header with official `<GastroMapLogo />`, `Back to explorer` pill, `ThemeToggle`, segmented `ES / EN` switcher, and `Donate` pill.
+  - Hero card with segmented tabs (`User Guide`, `Changelog`, `README`), refined Markdown renderer with inline code & blockquote styling in official `#ea580c` orange, and consistent minimalist footer.
 - **Stitch Redesign of Place Comparison Modal**:
   - Header featuring the official logo, selected places counter (max 3), and `Clear comparison` button.
   - Side-by-side cards with initials avatars, distance/city & price metric boxes, status/occasion pills, specialty tags, and notes/comments box.

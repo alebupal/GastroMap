@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño de la Pantalla de Documentación (`/docs`) según `DESIGN.md`**:
+  - Cabecera unificada con logotipo oficial `<GastroMapLogo />`, botón `Volver al explorador`, conmutador de tema (`ThemeToggle`), selector segmentado `ES / EN` y botón `Donar`.
+  - Tarjeta hero con pestañas segmentadas (`Guía de uso`, `Changelog`, `README`), visor Markdown renovado con soporte para código inline y citas en paleta oficial naranja `#ea580c`, y pie de página minimalista coherente con toda la web.
 - **Rediseño Stitch de la Ventana Comparativa de Sitios**:
   - Cabecera con logotipo oficial, contador de locales (máx. 3) y botón `Limpiar comparativa`.
   - Tarjetas comparadas con avatares de iniciales, cajas de distancia/ciudad y rango de precio, píldoras de estado/ocasiones, nube de especialidades y bloque de notas/comentarios.
