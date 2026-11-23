@@ -119,8 +119,9 @@ Al acceder por primera vez a una instancia limpia:
   - Ventanas emergentes (popups) de mapa con diseño y estilo unificados con las tarjetas.
 - **Paginación Moderna**: Botones de paginación circulares tipo píldora (`< Anterior`, `1`, `2`, `...`, `Siguiente >`) con selector de tamaño y ordenación.
 
-### 📱 Experiencia Móvil Optimizada
-- **Pestañas Exclusivas sin Duplicidades**: Alternancia limpia en la cabecera móvil mediante `[🗺️ Mapa] | [📋 Lista]` que muestra la vista seleccionada de forma limpia y despejada.
+### 📱 Experiencia Móvil Optimizada (Diseño Stitch)
+- **Cabecera Compacta + Barra Inferior Fija (`MobileBottomNav`)**: Navegación con el pulgar (`Explorar`, `Añadir`, `Estadísticas`, `Menú`), lupa rápida en cabecera para abrir la paleta de comandos y botón flotante **FAB `Añadir sitio`**.
+- **Mapa + Bottom Sheet Superpuesto**: Buscador píldora con icono de filtros y conmutador naranja `Lista / Mapa`, carrusel horizontal de chips con contadores y panel blanco redondeado («Lugares Destacados») integrado directamente bajo el mapa.
 - **Tarjeta Flotante Inferior y Salto Sincronizado**: Al pulsar cualquier chincheta en el mapa móvil, se despliega una tarjeta resumen inferior (*Bottom Card*) con nombre, rango de precio, botón de navegación directa en Google Maps (`🗺️ Cómo llegar`) y acceso a la ficha completa. Al pulsar *"Ver ficha completa →"*, la aplicación calcula automáticamente la página de paginación correcta, cambia a la lista y hace un scroll suave y centrado resaltando la tarjeta con un halo dorado.
 - **Botón Flotante «Subir Arriba»**: Botón circular sutil y minimalista con estética *glassmorphism* que aparece de forma no invasiva al desplazarse más de 300px hacia abajo para volver inmediatamente a la parte superior.
 - **Paginación Inteligente**: En modo lista los locales se muestran paginados con selector de tamaño configurable (10, 20, 50 o Todos) y selector de página para navegación ultra ágil.

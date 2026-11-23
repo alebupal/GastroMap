@@ -65,8 +65,8 @@ export default async function Home() {
         </section>
       </div>
 
-      {/* 4. Pie de página estilizado Stitch */}
-      <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 mt-8">
+      {/* 4. Pie de página estilizado Stitch (espacio inferior extra en móvil para la barra de navegación fija) */}
+      <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 pb-24 lg:pb-6 mt-8">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <GastroMapIcon className="w-6 h-6 shrink-0 shadow-xs rounded-[28%]" />

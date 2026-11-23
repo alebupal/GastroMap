@@ -9,6 +9,7 @@ import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
+import { MOBILE_NAV_EVENTS } from "@/components/layout/MobileBottomNav";
 import { clearAppOfflineCache } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
 
@@ -74,6 +75,25 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
     }
   }
 
+  // Escuchar eventos de la barra inferior móvil (Estadísticas y Menú)
+  useEffect(() => {
+    function handleOpenStats() {
+      setIsStatsOpen(true);
+    }
+    function handleOpenMenu() {
+      setIsMenuOpen((prev) => !prev);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+    window.addEventListener(MOBILE_NAV_EVENTS.OPEN_STATS, handleOpenStats);
+    window.addEventListener(MOBILE_NAV_EVENTS.OPEN_MENU, handleOpenMenu);
+    return () => {
+      window.removeEventListener(MOBILE_NAV_EVENTS.OPEN_STATS, handleOpenStats);
+      window.removeEventListener(MOBILE_NAV_EVENTS.OPEN_MENU, handleOpenMenu);
+    };
+  }, []);
+
   // Cerrar el menú desplegable al hacer click fuera o pulsar Escape
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -113,7 +133,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         </div>
       )}
 
-      <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-3 sm:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
+      <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-1.5 lg:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-2 sm:gap-3">
         {/* Brand / Logo */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center group shrink-0">
@@ -126,11 +146,25 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
         {/* User profile pill & controls */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Selector de modo claro / modo oscuro */}
-          <ThemeToggle />
+          {/* Botón búsqueda rápida estilo Stitch en móvil */}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event(MOBILE_NAV_EVENTS.OPEN_COMMAND_PALETTE));
+              }
+            }}
+            className="lg:hidden w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center transition cursor-pointer active:scale-95"
+            aria-label={t("command_palette.placeholder")}
+          >
+            <span className="material-symbols-outlined text-[20px] leading-none">search</span>
+          </button>
 
-          {/* Selector de idioma */}
-          <LanguageSelector />
+          {/* Selector de modo claro / modo oscuro (visible en cabecera en sm+, en móvil dentro del menú) */}
+          <div className="hidden sm:flex items-center gap-1.5 sm:gap-2.5">
+            <ThemeToggle />
+            <LanguageSelector />
+          </div>
 
           {/* Botón Panel Admin */}
           {currentUser.role === "admin" && (
@@ -149,21 +183,21 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             <button
               type="button"
               onClick={() => setIsMenuOpen((prev) => !prev)}
-              className="flex items-center gap-1.5 p-1 pl-1 pr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="flex items-center gap-1.5 p-0.5 sm:p-1 sm:pr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               aria-label="Abrir menú de usuario"
               aria-expanded={isMenuOpen}
             >
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center shadow-xs border border-orange-200 dark:border-orange-800">
+                <div className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-orange-600 sm:bg-orange-100 dark:sm:bg-orange-950/80 text-white sm:text-orange-900 dark:sm:text-orange-200 font-extrabold text-xs flex items-center justify-center shadow-xs sm:border sm:border-orange-200 dark:sm:border-orange-800">
                   {displayUsername.charAt(0).toUpperCase()}
                 </div>
                 {currentUser.role === "admin" && (
-                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-slate-900 dark:bg-orange-600 sm:bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
                     Admin
                   </span>
                 )}
               </div>
-              <span className="material-symbols-outlined text-sm text-slate-400">
+              <span className="hidden sm:inline material-symbols-outlined text-sm text-slate-400">
                 {isMenuOpen ? "expand_less" : "expand_more"}
               </span>
             </button>
@@ -186,6 +220,12 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                   <p className="text-[11px] text-slate-400 truncate mt-0.5">
                     {currentUser.email}
                   </p>
+                </div>
+
+                {/* Tema e idioma rápidos en móvil dentro del menú */}
+                <div className="sm:hidden flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <ThemeToggle />
+                  <LanguageSelector />
                 </div>
 
                 {/* Opciones del menú */}

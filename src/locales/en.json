@@ -855,5 +855,16 @@
     "no_results": "No results found for your query.",
     "navigate": "navigate",
     "select": "open"
+  },
+  "mobile_nav": {
+    "aria_label": "Mobile navigation",
+    "explore": "Explore",
+    "add": "Add",
+    "stats": "Stats",
+    "menu": "Menu",
+    "search_placeholder": "Search restaurant, dish or area...",
+    "featured_title": "Featured Places",
+    "filtered_title": "Filtered Results",
+    "recommendations_count": "{count} food recommendations"
   }
 }

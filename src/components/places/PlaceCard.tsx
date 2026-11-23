@@ -257,28 +257,28 @@ export function PlaceCard({
             type="button"
             onClick={() => handleStatusChange("pending")}
             aria-label={personalStatus === "pending" ? t("places.remove_pending") : t("places.add_pending")}
-            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 ${
+            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 min-w-0 ${
               personalStatus === "pending"
                 ? "bg-[#fea619] text-[#2a1700] shadow-xs"
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
             }`}
           >
-            <span className="material-symbols-outlined text-base leading-none">schedule</span>
-            <span>{t("cards.pending")}</span>
+            <span className="material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0">schedule</span>
+            <span className="truncate">{t("cards.pending")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleStatusChange("visited")}
             aria-label={personalStatus === "visited" ? t("places.remove_visited") : t("places.mark_visited")}
-            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 ${
+            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 min-w-0 ${
               personalStatus === "visited"
                 ? "bg-orange-600 text-white shadow-xs"
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
             }`}
           >
             <span
-              className={`material-symbols-outlined text-base leading-none ${
+              className={`material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0 ${
                 personalStatus === "visited"
                   ? "text-white"
                   : "text-emerald-600 dark:text-emerald-400"
@@ -286,14 +286,14 @@ export function PlaceCard({
             >
               check_circle
             </span>
-            <span>{t("cards.visited")}</span>
+            <span className="truncate">{t("cards.visited")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowNotesModal(true)}
             aria-label={t("cards.add_note_tooltip")}
-            className="py-1.5 px-3 rounded-xl text-xs font-semibold bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center justify-center gap-1 shrink-0 active:scale-95"
+            className="py-1.5 px-2.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center justify-center gap-1 shrink-0 active:scale-95"
             title={t("cards.add_note_tooltip")}
           >
             <span className="material-symbols-outlined text-sm leading-none text-orange-600">edit_note</span>

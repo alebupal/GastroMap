@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Full Stitch Mobile Redesign (Map + Bottom Sheet + Fixed Bottom Navigation)**:
+  - Streamlined mobile `UserHeader` featuring the official logo, circular quick-search trigger (`CommandPalette`), and orange circular profile avatar (moving theme and language switchers cleanly into the mobile dropdown).
+  - New mobile search & filter bar in `PlacesExplorer` with pill search input + inline `tune` filter button (with active badge), orange `List / Map` toggle pill, and horizontal quick chips (`All`, `To discover`, `Favorites`, and categories with counts).
+  - New mobile layout pairing the top map (`44vh`) with an overlapping rounded **Bottom Sheet** (`Featured Places` + sort dropdown + place cards), a floating **`Add place` FAB**, and a fixed **Bottom Navigation Bar** (`MobileBottomNav`: `Explore`, `Add`, `Stats`, `Menu`).
 - **Revamped Default Categories (8 Plans) & Rich Icon Picker (Emojis + Material Symbols)**:
   - Updated initial categories in `src/lib/actions/taxonomy.ts` and `src/data/occasions.ts` to 8 clear, non-overlapping plans: `🥐 Desayuno / Brunch`, `🍢 Tapear / Cañas`, `🍽️ Comer / Cenar`, `🍔 Informal / Rápido`, `☕ Café / Merienda`, `🍸 Copas / Cócteles`, `🕯️ Cita / Especial`, and `👥 Grupos / Celebración`.
   - New `OccasionIcon` renderer and `OccasionIconPicker` in `/admin > Taxonomy` (for both creating and editing categories) offering 60+ food emojis, custom emoji input, and 50+ searchable **Material Symbols Outlined** icons supported across cards, filters, comparator, stats, and map pins.

@@ -50,7 +50,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
   * Rediseño visual de alta gama con tipografía **Plus Jakarta Sans**, selector dual segmentado de tema, franja de estado PWA y tarjetas con avatares de iniciales gastronómicas.
-  * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
+  * Interfaz móvil nativa estilo Stitch con buscador píldora + botón `Lista / Mapa`, chips horizontales rápidos, **Bottom Sheet** deslizable bajo el mapa («Lugares Destacados»), botón flotante **FAB «Añadir sitio»** y **barra de navegación inferior fija** (`Explorar`, `Añadir`, `Estadísticas`, `Menú`).
   * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) justificados al 100% en cuadrícula adaptable para aprovechar todo el espacio útil en pantalla.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker, caché offline integral (`/sw.js`) y cola de escritura sin conexión**: puedes marcar favoritos, cambiar estados (`Quiero ir` / `Ya he ido`) y guardar notas privadas sin cobertura, y todo se sincroniza automáticamente al reconectar.

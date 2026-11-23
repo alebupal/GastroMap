@@ -8,6 +8,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Móvil Completo Estilo Stitch (Mapa + Bottom Sheet + Barra Inferior Fija)**:
+  - Cabecera móvil simplificada en `UserHeader` con logotipo oficial, botón circular de búsqueda rápida (`CommandPalette`) y avatar circular naranja (con selector de tema e idioma integrados en el menú desplegable móvil).
+  - Nueva barra móvil en `PlacesExplorer` con buscador píldora + icono de filtros avanzados (`tune` con contador), botón píldora naranja `Lista / Mapa` y carrusel horizontal de chips (`Todos`, `Por descubrir`, `Favoritos` y categorías con contador).
+  - Nuevo diseño de mapa superior (`44vh`) + **Bottom Sheet** redondeado superpuesto (`Lugares Destacados` + selector de ordenación + tarjetas) en vista mapa, botón flotante **FAB `Añadir sitio`** y barra de navegación inferior fija (`MobileBottomNav`: `Explorar`, `Añadir`, `Estadísticas`, `Menú`).
 - **Renovación de Categorías por Defecto (8 Planes) y Selector Avanzado de Iconos (Emojis + Material Symbols)**:
   - Actualizadas las categorías iniciales en `src/lib/actions/taxonomy.ts` y `src/data/occasions.ts` a 8 planes claros sin solapamientos: `🥐 Desayuno / Brunch`, `🍢 Tapear / Cañas`, `🍽️ Comer / Cenar`, `🍔 Informal / Rápido`, `☕ Café / Merienda`, `🍸 Copas / Cócteles`, `🕯️ Cita / Especial` y `👥 Grupos / Celebración`.
   - Nuevo componente `OccasionIcon` y selector `OccasionIconPicker` en `/admin > Taxonomía` (al crear y editar categorías) con más de 60 emojis gastronómicos, entrada libre de emoji y más de 50 iconos **Material Symbols Outlined** con buscador en vivo y soporte completo en tarjetas, filtros, comparador, estadísticas y pines del mapa.

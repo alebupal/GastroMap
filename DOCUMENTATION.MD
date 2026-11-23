@@ -119,8 +119,9 @@ When launching on a clean database:
   - Customized card popups matching the place card aesthetic.
 - **Modern Pagination**: Circular pill buttons (`< Previous`, `1`, `2`, `...`, `Next >`) with page size and sorting selectors.
 
-### 📱 Optimized Mobile Experience
-- **Clean Exclusive Mobile Tabs**: Streamlined mobile header tabs `[🗺️ Map] | [📋 List]` keeping the active view clean without clutter or redundancy.
+### 📱 Optimized Mobile Experience (Stitch Design)
+- **Compact Header + Fixed Bottom Navigation (`MobileBottomNav`)**: Thumb-friendly navigation (`Explore`, `Add`, `Stats`, `Menu`), top search trigger for the command palette, and floating **`Add place` FAB**.
+- **Map + Overlapping Bottom Sheet**: Pill search bar with inline filter toggle and orange `List / Map` switch, horizontal quick chips with counts, and a rounded white sheet («Featured Places») directly beneath the map.
 - **Bottom Floating Card & Synchronized Jump**: Tapping any pin on the mobile map pops up a floating summary card with price, name, direct Google Maps directions (`🗺️ Directions`), and full details trigger. Tapping *"Full details →"* automatically navigates to the exact pagination page, switches views, and scrolls smoothly to the target card with a golden highlight ring.
 - **Floating «Back to Top» Button**: Subtle, non-intrusive circular button with glassmorphism styling that appears smoothly when scrolling past 300px for instant one-tap scroll to header.
 - **Smart Pagination**: Place listings feature a configurable page size selector (10, 20, 50, or All) and page buttons for ultra-responsive navigation.

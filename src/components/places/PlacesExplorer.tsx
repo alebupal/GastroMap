@@ -23,6 +23,7 @@ import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
 import { CommandPalette } from "@/components/ui/CommandPalette";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { MobileBottomNav, MOBILE_NAV_EVENTS } from "@/components/layout/MobileBottomNav";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 
@@ -177,7 +178,7 @@ export function PlacesExplorer({
   >("all");
   const urlHydratedRef = useRef(false);
 
-  // Atajo global Ctrl+K / ⌘+K para abrir la paleta de comandos
+  // Atajo global Ctrl+K / ⌘+K y botón lupa móvil para abrir la paleta de comandos
   useEffect(() => {
     function onGlobalKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -185,8 +186,15 @@ export function PlacesExplorer({
         setIsCommandPaletteOpen((prev) => !prev);
       }
     }
+    function onOpenPaletteEvent() {
+      setIsCommandPaletteOpen(true);
+    }
     window.addEventListener("keydown", onGlobalKeyDown);
-    return () => window.removeEventListener("keydown", onGlobalKeyDown);
+    window.addEventListener(MOBILE_NAV_EVENTS.OPEN_COMMAND_PALETTE, onOpenPaletteEvent);
+    return () => {
+      window.removeEventListener("keydown", onGlobalKeyDown);
+      window.removeEventListener(MOBILE_NAV_EVENTS.OPEN_COMMAND_PALETTE, onOpenPaletteEvent);
+    };
   }, []);
 
   // Restaurar filtros desde los query params de la URL al montar
@@ -811,9 +819,167 @@ export function PlacesExplorer({
       <OfflineSyncBanner />
 
       {/* =========================================================================
-          1. HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida estilo Stitch
+          0. CABECERA MÓVIL STITCH (Buscador píldora + Botón Lista/Mapa + Chips)
          ========================================================================= */}
-      <section className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-2 sm:px-3 border border-slate-200/70 dark:border-slate-800/70">
+      <section className="lg:hidden space-y-2.5">
+        {/* Fila 1: Buscador píldora con icono filtros + Botón naranja Lista/Mapa */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-full px-3.5 py-2 shadow-xs focus-within:ring-2 focus-within:ring-orange-500/40 transition">
+            <span className="material-symbols-outlined text-orange-600 text-[18px] mr-2 shrink-0 leading-none">
+              search
+            </span>
+            <input
+              type="text"
+              value={textSearch}
+              onChange={(e) => setTextSearch(e.target.value)}
+              placeholder={t("mobile_nav.search_placeholder")}
+              className="w-full min-w-0 bg-transparent text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            />
+            {textSearch && (
+              <button
+                type="button"
+                onClick={() => setTextSearch("")}
+                className="p-0.5 text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
+                aria-label={t("places.clear_filter")}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">close</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setShowExtraFilters((prev) => !prev)}
+              aria-expanded={showExtraFilters}
+              aria-label={t("places.more_filters")}
+              className={`ml-1.5 relative p-1 rounded-full transition cursor-pointer shrink-0 ${
+                showExtraFilters || activeFiltersCount > 0
+                  ? "text-orange-600 bg-orange-50 dark:bg-orange-950/50"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-800"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[18px] leading-none block">tune</span>
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center leading-none">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setActiveMobileView((prev) => (prev === "map" ? "list" : "map"))
+            }
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shadow-orange-600/25 active:scale-95 transition shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[17px] leading-none">
+              {activeMobileView === "map" ? "format_list_bulleted" : "map"}
+            </span>
+            <span>
+              {activeMobileView === "map" ? t("places.view_list") : t("places.view_map")}
+            </span>
+          </button>
+        </div>
+
+        {/* Fila 2: Carrusel horizontal de píldoras rápidas (Todos, Por descubrir, Favoritos y Categorías) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
+          <button
+            type="button"
+            onClick={() => {
+              setExperienceFilter("all");
+              setSelectedOccasions([]);
+              setCurrentPage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+              experienceFilter === "all" && selectedOccasions.length === 0
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            <span>{t("places.all")}</span>
+            <span className="text-[11px] opacity-80 font-extrabold">
+              {initialPlaces.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setExperienceFilter((prev) => (prev === "untried" ? "all" : "untried"));
+              setCurrentPage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+              experienceFilter === "untried"
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                experienceFilter === "untried" ? "bg-white" : "bg-orange-600"
+              }`}
+            />
+            <span>{t("places.unexplored")}</span>
+            <span className="text-[11px] opacity-75 font-extrabold">
+              {
+                initialPlaces.filter(
+                  (p) => p.personalStatus !== "visited" && (!p.rating || p.rating === 0)
+                ).length
+              }
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setExperienceFilter((prev) => (prev === "favorite" ? "all" : "favorite"));
+              setCurrentPage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+              experienceFilter === "favorite"
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[14px] leading-none text-amber-500">
+              star
+            </span>
+            <span>{t("places.favorites")}</span>
+            <span className="text-[11px] opacity-75 font-extrabold">
+              {initialPlaces.filter((p) => p.isFavorite).length}
+            </span>
+          </button>
+
+          {sortedOccasions.slice(0, 6).map((occ) => {
+            const active = selectedOccasions.includes(occ.id);
+            return (
+              <button
+                key={occ.id}
+                type="button"
+                onClick={() => toggleOccasion(occ.id)}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+                  active
+                    ? "bg-orange-600 text-white shadow-xs"
+                    : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+                }`}
+              >
+                <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
+                <span>{occ.name}</span>
+                {(occ.placesCount || 0) > 0 && (
+                  <span className="text-[11px] opacity-75 font-extrabold">
+                    {occ.placesCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* =========================================================================
+          1. HERO ACTION HUB (Desktop): Búsqueda interactiva y botones de acción rápida
+         ========================================================================= */}
+      <section className="hidden lg:block bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-2 sm:px-3 border border-slate-200/70 dark:border-slate-800/70">
         <div className="flex flex-col md:flex-row items-center gap-2">
           {/* Buscador de texto en vivo redondeado estilo Stitch */}
           <div className="relative flex-1 w-full flex items-center bg-[#f2f3ff] dark:bg-slate-800/70 rounded-full px-3.5 py-1.5 transition-all focus-within:ring-2 focus-within:ring-orange-500/50">
@@ -966,9 +1132,9 @@ export function PlacesExplorer({
       )}
 
       {/* =========================================================================
-          2. TAXONOMÍAS, FILTROS Y ESTADOS: Fila 1 y Fila 2 estilo Stitch
+          2. TAXONOMÍAS, FILTROS Y ESTADOS (Desktop): Fila 1 y Fila 2 estilo Stitch
          ========================================================================= */}
-      <section className="flex flex-col gap-2.5 bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70">
+      <section className="hidden lg:flex flex-col gap-2.5 bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70">
         {/* Fila 1: Píldoras de Experiencia / Colección + Filtros Guardados */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
           <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-0.5 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
@@ -1350,9 +1516,99 @@ export function PlacesExplorer({
         </div>
       </section>
 
-      {/* Panel desplegable de Planes / Categorías y Etiquetas (solo visible al pulsar + Filtros) */}
+      {/* Panel desplegable de Planes / Categorías y Etiquetas (solo visible al pulsar + Filtros o icono tune en móvil) */}
       {showExtraFilters && (
         <div className="space-y-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 p-3 sm:p-4 shadow-xs animate-in fade-in duration-150">
+          {/* Acciones rápidas y filtros extra compactos en móvil */}
+          <div className="lg:hidden space-y-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+              <button
+                type="button"
+                onClick={() => setIsAssistantOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-orange-600 text-base leading-none">assistant</span>
+                <span>{t("places.assistant")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRandomModalOpen(true)}
+                disabled={filteredPlaces.length === 0}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer disabled:opacity-40"
+              >
+                <span className="material-symbols-outlined text-amber-500 text-base leading-none">casino</span>
+                <span>{t("places.roulette")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsExportImportOpen(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-slate-500 text-base leading-none">import_export</span>
+                <span>{t("places.export_import")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={userLocation ? handleDisableLocation : handleRequestLocation}
+                disabled={isLocating}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 cursor-pointer ${
+                  userLocation
+                    ? "bg-blue-600 text-white"
+                    : "bg-[#f2f3ff] dark:bg-slate-800 text-orange-600 dark:text-orange-400"
+                }`}
+              >
+                <span className="material-symbols-outlined text-base leading-none">near_me</span>
+                <span>{t("places.near_me")}</span>
+              </button>
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleShareFilteredView}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 text-xs font-bold shrink-0 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-base leading-none">share</span>
+                  <span>{t("places.share_view")}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Rango de precios y reset en móvil */}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-1 flex-wrap">
+                {[
+                  { val: "€", label: "< 15 €" },
+                  { val: "€€", label: "15 - 30 €" },
+                  { val: "€€€", label: "30 - 50 €" },
+                  { val: "€€€€", label: "> 50 €" },
+                ].map((pr) => {
+                  const active = selectedPrices.includes(pr.val);
+                  return (
+                    <button
+                      key={pr.val}
+                      type="button"
+                      onClick={() => togglePrice(pr.val)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                        active
+                          ? "bg-orange-600 text-white"
+                          : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {pr.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
+                >
+                  {t("places.clear_filter")} ({activeFiltersCount})
+                </button>
+              )}
+            </div>
+          </div>
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -1692,63 +1948,17 @@ export function PlacesExplorer({
       )}
 
       {/* =========================================================================
-          SELECTOR DE PESTAÑAS MÓVIL SUPERIOR (Opción 2: Tabs limpios integrados)
+          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil Mapa + Sheet o Lista completa)
          ========================================================================= */}
-      <div className="lg:hidden pt-1">
-        <div className="grid grid-cols-2 p-1 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-inner">
-          <button
-            type="button"
-            onClick={() => setActiveMobileView("map")}
-            className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeMobileView === "map"
-              ? "bg-orange-600 text-white shadow-md shadow-orange-600/25"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-          >
-            <span className="text-sm leading-none">🗺️</span>
-            <span>{t("places.view_map")}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "map"
-                ? "bg-slate-950/15 text-slate-950"
-                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                }`}
-            >
-              {filteredPlaces.filter((p) => p.latitude != null).length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveMobileView("list")}
-            className={`py-2 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${activeMobileView === "list"
-              ? "bg-orange-600 text-white shadow-md shadow-orange-600/25"
-              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-              }`}
-          >
-            <span className="text-sm leading-none">📋</span>
-            <span>{t("places.view_list")}</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${activeMobileView === "list"
-                ? "bg-slate-950/15 text-slate-950"
-                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                }`}
-            >
-              {filteredPlaces.length}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          LAYOUT RESPONSIVE SPLIT-VIEW (Desktop 2 columnas, Móvil pestañas exclusivas Mapa / Lista)
-         ========================================================================= */}
-      <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-1 lg:pt-2">
-        {/* Columna Mapa: en desktop siempre visible; en móvil exclusiva cuando activeMobileView === "map" */}
+      <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-0 lg:pt-2">
+        {/* Columna Mapa: en desktop siempre visible; en móvil visible arriba cuando activeMobileView === "map" */}
         <div
-          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${activeMobileView === "list" ? "hidden lg:block" : "block order-1 mb-4 lg:mb-0"
-            }`}
+          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${
+            activeMobileView === "list" ? "hidden lg:block" : "block order-1"
+          }`}
         >
-          <div className="lg:sticky lg:top-4 space-y-2 pb-2 lg:pb-0">
-            <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl">
+          <div className="lg:sticky lg:top-4 space-y-2 pb-0">
+            <div className="rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-lg lg:shadow-xl dark:shadow-2xl">
               <MapContainerWrapper
                 places={filteredPlaces}
                 selectedPlaceId={selectedPlaceId}
@@ -1758,10 +1968,10 @@ export function PlacesExplorer({
                 occasionMap={occasionMap}
                 cartoApiKey={cartoApiKey}
                 isFiltered={isFiltered}
-                className="w-full h-[58vh] sm:h-[520px] lg:h-[calc(100vh-14rem)] min-h-[380px]"
+                className="w-full h-[44vh] min-h-[300px] sm:h-[460px] lg:h-[calc(100vh-14rem)] lg:min-h-[380px]"
               />
             </div>
-            <div className="flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-xl text-xs font-medium">
+            <div className="hidden lg:flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-xl text-xs font-medium">
               <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>Base de datos sincronizada localmente (Cache First)</span>
@@ -1775,12 +1985,50 @@ export function PlacesExplorer({
           </div>
         </div>
 
-        {/* Columna Lista de Tarjetas: en desktop siempre visible; en móvil exclusiva cuando activeMobileView === "list" */}
+        {/* Columna Lista de Tarjetas: en desktop siempre visible; en móvil Bottom Sheet bajo el mapa o lista completa */}
         <div
           id="places-list-top"
-          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${activeMobileView === "map" ? "hidden lg:block" : "block"
-            }`}
+          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${
+            activeMobileView === "map"
+              ? "-mt-5 relative z-[450] rounded-t-[28px] bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] px-3 pt-3 pb-24 lg:mt-0 lg:z-auto lg:rounded-none lg:bg-transparent lg:dark:bg-transparent lg:border-0 lg:shadow-none lg:p-0"
+              : "pb-24 lg:pb-0"
+          }`}
         >
+          {/* Tirador superior y cabecera Stitch del Bottom Sheet en móvil */}
+          {activeMobileView === "map" && (
+            <div className="lg:hidden space-y-2.5 pb-1">
+              <div className="w-10 h-1 rounded-full bg-slate-200 dark:bg-slate-700 mx-auto" />
+              <div className="flex items-center justify-between gap-2 px-0.5">
+                <div className="min-w-0">
+                  <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                    {isFiltered ? t("mobile_nav.filtered_title") : t("mobile_nav.featured_title")}
+                  </h2>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {t("mobile_nav.recommendations_count", { count: filteredPlaces.length })}
+                  </p>
+                </div>
+
+                <label className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                  <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                    sort
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                    className="bg-transparent focus:outline-none cursor-pointer font-bold"
+                    aria-label={t("places.sort_by")}
+                  >
+                    <option value="recent">{t("places.sort_recent")}</option>
+                    {userLocation && <option value="distance">{t("places.sort_distance")}</option>}
+                    <option value="rating">{t("places.sort_rating")}</option>
+                    <option value="name">{t("places.sort_alphabetical")}</option>
+                    <option value="price_asc">{t("places.sort_price_asc")}</option>
+                    <option value="price_desc">{t("places.sort_price_desc")}</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          )}
           {filteredPlaces.length === 0 ? (
             <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
               <div className="text-4xl mb-3">🔍</div>
@@ -1799,8 +2047,12 @@ export function PlacesExplorer({
               </button>
             </div>
           ) : (
-            <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-14 lg:pb-0">
-              <div className="flex items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium px-1 flex-wrap">
+            <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-4 lg:pb-0">
+              <div
+                className={`${
+                  activeMobileView === "map" ? "hidden lg:flex" : "flex"
+                } items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium px-1 flex-wrap`}
+              >
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-orange-600 text-sm">
                     {filteredPlaces.length} {filteredPlaces.length === 1 ? t("places.locale_single") : t("places.locales_count")}
@@ -2024,7 +2276,7 @@ export function PlacesExplorer({
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}
       {selectedPlace && activeMobileView === "map" && (
-        <div className="lg:hidden fixed bottom-4 left-3 right-3 z-50 p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
+        <div className="lg:hidden fixed bottom-20 left-3 right-3 z-[955] p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -2102,9 +2354,23 @@ export function PlacesExplorer({
         </div>
       )}
 
+      {/* FAB flotante «Añadir sitio» estilo Stitch en móvil (oculto si hay tarjeta seleccionada abierta) */}
+      {!selectedPlace && (
+        <a
+          href="/new"
+          className="lg:hidden fixed right-4 bottom-20 z-[950] inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-lg shadow-orange-600/35 active:scale-95 transition"
+        >
+          <span className="material-symbols-outlined text-[18px] leading-none">add_location_alt</span>
+          <span>{t("places.add_new")}</span>
+        </a>
+      )}
+
+      {/* Barra de navegación inferior fija móvil estilo Stitch */}
+      <MobileBottomNav onExploreClick={() => setActiveMobileView("map")} />
+
       {/* Botón flotante para subir arriba: en móvil solo en vista lista y si no hay tarjeta abierta */}
       <ScrollToTop
-        className={activeMobileView === "map" || Boolean(selectedPlace) ? "hidden lg:flex" : "flex"}
+        className={activeMobileView === "map" || Boolean(selectedPlace) ? "hidden lg:flex" : "hidden lg:flex"}
       />
     </div>
   );
