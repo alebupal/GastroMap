@@ -69,6 +69,9 @@ export function LocationPicker({
   const [address, setAddress] = useState<string>(initialAddress);
   const [lat, setLat] = useState<string>(initialLat);
   const [lng, setLng] = useState<string>(initialLng);
+  const [isGeocodingAddress, setIsGeocodingAddress] = useState<boolean>(false);
+  const [geocodeMessage, setGeocodeMessage] = useState<{ type: "success" | "warning"; text: string } | null>(null);
+  const [showManualCoords, setShowManualCoords] = useState<boolean>(false);
 
   // Buscador de direcciones en vivo (Nominatim)
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -201,6 +204,47 @@ export function LocationPicker({
 
     setSearchQuery(result.displayName);
     setShowResults(false);
+    setGeocodeMessage(null);
+  }
+
+  async function handleGeocodeAddress(addressToSearch?: string) {
+    const target = (addressToSearch ?? address).trim();
+    if (target.length < 2) return;
+    setIsGeocodingAddress(true);
+    setGeocodeMessage(null);
+    try {
+      const fullQuery = effectiveCity ? `${target}, ${effectiveCity}` : target;
+      let results = await searchAddressAction(fullQuery);
+      if (results.length === 0 && target !== fullQuery) {
+        results = await searchAddressAction(target);
+      }
+      if (results.length > 0) {
+        const top = results[0];
+        const newLat = top.latitude.toString();
+        const newLng = top.longitude.toString();
+        setLat(newLat);
+        setLng(newLng);
+        setGeocodeMessage({
+          type: "success",
+          text: `${t("location.coords_found")}: ${top.latitude.toFixed(4)}, ${top.longitude.toFixed(4)}`,
+        });
+        setShowManualCoords(false);
+      } else {
+        setGeocodeMessage({
+          type: "warning",
+          text: t("location.coords_not_found"),
+        });
+        setShowManualCoords(true);
+      }
+    } catch {
+      setGeocodeMessage({
+        type: "warning",
+        text: t("location.coords_not_found"),
+      });
+      setShowManualCoords(true);
+    } finally {
+      setIsGeocodingAddress(false);
+    }
   }
 
   return (
@@ -329,32 +373,139 @@ export function LocationPicker({
         </div>
       )}
 
-      {/* 4. Dirección / Calle / Zona */}
-      <div>
-        <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+      {/* 4. Dirección / Calle / Zona con geocodificación automática */}
+      <div className="space-y-1.5">
+        <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400">
           {t("location.address_label")}
         </label>
-        <input
-          type="text"
-          name="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder={t("location.address_placeholder")}
-          className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            name="address"
+            value={address}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              setGeocodeMessage(null);
+            }}
+            onBlur={() => {
+              if (address.trim().length >= 3 && (!lat || !lng)) {
+                handleGeocodeAddress();
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleGeocodeAddress();
+              }
+            }}
+            placeholder={t("location.address_placeholder")}
+            className="flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          />
+          <button
+            type="button"
+            onClick={() => handleGeocodeAddress()}
+            disabled={isGeocodingAddress || address.trim().length < 2}
+            className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shrink-0 transition disabled:opacity-40 cursor-pointer"
+            title={t("location.search_coords_btn")}
+          >
+            {isGeocodingAddress ? "⏳ " + t("location.searching_coords") : "🔍 " + t("location.search_coords_btn")}
+          </button>
+        </div>
       </div>
 
-      {/* Coordenadas geolocalizadas */}
-      {lat && lng && (
-        <p className="text-[10px] text-slate-400 flex items-center gap-1.5 font-mono">
-          <span>🌐</span>
-          <span>
-            {t("location.coords_label", {
-              lat: parseFloat(lat).toFixed(4),
-              lng: parseFloat(lng).toFixed(4),
-            })}
-          </span>
-        </p>
+      {/* Mensaje de resultado de geocodificación */}
+      {geocodeMessage && (
+        <div
+          className={`p-2.5 rounded-xl text-xs font-medium flex items-center justify-between ${
+            geocodeMessage.type === "success"
+              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40"
+              : "bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40"
+          }`}
+        >
+          <span>{geocodeMessage.text}</span>
+          <button
+            type="button"
+            onClick={() => setGeocodeMessage(null)}
+            className="text-xs opacity-60 hover:opacity-100 cursor-pointer ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Coordenadas obligatorias: visores y campos manuales */}
+      {!lat || !lng || showManualCoords ? (
+        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+              <span>📍</span>
+              <span>{t("location.manual_coords_title")}</span>
+            </span>
+            {lat && lng && (
+              <button
+                type="button"
+                onClick={() => setShowManualCoords(false)}
+                className="text-[11px] text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
+              >
+                ✕ Ocultar
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">
+                {t("location.lat_label")} *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={lat}
+                onChange={(e) => setLat(e.target.value)}
+                placeholder="ej. 37.1773"
+                required
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">
+                {t("location.lng_label")} *
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={lng}
+                onChange={(e) => setLng(e.target.value)}
+                placeholder="ej. -3.5986"
+                required
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+              />
+            </div>
+          </div>
+          {(!lat || !lng) && (
+            <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+              * {t("location.coords_required")}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center justify-between text-xs px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <p className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 font-mono">
+            <span>🌐</span>
+            <span>
+              {t("location.coords_label", {
+                lat: parseFloat(lat).toFixed(4),
+                lng: parseFloat(lng).toFixed(4),
+              })}
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowManualCoords(true)}
+            className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+          >
+            ✏️ {t("location.edit_coords")}
+          </button>
+        </div>
       )}
 
       {/* Campos ocultos para el FormData del formulario */}

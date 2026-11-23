@@ -94,6 +94,8 @@ Al acceder por primera vez a una instancia limpia:
 
 ### 🍽️ Explorador Gastronómico (Vista Principal)
 - **Buscador Universal Integral**: Búsqueda instantánea en vivo por cualquier dato: nombre del establecimiento, ciudad, dirección, notas públicas, notas privadas personales, categorías/ocasiones, etiquetas, autor y el contenido completo de los comentarios colaborativos, con soporte multi-término.
+- **Acciones Rápidas y Filtros Guardados Centrados**: Botones de acceso rápido (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí` y `💾 Guardar filtro`) dispuestos de forma centrada para uso táctil ergonómico en dispositivos móviles.
+- **Registro con Coordenadas Obligatorias y Geocodificación**: Al añadir o editar un establecimiento, las coordenadas (latitud y longitud) son obligatorias para situarlo en el mapa. Al escribir una calle se geocodifica automáticamente mediante OpenStreetMap/Nominatim; si no se encuentran coordenadas, se despliegan campos numéricos manuales para introducirlas con total precisión.
 - **Filtros por Experiencia (Fila 1)**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
@@ -237,7 +239,7 @@ GastroMap está construido bajo los principios de modularidad, tipado estricto y
 
 - **Single Source of Truth de Versión**: La versión de la aplicación se centraliza en `package.json` y se consume en cliente y servidor a través de `src/lib/version.ts`.
 - **Drizzle ORM con TypeScript**: Migraciones versionadas en `drizzle/` aplicables de forma determinista y tipos inferidos para el 100% de los esquemas.
-- **Caché Offline y PWA**: Service Worker (`/sw.js`) con almacenamiento local para consulta de sitios favoritos y pendientes sin cobertura móvil en sótanos o zonas rurales.
+- **Caché Offline Integral y PWA**: Service Worker (`/sw.js`) con almacenamiento local que precachea la aplicación, almacena en caché las teselas de mapas (`gastromap-tiles-v1`) y ofrece respaldo completo sin conexión a internet para consultar el catálogo y mapas guardados en movilidad, sótanos o zonas rurales.
 - **Tests Automatizados**: Suite de pruebas nativas con `npm test` verificando consistencia de traducciones, fórmulas espaciales, seguridad y parsers.
 
 ---

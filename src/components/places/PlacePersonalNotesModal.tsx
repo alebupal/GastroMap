@@ -48,7 +48,7 @@ export function PlacePersonalNotesModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-1.5">

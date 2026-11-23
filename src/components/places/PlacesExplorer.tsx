@@ -778,8 +778,8 @@ export function PlacesExplorer({
         </div>
 
         {/* Barra de herramientas y filtros rápidos */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             {/* Botón Asistente Guiado */}
             <button
               type="button"
@@ -820,7 +820,7 @@ export function PlacesExplorer({
           </div>
 
           {/* Lado derecho: Cerca de mí y botón limpiar */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
             {!userLocation ? (
               <button
                 type="button"
@@ -854,7 +854,7 @@ export function PlacesExplorer({
                   title={t("places.save_filter_tooltip")}
                 >
                   <span>💾</span>
-                  <span className="hidden sm:inline">Guardar filtro</span>
+                  <span>{t("places.save_filter")}</span>
                 </button>
                 <button
                   type="button"

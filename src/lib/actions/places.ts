@@ -113,6 +113,10 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
     return { error: "El nombre del establecimiento es obligatorio." };
   }
 
+  if (latitude === null || isNaN(latitude) || longitude === null || isNaN(longitude)) {
+    return { error: "Las coordenadas (latitud y longitud) son obligatorias para situar el establecimiento en el mapa." };
+  }
+
   // 1. Insertar el establecimiento
   const [newPlace] = await db
     .insert(places)
@@ -235,6 +239,10 @@ export async function updatePlaceAction(
   const parsedLng = lngStr ? parseFloat(lngStr) : null;
   const latitude = parsedLat !== null && !isNaN(parsedLat) ? parsedLat : null;
   const longitude = parsedLng !== null && !isNaN(parsedLng) ? parsedLng : null;
+
+  if (latitude === null || isNaN(latitude) || longitude === null || isNaN(longitude)) {
+    return { error: "Las coordenadas (latitud y longitud) son obligatorias para situar el establecimiento en el mapa." };
+  }
 
   const occasionsSelected = formData.getAll("occasions") as string[];
   const formTags = (formData.getAll("tags") as string[])

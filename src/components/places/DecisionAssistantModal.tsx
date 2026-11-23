@@ -47,7 +47,7 @@ export function DecisionAssistantModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left max-h-[90vh] overflow-y-auto">
         {/* Cabecera */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">

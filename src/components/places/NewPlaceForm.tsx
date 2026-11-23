@@ -144,6 +144,12 @@ export function NewPlaceForm({
     setSubmitting(true);
     setError(null);
 
+    if (!lat || !lng || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+      setError(t("location.coords_required"));
+      setSubmitting(false);
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const result = await createPlaceAction(formData);
 

@@ -39,12 +39,12 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Private personal notes and collaborative comments on each place. Deletion is restricted to administrators.
 
 * **📊 Personal Statistics, Annual «Wrapped» & Admin Analytics:**
-  * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary by year.
+  * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
   * Extended platform-wide analytics for administrators: KPIs, 30-day activity pulse, top contributors, popular places, and catalog breakdowns.
 
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
-  * Saved filter presets (`💾`), multi-criteria sorting, and live searchable taxonomies with progressive «Show more» loading.
+  * Saved filter presets (`💾`) with persistent label, multi-criteria sorting, centered quick actions, and live searchable taxonomies with progressive «Show more» loading.
   * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview and downloadable sample templates.
   * Bulk place backup downloads directly from the admin management table.
 
@@ -52,10 +52,11 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Full support for multiple languages (Spanish 🇪🇸 / English 🇬🇧) powered by JSON dictionaries and CSV sync architecture.
   * Header language selector persisted via cookies, plus CLI synchronization scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
-* **📱 Mobile Experience (PWA), Offline Cache & Dark/Light Mode:**
+* **📱 Mobile Experience (PWA), Full Offline Cache & Dark/Light Mode:**
   * Clean exclusive mobile tabs (`[🗺️ Map] | [📋 List]`) and bottom floating summary card on map pin selection with direct directions and synchronized jump to full place card with golden highlight.
+  * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) cleanly centered for effortless one-handed mobile navigation.
   * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.
-  * Installable on iOS and Android home screens as a Progressive Web App with **Service Worker offline caching** (`/sw.js`) for favorites and pending places.
+  * Installable on iOS and Android home screens as a Progressive Web App with **full Service Worker offline caching** (`/sw.js`) caching shell, pages, and map tiles for seamless offline browsing.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
 
 * **🛡️ Security, Auditing & Backups:**

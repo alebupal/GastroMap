@@ -271,10 +271,10 @@ export function PlacesTableManager({
   return (
     <div className="w-full space-y-4 text-left">
       {/* Barra de control y búsqueda */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-        <div className="flex items-center gap-2.5 flex-1">
-          <div className="relative flex-1 max-w-sm">
-            <span className="absolute left-3 top-2.5 text-xs text-slate-500">🔍</span>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex items-center gap-2.5 flex-1 flex-wrap sm:flex-nowrap">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <span className="absolute left-3 top-2.5 text-xs text-slate-400 dark:text-slate-500">🔍</span>
             <input
               type="text"
               value={searchQuery}
@@ -283,7 +283,7 @@ export function PlacesTableManager({
                 setCurrentPage(1);
               }}
               placeholder={t("admin_places.search_placeholder")}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+              className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
           </div>
 
@@ -303,7 +303,7 @@ export function PlacesTableManager({
               }}
               searchPlaceholder={t("location.country_placeholder")}
               className="shrink-0"
-              buttonClassName="bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700"
+              buttonClassName="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
             />
           )}
 
@@ -322,13 +322,13 @@ export function PlacesTableManager({
               }}
               searchPlaceholder={t("location.city_placeholder")}
               className="shrink-0"
-              buttonClassName="bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700"
+              buttonClassName="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
             />
           )}
         </div>
 
         {/* Acciones por lote */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-between sm:justify-end">
           {selectedIds.size > 0 && (
             <>
               <button
@@ -353,7 +353,7 @@ export function PlacesTableManager({
             </>
           )}
 
-          <span className="text-xs text-slate-400 font-medium">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {t("admin_places.showing_of", { filtered: String(filteredPlaces.length), total: String(placesList.length) })}
           </span>
         </div>
@@ -363,33 +363,160 @@ export function PlacesTableManager({
       {statusMessage && (
         <div
           className={`p-3 rounded-xl text-xs font-semibold flex items-center justify-between ${statusMessage.type === "success"
-            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/50"
-            : "bg-red-950/40 text-red-400 border border-red-900/50"
+            ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50"
+            : "bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-900/50"
             }`}
         >
           <span>{statusMessage.text}</span>
           <button
             type="button"
             onClick={() => setStatusMessage(null)}
-            className="text-xs opacity-60 hover:opacity-100 cursor-pointer"
+            className="text-xs opacity-60 hover:opacity-100 cursor-pointer ml-2"
           >
             ✕
           </button>
         </div>
       )}
 
-      {/* Tabla de Sitios */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden shadow-sm">
+      {/* Vista Móvil: Tarjetas Responsive (< md) */}
+      <div className="block md:hidden space-y-2.5">
+        {paginatedPlaces.length > 0 && (
+          <div className="flex items-center justify-between px-2 py-1 text-xs text-slate-600 dark:text-slate-400 font-semibold">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500"
+              />
+              <span>{t("admin_places.col_select_all")}</span>
+            </label>
+            <span>{paginatedPlaces.length} {t("pagination.places")}</span>
+          </div>
+        )}
+
+        {paginatedPlaces.length === 0 ? (
+          <div className="p-8 text-center text-slate-500 text-xs bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800">
+            {t("admin_places.empty_search")}
+          </div>
+        ) : (
+          paginatedPlaces.map((place) => {
+            const isChecked = selectedIds.has(place.id);
+            const hasCoords = place.latitude != null && place.longitude != null;
+
+            return (
+              <div
+                key={`m-${place.id}`}
+                className={`p-3.5 rounded-2xl border transition space-y-2.5 ${isChecked
+                  ? "bg-amber-500/10 border-amber-500/40"
+                  : "bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleSelect(place.id)}
+                      className="mt-1 rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    />
+                    <div className="min-w-0">
+                      <div className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">
+                        {place.name}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {place.city || "—"}{place.address ? ` • ${place.address}` : ""}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-2 py-0.5 rounded text-xs shrink-0">
+                    {place.priceRange}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {place.occasions.map((occ) => (
+                    <span
+                      key={occ}
+                      className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700/60"
+                    >
+                      {occ}
+                    </span>
+                  ))}
+                  {hasCoords ? (
+                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-mono font-semibold ml-auto">
+                      📍 {place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-slate-400 dark:text-slate-600 ml-auto">
+                      {t("admin_places.no_coords")}
+                    </span>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-slate-400">
+                    @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {place.googleMapsUrl && (
+                      <a
+                        href={place.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-slate-500 hover:text-blue-500 text-xs font-semibold flex items-center gap-0.5"
+                      >
+                        Maps ↗
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setEditingPlace(place)}
+                      disabled={loading}
+                      className="text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-semibold cursor-pointer"
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMergeSource(place);
+                        setMergeTargetId("");
+                        setMergeSearch("");
+                      }}
+                      disabled={loading || placesList.length < 2}
+                      className="text-slate-600 dark:text-slate-400 hover:text-amber-500 text-xs font-semibold cursor-pointer"
+                    >
+                      🔀 Fusionar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSingle(place)}
+                      disabled={loading}
+                      className="text-slate-500 hover:text-red-500 text-xs font-semibold cursor-pointer"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Tabla de Sitios para Pantallas Medianas y Grandes (hidden md:block) */}
+      <div className="hidden md:block rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+          <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300 min-w-[700px]">
+            <thead className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="p-3 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
-                    className="rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                    className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
                     title={t("admin_places.col_select_all")}
                   />
                 </th>
@@ -402,7 +529,7 @@ export function PlacesTableManager({
                 <th className="p-3 text-right">{t("admin_places.col_action")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {paginatedPlaces.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
@@ -417,7 +544,7 @@ export function PlacesTableManager({
                   return (
                     <tr
                       key={place.id}
-                      className={`hover:bg-slate-800/40 transition ${isChecked ? "bg-amber-500/5" : ""
+                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition ${isChecked ? "bg-amber-500/10 dark:bg-amber-500/10" : ""
                         }`}
                     >
                       <td className="p-3 text-center">
@@ -425,23 +552,23 @@ export function PlacesTableManager({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleSelect(place.id)}
-                          className="rounded border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
+                          className="rounded border-slate-300 dark:border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer"
                         />
                       </td>
 
                       <td className="p-3 max-w-[220px]">
-                        <div className="font-bold text-slate-100 truncate">{place.name}</div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100 truncate">{place.name}</div>
                         {place.address && (
-                          <div className="text-[11px] text-slate-500 truncate">{place.address}</div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{place.address}</div>
                         )}
                       </td>
 
-                      <td className="p-3 whitespace-nowrap text-slate-300">
-                        {place.city || <span className="text-slate-600">—</span>}
+                      <td className="p-3 whitespace-nowrap text-slate-700 dark:text-slate-300">
+                        {place.city || <span className="text-slate-400 dark:text-slate-600">—</span>}
                       </td>
 
                       <td className="p-3 whitespace-nowrap">
-                        <span className="font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-900/40 px-1.5 py-0.5 rounded text-[11px]">
+                        <span className="font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/40 px-1.5 py-0.5 rounded text-[11px]">
                           {place.priceRange}
                         </span>
                       </td>
@@ -451,7 +578,7 @@ export function PlacesTableManager({
                           {place.occasions.map((occ) => (
                             <span
                               key={occ}
-                              className="px-1.5 py-0.5 rounded-md bg-slate-800 text-[10px] text-slate-300 font-semibold"
+                              className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] text-slate-700 dark:text-slate-300 font-semibold border border-slate-200 dark:border-slate-700/60"
                             >
                               {occ}
                             </span>
@@ -461,16 +588,16 @@ export function PlacesTableManager({
 
                       <td className="p-3 whitespace-nowrap">
                         {hasCoords ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-blue-400 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
                             <span>📍</span>
                             <span>{place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}</span>
                           </span>
                         ) : (
-                          <span className="text-slate-600 text-[11px]">{t("admin_places.no_coords")}</span>
+                          <span className="text-slate-400 dark:text-slate-600 text-[11px]">{t("admin_places.no_coords")}</span>
                         )}
                       </td>
 
-                      <td className="p-3 whitespace-nowrap text-slate-400 text-[11px]">
+                      <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
                         @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
                       </td>
 
@@ -481,7 +608,7 @@ export function PlacesTableManager({
                               href={place.googleMapsUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-slate-400 hover:text-blue-400 text-xs transition"
+                              className="text-slate-400 hover:text-blue-500 text-xs transition"
                               title={t("admin_places.open_maps")}
                             >
                               ↗
@@ -491,7 +618,7 @@ export function PlacesTableManager({
                             type="button"
                             onClick={() => setEditingPlace(place)}
                             disabled={loading}
-                            className="text-slate-400 hover:text-amber-400 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.edit_title")}
                           >
                             ✏️
@@ -504,7 +631,7 @@ export function PlacesTableManager({
                               setMergeSearch("");
                             }}
                             disabled={loading || placesList.length < 2}
-                            className="text-slate-400 hover:text-amber-400 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="text-slate-400 hover:text-amber-500 text-xs transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.merge_title")}
                           >
                             🔀
@@ -513,7 +640,7 @@ export function PlacesTableManager({
                             type="button"
                             onClick={() => handleDeleteSingle(place)}
                             disabled={loading}
-                            className="text-slate-500 hover:text-red-400 text-xs transition cursor-pointer disabled:opacity-40"
+                            className="text-slate-400 hover:text-red-500 text-xs transition cursor-pointer disabled:opacity-40"
                             title={t("admin_places.delete_title")}
                           >
                             🗑️
@@ -541,7 +668,7 @@ export function PlacesTableManager({
 
       {/* Modal de fusión administrativa de duplicados */}
       {mergeSource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 text-left max-h-[90vh] flex flex-col">
             <div className="flex items-start justify-between gap-2">
               <div>

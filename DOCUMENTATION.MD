@@ -94,6 +94,8 @@ When launching on a clean database:
 
 ### 🍽️ Gastronomic Explorer (Main View)
 - **Universal Multi-field Search**: Instant live search covering every field: establishment name, city, address, public notes, personal private notes, categories/occasions, tags, author, and full collaborative comments text, with multi-term support.
+- **Centered Quick Actions & Saved Filters**: Quick access toolbar buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`, and `💾 Save filter`) ergonomically centered on mobile screens.
+- **Mandatory Coordinates with Geocoding**: When creating or editing a place, latitude and longitude are mandatory to accurately locate it on the map. Typing a street triggers automatic OpenStreetMap/Nominatim geocoding; if no coordinates are found, manual numeric fields are presented for pinpoint input.
 - **Experience Filters (Row 1)**:
   - `🌐 All`: Global catalog filtered by user access.
   - `⭐ Favorites`: Starred places for instant recall.
@@ -207,7 +209,7 @@ In the **Import / Export** modal (`📦`):
 
 - **Single Source of Truth**: App version centralized in `package.json` consumed via `src/lib/version.ts`.
 - **Drizzle ORM & TypeScript**: Typed schema models and deterministic SQL migrations in `drizzle/`.
-- **Offline PWA Cache**: Service Worker (`/sw.js`) with offline storage for wishlists and favorites without internet coverage.
+- **Offline PWA & Full Cache**: Service Worker (`/sw.js`) with offline caching for application assets, visited pages, and map tiles (`gastromap-tiles-v1`), enabling full catalog and map access without internet connection in rural areas, basements, or offline mode.
 - **Automated Tests**: Native test runner via `npm test` verifying i18n, Haversine formulas, security, and GPX output.
 
 ---

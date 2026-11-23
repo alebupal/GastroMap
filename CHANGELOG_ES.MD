@@ -5,9 +5,22 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
-## [0.1.0] - 2026-11-20
+## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Caché Offline Integral para PWA**:
+  - Nuevo Service Worker con precaché de la aplicación, almacenamiento dinámico de teselas de mapas (`gastromap-tiles-v1`), assets inmutables y documentos HTML con fallback automático, permitiendo navegar y consultar locales sin conexión a internet desde el móvil instalado.
+- **Coordenadas Obligatorias con Geocodificación y Fallback Manual**:
+  - Las coordenadas (latitud y longitud) son ahora estrictamente obligatorias al registrar o editar un establecimiento.
+  - Al introducir una calle se intenta resolver la localización automáticamente con OpenStreetMap/Nominatim; si no se detectan coordenadas o la búsqueda no arroja resultados, se despliegan campos numéricos manuales para indicar latitud y longitud a mano.
+- **Rediseño Responsive y Soporte Dual Claro/Oscuro en la Tabla de Administración**:
+  - Vista adaptativa de tarjetas compactas en pantallas móviles (`< md`), contenedor con desplazamiento horizontal suave y estilización de contraste mejorada para el modo claro y el modo oscuro.
+- **Renovación del Resumen Anual GastroMap Wrapped y Estadísticas**:
+  - Retiradas las métricas obsoletas de visitas con fecha, sustituidas por sitios probados, favoritos guardados, sitios aportados y comentarios/reseñas aportadas en el año.
+- **Jerarquía Visual y Corrección de Z-Index en el Mapa**:
+  - Corregida la superposición del botón flotante «🖐️ Mover mapa» sobre el modal de estadísticas y los diálogos modales de la aplicación.
+- **Centrado de Acciones Rápidas y Etiqueta en «Guardar filtro»**:
+  - Botones inferiores de herramientas bajo «Añadir sitio» centrados estéticamente en dispositivos móviles y etiqueta de texto visible para «💾 Guardar filtro».
 - **Animación de Giro del Dado y Rediseño de Acciones en «Al azar»**:
   - Animación continua de rotación en el dado (`animate-spin`) durante el proceso de tirada aleatoria.
   - Distribución equilibrada en cuadrícula de 2 columnas para «Ver en el listado» y «Ver en el mapa» evitando saltos de línea antiestéticos y eliminando emojis duplicados en los botones.

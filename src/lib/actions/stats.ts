@@ -27,8 +27,10 @@ export interface UserWrappedData {
   availableYears: number[];
   visitsCount: number;
   uniquePlacesVisited: number;
+  favoritesCount: number;
   placesAdded: number;
   commentsPosted: number;
+  ratingsCount: number;
   topRatedPlace: { name: string; city: string | null; rating: number } | null;
   topCity: string | null;
   topOccasion: { name: string; icon: string; count: number } | null;
@@ -252,6 +254,13 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
   const bestOccEntry = Array.from(yearOccMap.entries()).sort((a, b) => b[1] - a[1])[0];
   const bestTagEntry = Array.from(yearTagMap.entries()).sort((a, b) => b[1] - a[1])[0];
 
+  const yearFavoritesCount = myInteractions.filter(
+    (i) => i.favorite && (new Date(i.updatedAt).getFullYear() === targetYear || targetYear === new Date().getFullYear())
+  ).length;
+  const yearRatingsCount = myInteractions.filter(
+    (i) => i.rating !== null && new Date(i.updatedAt).getFullYear() === targetYear
+  ).length;
+
   return {
     visitedCount,
     pendingCount,
@@ -269,8 +278,10 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
       availableYears,
       visitsCount: yearVisits.length,
       uniquePlacesVisited: yearPlaceIds.length,
+      favoritesCount: yearFavoritesCount,
       placesAdded: yearPlacesAdded,
       commentsPosted: yearCommentsPosted,
+      ratingsCount: yearRatingsCount,
       topRatedPlace,
       topCity: bestCity,
       topOccasion: bestOccEntry

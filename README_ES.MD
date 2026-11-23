@@ -37,12 +37,12 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Solo los administradores pueden eliminar lugares.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Analítica Admin:**
-  * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año.
+  * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
   * Panel de estadísticas globales completas para administradores: KPIs de plataforma, pulso de los últimos 30 días, top contribuidores, sitios más populares y distribuciones del catálogo.
 
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
-  * Filtros guardados (`💾`), ordenación multicriterio y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
+  * Filtros guardados (`💾`) con etiqueta explícita, ordenación multicriterio, acciones rápidas centradas y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
   * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa y plantillas de ejemplo descargables por formato.
   * Copia de seguridad (backup) en lote de sitios seleccionados desde la tabla de administración.
 
@@ -50,10 +50,11 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Soporte completo para múltiples idiomas (Español 🇪🇸 / English 🇬🇧) con arquitectura extensible por JSON y CSV.
   * Selector integrado en la cabecera persistente y scripts CLI para sincronizar con hojas de cálculo (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
-* **📱 Experiencia Móvil (PWA), Caché Offline y Modo Oscuro / Claro:**
+* **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
   * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
+  * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) perfectamente centrados y cómodos para uso táctil.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
-  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline** (`/sw.js`) para consultar favoritos y pendientes sin conexión.
+  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline integral** (`/sw.js`) que almacena la aplicación, páginas y teselas de mapas para uso sin conexión a internet.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC).
 
 * **🛡️ Seguridad, Auditoría y Copias de Seguridad:**

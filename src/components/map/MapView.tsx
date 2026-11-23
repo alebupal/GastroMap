@@ -491,7 +491,7 @@ export default function MapView({
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
       <div ref={mapContainerRef} className="w-full h-full z-0" />
       {/* Botón flotante móvil para alternar entre interactuar con el mapa o hacer scroll vertical */}
-      <div className="absolute top-3 right-3 z-[1000] lg:hidden">
+      <div className="absolute top-3 right-3 z-30 lg:hidden">
         <button
           type="button"
           onClick={() => {

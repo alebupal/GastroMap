@@ -5,9 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-11-20
+## [0.1.0] - 2026-11-23
 
 ### Added
+- **Full Offline PWA Caching**:
+  - Enhanced Service Worker featuring core application precaching, map tile caching (`gastromap-tiles-v1`), immutable asset caching, and HTML page fallbacks, enabling complete offline functionality when installed on mobile devices.
+- **Mandatory Coordinates with Geocoding and Manual Fallback**:
+  - Latitude and longitude are now strictly required when creating or editing a place.
+  - Entering a street address triggers automatic geocoding via OpenStreetMap/Nominatim; if no coordinates are found, manual numeric input fields are presented so users can enter them directly.
+- **Responsive Redesign & Dual Light/Dark Mode in Admin Places Table**:
+  - Touch-friendly mobile card layout for screens under `md`, horizontal scroll container, and refreshed contrast styling for seamless light and dark mode experiences.
+- **Revamped GastroMap Wrapped and Activity Overview**:
+  - Removed outdated visit date counts in favor of places tried, saved favorites, catalog contributions, and reviews posted during the year.
+- **Z-Index Layering Fix for Map Controls**:
+  - Fixed floating «🖐️ Move map» button incorrectly overlaying the statistics modal and other full-screen dialogs.
+- **Centered Quick Actions & Save Filter Button Label**:
+  - Centered quick action buttons below «Add place» on mobile viewports and restored persistent text label on the «💾 Save filter» button.
 - **Spinning Dice Animation & Modal Action Redesign in «Random»**:
   - Continuous rotating animation on the header dice (`animate-spin`) while picking a random place.
   - Balanced 2-column grid layout for «View in list» and «View on map» eliminating awkward text breaks and removing duplicated emojis.

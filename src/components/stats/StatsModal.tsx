@@ -74,7 +74,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 text-left">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 text-left">
       <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden">
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
@@ -175,21 +175,21 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <div className="grid grid-cols-3 gap-2.5 text-center">
                 <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                   <div className="text-lg font-black text-slate-800 dark:text-slate-100">
-                    {stats.totalVisitsCount}
-                  </div>
-                  <div className="text-[10px] font-semibold text-slate-500">📅 Visitas reg.</div>
-                </div>
-                <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
-                  <div className="text-lg font-black text-slate-800 dark:text-slate-100">
                     {stats.contributedPlacesCount}
                   </div>
-                  <div className="text-[10px] font-semibold text-slate-500">🍽️ Aportados</div>
+                  <div className="text-[10px] font-semibold text-slate-500">🍽️ {t("stats.contributed")}</div>
                 </div>
                 <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                   <div className="text-lg font-black text-slate-800 dark:text-slate-100">
                     {stats.commentsCount}
                   </div>
-                  <div className="text-[10px] font-semibold text-slate-500">💬 Comentarios</div>
+                  <div className="text-[10px] font-semibold text-slate-500">💬 {t("stats.comments")}</div>
+                </div>
+                <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                  <div className="text-lg font-black text-slate-800 dark:text-slate-100">
+                    {stats.topCities.length}
+                  </div>
+                  <div className="text-[10px] font-semibold text-slate-500">🏙️ {t("stats.cities_count")}</div>
                 </div>
               </div>
 
@@ -254,19 +254,19 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   <div className="p-3 rounded-2xl bg-slate-950/15 backdrop-blur-xs">
                     <div className="text-2xl font-black">{stats.wrapped.uniquePlacesVisited}</div>
-                    <div className="text-[11px] font-bold opacity-85">Sitios probados</div>
+                    <div className="text-[11px] font-bold opacity-85">{t("stats.wrapped_tested")}</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-slate-950/15 backdrop-blur-xs">
-                    <div className="text-2xl font-black">{stats.wrapped.visitsCount}</div>
-                    <div className="text-[11px] font-bold opacity-85">Visitas con fecha</div>
+                    <div className="text-2xl font-black">{stats.wrapped.favoritesCount}</div>
+                    <div className="text-[11px] font-bold opacity-85">{t("stats.wrapped_favorites")}</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-slate-950/15 backdrop-blur-xs">
                     <div className="text-2xl font-black">{stats.wrapped.placesAdded}</div>
-                    <div className="text-[11px] font-bold opacity-85">Sitios añadidos</div>
+                    <div className="text-[11px] font-bold opacity-85">{t("stats.wrapped_added")}</div>
                   </div>
                   <div className="p-3 rounded-2xl bg-slate-950/15 backdrop-blur-xs">
                     <div className="text-2xl font-black">{stats.wrapped.commentsPosted}</div>
-                    <div className="text-[11px] font-bold opacity-85">Comentarios</div>
+                    <div className="text-[11px] font-bold opacity-85">{t("stats.wrapped_comments")}</div>
                   </div>
                 </div>
 
