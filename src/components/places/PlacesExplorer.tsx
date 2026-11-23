@@ -1860,6 +1860,9 @@ export function PlacesExplorer({
         occasions={occasionsList}
         selectedOccasions={selectedOccasions}
         onSelectOccasions={(occs) => setSelectedOccasions(occs)}
+        tags={sortedTags}
+        selectedTags={selectedTags}
+        onSelectTags={(tgs) => setSelectedTags(tgs)}
         selectedPrice={selectedPrices[0] || null}
         onSelectPrice={(p) => setSelectedPrices(p ? [p] : [])}
         experienceFilter={experienceFilter}
@@ -1871,6 +1874,7 @@ export function PlacesExplorer({
         }}
         radiusKm={radiusKm || 10}
         onChangeRadius={(km) => setRadiusKm(km)}
+        matchingCount={filteredPlaces.length}
         onReset={resetAllFilters}
       />
 
