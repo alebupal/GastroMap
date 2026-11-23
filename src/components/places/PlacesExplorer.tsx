@@ -941,12 +941,74 @@ export function PlacesExplorer({
                 : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
             }`}
           >
-            <span className="material-symbols-outlined text-[14px] leading-none text-amber-500">
+            <span
+              className={`material-symbols-outlined text-[14px] leading-none ${
+                experienceFilter === "favorite" ? "text-white" : "text-amber-500"
+              }`}
+            >
               star
             </span>
             <span>{t("places.favorites")}</span>
             <span className="text-[11px] opacity-75 font-extrabold">
               {initialPlaces.filter((p) => p.isFavorite).length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setExperienceFilter((prev) => (prev === "pending" ? "all" : "pending"));
+              setCurrentPage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+              experienceFilter === "pending"
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            <span
+              className={`material-symbols-outlined text-[14px] leading-none ${
+                experienceFilter === "pending" ? "text-white" : "text-orange-600 dark:text-orange-400"
+              }`}
+            >
+              schedule
+            </span>
+            <span>{t("places.want_to_go")}</span>
+            <span className="text-[11px] opacity-75 font-extrabold">
+              {initialPlaces.filter((p) => p.personalStatus === "pending").length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setExperienceFilter((prev) =>
+                prev === "visited_by_me" ? "all" : "visited_by_me"
+              );
+              setCurrentPage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 cursor-pointer ${
+              experienceFilter === "visited_by_me"
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200"
+            }`}
+          >
+            <span
+              className={`material-symbols-outlined text-[14px] leading-none ${
+                experienceFilter === "visited_by_me" ? "text-white" : "text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              check_circle
+            </span>
+            <span>{t("places.visited")}</span>
+            <span className="text-[11px] opacity-75 font-extrabold">
+              {
+                initialPlaces.filter(
+                  (p) =>
+                    p.personalStatus === "visited" ||
+                    (p.rating !== null && (p.rating ?? 0) > 0)
+                ).length
+              }
             </span>
           </button>
 
@@ -973,6 +1035,75 @@ export function PlacesExplorer({
               </button>
             );
           })}
+        </div>
+
+        {/* Fila 3: Tira compacta de accesos estrella (Cerca de mí, Al azar, Ciudad y Asistente) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
+          <button
+            type="button"
+            onClick={userLocation ? handleDisableLocation : handleRequestLocation}
+            disabled={isLocating}
+            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer border ${
+              userLocation
+                ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-orange-600 dark:text-orange-400"
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px] leading-none">
+              {isLocating ? "hourglass_empty" : "near_me"}
+            </span>
+            <span>{t("places.near_me")}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsRandomModalOpen(true)}
+            disabled={filteredPlaces.length === 0}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer disabled:opacity-40"
+          >
+            <span className="material-symbols-outlined text-[15px] leading-none text-amber-500">
+              casino
+            </span>
+            <span>{t("places.roulette")}</span>
+          </button>
+
+          {availableCities.length > 0 && (
+            <label
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap shrink-0 border transition ${
+                selectedCity !== "all"
+                  ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-300"
+                  : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
+                location_city
+              </span>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="bg-transparent focus:outline-none cursor-pointer font-bold max-w-[120px] truncate"
+                aria-label={t("places.city_filter")}
+              >
+                <option value="all">{t("places.all_cities")}</option>
+                {availableCities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsAssistantOpen(true)}
+            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap transition shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
+              assistant
+            </span>
+            <span>{t("places.assistant")}</span>
+          </button>
         </div>
       </section>
 
@@ -1571,6 +1702,66 @@ export function PlacesExplorer({
                 </button>
               )}
             </div>
+
+            {/* País y Grupos en móvil dentro de filtros avanzados */}
+            {(allCountries.length > 1 || myGroups.length > 0) && (
+              <div className="flex items-center gap-2 flex-wrap">
+                {allCountries.length > 1 && (
+                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold">
+                    <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                      public
+                    </span>
+                    <select
+                      value={selectedCountry}
+                      onChange={(e) => {
+                        setSelectedCountry(e.target.value);
+                        setSelectedCity("all");
+                      }}
+                      className="bg-transparent focus:outline-none cursor-pointer font-bold"
+                      aria-label={t("places.country_filter")}
+                    >
+                      <option value="all">{t("places.all_countries")}</option>
+                      {countryOptions.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
+                {myGroups.length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {myGroups.map((g) => {
+                      const active = selectedGroupFilterIds.includes(g.id);
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedGroupFilterIds((prev) =>
+                              prev.includes(g.id)
+                                ? prev.filter((id) => id !== g.id)
+                                : [...prev, g.id]
+                            )
+                          }
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                            active
+                              ? "bg-orange-600 text-white"
+                              : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-xs leading-none">
+                            group
+                          </span>
+                          <span>{g.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Rango de precios y reset en móvil */}
             <div className="flex items-center justify-between gap-2 flex-wrap">
