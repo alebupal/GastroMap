@@ -30,7 +30,6 @@ interface MapViewProps {
   className?: string;
   cartoApiKey?: string | null;
   isFiltered?: boolean;
-  onCenterChange?: (lat: number, lng: number) => void;
 }
 
 const SPAIN_CENTER: [number, number] = [40.4168, -3.7038];
@@ -110,7 +109,6 @@ export default function MapView({
   className = "w-full h-[60vh] sm:h-[500px]",
   cartoApiKey,
   isFiltered = false,
-  onCenterChange,
 }: MapViewProps) {
   const { t } = useT();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -154,13 +152,6 @@ export default function MapView({
       maxZoom: 19,
       subdomains: cartoApiKey ? "abcd" : "abc",
     }).addTo(map);
-
-    const emitCenter = () => {
-      const c = map.getCenter();
-      onCenterChange?.(c.lat, c.lng);
-    };
-    map.on("moveend", emitCenter);
-    emitCenter();
 
     // Atribución discreta
     L.control

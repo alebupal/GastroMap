@@ -303,9 +303,8 @@ export function PlacesExplorer({
     });
   }
 
-  // Geolocalización y centro real del mapa
+  // Geolocalización
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
@@ -1968,7 +1967,6 @@ export function PlacesExplorer({
                 occasionMap={occasionMap}
                 cartoApiKey={cartoApiKey}
                 isFiltered={isFiltered}
-                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
                 className="w-full h-[44vh] min-h-[300px] sm:h-[460px] lg:h-[calc(100vh-14rem)] lg:min-h-[380px]"
               />
             </div>
@@ -1977,17 +1975,6 @@ export function PlacesExplorer({
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>{t("map.cache_first_synced")}</span>
               </div>
-              {mapCenter && (
-                <div className="flex items-center gap-2 text-slate-400 text-[11px] font-mono">
-                  <span>
-                    Lat: {Math.abs(mapCenter.lat).toFixed(4)}° {mapCenter.lat >= 0 ? "N" : "S"}
-                  </span>
-                  <span>•</span>
-                  <span>
-                    Lon: {Math.abs(mapCenter.lng).toFixed(4)}° {mapCenter.lng >= 0 ? "E" : "W"}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>
