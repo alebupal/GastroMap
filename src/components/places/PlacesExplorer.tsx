@@ -18,7 +18,7 @@ import {
 } from "@/lib/actions/saved-filters";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry, resolveFilterCity } from "@/lib/location";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { MultiSearchableSelect } from "@/components/ui/MultiSearchableSelect";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
@@ -81,8 +81,8 @@ export function PlacesExplorer({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<string>("all");
-  const [selectedCity, setSelectedCity] = useState<string>("all");
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
   const [showExtraFilters, setShowExtraFilters] = useState(false);
@@ -180,58 +180,28 @@ export function PlacesExplorer({
   >("all");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
-  const [isTownFilterOpen, setIsTownFilterOpen] = useState(false);
-  const [townSearchQuery, setTownSearchQuery] = useState("");
-  const townBtnRef = useRef<HTMLButtonElement>(null);
-  const townMenuRef = useRef<HTMLDivElement>(null);
-  const [townCoords, setTownCoords] = useState({ top: 0, left: 0 });
   const urlHydratedRef = useRef(false);
+
+  function toggleCountry(country: string) {
+    setSelectedCountries((prev) =>
+      prev.includes(country) ? prev.filter((c) => c !== country) : [...prev, country]
+    );
+    setSelectedCities([]);
+    setSelectedTowns([]);
+  }
+
+  function toggleCity(city: string) {
+    setSelectedCities((prev) =>
+      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
+    );
+    setSelectedTowns([]);
+  }
 
   function toggleTown(town: string) {
     setSelectedTowns((prev) =>
       prev.includes(town) ? prev.filter((t) => t !== town) : [...prev, town]
     );
   }
-
-  useEffect(() => {
-    if (!isTownFilterOpen) return;
-    const updateTownCoords = () => {
-      if (townBtnRef.current) {
-        const rect = townBtnRef.current.getBoundingClientRect();
-        const width = 256;
-        let left = rect.left;
-        if (left + width > window.innerWidth - 12) {
-          left = Math.max(12, window.innerWidth - width - 12);
-        }
-        setTownCoords({ top: rect.bottom + 6, left });
-      }
-    };
-    updateTownCoords();
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        townBtnRef.current &&
-        !townBtnRef.current.contains(target) &&
-        townMenuRef.current &&
-        !townMenuRef.current.contains(target)
-      ) {
-        setIsTownFilterOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsTownFilterOpen(false);
-    };
-    window.addEventListener("scroll", updateTownCoords, true);
-    window.addEventListener("resize", updateTownCoords);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("scroll", updateTownCoords, true);
-      window.removeEventListener("resize", updateTownCoords);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isTownFilterOpen]);
 
   // Atajo global Ctrl+K / ⌘+K y botón lupa móvil para abrir la paleta de comandos
   useEffect(() => {
@@ -266,8 +236,8 @@ export function PlacesExplorer({
     const towns = params.get("towns");
 
     if (q) setTextSearch(q);
-    if (city) setSelectedCity(city);
-    if (country) setSelectedCountry(country);
+    if (city && city !== "all") setSelectedCities(city.split(",").filter(Boolean));
+    if (country && country !== "all") setSelectedCountries(country.split(",").filter(Boolean));
     if (price) setSelectedPrices(price.split(",").filter(Boolean));
     if (
       exp === "visited_by_me" ||
@@ -289,8 +259,8 @@ export function PlacesExplorer({
     if (typeof window === "undefined" || !urlHydratedRef.current) return;
     const params = new URLSearchParams();
     if (textSearch.trim()) params.set("q", textSearch.trim());
-    if (selectedCity !== "all") params.set("city", selectedCity);
-    if (selectedCountry !== "all") params.set("country", selectedCountry);
+    if (selectedCities.length > 0) params.set("city", selectedCities.join(","));
+    if (selectedCountries.length > 0) params.set("country", selectedCountries.join(","));
     if (selectedPrices.length > 0) params.set("price", selectedPrices.join(","));
     if (experienceFilter !== "all") params.set("exp", experienceFilter);
     if (selectedOccasions.length > 0) params.set("occ", selectedOccasions.join(","));
@@ -304,8 +274,8 @@ export function PlacesExplorer({
     }
   }, [
     textSearch,
-    selectedCity,
-    selectedCountry,
+    selectedCities,
+    selectedCountries,
     selectedPrices,
     experienceFilter,
     selectedOccasions,
@@ -497,10 +467,9 @@ export function PlacesExplorer({
     setSelectedOccasions([]);
     setSelectedTags([]);
     setSelectedPrices([]);
-    setSelectedCountry("all");
-    setSelectedCity("all");
+    setSelectedCountries([]);
+    setSelectedCities([]);
     setSelectedTowns([]);
-    setTownSearchQuery("");
     setExperienceFilter("all");
     setMinRating(null);
     setTextSearch("");
@@ -510,41 +479,50 @@ export function PlacesExplorer({
     setTagSearchQuery("");
   }
 
-  // Lista única de países y ciudades filtradas (priorizando columna country real)
-  const { allCountries, availableCities } = useMemo(() => {
-    const cSet = new Set<string>();
+  // Lista única de países y ciudades filtradas con contadores (priorizando columna country real)
+  const { allCountries, countryCounts, availableCities, cityCounts } = useMemo(() => {
+    const cMap = new Map<string, number>();
     initialPlaces.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
-      if (effectiveCountry) cSet.add(effectiveCountry);
+      if (effectiveCountry) cMap.set(effectiveCountry, (cMap.get(effectiveCountry) || 0) + 1);
     });
-    const countries = Array.from(cSet).sort((a, b) => a.localeCompare(b));
+    const countries = Array.from(cMap.keys()).sort(
+      (a, b) => (cMap.get(b) || 0) - (cMap.get(a) || 0) || a.localeCompare(b)
+    );
 
-    const citySet = new Set<string>();
+    const cityMap = new Map<string, number>();
     initialPlaces.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
-      if (selectedCountry === "all" || effectiveCountry === selectedCountry) {
+      if (selectedCountries.length === 0 || selectedCountries.includes(effectiveCountry)) {
         const filterCity = resolveFilterCity(p.city, p.address, p.country);
-        if (filterCity) citySet.add(filterCity);
+        if (filterCity) cityMap.set(filterCity, (cityMap.get(filterCity) || 0) + 1);
       }
     });
-    const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
+    const cities = Array.from(cityMap.keys()).sort(
+      (a, b) => (cityMap.get(b) || 0) - (cityMap.get(a) || 0) || a.localeCompare(b)
+    );
 
-    return { allCountries: countries, availableCities: cities };
-  }, [initialPlaces, selectedCountry]);
+    return {
+      allCountries: countries,
+      countryCounts: cMap,
+      availableCities: cities,
+      cityCounts: cityMap,
+    };
+  }, [initialPlaces, selectedCountries]);
 
-  // Pueblos / municipios disponibles cuando se selecciona una ciudad/provincia de España
+  // Pueblos / municipios disponibles cuando se selecciona una o varias ciudades/provincias de España
   const availableTowns = useMemo(() => {
-    if (selectedCity === "all") return [] as Array<{ name: string; count: number }>;
+    if (selectedCities.length === 0) return [] as Array<{ name: string; count: number }>;
     const counts = new Map<string, number>();
     initialPlaces.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (effectiveCountry !== "España") return;
-      if (selectedCountry !== "all" && effectiveCountry !== selectedCountry) return;
+      if (selectedCountries.length > 0 && !selectedCountries.includes(effectiveCountry)) return;
       const filterCity = resolveFilterCity(p.city, p.address, p.country);
-      if (filterCity !== selectedCity) return;
+      if (!selectedCities.includes(filterCity)) return;
       const rawTown = parsed.city.trim();
       if (rawTown) {
         counts.set(rawTown, (counts.get(rawTown) || 0) + 1);
@@ -553,7 +531,7 @@ export function PlacesExplorer({
     return Array.from(counts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "es"));
-  }, [initialPlaces, selectedCountry, selectedCity]);
+  }, [initialPlaces, selectedCountries, selectedCities]);
 
   const countryOptions = useMemo(() => {
     return allCountries.map((c) => {
@@ -566,17 +544,26 @@ export function PlacesExplorer({
         label: title,
         icon: countryData?.flag || "🌍",
         subtitle: subtitle !== title ? subtitle : undefined,
+        count: countryCounts.get(c) || 0,
       };
     });
-  }, [allCountries, locale]);
+  }, [allCountries, countryCounts, locale]);
 
   const cityOptions = useMemo(() => {
     return availableCities.map((city) => ({
       value: city,
       label: city,
-      icon: "📍",
+      count: cityCounts.get(city) || 0,
     }));
-  }, [availableCities]);
+  }, [availableCities, cityCounts]);
+
+  const townOptions = useMemo(() => {
+    return availableTowns.map((tw) => ({
+      value: tw.name,
+      label: tw.name,
+      count: tw.count,
+    }));
+  }, [availableTowns]);
 
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
@@ -683,17 +670,17 @@ export function PlacesExplorer({
       );
     }
 
-    // 7. Filtro por País
-    if (selectedCountry !== "all") {
-      result = result.filter(
-        (p) => (p.country || parseCityCountry(p.city, p.address).country) === selectedCountry
+    // 7. Filtro multiselección por País
+    if (selectedCountries.length > 0) {
+      result = result.filter((p) =>
+        selectedCountries.includes(p.country || parseCityCountry(p.city, p.address).country)
       );
     }
 
-    // 8. Filtro por Ciudad / Provincia
-    if (selectedCity !== "all") {
-      result = result.filter(
-        (p) => resolveFilterCity(p.city, p.address, p.country) === selectedCity
+    // 8. Filtro multiselección por Ciudad / Provincia
+    if (selectedCities.length > 0) {
+      result = result.filter((p) =>
+        selectedCities.includes(resolveFilterCity(p.city, p.address, p.country))
       );
     }
 
@@ -755,8 +742,8 @@ export function PlacesExplorer({
     selectedOccasions,
     selectedTags,
     selectedPrices,
-    selectedCountry,
-    selectedCity,
+    selectedCountries,
+    selectedCities,
     selectedTowns,
     selectedGroupFilterIds,
     experienceFilter,
@@ -774,8 +761,8 @@ export function PlacesExplorer({
     selectedOccasions,
     selectedTags,
     selectedPrices,
-    selectedCountry,
-    selectedCity,
+    selectedCountries,
+    selectedCities,
     selectedTowns,
     selectedGroupFilterIds,
     experienceFilter,
@@ -911,8 +898,8 @@ export function PlacesExplorer({
     selectedOccasions.length +
     selectedTags.length +
     selectedPrices.length +
-    (selectedCountry !== "all" ? 1 : 0) +
-    (selectedCity !== "all" ? 1 : 0) +
+    selectedCountries.length +
+    selectedCities.length +
     selectedTowns.length +
     (experienceFilter !== "all" ? 1 : 0) +
     (minRating !== null ? 1 : 0) +
@@ -955,8 +942,11 @@ export function PlacesExplorer({
         onToggleLocation={userLocation ? handleDisableLocation : handleRequestLocation}
         onOpenRandom={() => setIsRandomModalOpen(true)}
         availableCities={availableCities}
-        selectedCity={selectedCity}
-        onSelectCity={setSelectedCity}
+        selectedCity={selectedCities[0] || "all"}
+        onSelectCity={(city) => {
+          setSelectedCities(city === "all" ? [] : [city]);
+          setSelectedTowns([]);
+        }}
         onOpenAssistant={() => setIsAssistantOpen(true)}
       />
 
@@ -1369,170 +1359,70 @@ export function PlacesExplorer({
               </div>
             )}
 
-            {/* Países */}
+            {/* Países (multiselección) */}
             {allCountries.length > 0 && (
-              <SearchableSelect
-                value={selectedCountry}
-                onChange={(val) => {
-                  setSelectedCountry(val);
-                  setSelectedCity("all");
+              <MultiSearchableSelect
+                values={selectedCountries}
+                onChange={(vals) => {
+                  setSelectedCountries(vals);
+                  setSelectedCities([]);
                   setSelectedTowns([]);
-                  setIsTownFilterOpen(false);
                   setCurrentPage(1);
                 }}
                 options={countryOptions}
-                allOption={{
-                  value: "all",
-                  label: `${t("places.all_countries")} (${allCountries.length})`,
-                  icon: (
-                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
-                      public
-                    </span>
-                  ),
-                }}
+                placeholder={`${t("places.all_countries")} (${allCountries.length})`}
+                clearLabel={t("places.clear_filter")}
                 searchPlaceholder={t("location.country_placeholder")}
+                icon={
+                  <span className="material-symbols-outlined text-[16px] leading-none">
+                    public
+                  </span>
+                }
                 className="shrink-0"
               />
             )}
 
-            {/* Ciudad / Provincia */}
+            {/* Ciudades / Provincias (multiselección) */}
             {availableCities.length > 0 && (
-              <SearchableSelect
-                value={selectedCity}
-                onChange={(val) => {
-                  setSelectedCity(val);
+              <MultiSearchableSelect
+                values={selectedCities}
+                onChange={(vals) => {
+                  setSelectedCities(vals);
                   setSelectedTowns([]);
-                  setIsTownFilterOpen(false);
                   setCurrentPage(1);
                 }}
                 options={cityOptions}
-                allOption={{
-                  value: "all",
-                  label: `${t("places.all_cities")} (${availableCities.length})`,
-                  icon: (
-                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
-                      location_city
-                    </span>
-                  ),
-                }}
+                placeholder={`${t("places.all_cities")} (${availableCities.length})`}
+                clearLabel={t("places.clear_filter")}
                 searchPlaceholder={t("location.city_placeholder")}
+                icon={
+                  <span className="material-symbols-outlined text-[16px] leading-none">
+                    location_city
+                  </span>
+                }
                 className="shrink-0"
               />
             )}
 
-            {/* Pueblos / Municipios (multiselección cuando se elige una provincia de España con >1 localidad) */}
-            {selectedCity !== "all" && availableTowns.length > 1 && (
-              <div className="relative shrink-0 gm-popover-in">
-                <button
-                  ref={townBtnRef}
-                  type="button"
-                  onClick={() => {
-                    setIsTownFilterOpen((v) => !v);
-                    setTownSearchQuery("");
-                  }}
-                  aria-expanded={isTownFilterOpen}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer active:scale-95 ${
-                    selectedTowns.length > 0
-                      ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <span
-                    className={`material-symbols-outlined text-[16px] leading-none ${
-                      selectedTowns.length > 0 ? "text-white" : "text-orange-600 dark:text-orange-400"
-                    }`}
-                  >
+            {/* Pueblos / Municipios (multiselección cuando se elige provincia española con >1 localidad) */}
+            {selectedCities.length > 0 && availableTowns.length > 1 && (
+              <MultiSearchableSelect
+                values={selectedTowns}
+                onChange={(vals) => {
+                  setSelectedTowns(vals);
+                  setCurrentPage(1);
+                }}
+                options={townOptions}
+                placeholder={`${t("places.towns_filter")} (${availableTowns.length})`}
+                clearLabel={t("places.clear_filter")}
+                searchPlaceholder={t("places.search_towns_placeholder")}
+                icon={
+                  <span className="material-symbols-outlined text-[16px] leading-none">
                     holiday_village
                   </span>
-                  <span>
-                    {selectedTowns.length === 0
-                      ? `${t("places.towns_filter")} (${availableTowns.length})`
-                      : selectedTowns.length === 1
-                      ? selectedTowns[0]
-                      : `${t("places.towns_filter")} (${selectedTowns.length})`}
-                  </span>
-                  <span className="material-symbols-outlined text-sm leading-none opacity-75">
-                    {isTownFilterOpen ? "expand_less" : "expand_more"}
-                  </span>
-                </button>
-
-                {isTownFilterOpen &&
-                  typeof document !== "undefined" &&
-                  createPortal(
-                    <div
-                      ref={townMenuRef}
-                      style={{
-                        position: "fixed",
-                        top: `${townCoords.top}px`,
-                        left: `${townCoords.left}px`,
-                      }}
-                      className="z-[9999] w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
-                    >
-                      <div className="relative shrink-0">
-                        <span className="material-symbols-outlined text-sm text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
-                          search
-                        </span>
-                        <input
-                          type="text"
-                          value={townSearchQuery}
-                          onChange={(e) => setTownSearchQuery(e.target.value)}
-                          placeholder={t("places.search_towns_placeholder")}
-                          autoFocus
-                          className="w-full px-2.5 py-1.5 pl-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 transition"
-                        />
-                      </div>
-
-                      {selectedTowns.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTowns([])}
-                          className="w-full px-2.5 py-1 rounded-xl text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer text-left shrink-0"
-                        >
-                          {t("places.clear_filter")} ({selectedTowns.length})
-                        </button>
-                      )}
-
-                      <div className="overflow-y-auto space-y-0.5 pr-0.5">
-                        {availableTowns
-                          .filter(
-                            (tw) =>
-                              !townSearchQuery.trim() ||
-                              tw.name.toLowerCase().includes(townSearchQuery.trim().toLowerCase())
-                          )
-                          .map((tw) => {
-                            const active = selectedTowns.includes(tw.name);
-                            return (
-                              <button
-                                key={tw.name}
-                                type="button"
-                                onClick={() => toggleTown(tw.name)}
-                                className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between gap-2 transition cursor-pointer ${
-                                  active
-                                    ? "bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-bold"
-                                    : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium"
-                                }`}
-                              >
-                                <span className="inline-flex items-center gap-2 min-w-0">
-                                  <span
-                                    className={`material-symbols-outlined text-sm leading-none shrink-0 ${
-                                      active ? "text-orange-600 dark:text-orange-400" : "text-slate-300 dark:text-slate-600"
-                                    }`}
-                                  >
-                                    {active ? "check_box" : "check_box_outline_blank"}
-                                  </span>
-                                  <span className="truncate">{tw.name}</span>
-                                </span>
-                                <span className="text-[10px] font-bold text-slate-400 shrink-0">
-                                  {tw.count}
-                                </span>
-                              </button>
-                            );
-                          })}
-                      </div>
-                    </div>,
-                    document.body
-                  )}
-              </div>
+                }
+                className="shrink-0 gm-popover-in"
+              />
             )}
 
             {/* Precios */}
@@ -1681,64 +1571,111 @@ export function PlacesExplorer({
 
           {/* Secciones estructuradas exclusivas de móvil: Ubicación, Presupuesto y Grupos */}
           <div className="lg:hidden space-y-3.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-            {/* 1. Ubicación (País + Ciudad en 2 columnas) */}
+            {/* 1. Ubicación (Países, Ciudades y Pueblos multiselección en móvil) */}
             {(allCountries.length > 0 || availableCities.length > 0) && (
-              <div className="space-y-1.5">
-                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
-                  {t("places.country_filter")} / {t("places.city_filter")}
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  {allCountries.length > 0 && (
-                    <label className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 min-w-0">
-                      <span className="material-symbols-outlined text-[16px] text-orange-600 leading-none shrink-0">
-                        public
+              <div className="space-y-2.5">
+                {allCountries.length > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between px-0.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs text-orange-600 leading-none">
+                          public
+                        </span>
+                        <span>
+                          {t("places.country_filter")} ({allCountries.length})
+                        </span>
                       </span>
-                      <select
-                        value={selectedCountry}
-                        onChange={(e) => {
-                          setSelectedCountry(e.target.value);
-                          setSelectedCity("all");
-                        }}
-                        className="w-full min-w-0 bg-transparent focus:outline-none cursor-pointer font-bold truncate"
-                        aria-label={t("places.country_filter")}
-                      >
-                        <option value="all">{t("places.all_countries")}</option>
-                        {countryOptions.map((c) => (
-                          <option key={c.value} value={c.value}>
-                            {c.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
+                      {selectedCountries.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCountries([]);
+                            setSelectedCities([]);
+                            setSelectedTowns([]);
+                          }}
+                          className="text-[10px] font-bold text-rose-500 cursor-pointer"
+                        >
+                          {t("places.clear_filter")} ({selectedCountries.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {countryOptions.map((c) => {
+                        const active = selectedCountries.includes(c.value);
+                        return (
+                          <button
+                            key={c.value}
+                            type="button"
+                            onClick={() => toggleCountry(c.value)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
+                              active
+                                ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                                : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            <span>{c.icon}</span>
+                            <span>{c.label}</span>
+                            <span className={`text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}>
+                              {c.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-                  {availableCities.length > 0 && (
-                    <label className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 min-w-0">
-                      <span className="material-symbols-outlined text-[16px] text-orange-600 leading-none shrink-0">
-                        location_city
+                {availableCities.length > 0 && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between px-0.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs text-orange-600 leading-none">
+                          location_city
+                        </span>
+                        <span>
+                          {t("places.city_filter")} ({availableCities.length})
+                        </span>
                       </span>
-                      <select
-                        value={selectedCity}
-                        onChange={(e) => {
-                          setSelectedCity(e.target.value);
-                          setSelectedTowns([]);
-                        }}
-                        className="w-full min-w-0 bg-transparent focus:outline-none cursor-pointer font-bold truncate"
-                        aria-label={t("places.city_filter")}
-                      >
-                        <option value="all">{t("places.all_cities")}</option>
-                        {availableCities.map((city) => (
-                          <option key={city} value={city}>
-                            {city}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
-                </div>
+                      {selectedCities.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCities([]);
+                            setSelectedTowns([]);
+                          }}
+                          className="text-[10px] font-bold text-rose-500 cursor-pointer"
+                        >
+                          {t("places.clear_filter")} ({selectedCities.length})
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                      {cityOptions.map((city) => {
+                        const active = selectedCities.includes(city.value);
+                        return (
+                          <button
+                            key={city.value}
+                            type="button"
+                            onClick={() => toggleCity(city.value)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
+                              active
+                                ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                                : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                            }`}
+                          >
+                            <span>{city.label}</span>
+                            <span className={`text-[10px] ${active ? "text-white/80" : "text-slate-400"}`}>
+                              {city.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Pueblos / Municipios en móvil (multiselección cuando hay >1 localidad en España) */}
-                {selectedCity !== "all" && availableTowns.length > 1 && (
+                {selectedCities.length > 0 && availableTowns.length > 1 && (
                   <div className="pt-1.5 space-y-1.5 gm-panel-reveal">
                     <div className="flex items-center justify-between px-0.5">
                       <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
@@ -2411,32 +2348,28 @@ export function PlacesExplorer({
                         <span className="material-symbols-outlined text-xs leading-none">close</span>
                       </button>
                     )}
-                    {selectedCountry !== "all" && (
+                    {selectedCountries.map((c) => (
                       <button
+                        key={c}
                         type="button"
-                        onClick={() => {
-                          setSelectedCountry("all");
-                          setSelectedCity("all");
-                        }}
+                        onClick={() => toggleCountry(c)}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
                       >
-                        <span>{selectedCountry}</span>
+                        <span>{c}</span>
                         <span className="material-symbols-outlined text-xs leading-none">close</span>
                       </button>
-                    )}
-                    {selectedCity !== "all" && (
+                    ))}
+                    {selectedCities.map((city) => (
                       <button
+                        key={city}
                         type="button"
-                        onClick={() => {
-                          setSelectedCity("all");
-                          setSelectedTowns([]);
-                        }}
+                        onClick={() => toggleCity(city)}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
                       >
-                        <span>{selectedCity}</span>
+                        <span>{city}</span>
                         <span className="material-symbols-outlined text-xs leading-none">close</span>
                       </button>
-                    )}
+                    ))}
                     {selectedTowns.map((tw) => (
                       <button
                         key={tw}
@@ -2764,14 +2697,18 @@ export function PlacesExplorer({
         radiusKm={radiusKm || 10}
         onChangeRadius={(km) => setRadiusKm(km)}
         countries={countryOptions.map((c) => ({ value: c.value, label: c.label }))}
-        selectedCountry={selectedCountry}
+        selectedCountry={selectedCountries[0] || "all"}
         onSelectCountry={(country) => {
-          setSelectedCountry(country);
-          setSelectedCity("all");
+          setSelectedCountries(country === "all" ? [] : [country]);
+          setSelectedCities([]);
+          setSelectedTowns([]);
         }}
         cities={availableCities}
-        selectedCity={selectedCity}
-        onSelectCity={(city) => setSelectedCity(city)}
+        selectedCity={selectedCities[0] || "all"}
+        onSelectCity={(city) => {
+          setSelectedCities(city === "all" ? [] : [city]);
+          setSelectedTowns([]);
+        }}
         matchingCount={filteredPlaces.length}
         onReset={resetAllFilters}
       />
