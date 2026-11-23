@@ -116,7 +116,7 @@ export function LanguageSelector({
           aria-label={t("common.language")}
           className={`absolute ${
             fullWidth ? "left-0 right-0" : "right-0 min-w-[164px]"
-          } top-full mt-2 max-h-64 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl dark:shadow-2xl z-[1200] p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150`}
+          } top-full mt-2 max-h-64 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl dark:shadow-2xl z-[1200] p-1.5 space-y-0.5 gm-popover-in`}
         >
           {options.length > 6 && (
             <div className="p-1 pb-1.5">

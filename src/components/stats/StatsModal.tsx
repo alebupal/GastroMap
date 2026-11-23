@@ -69,10 +69,13 @@ function MiniBarList({
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-slate-800 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${
+                    className={`h-full rounded-full gm-bar-grow ${
                       isTop ? topBarClass : restBarClass
                     }`}
-                    style={{ width: `${Math.max(8, Math.round((item.count / max) * 100))}%` }}
+                    style={{
+                      width: `${Math.max(8, Math.round((item.count / max) * 100))}%`,
+                      animationDelay: `${idx * 45}ms`,
+                    }}
                   />
                 </div>
               </div>
@@ -257,12 +260,12 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
+      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden">
+      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo Stitch */}
         <div className="px-5 sm:px-6 pt-5 pb-3 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3">
@@ -329,7 +332,18 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
         {/* Contenido */}
         <div className="px-5 sm:px-6 pb-6 pt-1 overflow-y-auto flex-1 space-y-4">
           {loading || !stats ? (
-            <p className="text-xs text-slate-400 text-center py-12">{t("common.loading")}</p>
+            <div className="space-y-4 py-2" aria-label={t("common.loading")}>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="h-24 rounded-2xl gm-shimmer" />
+                ))}
+              </div>
+              <div className="h-12 rounded-2xl gm-shimmer" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="h-44 rounded-2xl gm-shimmer" />
+                <div className="h-44 rounded-2xl gm-shimmer" />
+              </div>
+            </div>
           ) : activeTab === "overview" ? (
             <>
               {/* 4 KPIs principales estilo Stitch */}

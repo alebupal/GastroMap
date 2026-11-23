@@ -167,7 +167,10 @@ export function PlaceVisitsModal({
               {t("notes_visits.visits_history")}
             </h4>
             {loading ? (
-              <p className="text-xs text-slate-400 text-center py-4">{t("common.loading")}</p>
+              <div className="space-y-2 py-1" aria-label={t("common.loading")}>
+                <div className="h-14 rounded-2xl gm-shimmer" />
+                <div className="h-14 rounded-2xl gm-shimmer" />
+              </div>
             ) : visits.length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-3">
                 {t("notes_visits.no_visits_yet")}

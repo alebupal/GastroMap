@@ -95,12 +95,12 @@ export function RandomPickerModal({
 
   return (
     <div
-      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200 text-left"
+      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 overflow-hidden space-y-5">
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 overflow-hidden space-y-5 gm-modal-in">
         {/* Brillo cálido decorativo superior derecho */}
         <div
           aria-hidden="true"
@@ -174,8 +174,9 @@ export function RandomPickerModal({
             </div>
 
             <div
+              key={isSpinning ? "spinning" : `winner-${selectedPlace.id}`}
               className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 sm:p-5 space-y-3.5 transition-all duration-150 ${
-                isSpinning ? "scale-[0.98] opacity-75" : "scale-100 opacity-100 shadow-sm"
+                isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
               }`}
             >
               <div className="flex items-start gap-3.5">

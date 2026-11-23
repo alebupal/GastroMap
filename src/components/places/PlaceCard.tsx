@@ -130,9 +130,9 @@ export function PlaceCard({
   return (
     <article
       id={`place-card-${place.id}`}
-      className={`w-full p-4 rounded-2xl border transition-all duration-200 text-left flex flex-col justify-between gap-3 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md relative ${
+      className={`w-full p-4 rounded-2xl border gm-card-hover text-left flex flex-col justify-between gap-3 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md relative ${
         isSelected
-          ? "ring-2 ring-orange-500/50 border-orange-500 shadow-md"
+          ? "ring-2 ring-orange-500/50 border-orange-500 shadow-md gm-focus-pulse"
           : "border-slate-200/80 dark:border-slate-800"
       }`}
     >
@@ -186,7 +186,8 @@ export function PlaceCard({
               aria-label={favorite ? t("places.remove_favorite") : t("places.add_favorite")}
             >
               <span
-                className={`material-symbols-outlined text-lg leading-none ${favorite ? "text-red-500" : ""}`}
+                key={favorite ? "fav-on" : "fav-off"}
+                className={`material-symbols-outlined text-lg leading-none ${favorite ? "text-red-500 gm-pop" : ""}`}
                 style={favorite ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
                 favorite
@@ -294,9 +295,10 @@ export function PlaceCard({
             }`}
           >
             <span
+              key={personalStatus === "visited" ? "vis-on" : "vis-off"}
               className={`material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0 ${
                 personalStatus === "visited"
-                  ? "text-white"
+                  ? "text-white gm-pop"
                   : "text-emerald-600 dark:text-emerald-400"
               }`}
             >

@@ -31,7 +31,7 @@ function AdminBarCard({
         </h4>
       </div>
       <div className="space-y-2.5">
-        {items.map((item) => (
+        {items.map((item, idx) => (
           <div key={item.label} className="space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
@@ -45,8 +45,11 @@ function AdminBarCard({
             </div>
             <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div
-                className={`h-full rounded-full ${barColor} transition-all duration-300`}
-                style={{ width: `${Math.max(8, Math.round((item.count / max) * 100))}%` }}
+                className={`h-full rounded-full ${barColor} gm-bar-grow`}
+                style={{
+                  width: `${Math.max(8, Math.round((item.count / max) * 100))}%`,
+                  animationDelay: `${idx * 40}ms`,
+                }}
               />
             </div>
           </div>
@@ -77,8 +80,16 @@ export function AdminStatsPanel() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-12 text-center text-xs text-slate-400">
-        {t("admin_stats.loading")}
+      <div className="w-full space-y-5" aria-label={t("admin_stats.loading")}>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-28 rounded-3xl gm-shimmer" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="h-56 rounded-3xl gm-shimmer" />
+          <div className="h-56 rounded-3xl gm-shimmer" />
+        </div>
       </div>
     );
   }

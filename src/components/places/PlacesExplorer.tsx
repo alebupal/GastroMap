@@ -2263,7 +2263,7 @@ export function PlacesExplorer({
       {/* Barra flotante del Comparador de Establecimientos (hasta 3 sitios) */}
       {compareIds.length > 0 && (
         <div className="fixed bottom-20 lg:bottom-5 left-1/2 -translate-x-1/2 z-[955] max-w-[calc(100vw-1.5rem)]">
-          <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
+          <div className="gm-slide-up inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
             <span className="text-xs font-bold flex items-center gap-1.5">
               <span className="material-symbols-outlined text-base text-orange-400 leading-none">compare_arrows</span>
               <span>{t("places.compare_counter", { count: compareIds.length })}</span>
@@ -2363,7 +2363,7 @@ export function PlacesExplorer({
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}
       {selectedPlace && activeMobileView === "map" && (
-        <div className="lg:hidden fixed bottom-20 left-3 right-3 z-[955] p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
+        <div className="lg:hidden fixed bottom-20 left-3 right-3 z-[955] p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-md gm-slide-up">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -2381,8 +2381,9 @@ export function PlacesExplorer({
                 {selectedPlace.name}
               </h4>
               {selectedPlace.address && (
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                  📍 {selectedPlace.address}
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs text-orange-600 leading-none shrink-0">location_on</span>
+                  <span className="truncate">{selectedPlace.address}</span>
                 </p>
               )}
             </div>

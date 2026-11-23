@@ -77,7 +77,7 @@ export function CustomSelect<T extends string = string>({
           aria-label={ariaLabel}
           className={`absolute ${
             align === "left" ? "left-0" : "right-0"
-          } top-full mt-1.5 min-w-[168px] max-h-64 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl dark:shadow-2xl z-[1050] p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150`}
+          } top-full mt-1.5 min-w-[168px] max-h-64 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl dark:shadow-2xl z-[1050] p-1.5 space-y-0.5 gm-popover-in`}
         >
           {options.map((opt) => {
             const active = opt.value === value;
