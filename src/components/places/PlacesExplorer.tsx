@@ -2184,7 +2184,7 @@ export function PlacesExplorer({
 
       {/* Barra flotante del Comparador de Establecimientos (hasta 3 sitios) */}
       {compareIds.length > 0 && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40">
+        <div className="fixed bottom-20 lg:bottom-5 left-1/2 -translate-x-1/2 z-[955] max-w-[calc(100vw-1.5rem)]">
           <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
             <span className="text-xs font-bold flex items-center gap-1.5">
               <span>⚖️</span>

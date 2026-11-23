@@ -240,8 +240,10 @@ export function AdminDashboard({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-            <LanguageSelector />
+            <div className="hidden sm:flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageSelector />
+            </div>
 
             {/* Menú desplegable de usuario en el header (igual que en la app principal) */}
             <div className="relative shrink-0" ref={userMenuRef}>
@@ -279,6 +281,11 @@ export function AdminDashboard({
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">
                       {currentUser.email}
                     </p>
+                  </div>
+
+                  <div className="sm:hidden flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <ThemeToggle />
+                    <LanguageSelector />
                   </div>
 
                   <div className="pt-1 space-y-0.5 text-xs">

@@ -28,6 +28,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -73,7 +74,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased min-h-screen flex flex-col transition-colors duration-200">
+      <body className="antialiased min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
         <I18nProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <ToastProvider>{children}</ToastProvider>

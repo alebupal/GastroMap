@@ -232,10 +232,11 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             </Link>
             <Link
               href="/"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shrink-0"
+              aria-label="Volver al explorador"
             >
               <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-              <span>Volver al explorador</span>
+              <span className="hidden sm:inline">Volver al explorador</span>
             </Link>
           </div>
 
@@ -303,25 +304,25 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("docs")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "docs"
+                className={`px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${activeTab === "docs"
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                   }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">book</span>
-                <span>Guía de uso</span>
+                <span className="truncate">Guía de uso</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab("changelog")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "changelog"
+                className={`px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${activeTab === "changelog"
                     ? "bg-orange-600 text-white shadow-sm"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                   }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">history</span>
-                <span>Changelog</span>
+                <span className="truncate">Changelog</span>
               </button>
 
               <button

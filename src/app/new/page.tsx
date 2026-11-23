@@ -5,6 +5,7 @@ import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { NewPlaceForm } from "@/components/places/NewPlaceForm";
 import { UserHeader } from "@/components/profile/UserHeader";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
@@ -90,8 +91,8 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
         </main>
       </div>
 
-      {/* Pie de página minimalista coherente */}
-      <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-5 mt-8">
+      {/* Pie de página minimalista coherente (espacio extra en móvil para MobileBottomNav) */}
+      <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-5 pb-24 lg:pb-5 mt-8">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <GastroMapIcon className="w-5 h-5 shrink-0 shadow-xs rounded-[28%]" />
@@ -129,6 +130,8 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
           </div>
         </div>
       </footer>
+
+      <MobileBottomNav />
     </div>
   );
 }
