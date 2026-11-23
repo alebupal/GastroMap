@@ -1808,7 +1808,7 @@ export function PlacesExplorer({
                   {(isTagsExpanded
                     ? t("places.hide_search")
                     : t("places.search_show_more")
-                  ).replace(/^[🔍▲]\s*/, "")}
+                  ).replace(/^[^\p{L}\p{N}]+/u, "")}
                 </span>
               </button>
             </div>
