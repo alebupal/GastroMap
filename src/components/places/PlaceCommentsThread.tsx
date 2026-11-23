@@ -478,7 +478,7 @@ export function PlaceCommentsThread({
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-slate-100 tracking-tight truncate">
-                  Comentarios y Notas: {placeName}
+                  {t("ui.comments_and_notes", { name: placeName })}
                 </h3>
                 {placeCity && (
                   <span className="px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-[10px] font-bold shrink-0">
@@ -527,7 +527,7 @@ export function PlaceCommentsThread({
               }`}
             >
               <span className="material-symbols-outlined text-sm leading-none">forum</span>
-              <span>Todos ({totalNotesCount})</span>
+              <span>{t("places.all")} ({totalNotesCount})</span>
             </button>
             <button
               type="button"
@@ -539,7 +539,7 @@ export function PlaceCommentsThread({
               }`}
             >
               <span className="material-symbols-outlined text-sm leading-none">lock</span>
-              <span>Mis notas privadas ({hasPrivateNote ? 1 : 0})</span>
+              <span>{t("ui.my_private_notes")} ({hasPrivateNote ? 1 : 0})</span>
             </button>
             <button
               type="button"
@@ -551,19 +551,19 @@ export function PlaceCommentsThread({
               }`}
             >
               <span className="material-symbols-outlined text-sm leading-none">public</span>
-              <span>Comunidad ({comments.length})</span>
+              <span>{t("ui.community")} ({comments.length})</span>
             </button>
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-semibold">Ordenar:</span>
+            <span className="font-semibold">{t("ui.sort_label")}</span>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
               className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer focus:outline-none"
             >
-              <option value="newest">Más recientes</option>
-              <option value="oldest">Más antiguos</option>
+              <option value="newest">{t("ui.sort_newest")}</option>
+              <option value="oldest">{t("ui.sort_oldest")}</option>
             </select>
           </div>
         </div>
@@ -591,7 +591,7 @@ export function PlaceCommentsThread({
               }
               onSubmit={handlePublish}
               isSubmitting={submitting}
-              submitLabel={composeMode === "private" ? "Guardar nota privada" : "Publicar comentario"}
+              submitLabel={composeMode === "private" ? t("ui.save_private_note") : t("ui.publish_comment")}
               leftFooterSlot={
                 <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800 p-0.5 rounded-full text-[11px] font-bold">
                   <button
@@ -604,7 +604,7 @@ export function PlaceCommentsThread({
                     }`}
                   >
                     <span className="material-symbols-outlined text-xs leading-none">public</span>
-                    <span>Público</span>
+                    <span>{t("ui.public_mode")}</span>
                   </button>
                   <button
                     type="button"
@@ -616,7 +616,7 @@ export function PlaceCommentsThread({
                     }`}
                   >
                     <span className="material-symbols-outlined text-xs leading-none">lock</span>
-                    <span>Nota privada</span>
+                    <span>{t("ui.private_note_mode")}</span>
                   </button>
                 </div>
               }
@@ -816,7 +816,7 @@ export function PlaceCommentsThread({
           <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-sm text-emerald-600">shield</span>
             <span className="hidden sm:inline">
-              Tus notas privadas solo son accesibles desde tu perfil.
+              {t("ui.private_notes_privacy")}
             </span>
           </span>
           <button
@@ -824,7 +824,7 @@ export function PlaceCommentsThread({
             onClick={onClose}
             className="px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
           >
-            Cerrar
+            {t("common.close")}
           </button>
         </div>
       </div>

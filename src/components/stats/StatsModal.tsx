@@ -357,7 +357,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <span>🏆</span>
-                    <span>Nota media</span>
+                    <span>{t("ui.avg_rating")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-1.5">
                     {stats.averageRating !== null ? `${stats.averageRating}` : "—"}
@@ -425,7 +425,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   topLabelClass="text-emerald-700 dark:text-emerald-400"
                   footerBadge={
                     predominantPrice
-                      ? { label: "Rango predominante", value: predominantPrice.label }
+                      ? { label: t("ui.predominant_range"), value: predominantPrice.label }
                       : undefined
                   }
                 />
@@ -444,7 +444,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                  Elige el año del resumen:
+                  {t("ui.choose_year")}
                 </span>
                 <select
                   value={selectedYear}
@@ -476,10 +476,10 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                       <span>GastroMap Wrapped</span>
                     </span>
                     <h4 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-                      Tu año gastronómico {stats.wrapped.year}
+                      {t("ui.wrapped_year_title", { year: stats.wrapped.year })}
                     </h4>
                     <p className="text-xs text-white/80 font-medium">
-                      Exploración épica, bocados memorables y nuevos horizontes culinarios.
+                      {t("ui.wrapped_year_subtitle")}
                     </p>
                   </div>
                   <span className="text-[11px] font-bold text-white/70 shrink-0">
@@ -608,28 +608,28 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <span className="material-symbols-outlined text-base text-emerald-600">verified</span>
-                  <span>
-                    {shareFeedback || "Generado automáticamente con tu actividad gastronómica"}
-                  </span>
-                </div>
+                    <span>
+                      {shareFeedback || t("ui.auto_generated_wrapped")}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleDownloadCard}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base leading-none">download</span>
-                    <span>Descargar tarjeta</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleShareWrapped}
-                    className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-base leading-none">share</span>
-                    <span>Compartir resumen</span>
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleDownloadCard}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">download</span>
+                      <span>{t("ui.download_card")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleShareWrapped}
+                      className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">share</span>
+                      <span>{t("ui.share_summary")}</span>
+                    </button>
                 </div>
               </div>
             </div>

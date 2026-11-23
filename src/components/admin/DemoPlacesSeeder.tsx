@@ -75,7 +75,7 @@ export function DemoPlacesSeeder({
             Catálogo &amp; Ambientes de Prueba
           </span>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mt-1">
-            Datos de Demostración y Pruebas
+            {t("ui.demo_data_title")}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Población rápida y reseteo de datos de catálogo para pruebas de desarrollo, geolocalización e indexado culinario.

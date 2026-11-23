@@ -143,7 +143,7 @@ export function ComparePlacesModal({
                 className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
               >
                 <span className="material-symbols-outlined text-sm leading-none">delete_sweep</span>
-                <span>Limpiar comparativa</span>
+                <span>{t("ui.clear_compare")}</span>
               </button>
             )}
             <button
@@ -372,7 +372,7 @@ export function ComparePlacesModal({
                 <span className="material-symbols-outlined text-base text-orange-600 leading-none">
                   auto_awesome
                 </span>
-                <span>Veredicto Rápido de GastroMap ({places.length} opciones)</span>
+                <span>{t("ui.quick_verdict", { count: places.length })}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
@@ -454,7 +454,7 @@ export function ComparePlacesModal({
                 className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition"
               >
                 <span className="material-symbols-outlined text-base leading-none">alt_route</span>
-                <span>Iniciar ruta gastronómica</span>
+                <span>{t("ui.start_food_route")}</span>
               </a>
             )}
           </div>

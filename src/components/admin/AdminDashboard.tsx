@@ -193,7 +193,7 @@ export function AdminDashboard({
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">map</span>
-            <span>Ver Explorador</span>
+            <span>{t("ui.view_explorer")}</span>
           </Link>
         </nav>
       </div>
@@ -290,7 +290,7 @@ export function AdminDashboard({
                       <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
                         map
                       </span>
-                      <span>Ver Explorador</span>
+                      <span>{t("ui.view_explorer")}</span>
                     </Link>
 
                     <Link
@@ -356,7 +356,7 @@ export function AdminDashboard({
                   className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition shrink-0"
                 >
                   <span className="material-symbols-outlined text-base leading-none">add_location_alt</span>
-                  <span>Nuevo Sitio</span>
+                  <span>{t("ui.new_place")}</span>
                 </Link>
               </div>
 

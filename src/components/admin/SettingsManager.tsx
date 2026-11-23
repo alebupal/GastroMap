@@ -134,10 +134,10 @@ export function SettingsManager({
         <div>
           <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-orange-600 dark:text-orange-400">
             <span className="material-symbols-outlined text-sm leading-none">tune</span>
-            Panel de Control Maestro
+            {t("ui.master_panel")}
           </span>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mt-1">
-            Configuración del Sistema
+            {t("ui.system_settings")}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Ajustes globales de mapas, claves de geolocalización, respaldos de datos y mantenimiento del núcleo.

@@ -116,7 +116,7 @@ export function RandomPickerModal({
               >
                 🎲
               </span>
-              <span>Modo Indecisión</span>
+              <span>{t("ui.indecision_mode")}</span>
             </span>
             <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight mt-2">
               {t("random.title")}
@@ -140,14 +140,14 @@ export function RandomPickerModal({
         <div className="relative space-y-2">
           <div className="flex items-center justify-between text-[10px]">
             <span className="font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Universo de decisión
+              {t("ui.decision_universe")}
             </span>
             <button
               type="button"
               onClick={onClose}
               className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer text-[11px]"
             >
-              Modificar filtros
+              {t("ui.modify_filters")}
             </button>
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
@@ -170,7 +170,7 @@ export function RandomPickerModal({
             {/* Insignia flotante superior derecha */}
             <div className="absolute -top-0.5 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
               <span>✨</span>
-              <span>Destino Recomendado</span>
+              <span>{t("ui.recommended_dest")}</span>
             </div>
 
             <div
@@ -227,35 +227,34 @@ export function RandomPickerModal({
                     {selectedPlace.isFavorite ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
                         <span>⭐</span>
-                        <span>En tus favoritos</span>
+                        <span>{t("ui.in_favorites")}</span>
                       </span>
                     ) : selectedPlace.personalStatus === "visited" ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                         <span>✅</span>
-                        <span>Ya lo has probado</span>
+                        <span>{t("ui.already_tried")}</span>
                       </span>
                     ) : selectedPlace.personalStatus === "pending" ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
                         <span>🕒</span>
-                        <span>En tu lista de deseos</span>
+                        <span>{t("ui.in_wishlist")}</span>
                       </span>
                     ) : !selectedPlace.communityPublished ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
                         <span>🔒</span>
-                        <span>Ficha privada</span>
+                        <span>{t("ui.private_card")}</span>
                       </span>
                     ) : (selectedPlace.commentsCount || 0) > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                         <span>💬</span>
                         <span>
-                          {selectedPlace.commentsCount}{" "}
-                          {selectedPlace.commentsCount === 1 ? "reseña en tu red" : "reseñas en tu red"}
+                          {selectedPlace.commentsCount} {t("compare.comments").toLowerCase()}
                         </span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
                         <span>✨</span>
-                        <span>Por descubrir</span>
+                        <span>{t("places.unexplored")}</span>
                       </span>
                     )}
                   </div>
@@ -360,7 +359,7 @@ export function RandomPickerModal({
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
             <span className="material-symbols-outlined text-base text-slate-400 leading-none">history</span>
-            <span>Excluir sitios ya visitados</span>
+            <span>{t("ui.exclude_visited")}</span>
           </div>
           <button
             type="button"
@@ -370,7 +369,7 @@ export function RandomPickerModal({
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
               excludeVisited ? "bg-orange-600" : "bg-slate-300 dark:bg-slate-700"
             }`}
-            aria-label="Excluir sitios ya visitados"
+            aria-label={t("ui.exclude_visited")}
           >
             <span
               className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
