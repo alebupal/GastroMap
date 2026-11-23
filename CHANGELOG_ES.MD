@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño de los Modales «Mis Grupos Privados» e «Importar / Exportar» según `DESIGN.md`**:
+  - `GroupsModal`: nuevo z-index `z-[1100]` (siempre sobre el mapa), cabecera con icono cuadrado naranja suave y cierre circular, avatares de iniciales por grupo, iconos Material Symbols Outlined (`group_add`, `edit`, `delete`, `link`, `add_link`, `logout`) y cierre con `Escape` / clic fuera.
+  - `ExportImportModal`: pestañas segmentadas `rounded-full` en naranja oficial, 6 tarjetas de exportación con iconos Material Symbols, zona de subida renovada, plantillas descargables en píldoras y botones redondeados.
 - **Nueva Pantalla de Login (`/login`) con Animaciones y Diseño Split-Screen**:
   - Panel izquierdo animado en degradado naranja oficial con radar gastronómico pulsante (inspirado en el isotipo Radar y Plato) y tarjetas flotantes con efecto *glassmorphism*.
   - Formulario renovado según `DESIGN.md` con iconos en los campos, botón para mostrar/ocultar contraseña, conmutador de tema flotante y botón de acceso píldora con micro-interacción.
