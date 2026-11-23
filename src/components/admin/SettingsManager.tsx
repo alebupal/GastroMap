@@ -143,16 +143,6 @@ export function SettingsManager({
             Ajustes globales de mapas, claves de geolocalización, respaldos de datos y mantenimiento del núcleo.
           </p>
         </div>
-
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#f2f3ff] dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-xs shrink-0 self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <div>
-            <div className="text-[10px] text-slate-400 font-semibold leading-none">Sincronización PWA</div>
-            <div className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-              Estado Activo ({totalPlacesCount} Sitios)
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Contenedor principal de tarjetas de configuración */}
