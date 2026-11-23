@@ -19,6 +19,7 @@ import {
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
 import { CommandPalette } from "@/components/ui/CommandPalette";
@@ -2059,40 +2060,92 @@ export function PlacesExplorer({
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                     <span className="hidden sm:inline">{t("places.page_size")}:</span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
+                    <CustomSelect
+                      value={String(pageSize)}
+                      onChange={(val) => {
+                        setPageSize(Number(val));
                         setCurrentPage(1);
                       }}
-                      className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
-                      aria-label={t("places.page_size")}
-                    >
-                      <option value={10}>10 {t("places.per_page")}</option>
-                      <option value={20}>20 {t("places.per_page")}</option>
-                      <option value={50}>50 {t("places.per_page")}</option>
-                      <option value={10000}>{t("places.all")}</option>
-                    </select>
-                  </label>
+                      ariaLabel={t("places.page_size")}
+                      options={[
+                        { value: "10", label: `10 ${t("places.per_page")}` },
+                        { value: "20", label: `20 ${t("places.per_page")}` },
+                        { value: "50", label: `50 ${t("places.per_page")}` },
+                        { value: "10000", label: t("places.all") },
+                      ]}
+                    />
+                  </div>
 
-                  <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                     <span className="hidden sm:inline">{t("places.sort_by")}:</span>
-                    <select
+                    <CustomSelect
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                      className="px-2 py-1 rounded-xl text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 cursor-pointer transition"
-                      aria-label={t("places.sort_by")}
-                    >
-                      <option value="recent">🕒 {t("places.sort_recent")}</option>
-                      {userLocation && <option value="distance">📍 {t("places.sort_distance")}</option>}
-                      <option value="rating">⭐ {t("places.sort_rating")}</option>
-                      <option value="name">🔤 {t("places.sort_alphabetical")}</option>
-                      <option value="price_asc">💶 {t("places.sort_price_asc")}</option>
-                      <option value="price_desc">💶 {t("places.sort_price_desc")}</option>
-                    </select>
-                  </label>
+                      onChange={(val) => setSortBy(val as typeof sortBy)}
+                      ariaLabel={t("places.sort_by")}
+                      options={[
+                        {
+                          value: "recent",
+                          label: t("places.sort_recent"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-orange-600 dark:text-orange-400 leading-none">
+                              schedule
+                            </span>
+                          ),
+                        },
+                        ...(userLocation
+                          ? [
+                              {
+                                value: "distance" as const,
+                                label: t("places.sort_distance"),
+                                icon: (
+                                  <span className="material-symbols-outlined text-[15px] text-blue-600 dark:text-blue-400 leading-none">
+                                    near_me
+                                  </span>
+                                ),
+                              },
+                            ]
+                          : []),
+                        {
+                          value: "rating",
+                          label: t("places.sort_rating"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-amber-500 leading-none">
+                              star
+                            </span>
+                          ),
+                        },
+                        {
+                          value: "name",
+                          label: t("places.sort_alphabetical"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-slate-500 dark:text-slate-400 leading-none">
+                              sort_by_alpha
+                            </span>
+                          ),
+                        },
+                        {
+                          value: "price_asc",
+                          label: t("places.sort_price_asc"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-emerald-600 dark:text-emerald-400 leading-none">
+                              savings
+                            </span>
+                          ),
+                        },
+                        {
+                          value: "price_desc",
+                          label: t("places.sort_price_desc"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-purple-600 dark:text-purple-400 leading-none">
+                              diamond
+                            </span>
+                          ),
+                        },
+                      ] as Array<CustomSelectOption<typeof sortBy>>}
+                    />
+                  </div>
                 </div>
               </div>
 
