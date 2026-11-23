@@ -207,9 +207,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       setIsMenuOpen(false);
                       setIsGroupsOpen(true);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group"
                   >
-                    <span className="text-base">👥</span>
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      group
+                    </span>
                     <span>{t("nav.my_groups")}</span>
                   </button>
 
@@ -220,9 +222,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       setIsMenuOpen(false);
                       setIsStatsOpen(true);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group"
                   >
-                    <span className="text-base">📊</span>
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      bar_chart
+                    </span>
                     <span>{t("nav.my_stats")}</span>
                   </button>
 
@@ -230,9 +234,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                   <Link
                     href="/docs"
                     onClick={() => setIsMenuOpen(false)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group"
                   >
-                    <span className="text-base">📘</span>
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      menu_book
+                    </span>
                     <span>{t("nav.documentation")}</span>
                   </Link>
 
@@ -243,9 +249,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       setIsMenuOpen(false);
                       setIsEditProfileOpen(true);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group"
                   >
-                    <span className="text-base">⚙️</span>
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      manage_accounts
+                    </span>
                     <span>{t("nav.profile")}</span>
                   </button>
                 </div>
@@ -255,9 +263,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                   <form action={logoutAction}>
                     <button
                       type="submit"
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 font-semibold transition cursor-pointer text-left text-xs"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition cursor-pointer text-left text-xs"
                     >
-                      <span className="text-base">🚪</span>
+                      <span className="material-symbols-outlined text-[18px] leading-none">
+                        logout
+                      </span>
                       <span>{t("nav.logout")}</span>
                     </button>
                   </form>
