@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { saveSettingAction, resetApplicationAction } from "@/lib/actions/settings";
+import { clearAppOfflineCache, getBrowserCacheEstimate } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
 
 interface SettingsManagerProps {
@@ -25,6 +26,24 @@ export function SettingsManager({
 
   const [resetting, setResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [cacheInfo, setCacheInfo] = useState<{ usageMB: number | null; cacheCount: number }>({
+    usageMB: null,
+    cacheCount: 0,
+  });
+  const [clearingCache, setClearingCache] = useState(false);
+
+  useEffect(() => {
+    getBrowserCacheEstimate().then((info) => {
+      setCacheInfo({ usageMB: info.usageMB, cacheCount: info.cacheCount });
+    });
+  }, []);
+
+  async function handleClearCache() {
+    if (!confirm(t("nav.clear_cache_confirm"))) return;
+    setClearingCache(true);
+    await clearAppOfflineCache();
+    window.location.reload();
+  }
 
   async function handleResetApp() {
     const confirmation = prompt(t("admin.reset_app.prompt"));
@@ -321,21 +340,35 @@ export function SettingsManager({
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-xl">storage</span>
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-xl">storage</span>
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Caché Offline PWA
+              </div>
+              <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                {cacheInfo.usageMB !== null
+                  ? `${cacheInfo.usageMB} MB (${cacheInfo.cacheCount} cachés)`
+                  : "Cache First Activo"}
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                Teselas y catálogo en caché
+              </div>
+            </div>
           </div>
-          <div className="min-w-0">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Caché Offline PWA
-            </div>
-            <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
-              Cache First Activo
-            </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-              Teselas y catálogo en caché
-            </div>
-          </div>
+          <button
+            type="button"
+            disabled={clearingCache}
+            onClick={handleClearCache}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-orange-600 hover:text-white dark:bg-slate-800 dark:hover:bg-orange-600 text-slate-700 dark:text-slate-200 text-[11px] font-bold transition cursor-pointer shrink-0 disabled:opacity-50"
+            title={t("nav.clear_cache")}
+          >
+            <span className="material-symbols-outlined text-sm leading-none">cleaning_services</span>
+            <span>{clearingCache ? "..." : t("nav.clear_cache")}</span>
+          </button>
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex items-center gap-3">

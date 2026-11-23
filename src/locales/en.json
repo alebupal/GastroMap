@@ -16,7 +16,10 @@
     "my_groups": "My private groups",
     "my_stats": "My statistics & Wrapped",
     "documentation": "Documentation",
-    "donate_paypal": "Donate with PayPal"
+    "donate_paypal": "Donate with PayPal",
+    "clear_cache": "Clear cache",
+    "clearing_cache": "Clearing cache...",
+    "clear_cache_confirm": "Clear all offline cache (map tiles and local files) and reload the app?"
   },
   "theme": {
     "light": "Light",

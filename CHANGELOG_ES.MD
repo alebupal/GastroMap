@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Botón «Limpiar caché» (Service Worker y Teselas Offline)**:
+  - Añadida utilidad cliente (`src/lib/cache.ts`) para vaciar todas las cachés PWA (`window.caches`), desregistrar el Service Worker y recargar la app limpia.
+  - Disponible para cualquier usuario en el menú desplegable de perfil (`Limpiar caché`) y en `/admin > Configuración` junto al indicador en tiempo real del espacio ocupado en MB.
 - **Adaptación Integral Final a `DESIGN.md` e Iconografía Material Symbols**:
   - Sustituidos los emojis de la barra de filtros (`Favoritos`, `Quiero ir`, `Ya he ido`, `Por descubrir`, `Grupos`, `Ciudades`, `Países`, `Mis filtros`) por iconos **Material Symbols Outlined** (`star`, `schedule`, `check_circle`, `auto_awesome`, `group`, `location_city`, `public`, `bookmark`) con soporte de nodos React en `SearchableSelect`.
   - Rediseñados según `DESIGN.md` los modales `EditProfileModal` (`z-[1100]`, cierre con `Escape`, cabecera `manage_accounts`) y `EditPlaceModal`, así como las páginas de autenticación e invitaciones (`/setup`, `/invite/[token]` y `/groups/join/[token]`) con logotipo oficial `<GastroMapLogo />`, `ThemeToggle` y animación suave de entrada.

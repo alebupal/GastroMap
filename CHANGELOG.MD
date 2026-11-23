@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **«Clear Cache» Button (Service Worker & Offline Tiles)**:
+  - Added client utility (`src/lib/cache.ts`) to purge all PWA caches (`window.caches`), unregister the Service Worker, and perform a clean reload.
+  - Available to every user in the profile dropdown menu (`Clear cache`) and in `/admin > Settings` alongside the live storage usage estimate in MB.
 - **Final Full App Alignment with `DESIGN.md` & Material Symbols Iconography**:
   - Replaced filter bar emojis (`Favorites`, `Want to go`, `Visited`, `To discover`, `Groups`, `Cities`, `Countries`, `Saved filters`) with **Material Symbols Outlined** (`star`, `schedule`, `check_circle`, `auto_awesome`, `group`, `location_city`, `public`, `bookmark`), adding `ReactNode` icon support in `SearchableSelect`.
   - Redesigned `EditProfileModal` (`z-[1100]`, `Escape` dismiss, `manage_accounts` header), `EditPlaceModal`, and auth/invite pages (`/setup`, `/invite/[token]`, `/groups/join/[token]`) with `<GastroMapLogo />`, `ThemeToggle`, and smooth entrance animation.

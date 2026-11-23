@@ -9,6 +9,7 @@ import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
+import { clearAppOfflineCache } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -33,6 +34,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [clearingCache, setClearingCache] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -255,6 +257,24 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       manage_accounts
                     </span>
                     <span>{t("nav.profile")}</span>
+                  </button>
+
+                  {/* Limpiar caché offline (Service Worker + teselas de mapa) */}
+                  <button
+                    type="button"
+                    disabled={clearingCache}
+                    onClick={async () => {
+                      if (!confirm(t("nav.clear_cache_confirm"))) return;
+                      setClearingCache(true);
+                      await clearAppOfflineCache();
+                      window.location.reload();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      cleaning_services
+                    </span>
+                    <span>{clearingCache ? t("nav.clearing_cache") : t("nav.clear_cache")}</span>
                   </button>
                 </div>
 
