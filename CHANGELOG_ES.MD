@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Nueva Pantalla de Login (`/login`) con Animaciones y Diseño Split-Screen**:
+  - Panel izquierdo animado en degradado naranja oficial con radar gastronómico pulsante (inspirado en el isotipo Radar y Plato) y tarjetas flotantes con efecto *glassmorphism*.
+  - Formulario renovado según `DESIGN.md` con iconos en los campos, botón para mostrar/ocultar contraseña, conmutador de tema flotante y botón de acceso píldora con micro-interacción.
 - **Eliminación Completa del Campo «Estado del Establecimiento» (`places.status`)**:
   - Eliminada la columna `status` de la tabla `places` en el esquema Drizzle (`src/db/schema.ts`), generada su migración SQL oficial en `drizzle/` y limpiadas todas las referencias en acciones de servidor, estadísticas, semilla demo, exportación JSON y UI.
 - **Rediseño Stitch de la Pantalla «Añadir Sitio» (`/new`)**:

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Animated Split-Screen Login Screen (`/login`)**:
+  - Animated left brand showcase in official orange gradient featuring a pulsing gastronomic radar (matching the Radar & Plate logo) and floating glassmorphism cards.
+  - Revamped login form following `DESIGN.md` with input icons, password visibility toggle, floating theme switcher, and pill submit button with hover micro-interaction.
 - **Complete Removal of Establishment Status (`places.status`)**:
   - Dropped the `status` column from `places` in the Drizzle schema (`src/db/schema.ts`), generated the official SQL migration in `drizzle/`, and cleaned all references across server actions, stats, demo seed, JSON export, and UI.
 - **Stitch Redesign of «Add Place» Screen (`/new`)**:
