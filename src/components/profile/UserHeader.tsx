@@ -9,8 +9,12 @@ import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
-import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 interface UserHeaderProps {
   currentUser: {
@@ -29,9 +33,44 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const displayUsername = currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "");
+
+  // Capturar el evento nativo de instalación PWA (solo cuando no está ya instalada)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (isStandalone) return;
+
+    function handleBeforeInstallPrompt(e: Event) {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    }
+
+    function handleAppInstalled() {
+      setInstallPrompt(null);
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  async function handleInstallPwa() {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") {
+      setInstallPrompt(null);
+    }
+  }
 
   // Cerrar el menú desplegable al hacer click fuera o pulsar Escape
   useEffect(() => {
@@ -57,32 +96,20 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
   return (
     <>
-      {/* Barra de estado PWA y sincronización estilo Stitch */}
-      <div className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl px-3 sm:px-4 py-1.5 mb-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            En línea
-          </span>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <span className="font-medium">PWA Sync v{APP_VERSION} Ready</span>
-        </div>
-        <div className="flex items-center gap-3">
+      {/* Botón de instalación PWA solo visible en móviles cuando es instalable */}
+      {installPrompt && (
+        <div className="sm:hidden w-full mb-2 flex justify-end">
           <button
             type="button"
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                window.dispatchEvent(new Event("beforeinstallprompt"));
-              }
-            }}
-            className="flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 cursor-pointer transition font-medium"
-            title="Instalar como Progressive Web App"
+            onClick={handleInstallPwa}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/50 border border-orange-200/80 dark:border-orange-800/60 text-orange-800 dark:text-orange-200 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition"
+            title="Instalar GastroMap como aplicación"
           >
-            <span className="material-symbols-outlined text-sm leading-none">install_mobile</span>
-            <span>Instalar App PWA</span>
+            <span className="material-symbols-outlined text-sm leading-none text-orange-600">install_mobile</span>
+            <span>Instalar App</span>
           </button>
         </div>
-      </div>
+      )}
 
       <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-3 sm:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
         {/* Brand / Logo + Pill Explorar Mapa */}

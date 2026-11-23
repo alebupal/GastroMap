@@ -14,7 +14,6 @@ import { AdminStatsPanel } from "./AdminStatsPanel";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
-import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
@@ -249,11 +248,8 @@ export function AdminDashboard({
               <span className="material-symbols-outlined text-lg leading-none">menu</span>
             </button>
 
-            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 font-medium truncate">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-              <span className="truncate">
-                Conexión PWA en vivo (v{APP_VERSION})
-              </span>
+            <div className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+              {navItems.find((item) => item.id === activeTab)?.label || t("admin.title")}
             </div>
           </div>
 
