@@ -120,14 +120,14 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
     <>
       {/* Botón de instalación PWA solo visible en móviles cuando es instalable */}
       {installPrompt && (
-        <div className="sm:hidden w-full mb-2 flex justify-end">
+        <div className="sm:hidden w-full mb-2">
           <button
             type="button"
             onClick={handleInstallPwa}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/50 border border-orange-200/80 dark:border-orange-800/60 text-orange-800 dark:text-orange-200 text-xs font-bold shadow-xs cursor-pointer active:scale-95 transition"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/80 dark:border-orange-800/60 text-orange-800 dark:text-orange-200 text-xs font-extrabold shadow-xs cursor-pointer active:scale-[0.99] transition"
             title="Instalar GastroMap como aplicación"
           >
-            <span className="material-symbols-outlined text-sm leading-none text-orange-600">install_mobile</span>
+            <span className="material-symbols-outlined text-base leading-none text-orange-600">install_mobile</span>
             <span>Instalar App</span>
           </button>
         </div>
