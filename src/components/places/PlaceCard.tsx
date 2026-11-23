@@ -63,6 +63,7 @@ export function PlaceCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [copiedPlace, setCopiedPlace] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
 
   function buildShareText() {
     const parts = [place.name];
@@ -244,6 +245,63 @@ export function PlaceCard({
                 favorite
               </span>
             </button>
+
+            {(canEdit || canDelete) && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowActionsMenu((prev) => !prev)}
+                  aria-label={t("common.actions")}
+                  aria-expanded={showActionsMenu}
+                  title={t("common.actions")}
+                  className={`p-1 rounded-full transition cursor-pointer active:scale-95 ${
+                    showActionsMenu
+                      ? "bg-[#f2f3ff] dark:bg-slate-800 text-orange-600 dark:text-orange-400"
+                      : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-lg leading-none">more_vert</span>
+                </button>
+
+                {showActionsMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowActionsMenu(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-1 w-40 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowActionsMenu(false);
+                            setShowEditModal(true);
+                          }}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                        >
+                          <span className="material-symbols-outlined text-base leading-none text-orange-600">edit</span>
+                          <span>{t("common.edit")}</span>
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowActionsMenu(false);
+                            handleDelete();
+                          }}
+                          disabled={deleting}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer disabled:opacity-40 text-left"
+                        >
+                          <span className="material-symbols-outlined text-base leading-none">delete</span>
+                          <span>{t("common.delete")}</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -508,30 +566,6 @@ export function PlaceCard({
               </>
             )}
           </div>
-
-          {canEdit && (
-            <button
-              type="button"
-              onClick={() => setShowEditModal(true)}
-              aria-label={t("cards.edit_tooltip")}
-              className="text-slate-400 hover:text-orange-600 transition cursor-pointer p-0.5"
-              title={t("cards.edit_tooltip")}
-            >
-              <span className="material-symbols-outlined text-sm leading-none">edit</span>
-            </button>
-          )}
-
-          {canDelete && (
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              aria-label={t("cards.delete_tooltip")}
-              className="text-slate-400 hover:text-red-500 transition cursor-pointer disabled:opacity-40 p-0.5"
-              title={t("cards.delete_tooltip")}
-            >
-              <span className="material-symbols-outlined text-sm leading-none">delete</span>
-            </button>
-          )}
         </div>
       </div>
 

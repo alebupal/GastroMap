@@ -542,7 +542,8 @@
     "copied": "Copied!",
     "saving": "Saving...",
     "search": "Search",
-    "scroll_to_top": "Back to top"
+    "scroll_to_top": "Back to top",
+    "actions": "Actions"
   },
   "comments": {
     "title": "Recommendations & comments",
