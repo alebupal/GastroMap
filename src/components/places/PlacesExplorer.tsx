@@ -17,7 +17,7 @@ import {
   type SavedFilterItem,
 } from "@/lib/actions/saved-filters";
 import { getMyGroupsAction } from "@/lib/actions/groups";
-import { parseCityCountry, findCountry } from "@/lib/location";
+import { parseCityCountry, findCountry, resolveFilterCity } from "@/lib/location";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
@@ -467,7 +467,8 @@ export function PlacesExplorer({
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (selectedCountry === "all" || effectiveCountry === selectedCountry) {
-        if (parsed.city) citySet.add(parsed.city);
+        const filterCity = resolveFilterCity(p.city, p.address, p.country);
+        if (filterCity) citySet.add(filterCity);
       }
     });
     const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
@@ -610,10 +611,10 @@ export function PlacesExplorer({
       );
     }
 
-    // 8. Filtro por Ciudad
+    // 8. Filtro por Ciudad / Provincia
     if (selectedCity !== "all") {
       result = result.filter(
-        (p) => parseCityCountry(p.city, p.address).city === selectedCity
+        (p) => resolveFilterCity(p.city, p.address, p.country) === selectedCity
       );
     }
 

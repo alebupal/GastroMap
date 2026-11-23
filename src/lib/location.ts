@@ -1,4 +1,5 @@
 import { WORLD_COUNTRIES, findCountry, type Country } from "@/data/worldCountries";
+import { findSpanishLocation } from "@/data/spanishLocations";
 
 export { WORLD_COUNTRIES, findCountry, type Country };
 
@@ -6,6 +7,65 @@ export interface ParsedLocation {
   city: string;
   country: string;
 }
+
+/**
+ * Mapa determinista de los 2 primeros dígitos del código postal español a su provincia oficial.
+ * Agrupa pueblos y pedanías (ej. Maracena, Armilla, Romilla, El Portil) bajo su provincia real.
+ */
+const SPANISH_POSTAL_PREFIX_TO_PROVINCE: Record<string, string> = {
+  "01": "Álava",
+  "02": "Albacete",
+  "03": "Alicante",
+  "04": "Almería",
+  "05": "Ávila",
+  "06": "Badajoz",
+  "07": "Illes Balears",
+  "08": "Barcelona",
+  "09": "Burgos",
+  "10": "Cáceres",
+  "11": "Cádiz",
+  "12": "Castellón",
+  "13": "Ciudad Real",
+  "14": "Córdoba",
+  "15": "A Coruña",
+  "16": "Cuenca",
+  "17": "Girona",
+  "18": "Granada",
+  "19": "Guadalajara",
+  "20": "Gipuzkoa",
+  "21": "Huelva",
+  "22": "Huesca",
+  "23": "Jaén",
+  "24": "León",
+  "25": "Lleida",
+  "26": "La Rioja",
+  "27": "Lugo",
+  "28": "Madrid",
+  "29": "Málaga",
+  "30": "Murcia",
+  "31": "Navarra",
+  "32": "Ourense",
+  "33": "Asturias",
+  "34": "Palencia",
+  "35": "Las Palmas",
+  "36": "Pontevedra",
+  "37": "Salamanca",
+  "38": "Santa Cruz de Tenerife",
+  "39": "Cantabria",
+  "40": "Segovia",
+  "41": "Sevilla",
+  "42": "Soria",
+  "43": "Tarragona",
+  "44": "Teruel",
+  "45": "Toledo",
+  "46": "Valencia",
+  "47": "Valladolid",
+  "48": "Bizkaia",
+  "49": "Zamora",
+  "50": "Zaragoza",
+  "51": "Ceuta",
+  "52": "Melilla",
+};
 
 function normalizeLocationText(text: string): string {
   return text
@@ -203,4 +263,43 @@ export function formatCityCountry(city: string, country?: string): string {
   }
 
   return `${c}, ${co}`;
+}
+
+/**
+ * Resuelve el nombre de ciudad/provincia para agrupar en el filtro de ciudades:
+ * - En España, agrupa pueblos y municipios (ej. Maracena, Armilla, Romilla, Bormujos)
+ *   bajo su provincia oficial (Granada, Sevilla...) usando el código postal de la dirección
+ *   y el nomenclátor oficial de municipios españoles.
+ * - Fuera de España, conserva la ciudad tal cual (Nueva York, Tokio, Ciudad de México, etc.).
+ */
+export function resolveFilterCity(
+  rawCity?: string | null,
+  rawAddress?: string | null,
+  rawCountry?: string | null
+): string {
+  const parsed = parseCityCountry(rawCity, rawAddress);
+  const effectiveCountry = (rawCountry || parsed.country || "").trim();
+  const city = parsed.city.trim();
+
+  if (!city && !rawAddress) return "";
+
+  if (effectiveCountry === "España") {
+    // 1. Código postal español de 5 dígitos en dirección (cubre también pedanías como Romilla o El Portil)
+    if (rawAddress) {
+      const cpMatch = rawAddress.match(/\b(0[1-9]|[1-4][0-9]|5[0-2])\d{3}\b/);
+      if (cpMatch && SPANISH_POSTAL_PREFIX_TO_PROVINCE[cpMatch[1]]) {
+        return SPANISH_POSTAL_PREFIX_TO_PROVINCE[cpMatch[1]];
+      }
+    }
+
+    // 2. Búsqueda en el nomenclátor oficial español (provincia o municipio)
+    if (city) {
+      const spanishLoc = findSpanishLocation(city);
+      if (spanishLoc && spanishLoc.province.id !== "otra") {
+        return spanishLoc.province.name;
+      }
+    }
+  }
+
+  return city;
 }
