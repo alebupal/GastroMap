@@ -1259,29 +1259,6 @@ export function PlacesExplorer({
               </div>
             )}
 
-            {/* Ciudad */}
-            {availableCities.length > 0 && (
-              <SearchableSelect
-                value={selectedCity}
-                onChange={(val) => {
-                  setSelectedCity(val);
-                  setCurrentPage(1);
-                }}
-                options={cityOptions}
-                allOption={{
-                  value: "all",
-                  label: `${t("places.all_cities")} (${availableCities.length})`,
-                  icon: (
-                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
-                      location_city
-                    </span>
-                  ),
-                }}
-                searchPlaceholder={t("location.city_placeholder")}
-                className="shrink-0"
-              />
-            )}
-
             {/* Países */}
             {allCountries.length > 0 && (
               <SearchableSelect
@@ -1302,6 +1279,29 @@ export function PlacesExplorer({
                   ),
                 }}
                 searchPlaceholder={t("location.country_placeholder")}
+                className="shrink-0"
+              />
+            )}
+
+            {/* Ciudad */}
+            {availableCities.length > 0 && (
+              <SearchableSelect
+                value={selectedCity}
+                onChange={(val) => {
+                  setSelectedCity(val);
+                  setCurrentPage(1);
+                }}
+                options={cityOptions}
+                allOption={{
+                  value: "all",
+                  label: `${t("places.all_cities")} (${availableCities.length})`,
+                  icon: (
+                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
+                      location_city
+                    </span>
+                  ),
+                }}
+                searchPlaceholder={t("location.city_placeholder")}
                 className="shrink-0"
               />
             )}
