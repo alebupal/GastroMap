@@ -1651,95 +1651,112 @@ export function PlacesExplorer({
         </div>
       </section>
 
-      {/* Panel desplegable de Planes / Categorías y Etiquetas (solo visible al pulsar + Filtros o icono tune en móvil) */}
+      {/* Panel desplegable de Filtros Avanzados (en móvil con cabecera, secciones claras y pie de confirmación) */}
       {showExtraFilters && (
-        <div className="space-y-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 p-3 sm:p-4 shadow-xs animate-in fade-in duration-150">
-          {/* Acciones y filtros extra exclusivos del panel desplegable móvil (sin repetir los de arriba) */}
-          <div className="lg:hidden space-y-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setIsExportImportOpen(true)}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-slate-500 text-base leading-none">import_export</span>
-                <span>{t("places.export_import")}</span>
-              </button>
+        <div className="space-y-3.5 rounded-3xl lg:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-md lg:shadow-xs animate-in fade-in duration-150">
+          {/* Cabecera del panel de filtros en móvil */}
+          <div className="lg:hidden flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="w-7 h-7 rounded-xl bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+                <span className="material-symbols-outlined text-base leading-none">tune</span>
+              </span>
+              <div>
+                <h3 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+                  {t("places.more_filters").replace(/^\+\s*/, "")}
+                </h3>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                  {filteredPlaces.length}{" "}
+                  {filteredPlaces.length === 1
+                    ? t("places.locale_single")
+                    : t("places.locales_count")}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
               {activeFiltersCount > 0 && (
                 <button
                   type="button"
-                  onClick={handleShareFilteredView}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 text-xs font-bold shrink-0 cursor-pointer"
+                  onClick={resetAllFilters}
+                  className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[11px] font-bold cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-base leading-none">share</span>
-                  <span>{t("places.share_view")}</span>
+                  {t("places.clear_filter")} ({activeFiltersCount})
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => setShowExtraFilters(false)}
+                aria-label={t("common.close")}
+                className="w-7 h-7 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-500 dark:text-slate-300 flex items-center justify-center cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base leading-none">close</span>
+              </button>
             </div>
+          </div>
 
-            {/* País y Grupos en móvil dentro de filtros avanzados */}
-            {(allCountries.length > 0 || myGroups.length > 0) && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {allCountries.length > 0 && (
-                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold">
-                    <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
-                      public
-                    </span>
-                    <select
-                      value={selectedCountry}
-                      onChange={(e) => {
-                        setSelectedCountry(e.target.value);
-                        setSelectedCity("all");
-                      }}
-                      className="bg-transparent focus:outline-none cursor-pointer font-bold"
-                      aria-label={t("places.country_filter")}
-                    >
-                      <option value="all">{t("places.all_countries")}</option>
-                      {countryOptions.map((c) => (
-                        <option key={c.value} value={c.value}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
+          {/* Secciones estructuradas exclusivas de móvil: Ubicación, Presupuesto y Grupos */}
+          <div className="lg:hidden space-y-3.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+            {/* 1. Ubicación (País + Ciudad en 2 columnas) */}
+            {(allCountries.length > 0 || availableCities.length > 0) && (
+              <div className="space-y-1.5">
+                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
+                  {t("places.country_filter")} / {t("places.city_filter")}
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {allCountries.length > 0 && (
+                    <label className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 min-w-0">
+                      <span className="material-symbols-outlined text-[16px] text-orange-600 leading-none shrink-0">
+                        public
+                      </span>
+                      <select
+                        value={selectedCountry}
+                        onChange={(e) => {
+                          setSelectedCountry(e.target.value);
+                          setSelectedCity("all");
+                        }}
+                        className="w-full min-w-0 bg-transparent focus:outline-none cursor-pointer font-bold truncate"
+                        aria-label={t("places.country_filter")}
+                      >
+                        <option value="all">{t("places.all_countries")}</option>
+                        {countryOptions.map((c) => (
+                          <option key={c.value} value={c.value}>
+                            {c.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
 
-                {myGroups.length > 0 && (
-                  <div className="flex items-center gap-1 flex-wrap">
-                    {myGroups.map((g) => {
-                      const active = selectedGroupFilterIds.includes(g.id);
-                      return (
-                        <button
-                          key={g.id}
-                          type="button"
-                          onClick={() =>
-                            setSelectedGroupFilterIds((prev) =>
-                              prev.includes(g.id)
-                                ? prev.filter((id) => id !== g.id)
-                                : [...prev, g.id]
-                            )
-                          }
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
-                            active
-                              ? "bg-orange-600 text-white"
-                              : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          <span className="material-symbols-outlined text-xs leading-none">
-                            group
-                          </span>
-                          <span>{g.name}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                  {availableCities.length > 0 && (
+                    <label className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 min-w-0">
+                      <span className="material-symbols-outlined text-[16px] text-orange-600 leading-none shrink-0">
+                        location_city
+                      </span>
+                      <select
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        className="w-full min-w-0 bg-transparent focus:outline-none cursor-pointer font-bold truncate"
+                        aria-label={t("places.city_filter")}
+                      >
+                        <option value="all">{t("places.all_cities")}</option>
+                        {availableCities.map((city) => (
+                          <option key={city} value={city}>
+                            {city}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
               </div>
             )}
 
-            {/* Rango de precios y reset en móvil */}
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-1 flex-wrap">
+            {/* 2. Presupuesto (4 columnas exactas) */}
+            <div className="space-y-1.5">
+              <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
+                {t("form.price_label")}
+              </span>
+              <div className="grid grid-cols-4 gap-1.5">
                 {[
                   { val: "€", label: "< 15 €" },
                   { val: "€€", label: "15 - 30 €" },
@@ -1752,10 +1769,10 @@ export function PlacesExplorer({
                       key={pr.val}
                       type="button"
                       onClick={() => togglePrice(pr.val)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                      className={`py-2 px-1 rounded-2xl text-[11px] font-extrabold text-center transition cursor-pointer border ${
                         active
-                          ? "bg-orange-600 text-white"
-                          : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                          : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200"
                       }`}
                     >
                       {pr.label}
@@ -1763,16 +1780,44 @@ export function PlacesExplorer({
                   );
                 })}
               </div>
-              {activeFiltersCount > 0 && (
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:underline cursor-pointer"
-                >
-                  {t("places.clear_filter")} ({activeFiltersCount})
-                </button>
-              )}
             </div>
+
+            {/* 3. Grupos privados (solo si tiene grupos) */}
+            {myGroups.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
+                  {t("places.groups_filter")}
+                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {myGroups.map((g) => {
+                    const active = selectedGroupFilterIds.includes(g.id);
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedGroupFilterIds((prev) =>
+                            prev.includes(g.id)
+                              ? prev.filter((id) => id !== g.id)
+                              : [...prev, g.id]
+                          )
+                        }
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer border ${
+                          active
+                            ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                            : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined text-sm leading-none">
+                          group
+                        </span>
+                        <span>{g.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
@@ -2109,6 +2154,46 @@ export function PlacesExplorer({
           )}
         </div>
       )}
+
+          {/* Pie de utilidades y botón aplicar en móvil */}
+          <div className="lg:hidden pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExtraFilters(false);
+                  setIsExportImportOpen(true);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold cursor-pointer"
+                title={t("places.export_import")}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">import_export</span>
+                <span>{t("places.export_import")}</span>
+              </button>
+              {activeFiltersCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleShareFilteredView}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 cursor-pointer"
+                  title={t("places.share_view")}
+                  aria-label={t("places.share_view")}
+                >
+                  <span className="material-symbols-outlined text-base leading-none">share</span>
+                </button>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowExtraFilters(false)}
+              className="px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-xs active:scale-95 transition cursor-pointer shrink-0"
+            >
+              {filteredPlaces.length}{" "}
+              {filteredPlaces.length === 1
+                ? t("places.locale_single")
+                : t("places.locales_count")}
+            </button>
+          </div>
         </div>
       )}
 
@@ -2528,8 +2613,8 @@ export function PlacesExplorer({
         </div>
       )}
 
-      {/* FAB flotante «Añadir sitio» estilo Stitch en móvil (oculto si hay tarjeta seleccionada abierta) */}
-      {!selectedPlace && (
+      {/* FAB flotante «Añadir sitio» estilo Stitch en móvil (oculto si hay tarjeta seleccionada o filtros abiertos) */}
+      {!selectedPlace && !showExtraFilters && (
         <a
           href="/new"
           className="lg:hidden fixed right-4 bottom-20 z-[950] inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-lg shadow-orange-600/35 active:scale-95 transition"
