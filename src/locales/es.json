@@ -160,7 +160,9 @@
     "delete_tooltip": "Eliminar sitio",
     "copy_place": "Compartir",
     "copy_place_tooltip": "Copiar datos del sitio",
-    "copied_place_toast": "Sitio copiado al portapapeles"
+    "copied_place_toast": "Sitio copiado al portapapeles",
+    "share_whatsapp": "WhatsApp",
+    "share_native": "Más apps…"
   },
   "location": {
     "title": "Localización y Coordenadas",

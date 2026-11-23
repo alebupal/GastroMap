@@ -62,26 +62,55 @@ export function PlaceCard({
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [copiedPlace, setCopiedPlace] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
-  async function handleCopyPlace() {
+  function buildShareText() {
     const parts = [place.name];
     if (place.address || place.city) {
       parts.push([place.address, place.city].filter(Boolean).join(", "));
     }
-    if (place.googleMapsUrl) {
-      parts.push(place.googleMapsUrl);
-    } else if (place.latitude != null && place.longitude != null) {
-      parts.push(`https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`);
-    }
-    const text = parts.join(" — ");
+    const mapsLink =
+      place.googleMapsUrl ||
+      (place.latitude != null && place.longitude != null
+        ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`
+        : "");
+    if (mapsLink) parts.push(mapsLink);
+    return { text: parts.join(" — "), mapsLink };
+  }
+
+  async function handleCopyPlace() {
+    const { text } = buildShareText();
     try {
       await navigator.clipboard.writeText(text);
       setCopiedPlace(true);
+      setShowShareMenu(false);
       toast(t("cards.copied_place_toast"), { kind: "success" });
       setTimeout(() => setCopiedPlace(false), 1800);
     } catch {
       // Fallback silencioso si el navegador bloquea el portapapeles
     }
+  }
+
+  async function handleNativeShare() {
+    const { text, mapsLink } = buildShareText();
+    setShowShareMenu(false);
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: place.name,
+          text,
+          url: mapsLink || undefined,
+        });
+      } catch {
+        // Usuario canceló el diálogo nativo
+      }
+    }
+  }
+
+  function handleWhatsAppShare() {
+    const { text } = buildShareText();
+    setShowShareMenu(false);
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
   const canDelete = isAdmin;
@@ -418,24 +447,67 @@ export function PlaceCard({
             </a>
           )}
 
-          <button
-            type="button"
-            onClick={handleCopyPlace}
-            aria-label={t("cards.copy_place_tooltip")}
-            title={t("cards.copy_place_tooltip")}
-            className={`inline-flex items-center transition cursor-pointer p-0.5 active:scale-90 ${
-              copiedPlace
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-slate-400 hover:text-orange-600"
-            }`}
-          >
-            <span
-              key={copiedPlace ? "copy-ok" : "copy-idle"}
-              className={`material-symbols-outlined text-sm leading-none ${copiedPlace ? "gm-pop" : ""}`}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowShareMenu((prev) => !prev)}
+              aria-label={t("cards.copy_place_tooltip")}
+              aria-expanded={showShareMenu}
+              title={t("cards.copy_place_tooltip")}
+              className={`inline-flex items-center gap-1 transition cursor-pointer px-1 py-0.5 active:scale-95 ${
+                copiedPlace
+                  ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                  : showShareMenu
+                  ? "text-orange-600 dark:text-orange-400 font-bold"
+                  : "hover:text-orange-600"
+              }`}
             >
-              {copiedPlace ? "check" : "content_copy"}
-            </span>
-          </button>
+              <span
+                key={copiedPlace ? "copy-ok" : "copy-idle"}
+                className={`material-symbols-outlined text-sm leading-none ${copiedPlace ? "gm-pop" : ""}`}
+              >
+                {copiedPlace ? "check" : "share"}
+              </span>
+              <span className="hidden sm:inline">{t("cards.copy_place")}</span>
+            </button>
+
+            {showShareMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowShareMenu(false)}
+                />
+                <div className="absolute right-0 bottom-full mb-1.5 w-44 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
+                  <button
+                    type="button"
+                    onClick={handleWhatsAppShare}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition cursor-pointer text-left"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">chat</span>
+                    <span>{t("cards.share_whatsapp")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyPlace}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none text-slate-500">content_copy</span>
+                    <span>{t("cards.copy_place_tooltip")}</span>
+                  </button>
+                  {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+                    <button
+                      type="button"
+                      onClick={handleNativeShare}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-orange-600">ios_share</span>
+                      <span>{t("cards.share_native")}</span>
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
 
           {canEdit && (
             <button

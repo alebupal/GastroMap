@@ -160,7 +160,9 @@
     "delete_tooltip": "Delete place",
     "copy_place": "Share",
     "copy_place_tooltip": "Copy place info",
-    "copied_place_toast": "Place copied to clipboard"
+    "copied_place_toast": "Place copied to clipboard",
+    "share_whatsapp": "WhatsApp",
+    "share_native": "More apps…"
   },
   "location": {
     "title": "Location & Coordinates",

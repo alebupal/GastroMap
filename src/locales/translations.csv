@@ -305,6 +305,8 @@
 "cards.phone_tooltip","Llamar: {phone}","Call: {phone}"
 "cards.private_badge","Privado","Private"
 "cards.private_note","Mi nota","My note"
+"cards.share_native","Más apps…","More apps…"
+"cards.share_whatsapp","WhatsApp","WhatsApp"
 "cards.untried_badge","Por descubrir","To discover"
 "cards.visited","Ya he ido","Visited"
 "cards.visited_badge","Ya he ido","Visited"
