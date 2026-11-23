@@ -1142,30 +1142,15 @@ export function PlacesExplorer({
 
           <div className="flex items-center gap-2 text-xs">
             {activeFiltersCount > 0 && (
-              <>
-                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-                  <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">filter_alt</span>
-                  <span className="font-semibold truncate max-w-[150px]">
-                    {t("places.active_filter_count", { count: activeFiltersCount })}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={resetAllFilters}
-                    className="text-slate-400 hover:text-red-500 font-bold ml-1 cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleShareFilteredView}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/50 text-xs font-semibold transition cursor-pointer"
-                  title={t("places.share_view")}
-                >
-                  <span className="material-symbols-outlined text-sm leading-none">share</span>
-                  <span className="hidden sm:inline">{t("places.share_view")}</span>
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={handleShareFilteredView}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/50 text-xs font-semibold transition cursor-pointer"
+                title={t("places.share_view")}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">share</span>
+                <span className="hidden sm:inline">{t("places.share_view")}</span>
+              </button>
             )}
             <button
               type="button"
