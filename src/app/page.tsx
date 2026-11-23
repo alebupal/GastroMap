@@ -7,7 +7,6 @@ import { getSetting } from "@/lib/actions/settings";
 import { getSavedFiltersAction } from "@/lib/actions/saved-filters";
 import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
-import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
@@ -66,17 +65,6 @@ export default async function Home() {
             initialSavedFilters={savedFiltersList}
           />
         </section>
-
-        {/* 3. Panel de Administración con pestañas (solo visible para admin) */}
-        {currentUser.role === "admin" && (
-          <AdminDashboard
-            initialOccasions={occasionsList}
-            initialTags={tagsList}
-            allPlaces={places}
-            cartoApiKey={cartoApiKey}
-            currentUserId={currentUser.id}
-          />
-        )}
       </div>
 
       {/* 4. Pie de página estilizado Stitch */}

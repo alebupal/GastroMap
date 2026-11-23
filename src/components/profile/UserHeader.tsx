@@ -121,15 +121,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
           {/* Botón Panel Admin */}
           {currentUser.role === "admin" && (
             <Link
-              href="#admin"
-              onClick={() => {
-                const el = document.getElementById("admin");
-                if (el) el.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-600 hover:text-white text-orange-900 dark:text-orange-200 font-bold text-xs border border-orange-200/80 dark:border-orange-800/60 transition shadow-xs"
+              href="/admin"
+              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-600 hover:text-white text-orange-900 dark:text-orange-200 font-bold text-xs border border-orange-200/80 dark:border-orange-800/60 transition shadow-xs group"
               title="Ir al panel de administración"
             >
-              <span className="material-symbols-outlined text-sm text-orange-600">admin_panel_settings</span>
+              <span className="material-symbols-outlined text-sm text-orange-600 group-hover:text-white">admin_panel_settings</span>
               <span>{t("nav.admin")}</span>
             </Link>
           )}
@@ -180,6 +176,18 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
                 {/* Opciones del menú */}
                 <div className="pt-1 space-y-0.5 text-xs">
+                  {/* Panel Admin (accesible en móvil dentro del menú) */}
+                  {currentUser.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="sm:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-orange-700 dark:text-orange-300 bg-orange-50/70 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/50 font-bold transition text-left"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">admin_panel_settings</span>
+                      <span>{t("nav.admin")}</span>
+                    </Link>
+                  )}
+
                   {/* Mis Grupos (siempre accesible aquí en móvil y desktop) */}
                   <button
                     type="button"

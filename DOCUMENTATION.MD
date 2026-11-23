@@ -176,7 +176,9 @@ In the **Import / Export** modal (`📦`):
 - **Occasions & Tags Auto-creation**: When importing places with categories or occasions, the system automatically registers them in the `occasions` and `tags` tables, ensuring filters and selectors are synchronized.
 - **Automatic Linkification (LinkifiedText)**: Any URLs present in notes or comments are automatically rendered as secure clickable links.
 
-### 🛡️ Backups and Advanced Administration (Admin)
+### 🛡️ Backups and Advanced Administration (Admin `/admin`)
+- **Dedicated `/admin` Route with Sidebar Navigation**: The administration dashboard lives on its own protected `/admin` route with a persistent desktop sidebar (and mobile drawer) for instant switching between **Statistics**, **Places Table**, **Users**, **Taxonomy**, **Invitations**, **Audit Log**, **Settings**, and **Demo Places**, plus a direct link back to the explorer.
+- **Real-Time Global Analytics**: 6 KPI cards, 30-day activity pulse banner, top contributors ranking, popular places grid, and distribution bars across cities, plans, prices, and tags.
 - **Bulk Places Backup**: Checkbox selection in admin table to export JSON backups of selected places.
 - **Selective Demo Cleanup**: Button to wipe only the 50 demo places and demo community users without affecting custom places.
 - **Danger Zone — Reset Application**: Administrative wipe clearing all places, comments, groups, invitations, and collaborator accounts while preserving the current administrator account.

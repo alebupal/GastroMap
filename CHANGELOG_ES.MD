@@ -8,6 +8,11 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Panel de Administración en Ruta Dedicada (`/admin`) con Diseño Stitch UI/UX**:
+  - Nueva ruta protegida `/admin` accesible exclusivamente para administradores (con acceso directo desde `Panel Admin` en la cabecera y el menú móvil) y portada `/` limpia enfocada al explorador.
+  - Navegación lateral persistente (y cajón desplegable en móvil) con el logotipo oficial `GastroMap Admin`, accesos directos a **Estadísticas**, **Tabla Sitios** (con contador), **Usuarios**, **Taxonomía**, **Invitaciones**, **Auditoría**, **Configuración**, **Sitios Demo**, enlace `Ver Explorador` y tarjeta inferior de perfil con cierre de sesión.
+  - Cabecera superior unificada con estado `Conexión PWA en vivo`, selector de tema, selector de idioma e insignia `ADMIN`.
+  - Rediseño Stitch completo de las vistas de **Analítica Global** (6 KPIs, pulso cálido de 30 días, Top Contribuidores, cuadrícula de Sitios Más Populares y barras de distribución), **Configuración del Sistema** (mapas, copias de seguridad JSON, zona de peligro y tarjetas de estado) y **Datos de Demostración**.
 - **Logotipo Oficial «Radar y Plato»**:
   - Integrado el isotipo oficial de GastroMap (cuadrado redondeado naranja con aros concéntricos de radar/plato y punto central) junto a la tipografía oficial `GastroMap` en la cabecera, pie de página, pantalla de inicio de sesión y como icono oficial PWA / favicon (`public/icon.svg`).
 - **Calco Fiel y Réplica Exacta del Diseño Stitch UI/UX (Explorador Principal y Mapa)**:

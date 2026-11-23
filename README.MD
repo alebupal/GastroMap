@@ -36,9 +36,9 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Invitation-only access for your inner circle and **private sharing groups** (`👥 Groups`) with cumulative server-side permissions.
   * Private personal notes and collaborative comments on each place. Deletion is restricted to administrators.
 
-* **📊 Personal Statistics, Annual «Wrapped» & Admin Analytics:**
+* **📊 Personal Statistics, Annual «Wrapped» & Dedicated Admin Panel (`/admin`):**
   * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
-  * Extended platform-wide analytics for administrators: KPIs, 30-day activity pulse, top contributors, popular places, and catalog breakdowns.
+  * **Dedicated Admin Panel (`/admin`)** with Stitch sidebar navigation: real-time global analytics, places table, user management, taxonomy, invitations, audit log, system settings, backups, and demo seeder.
 
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.

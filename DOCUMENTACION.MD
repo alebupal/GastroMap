@@ -179,7 +179,9 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 - **Auto-creación de Ocasiones y Tags**: Al importar datos que contengan categorías u ocasiones temáticas, el sistema las registra automáticamente en el catálogo de `occasions` y `tags`, auto-sincronizando los selectores y filtros.
 - **Detección Automática de Enlaces (LinkifiedText)**: Cualquier URL presente en notas personales o comentarios se transforma automáticamente en un enlace web seguro clicable.
 
-### 🛡️ Copia de Seguridad y Administración Avanzada (Panel Admin)
+### 🛡️ Copia de Seguridad y Administración Avanzada (Panel Admin `/admin`)
+- **Ruta Dedicada `/admin` con Menú Lateral**: El panel de administración vive en su propia ruta protegida (`/admin`) con menú lateral fijo en escritorio (y desplegable en móvil) para alternar instantáneamente entre **Estadísticas**, **Tabla Sitios**, **Usuarios**, **Taxonomía**, **Invitaciones**, **Auditoría**, **Configuración** y **Sitios Demo**, además de enlace directo para volver al explorador.
+- **Analítica Global en Tiempo Real**: Panel con 6 indicadores KPI, pulso de actividad de los últimos 30 días, ranking de top contribuidores, sitios más populares y distribuciones por ciudades, planes, precios y etiquetas.
 - **Backup por Lote de Sitios**: Desde la tabla de establecimientos, los administradores pueden seleccionar casillas de verificación de sitios específicos y descargar una copia de seguridad JSON exclusiva de los mismos.
 - **Borrado Selectivo de Datos Demo**: Permite limpiar los 50 establecimientos y usuarios predefinidos de la semilla de prueba sin alterar los sitios propios ni los grupos creados por el usuario.
 - **Zona de Peligro — Resetear Aplicación**: Herramienta irreversible para vaciar completamente la base de datos (sitios, comentarios, grupos, miembros e invitaciones) conservando únicamente la cuenta del administrador actual.

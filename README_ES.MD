@@ -34,9 +34,9 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Acceso por invitación para tu círculo cercano y **grupos privados de compartición** (`👥 Grupos`) con permisos acumulativos en servidor.
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Solo los administradores pueden eliminar lugares.
 
-* **📊 Estadísticas Personales, «Wrapped» Anual y Analítica Admin:**
+* **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Dedicado (`/admin`):**
   * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
-  * Panel de estadísticas globales completas para administradores: KPIs de plataforma, pulso de los últimos 30 días, top contribuidores, sitios más populares y distribuciones del catálogo.
+  * **Panel de Administración dedicado (`/admin`)** con navegación lateral estilo Stitch: analítica global en tiempo real, tabla de sitios, gestión de usuarios, taxonomía, invitaciones, auditoría, configuración del sistema, copias de seguridad y generador de sitios demo.
 
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.

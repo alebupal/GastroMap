@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Dedicated Admin Panel Route (`/admin`) with Stitch UI/UX Design**:
+  - New protected `/admin` route accessible exclusively to administrators (linked from `Admin Panel` in the header and mobile menu), keeping the main `/` explorer uncluttered.
+  - Persistent sidebar navigation (with mobile drawer) featuring the official `GastroMap Admin` logo, quick links for **Statistics**, **Places Table** (with live count), **Users**, **Taxonomy**, **Invitations**, **Audit Log**, **Settings**, **Demo Places**, `View Explorer` shortcut, and pinned bottom user profile card with logout.
+  - Unified top bar showing live PWA status, theme switcher, language selector, and `ADMIN` badge.
+  - Complete Stitch redesign of **Global Analytics** (6 KPI cards, 30-day pulse banner, Top Contributors, Popular Places grid, and distribution bars), **System Settings** (maps, JSON backups, danger zone, and status cards), and **Demo Data**.
 - **Official «Radar & Plate» Brand Logo**:
   - Integrated the official GastroMap icon (orange rounded square with concentric radar/plate rings and center dot) alongside the `GastroMap` wordmark across the header, footer, login screen, and PWA / favicon asset (`public/icon.svg`).
 - **Faithful 1:1 Visual Replication of the Stitch UI/UX Design (Main Explorer & Map)**:
