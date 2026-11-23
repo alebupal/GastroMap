@@ -66,12 +66,12 @@ export default async function LoginPage() {
           </div>
 
           {/* Radar animado central + tarjetas flotantes */}
-          <div className="relative z-10 my-8 flex items-center justify-center h-64">
+          <div className="relative z-10 flex-1 flex items-center justify-center min-h-[300px]">
             {/* Ondas del radar */}
             <div className="absolute w-28 h-28 rounded-full border-2 border-white/40 gm-animate-radar" />
             <div className="absolute w-28 h-28 rounded-full border-2 border-white/30 gm-animate-radar-delayed" />
-            <div className="absolute w-44 h-44 rounded-full border border-white/15" />
-            <div className="absolute w-64 h-64 rounded-full border border-white/10" />
+            <div className="absolute w-48 h-48 rounded-full border border-white/15" />
+            <div className="absolute w-72 h-72 rounded-full border border-white/10" />
 
             {/* Núcleo Radar y Plato */}
             <div className="relative z-10 w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md border border-white/35 flex items-center justify-center shadow-xl">
@@ -79,50 +79,29 @@ export default async function LoginPage() {
             </div>
 
             {/* Tarjeta flotante 1 */}
-            <div className="gm-animate-float absolute top-2 left-1 px-3 py-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-lg flex items-center gap-2 text-xs">
+            <div className="gm-animate-float absolute top-6 left-0 px-3 py-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-lg flex items-center gap-2 text-xs">
               <span className="w-7 h-7 rounded-xl bg-white text-orange-600 font-black text-[11px] flex items-center justify-center shrink-0">
                 AJ
               </span>
               <div>
-                <div className="font-extrabold leading-tight">Tapear en el centro</div>
-                <div className="text-[10px] text-white/80">15 - 30 € • Favorito ★</div>
+                <div className="font-extrabold leading-tight">Tapear</div>
+                <div className="text-[10px] text-white/80">15 - 30 € • ★</div>
               </div>
             </div>
 
             {/* Tarjeta flotante 2 */}
-            <div className="gm-animate-float-delayed absolute bottom-3 right-0 px-3 py-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-lg flex items-center gap-2 text-xs">
+            <div className="gm-animate-float-delayed absolute bottom-6 right-0 px-3 py-2 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 shadow-lg flex items-center gap-2 text-xs">
               <span className="text-base">🎲</span>
               <div>
-                <div className="font-extrabold leading-tight">¿Dónde comemos hoy?</div>
-                <div className="text-[10px] text-white/80">Modo indecisión activo</div>
+                <div className="font-extrabold leading-tight">{t("random.title")}</div>
+                <div className="text-[10px] text-white/80">GastroMap</div>
               </div>
             </div>
 
             {/* Tarjeta flotante 3 */}
-            <div className="gm-animate-float-slow absolute top-14 right-2 px-2.5 py-1.5 rounded-full bg-emerald-400/20 backdrop-blur-md border border-emerald-200/35 text-[11px] font-bold flex items-center gap-1.5 shadow-md">
+            <div className="gm-animate-float-slow absolute top-16 right-2 px-2.5 py-1.5 rounded-full bg-emerald-400/20 backdrop-blur-md border border-emerald-200/35 text-[11px] font-bold flex items-center gap-1.5 shadow-md">
               <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-              <span>Mapa en vivo</span>
-            </div>
-          </div>
-
-          {/* Mensaje inferior */}
-          <div className="relative z-10 space-y-3">
-            <h2 className="text-2xl font-black tracking-tight leading-tight">
-              Tu mapa privado de sitios inolvidables.
-            </h2>
-            <p className="text-xs text-white/80 leading-relaxed">
-              Guarda restaurantes desde Google Maps, organiza planes por ocasión y decide al instante con tus amigos.
-            </p>
-            <div className="flex flex-wrap gap-1.5 pt-1 text-[10px] font-bold">
-              <span className="px-2.5 py-1 rounded-full bg-white/15 border border-white/20">
-                🗺️ Mapa interactivo
-              </span>
-              <span className="px-2.5 py-1 rounded-full bg-white/15 border border-white/20">
-                👥 Grupos privados
-              </span>
-              <span className="px-2.5 py-1 rounded-full bg-white/15 border border-white/20">
-                📱 Modo Offline PWA
-              </span>
+              <span>{t("places.view_map")}</span>
             </div>
           </div>
         </div>
@@ -149,7 +128,7 @@ export default async function LoginPage() {
           </div>
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
-            <span>Acceso privado mediante invitación.</span>
+            <span>{t("auth.private_invite_notice")}</span>
             <span className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold self-center sm:self-auto">
               v{APP_VERSION}
             </span>

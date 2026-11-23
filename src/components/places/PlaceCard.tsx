@@ -157,16 +157,19 @@ export function PlaceCard({
         {/* Fila de Insignia de Estado Personal + Ocasiones / Categorías + Etiquetas */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
           {personalStatus === "visited" ? (
-            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
-              ✅ Ya he ido
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
+              <span className="material-symbols-outlined text-[13px] leading-none">check_circle</span>
+              <span>{t("cards.visited")}</span>
             </span>
           ) : personalStatus === "pending" ? (
-            <span className="px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100 font-bold text-[11px]">
-              🕒 Quiero ir
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100 font-bold text-[11px]">
+              <span className="material-symbols-outlined text-[13px] leading-none">schedule</span>
+              <span>{t("places.want_to_go")}</span>
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
-              ✨ Por descubrir
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
+              <span className="material-symbols-outlined text-[13px] leading-none">auto_awesome</span>
+              <span>{t("places.unexplored")}</span>
             </span>
           )}
 

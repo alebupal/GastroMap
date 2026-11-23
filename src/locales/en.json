@@ -37,6 +37,9 @@
     "visited": "Visited",
     "friends": "From friends",
     "unexplored": "To discover",
+    "more_filters": "+ Filters",
+    "hide_filters": "Hide filters",
+    "active_filter_count": "Active filter ({count})",
     "groups_filter": "Groups",
     "plans_title": "PLANS / CATEGORIES",
     "all_plans": "All plans",
@@ -406,7 +409,9 @@
     "invite_subtitle": "Complete your registration to join the foodie map",
     "invalid_invite": "The invitation is invalid or has expired.",
     "register_btn": "Complete Registration",
-    "registering": "Registering..."
+    "registering": "Registering...",
+    "identifier_placeholder": "username or your@email.com",
+    "private_invite_notice": "Private access by invitation only."
   },
   "groups": {
     "title": "My private groups",

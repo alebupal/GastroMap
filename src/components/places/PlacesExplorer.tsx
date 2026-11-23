@@ -895,11 +895,11 @@ export function PlacesExplorer({
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
           <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-0.5 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
             {[
-              { key: "all", icon: null, iconClass: "", label: `Todos (${initialPlaces.length})` },
-              { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `Favoritos (${initialPlaces.filter(p => p.isFavorite).length})` },
-              { key: "pending", icon: "schedule", iconClass: "text-orange-600 dark:text-orange-400", label: `Quiero ir (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
-              { key: "visited_by_me", icon: "check_circle", iconClass: "text-emerald-600 dark:text-emerald-400", label: `Ya he ido (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
-              { key: "untried", icon: "auto_awesome", iconClass: "text-amber-600 dark:text-amber-400", label: "Por descubrir" },
+              { key: "all", icon: null, iconClass: "", label: `${t("places.all")} (${initialPlaces.length})` },
+              { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `${t("places.favorites")} (${initialPlaces.filter(p => p.isFavorite).length})` },
+              { key: "pending", icon: "schedule", iconClass: "text-orange-600 dark:text-orange-400", label: `${t("places.want_to_go")} (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
+              { key: "visited_by_me", icon: "check_circle", iconClass: "text-emerald-600 dark:text-emerald-400", label: `${t("places.visited")} (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
+              { key: "untried", icon: "auto_awesome", iconClass: "text-amber-600 dark:text-amber-400", label: t("places.unexplored") },
             ].map((item) => {
               const active = experienceFilter === item.key;
               const isUntried = item.key === "untried";
@@ -940,7 +940,9 @@ export function PlacesExplorer({
             {activeFiltersCount > 0 && (
               <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
                 <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">filter_alt</span>
-                <span className="font-semibold truncate max-w-[150px]">Filtro activo ({activeFiltersCount})</span>
+                <span className="font-semibold truncate max-w-[150px]">
+                  {t("places.active_filter_count", { count: activeFiltersCount })}
+                </span>
                 <button
                   type="button"
                   onClick={resetAllFilters}
@@ -1242,7 +1244,7 @@ export function PlacesExplorer({
               }`}
             >
               <span className="material-symbols-outlined text-sm leading-none">tune</span>
-              <span>{showExtraFilters ? "Ocultar filtros" : "+ Filtros"}</span>
+              <span>{showExtraFilters ? t("places.hide_filters") : t("places.more_filters")}</span>
               {selectedOccasions.length + selectedTags.length > 0 && (
                 <span
                   className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${

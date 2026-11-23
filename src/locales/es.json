@@ -37,6 +37,9 @@
     "visited": "Ya he ido",
     "friends": "De amigos",
     "unexplored": "Por descubrir",
+    "more_filters": "+ Filtros",
+    "hide_filters": "Ocultar filtros",
+    "active_filter_count": "Filtro activo ({count})",
     "groups_filter": "Grupos",
     "plans_title": "PLANES / CATEGORÍAS",
     "all_plans": "Todos los planes",
@@ -406,7 +409,9 @@
     "invite_subtitle": "Completa tu registro para unirte al mapa gastronómico",
     "invalid_invite": "La invitación no es válida o ha caducado.",
     "register_btn": "Completar Registro",
-    "registering": "Registrando..."
+    "registering": "Registrando...",
+    "identifier_placeholder": "usuario o tu@email.com",
+    "private_invite_notice": "Acceso privado mediante invitación."
   },
   "groups": {
     "title": "Mis grupos privados",
