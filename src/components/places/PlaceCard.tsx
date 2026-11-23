@@ -13,6 +13,7 @@ import { PlaceCommentsThread } from "./PlaceCommentsThread";
 import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
 import { EditPlaceModal } from "./EditPlaceModal";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 15 €",
@@ -208,9 +209,10 @@ export function PlaceCard({
             return (
               <span
                 key={occId}
-                className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
               >
-                {info.icon} {info.name}
+                <OccasionIcon icon={info.icon} msClassName="text-[13px]" />
+                <span>{info.name}</span>
               </span>
             );
           })}

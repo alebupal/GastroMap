@@ -8,16 +8,14 @@ import { getCurrentUser } from "@/lib/auth";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
 
 const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
-  { id: "tapear", name: "Tapear", icon: "🍢" },
-  { id: "comer", name: "Comer", icon: "🍽️" },
-  { id: "desayuno", name: "Desayuno / Brunch", icon: "🥞" },
-  { id: "dulce", name: "Un dulce", icon: "🍰" },
-  { id: "cafe", name: "Café", icon: "☕" },
-  { id: "copas", name: "Copas", icon: "🍸" },
-  { id: "postureo", name: "Postureo", icon: "✨" },
-  { id: "casual", name: "Casual / Rápido", icon: "🍔" },
+  { id: "desayuno", name: "Desayuno / Brunch", icon: "🥐" },
+  { id: "tapear", name: "Tapear / Cañas", icon: "🍢" },
+  { id: "comer", name: "Comer / Cenar", icon: "🍽️" },
+  { id: "informal", name: "Informal / Rápido", icon: "🍔" },
+  { id: "cafe", name: "Café / Merienda", icon: "☕" },
+  { id: "copas", name: "Copas / Cócteles", icon: "🍸" },
   { id: "cita", name: "Cita / Especial", icon: "🕯️" },
-  { id: "terraza", name: "Terraza / Vistas", icon: "☀️" },
+  { id: "grupos", name: "Grupos / Celebración", icon: "👥" },
 ];
 
 

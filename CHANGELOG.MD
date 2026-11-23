@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Revamped Default Categories (8 Plans) & Rich Icon Picker (Emojis + Material Symbols)**:
+  - Updated initial categories in `src/lib/actions/taxonomy.ts` and `src/data/occasions.ts` to 8 clear, non-overlapping plans: `🥐 Desayuno / Brunch`, `🍢 Tapear / Cañas`, `🍽️ Comer / Cenar`, `🍔 Informal / Rápido`, `☕ Café / Merienda`, `🍸 Copas / Cócteles`, `🕯️ Cita / Especial`, and `👥 Grupos / Celebración`.
+  - New `OccasionIcon` renderer and `OccasionIconPicker` in `/admin > Taxonomy` (for both creating and editing categories) offering 60+ food emojis, custom emoji input, and 50+ searchable **Material Symbols Outlined** icons supported across cards, filters, comparator, stats, and map pins.
+  - Migrated all 146 places in `lugares/lugares_import.json` and the demo seeder (`src/lib/actions/seed.ts`) to the 8 new categories (preserving `terraza`, `postureo`, and `dulce` as tags).
 - **Offline Write Queue (IndexedDB) & Automatic Synchronization**:
   - New `src/lib/offlineQueue.ts` utility that queues personal changes locally in `IndexedDB` when offline or on network failure: toggling favorites, changing personal status (`Want to go` / `Visited`), and saving personal ratings or private notes.
   - New `OfflineSyncBanner` component displaying offline status or pending items, automatically flushing the queue in FIFO order upon reconnect, with a manual `Sync now` button.

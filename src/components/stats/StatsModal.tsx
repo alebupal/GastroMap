@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getUserStatsAction, type UserStatsData, type CountItem } from "@/lib/actions/stats";
 import { useT } from "@/lib/i18n/client";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -549,7 +550,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">
                           🎯 Plan predilecto
                         </span>
-                        <span className="text-sm">{stats.wrapped.topOccasion.icon}</span>
+                        <OccasionIcon icon={stats.wrapped.topOccasion.icon} className="text-sm" msClassName="text-base" />
                       </div>
                       <div className="font-black text-base mt-1 truncate">
                         {stats.wrapped.topOccasion.name}

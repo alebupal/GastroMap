@@ -17,6 +17,11 @@ import {
 } from "@/lib/actions/taxonomy";
 import type { Occasion } from "@/db/schema";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import {
+  OccasionIcon,
+  OccasionIconPicker,
+  formatOccasionOptionLabel,
+} from "@/components/ui/OccasionIcon";
 import { useT } from "@/lib/i18n/client";
 
 interface TaxonomyManagerProps {
@@ -25,11 +30,6 @@ interface TaxonomyManagerProps {
   section?: "occasions" | "tags";
   defaultOpen?: boolean;
 }
-
-const EMOJI_SUGGESTIONS = [
-  "🍽️", "🍢", "🥞", "🍰", "☕", "🍸", "✨", "🍔", "🕯️", "☀️",
-  "🍕", "🌮", "🍣", "🍷", "🍻", "🍨", "🥡", "🍜", "🥩", "🥗"
-];
 
 export function TaxonomyManager({
   initialOccasions,
@@ -608,7 +608,9 @@ export function TaxonomyManager({
                             onChange={() => toggleOccasionSelection(occ.id)}
                             className="w-3.5 h-3.5 rounded text-amber-500 focus:ring-0 cursor-pointer shrink-0"
                           />
-                          <span className="text-base shrink-0">{occ.icon}</span>
+                          <span className="text-base shrink-0 inline-flex items-center justify-center w-5 h-5">
+                            <OccasionIcon icon={occ.icon} msClassName="text-[18px]" />
+                          </span>
                           <div className="truncate">
                             <span className="font-semibold text-slate-900 dark:text-slate-100">
                               {occ.name}
@@ -710,23 +712,13 @@ export function TaxonomyManager({
                   </button>
                 </div>
                 <div>
-                  <span className="text-[11px] text-slate-500 block mb-1">{t("admin_taxonomy.choose_emoji")}</span>
-                  <div className="flex flex-wrap gap-1">
-                    {EMOJI_SUGGESTIONS.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => setNewOccasionIcon(emoji)}
-                        className={`w-6 h-6 rounded text-xs flex items-center justify-center cursor-pointer ${
-                          newOccasionIcon === emoji
-                            ? "bg-orange-600 text-white shadow-xs font-bold"
-                            : "bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200"
-                        }`}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1.5">
+                    {t("admin_taxonomy.choose_emoji")}
+                  </span>
+                  <OccasionIconPicker
+                    value={newOccasionIcon}
+                    onChange={setNewOccasionIcon}
+                  />
                   <input type="hidden" name="icon" value={newOccasionIcon} />
                 </div>
               </form>
@@ -945,7 +937,7 @@ export function TaxonomyManager({
                   className="flex items-center gap-2 text-xs text-slate-800 dark:text-slate-200 py-0.5"
                 >
                   <span className="text-slate-400 text-[10px]">•</span>
-                  {item.icon && <span className="text-sm">{item.icon}</span>}
+                  {item.icon && <OccasionIcon icon={item.icon} className="text-sm" msClassName="text-[15px]" />}
                   <span className="font-semibold">
                     {emptyConfirmModal.type === "tags" ? `#${item.name}` : item.name}
                   </span>
@@ -1014,7 +1006,7 @@ export function TaxonomyManager({
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-slate-400 text-[10px]">•</span>
-                    {item.icon && <span className="text-sm">{item.icon}</span>}
+                    {item.icon && <OccasionIcon icon={item.icon} className="text-sm" msClassName="text-[15px]" />}
                     <span className="font-semibold truncate">
                       {bulkDeleteModal.type === "tags" ? `#${item.name}` : item.name}
                     </span>
@@ -1103,7 +1095,7 @@ export function TaxonomyManager({
                               .filter((o) => o.id !== itemToDelete.id)
                               .map((o) => (
                                 <option key={o.id} value={o.id}>
-                                  {o.icon} {o.name}
+                                  {formatOccasionOptionLabel(o.icon, o.name)}
                                 </option>
                               ))
                           : tagsList
@@ -1191,7 +1183,7 @@ export function TaxonomyManager({
                       .filter((o) => o.id !== itemToMerge.id)
                       .map((o) => (
                         <option key={o.id} value={o.id}>
-                          {o.icon} {o.name}
+                          {formatOccasionOptionLabel(o.icon, o.name)}
                         </option>
                       ))
                   : tagsList
@@ -1248,6 +1240,18 @@ export function TaxonomyManager({
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
               />
             </div>
+
+            {editingItem.type === "occasion" && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">
+                  {t("admin_taxonomy.choose_emoji")}
+                </label>
+                <OccasionIconPicker
+                  value={editingItem.icon || "🍽️"}
+                  onChange={(icon) => setEditingItem({ ...editingItem, icon })}
+                />
+              </div>
+            )}
 
             <div className="flex gap-2 pt-2">
               <button

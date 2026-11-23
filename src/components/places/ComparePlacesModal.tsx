@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { useT } from "@/lib/i18n/client";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
 
@@ -277,9 +278,10 @@ export function ComparePlacesModal({
                           return (
                             <span
                               key={occId}
-                              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                             >
-                              {info.icon} {info.name}
+                              <OccasionIcon icon={info.icon} msClassName="text-[12px]" />
+                              <span>{info.name}</span>
                             </span>
                           );
                         })}

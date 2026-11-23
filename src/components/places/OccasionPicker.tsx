@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useT } from "@/lib/i18n/client";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 
 const INITIAL_VISIBLE = 10;
 const LOAD_MORE_STEP = 12;
@@ -123,7 +124,7 @@ export function OccasionPicker({
                     : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600"
                     }`}
                 >
-                  <span>{occ.icon}</span>
+                  <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
                   <span>{occ.name}</span>
                   {active && <span className="text-[10px] font-extrabold">✓</span>}
                 </button>

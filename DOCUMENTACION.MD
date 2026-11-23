@@ -107,7 +107,7 @@ Al acceder por primera vez a una instancia limpia:
 - **Filtros de Segmentación y Taxonomías (Fila 2)**:
   - `🏙️ Ciudades` y `🌍 Países (+195)`: Selectores desplegables con buscador integrado.
   - `💶 Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
-  - Ocasiones y etiquetas gastronómicas destacadas con botón desplegable `🎛️ + Filtros`.
+  - Ocasiones y etiquetas gastronómicas destacadas (8 planes por defecto personalizables con emojis o iconos **Material Symbols** desde `/admin > Taxonomía`) con botón desplegable `🎛️ + Filtros`.
 - **Tarjetas de Locales Estilo Stitch**:
   - Avatar con iniciales del establecimiento sobre degradado terracota/ámbar.
   - Nombre, dirección con chincheta, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).

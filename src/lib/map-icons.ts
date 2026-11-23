@@ -6,14 +6,17 @@ import L from "leaflet";
 const OCCASION_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   tapear: { bg: "#ea580c", text: "#ffffff", border: "#c2410c" }, // Naranja vibrante
   comer: { bg: "#2563eb", text: "#ffffff", border: "#1d4ed8" }, // Azul intenso
-  dulce: { bg: "#db2777", text: "#ffffff", border: "#be185d" }, // Rosa frambuesa
+  desayuno: { bg: "#f59e0b", text: "#ffffff", border: "#d97706" }, // Ámbar cálido
+  informal: { bg: "#059669", text: "#ffffff", border: "#047857" }, // Esmeralda
   cafe: { bg: "#92400e", text: "#ffffff", border: "#78350f" }, // Ámbar tostado
   copas: { bg: "#7c3aed", text: "#ffffff", border: "#6d28d9" }, // Morado
-  postureo: { bg: "#ca8a04", text: "#ffffff", border: "#a16207" }, // Dorado
-  desayuno: { bg: "#f59e0b", text: "#ffffff", border: "#d97706" }, // Ámbar cálido
-  casual: { bg: "#059669", text: "#ffffff", border: "#047857" }, // Esmeralda
   cita: { bg: "#e11d48", text: "#ffffff", border: "#be123c" }, // Rosa carmesí
-  terraza: { bg: "#0284c7", text: "#ffffff", border: "#0369a1" }, // Celeste cielo
+  grupos: { bg: "#0d9488", text: "#ffffff", border: "#0f766e" }, // Turquesa profundo
+  // Alias históricos
+  dulce: { bg: "#db2777", text: "#ffffff", border: "#be185d" },
+  postureo: { bg: "#ca8a04", text: "#ffffff", border: "#a16207" },
+  casual: { bg: "#059669", text: "#ffffff", border: "#047857" },
+  terraza: { bg: "#0284c7", text: "#ffffff", border: "#0369a1" },
 };
 
 const DEFAULT_COLOR = { bg: "#ea580c", text: "#ffffff", border: "#c2410c" }; // Naranja vibrante por defecto
@@ -50,6 +53,10 @@ export function createPlaceMarkerIcon(
     badgeHtml = `<div style="position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 9999px; background: #3b82f6; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; font-size: 9px; line-height: 1; box-shadow: 0 2px 4px rgba(0,0,0,0.35);">🕒</div>`;
   }
 
+  const iconContent = iconEmoji.startsWith("ms:")
+    ? `<span class="material-symbols-outlined" style="font-size: ${emojiSize}px; color: #ffffff; line-height: 1;">${iconEmoji.slice(3)}</span>`
+    : iconEmoji;
+
   const html = `
     <div style="position: relative; width: ${w}px; height: ${h}px; filter: drop-shadow(0 4px 10px rgba(0,0,0,${
     isSelected ? 0.5 : 0.3
@@ -63,12 +70,12 @@ export function createPlaceMarkerIcon(
   } 2 ${w - 2} ${cy - r} ${w - 2} ${cy} C${w - 2} ${cy + 12} ${cx} ${h} ${cx} ${h} Z" fill="${
     colors.bg
   }" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
-        <!-- Círculo interior de contraste para destacar el emoji -->
+        <!-- Círculo interior de contraste para destacar el icono -->
         <circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="#ffffff" fill-opacity="0.3"/>
       </svg>
-      <!-- Capa HTML nativa para emoji siempre visible y a todo color -->
+      <!-- Capa HTML para emoji o Material Symbol -->
       <div style="position: absolute; left: 0; top: 0; width: ${w}px; height: ${w}px; display: flex; align-items: center; justify-content: center; font-size: ${emojiSize}px; line-height: 1; pointer-events: none; user-select: none;">
-        ${iconEmoji}
+        ${iconContent}
       </div>
       ${badgeHtml}
     </div>

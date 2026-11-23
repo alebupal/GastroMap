@@ -16,7 +16,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **➕ Alta ultrarrápida de sitios:**
   * Compatible con **Web Share Target API**: Comparte un enlace desde Google Maps o redes sociales y abre la ficha al instante en el móvil.
   * Extracción y normalización automática de coordenadas y enlaces.
-  * Clasificación ágil por planes (*Tapear, Comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
+  * Clasificación ágil por 8 planes por defecto (*Desayuno / Brunch, Tapear / Cañas, Comer / Cenar, Informal / Rápido, Café / Merienda, Copas / Cócteles, Cita / Especial, Grupos / Celebración*) personalizables con emojis o iconos **Material Symbols**, y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
 * **🔍 Explorador Principal y Búsqueda Universal (Diseño Stitch UI/UX):**
   * **Barra de búsqueda unificada y Paleta de Comandos (`Ctrl+K` / `⌘+K`)**: Campo de búsqueda redondeado con acceso rápido `⌘K` navegable por teclado para saltar a cualquier sitio o acción, y píldoras integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).

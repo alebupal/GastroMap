@@ -22,6 +22,7 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
 import { CommandPalette } from "@/components/ui/CommandPalette";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 
@@ -1293,7 +1294,7 @@ export function PlacesExplorer({
                       : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                   }`}
                 >
-                  <span>{occ.icon}</span>
+                  <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
                   <span>{occ.name}</span>
                 </button>
               );
@@ -1449,7 +1450,7 @@ export function PlacesExplorer({
                       : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
                       }`}
                   >
-                    <span>{occ.icon}</span>
+                    <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
                     <span>{occ.name}</span>
                     {(occ.placesCount || 0) > 0 && (
                       <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
@@ -1515,7 +1516,7 @@ export function PlacesExplorer({
                     : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
                     }`}
                 >
-                  <span>{occ.icon}</span>
+                  <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
                   <span>{occ.name}</span>
                   {(occ.placesCount || 0) > 0 && (
                     <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>

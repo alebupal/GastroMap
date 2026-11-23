@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useT } from "@/lib/i18n/client";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 
 interface DecisionAssistantModalProps {
   isOpen: boolean;
@@ -149,7 +150,7 @@ export function DecisionAssistantModal({
                     }`}
                   >
                     <span className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-sm shrink-0">{occ.icon}</span>
+                      <OccasionIcon icon={occ.icon} className="text-sm shrink-0" msClassName="text-[16px]" />
                       <span className="truncate">{occ.name}</span>
                     </span>
                     {typeof occ.placesCount === "number" && occ.placesCount > 0 && (

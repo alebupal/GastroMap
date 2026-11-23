@@ -18,7 +18,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **➕ Ultra-Fast Place Ingestion:**
   * Compatible with the **Web Share Target API**: Share a link directly from Google Maps or social networks and open the place card instantly on your phone.
   * Automatic coordinate and link normalization.
-  * Fast classification by occasion (*Tapas, Full Meal, Trendy/Rooftops, Drinks, Coffee/Dessert*) and price range (`€` to `€€€€` or `???` so unknown places aren't left out).
+  * Fast classification across 8 default plans (*Breakfast / Brunch, Tapas / Drinks, Lunch / Dinner, Casual / Quick, Coffee / Dessert, Cocktails / Drinks, Date / Special, Groups / Celebration*) customizable with emojis or **Material Symbols** icons, plus price range (`€` to `€€€€` or `???` so unknown places aren't left out).
 
 * **🔍 Main Explorer & Universal Search (Stitch UI/UX Design):**
   * **Unified search bar & Command Palette (`Ctrl+K` / `⌘+K`)**: Rounded search input with keyboard-driven `⌘K` quick launcher to jump to any place or action, plus inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).

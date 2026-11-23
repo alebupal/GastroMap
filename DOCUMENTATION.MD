@@ -107,7 +107,7 @@ When launching on a clean database:
 - **Segmentation Filters (Row 2)**:
   - `🏙️ Cities` and `🌍 Countries (195+)`: Searchable dropdown selectors.
   - `💶 Price Ranges`: Segmented pills for explicit brackets (`<15€`, `15-30€`, `30-50€`, `>50€`).
-  - Featured categories and gastronomic tags with expandable `🎛️ + Filters`.
+  - Featured categories and gastronomic tags (8 default plans customizable with emojis or **Material Symbols** icons in `/admin > Taxonomy`) with expandable `🎛️ + Filters`.
 - **Stitch-styled Place Cards**:
   - Restaurant initials avatar with terracotta/amber gradient badge.
   - Name, address with pin, emerald price badge, and interactive favorite heart (`favorite`).

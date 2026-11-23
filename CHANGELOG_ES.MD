@@ -8,6 +8,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Renovación de Categorías por Defecto (8 Planes) y Selector Avanzado de Iconos (Emojis + Material Symbols)**:
+  - Actualizadas las categorías iniciales en `src/lib/actions/taxonomy.ts` y `src/data/occasions.ts` a 8 planes claros sin solapamientos: `🥐 Desayuno / Brunch`, `🍢 Tapear / Cañas`, `🍽️ Comer / Cenar`, `🍔 Informal / Rápido`, `☕ Café / Merienda`, `🍸 Copas / Cócteles`, `🕯️ Cita / Especial` y `👥 Grupos / Celebración`.
+  - Nuevo componente `OccasionIcon` y selector `OccasionIconPicker` en `/admin > Taxonomía` (al crear y editar categorías) con más de 60 emojis gastronómicos, entrada libre de emoji y más de 50 iconos **Material Symbols Outlined** con buscador en vivo y soporte completo en tarjetas, filtros, comparador, estadísticas y pines del mapa.
+  - Migrados los 146 locales de `lugares/lugares_import.json` y el generador de datos demo (`src/lib/actions/seed.ts`) a las 8 nuevas categorías (conservando `terraza`, `postureo` y `dulce` como etiquetas).
 - **Cola de Escritura Offline (IndexedDB) y Sincronización Automática**:
   - Nueva utilidad `src/lib/offlineQueue.ts` que encola localmente en `IndexedDB` los cambios personales realizados sin cobertura o ante fallo de red: alternar favoritos, cambiar estado personal (`Quiero ir` / `Ya he ido`) y guardar puntuación o notas privadas.
   - Nuevo componente `OfflineSyncBanner` que informa cuando estás sin conexión o tienes cambios pendientes, sincroniza automáticamente en orden FIFO al recuperar la conectividad y ofrece un botón manual `Sincronizar ahora`.
