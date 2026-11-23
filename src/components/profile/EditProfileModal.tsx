@@ -196,10 +196,12 @@ export function EditProfileModal({
             <button
               type="button"
               onClick={() => setShowPasswordFields(!showPasswordFields)}
-              className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline inline-flex items-center gap-1.5 cursor-pointer"
+              className="group text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 inline-flex items-center gap-1.5 cursor-pointer transition"
             >
               <span className="material-symbols-outlined text-base leading-none">key</span>
-              <span>{t("profile.change_password")}</span>
+              <span className="group-hover:underline underline-offset-2">
+                {t("profile.change_password")}
+              </span>
               <span className="material-symbols-outlined text-sm leading-none">
                 {showPasswordFields ? "expand_less" : "expand_more"}
               </span>
