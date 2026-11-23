@@ -1674,9 +1674,9 @@ export function PlacesExplorer({
             </div>
 
             {/* País y Grupos en móvil dentro de filtros avanzados */}
-            {(allCountries.length > 1 || myGroups.length > 0) && (
+            {(allCountries.length > 0 || myGroups.length > 0) && (
               <div className="flex items-center gap-2 flex-wrap">
-                {allCountries.length > 1 && (
+                {allCountries.length > 0 && (
                   <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold">
                     <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
                       public
