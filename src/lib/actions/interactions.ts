@@ -24,6 +24,36 @@ export interface CommentWithAuthor {
 }
 
 /**
+ * Establece de forma idempotente el estado de favorito de un establecimiento para el usuario actual
+ */
+export async function setFavoriteAction(placeId: string, favorite: boolean) {
+  const user = await getCurrentUser();
+  if (!user) return { error: "No autenticado" };
+
+  const [existing] = await db
+    .select()
+    .from(userPlaces)
+    .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(userPlaces)
+      .set({ favorite, updatedAt: new Date() })
+      .where(eq(userPlaces.id, existing.id));
+  } else {
+    await db.insert(userPlaces).values({
+      userId: user.id,
+      placeId,
+      favorite,
+    });
+  }
+
+  revalidatePath("/");
+  return { success: true, favorite };
+}
+
+/**
  * Alterna el estado de favorito de un establecimiento para el usuario actual
  */
 export async function toggleFavoriteAction(placeId: string) {

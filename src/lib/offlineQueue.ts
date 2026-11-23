@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  setFavoriteAction,
   toggleFavoriteAction,
   setPersonalStatusAction,
   setPersonalRatingAction,
@@ -8,6 +9,11 @@ import {
 } from "@/lib/actions/interactions";
 
 export type OfflineMutationInput =
+  | {
+      type: "set_favorite";
+      placeId: string;
+      favorite: boolean;
+    }
   | {
       type: "toggle_favorite";
       placeId: string;
@@ -134,7 +140,9 @@ export async function flushOfflineQueue(): Promise<{ synced: number; remaining: 
 
   for (const item of items) {
     try {
-      if (item.type === "toggle_favorite") {
+      if (item.type === "set_favorite") {
+        await setFavoriteAction(item.placeId, item.favorite);
+      } else if (item.type === "toggle_favorite") {
         await toggleFavoriteAction(item.placeId);
       } else if (item.type === "set_status") {
         await setPersonalStatusAction(item.placeId, item.status);

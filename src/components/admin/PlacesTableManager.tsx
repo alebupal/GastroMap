@@ -42,14 +42,16 @@ export function PlacesTableManager({
     const cSet = new Set<string>();
     placesList.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
-      if (parsed.country) cSet.add(parsed.country);
+      const effectiveCountry = p.country || parsed.country;
+      if (effectiveCountry) cSet.add(effectiveCountry);
     });
     const countries = Array.from(cSet).sort((a, b) => a.localeCompare(b));
 
     const citySet = new Set<string>();
     placesList.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
-      if (countryFilter === "all" || parsed.country === countryFilter) {
+      const effectiveCountry = p.country || parsed.country;
+      if (countryFilter === "all" || effectiveCountry === countryFilter) {
         if (parsed.city) citySet.add(parsed.city);
       }
     });
@@ -85,8 +87,9 @@ export function PlacesTableManager({
     const q = searchQuery.toLowerCase().trim();
     return placesList.filter((p) => {
       const parsed = parseCityCountry(p.city, p.address);
+      const effectiveCountry = p.country || parsed.country;
 
-      if (countryFilter !== "all" && parsed.country !== countryFilter) {
+      if (countryFilter !== "all" && effectiveCountry !== countryFilter) {
         return false;
       }
       if (cityFilter !== "all" && parsed.city !== cityFilter) {

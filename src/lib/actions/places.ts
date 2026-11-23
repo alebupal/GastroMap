@@ -26,6 +26,7 @@ import {
   reverseGeocodeNominatim,
   type GeocodingResult,
 } from "@/lib/geocoding";
+import { parseCityCountry } from "@/lib/location";
 
 export interface PlaceWithDetails extends Place {
   createdByName: string;
@@ -95,6 +96,8 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
   const name = (formData.get("name") as string)?.trim();
   const address = (formData.get("address") as string)?.trim() || null;
   const city = (formData.get("city") as string)?.trim() || null;
+  const explicitCountry = (formData.get("country") as string)?.trim() || null;
+  const country = explicitCountry || parseCityCountry(city, address).country || null;
   const googleMapsUrl = (formData.get("googleMapsUrl") as string)?.trim() || null;
   const priceRange = (formData.get("priceRange") as string) || "???";
   const notes = (formData.get("notes") as string)?.trim() || null;
@@ -124,6 +127,7 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
       name,
       address,
       city,
+      country,
       latitude,
       longitude,
       googleMapsUrl,
@@ -221,6 +225,8 @@ export async function updatePlaceAction(
 
   const address = (formData.get("address") as string)?.trim() || null;
   const city = (formData.get("city") as string)?.trim() || null;
+  const explicitCountry = (formData.get("country") as string)?.trim() || null;
+  const country = explicitCountry || parseCityCountry(city, address).country || null;
   const googleMapsUrl = (formData.get("googleMapsUrl") as string)?.trim() || null;
   const website = (formData.get("website") as string)?.trim() || null;
   const phone = (formData.get("phone") as string)?.trim() || null;
@@ -285,6 +291,7 @@ export async function updatePlaceAction(
       name,
       address,
       city,
+      country,
       latitude,
       longitude,
       googleMapsUrl,

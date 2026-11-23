@@ -6,6 +6,7 @@ import { places, occasions, placeOccasions, placeTags, tags, userPlaces, placeCo
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
+import { parseCityCountry } from "@/lib/location";
 
 export interface ImportPlacePayload {
   name: string;
@@ -59,12 +60,17 @@ export async function importPlacesAction(
     const priceRange =
       raw.priceRange && validPrices.has(raw.priceRange) ? raw.priceRange : "???";
 
+    const cleanCity = raw.city?.trim()?.slice(0, 100) || null;
+    const cleanAddress = raw.address?.trim() || null;
+    const inferredCountry = parseCityCountry(cleanCity, cleanAddress).country || null;
+
     const [created] = await db
       .insert(places)
       .values({
         name: cleanName.slice(0, 255),
-        city: raw.city?.trim()?.slice(0, 100) || null,
-        address: raw.address?.trim() || null,
+        city: cleanCity,
+        country: inferredCountry,
+        address: cleanAddress,
         latitude: lat,
         longitude: lng,
         priceRange,

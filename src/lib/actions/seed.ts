@@ -17,6 +17,7 @@ import {
   savedFilters,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword } from "@/lib/auth";
+import { parseCityCountry } from "@/lib/location";
 
 interface DemoComment {
   author?: string; // username del autor (ej. 'lauragourmet') o el admin si no se indica
@@ -1227,6 +1228,7 @@ export async function seedDemoPlacesAction() {
         .values({
           name: item.name,
           city: item.city,
+          country: parseCityCountry(item.city, item.address).country,
           address: item.address,
           latitude: item.latitude,
           longitude: item.longitude,

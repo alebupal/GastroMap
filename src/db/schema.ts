@@ -51,7 +51,7 @@ export const invitations = pgTable("invitations", {
 export const occasions = pgTable("occasions", {
   id: varchar("id", { length: 50 }).primaryKey(), // slug ej. 'tapear', 'comer'
   name: varchar("name", { length: 100 }).notNull(),
-  icon: varchar("icon", { length: 20 }).notNull().default("🍽️"),
+  icon: varchar("icon", { length: 50 }).notNull().default("🍽️"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -68,6 +68,7 @@ export const places = pgTable(
     name: varchar("name", { length: 255 }).notNull(),
     address: text("address"),
     city: varchar("city", { length: 100 }),
+    country: varchar("country", { length: 100 }),
     latitude: doublePrecision("latitude"),
     longitude: doublePrecision("longitude"),
     googleMapsUrl: text("google_maps_url"),

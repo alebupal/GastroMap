@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Engineering Hardening, `places.country` Column, Idempotent Offline Queue & Modularization**:
+  - Added native `country` column to `places` (`drizzle/0011_little_phantom_reporter.sql`), widened `occasions.icon` to `varchar(50)` for long Material Symbol identifiers, and migrated the local database (countries and 8 default categories) via `scripts/migrate-country-and-occasions.mjs`.
+  - Made offline favorite mutations idempotent (`set_favorite` + `setFavoriteAction`) so retries never invert user state.
+  - Replaced hardcoded map coordinates with live map center coordinates, translated all remaining hardcoded UI strings across explorer, map popups, comparator, `/new`, and `/docs`, and removed `userScalable: false` / `maximumScale: 1` for mobile accessibility.
+  - Extracted `MobileFilterBar.tsx` from `PlacesExplorer.tsx`, added engineering regression tests (`tests/engineering-quality.test.mjs`), and added a Playwright responsive audit script (`scripts/responsive-audit.mjs`).
 - **Full Stitch Mobile Redesign (Map + Bottom Sheet + Fixed Bottom Navigation)**:
   - Streamlined mobile `UserHeader` featuring the official logo, circular quick-search trigger (`CommandPalette`), and orange circular profile avatar (moving theme and language switchers cleanly into the mobile dropdown).
   - New mobile search & filter bar in `PlacesExplorer` with pill search input + inline `tune` filter button (with active badge), orange `List / Map` toggle pill, and horizontal quick chips (`All`, `To discover`, `Favorites`, and categories with counts).

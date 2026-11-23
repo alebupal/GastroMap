@@ -72,7 +72,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
                   {t("places.add_new")}
                 </h1>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-black uppercase tracking-wider">
-                  Nuevo
+                  {t("places.new_badge")}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">

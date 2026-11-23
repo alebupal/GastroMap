@@ -123,7 +123,13 @@
     "delete_filter_tooltip": "Delete saved filter",
     "clear_compare_tooltip": "Clear comparison",
     "share_view": "Share view",
-    "share_view_copied": "Filtered view link copied to clipboard"
+    "share_view_copied": "Filtered view link copied to clipboard",
+    "compare_counter": "Compare ({count}/3)",
+    "open_compare": "Open",
+    "radius_label": "Radius:",
+    "locating": "Locating...",
+    "location_active": "Location active",
+    "new_badge": "New"
   },
   "cards": {
     "pending": "Pending",
@@ -866,5 +872,17 @@
     "featured_title": "Featured Places",
     "filtered_title": "Filtered Results",
     "recommendations_count": "{count} food recommendations"
+  },
+  "map": {
+    "cache_first_synced": "Locally synced database (Cache First)",
+    "open_in_maps": "Open in Maps ↗",
+    "cities_count": "{count} cities",
+    "on_map": "On map"
+  },
+  "docs": {
+    "back_to_explorer": "Back to explorer",
+    "center_title": "Documentation Center",
+    "center_subtitle": "Official user guide, release changelog and project details for GastroMap.",
+    "user_guide": "User guide"
   }
 }

@@ -8,6 +8,11 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Mejoras de Ingeniería, Esquema `places.country`, Cola Offline Idempotente y Modularización**:
+  - Añadida columna nativa `country` en `places` (`drizzle/0011_little_phantom_reporter.sql`), ampliado `occasions.icon` a `varchar(50)` para soportar nombres largos de Material Symbols, y migrada la base de datos local (países y 8 categorías de Opción A) mediante `scripts/migrate-country-and-occasions.mjs`.
+  - Cola offline de favoritos convertida en idempotente (`set_favorite` + `setFavoriteAction`) para evitar inversiones accidentales al reintentar tras cortes de red.
+  - Coordenadas en tiempo real del centro del mapa en la barra inferior de escritorio (eliminando coordenadas fijas), traducción completa de cadenas pendientes en explorador, mapa, comparador, `/new` y `/docs`, y eliminación de `userScalable: false` / `maximumScale: 1` por accesibilidad móvil.
+  - Extraído `MobileFilterBar.tsx` desde `PlacesExplorer.tsx`, añadidos tests de calidad de ingeniería (`tests/engineering-quality.test.mjs`) y script de auditoría responsive Playwright (`scripts/responsive-audit.mjs`).
 - **Rediseño Móvil Completo Estilo Stitch (Mapa + Bottom Sheet + Barra Inferior Fija)**:
   - Cabecera móvil simplificada en `UserHeader` con logotipo oficial, botón circular de búsqueda rápida (`CommandPalette`) y avatar circular naranja (con selector de tema e idioma integrados en el menú desplegable móvil).
   - Nueva barra móvil en `PlacesExplorer` con buscador píldora + icono de filtros avanzados (`tune` con contador), botón píldora naranja `Lista / Mapa` y carrusel horizontal de chips (`Todos`, `Por descubrir`, `Favoritos` y categorías con contador).

@@ -30,6 +30,7 @@ interface MapViewProps {
   className?: string;
   cartoApiKey?: string | null;
   isFiltered?: boolean;
+  onCenterChange?: (lat: number, lng: number) => void;
 }
 
 const SPAIN_CENTER: [number, number] = [40.4168, -3.7038];
@@ -44,7 +45,12 @@ const PRICE_RANGE_LABELS: Record<string, string> = {
 };
 
 // Función auxiliar para construir el contenido HTML enriquecido del popup estilo Stitch
-function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
+function getPlacePopupHtml(
+  place: PlaceWithDetails,
+  lat: number,
+  lng: number,
+  labels: { visited: string; pending: string; unexplored: string; openInMaps: string }
+) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   const initials =
     place.name
@@ -58,10 +64,10 @@ function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
   const priceLabel = PRICE_RANGE_LABELS[place.priceRange] || place.priceRange;
   const statusLabel =
     place.personalStatus === "visited"
-      ? "✅ Ya he ido"
+      ? `✅ ${labels.visited}`
       : place.personalStatus === "pending"
-      ? "🕒 Pendiente"
-      : "✨ Por descubrir";
+      ? `🕒 ${labels.pending}`
+      : `✨ ${labels.unexplored}`;
 
   return `
     <div style="padding: 10px 12px; min-width: 210px; max-width: 250px; font-family: 'Plus Jakarta Sans', system-ui, sans-serif;">
@@ -86,7 +92,7 @@ function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
       }
       <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #eaedff; display: flex; align-items: center; justify-content: space-between; font-size: 10px;">
         <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="color: #a33900; font-weight: 700; text-decoration: none;">
-          Abrir en Maps ↗
+          ${labels.openInMaps}
         </a>
         <span style="background: #ffddb8; color: #684000; font-weight: 700; padding: 2px 6px; border-radius: 9999px;">${statusLabel}</span>
       </div>
@@ -104,6 +110,7 @@ export default function MapView({
   className = "w-full h-[60vh] sm:h-[500px]",
   cartoApiKey,
   isFiltered = false,
+  onCenterChange,
 }: MapViewProps) {
   const { t } = useT();
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -147,6 +154,13 @@ export default function MapView({
       maxZoom: 19,
       subdomains: cartoApiKey ? "abcd" : "abc",
     }).addTo(map);
+
+    const emitCenter = () => {
+      const c = map.getCenter();
+      onCenterChange?.(c.lat, c.lng);
+    };
+    map.on("moveend", emitCenter);
+    emitCenter();
 
     // Atribución discreta
     L.control
@@ -334,7 +348,12 @@ export default function MapView({
       const occasionInfo = primaryOccasion ? occasionMap[primaryOccasion] : undefined;
       const badge = getPersonalBadge(place);
       const icon = createPlaceMarkerIcon(primaryOccasion, occasionInfo?.icon, isSelected, badge);
-      const popupHtml = getPlacePopupHtml(place, lat, lng);
+      const popupHtml = getPlacePopupHtml(place, lat, lng, {
+        visited: t("cards.visited"),
+        pending: t("cards.pending"),
+        unexplored: t("places.unexplored"),
+        openInMaps: t("map.open_in_maps"),
+      });
 
       let marker = markersRef.current.get(place.id);
       if (!marker || !map.hasLayer(marker)) {
@@ -511,13 +530,14 @@ export default function MapView({
           uniqueCities.length === 1
             ? uniqueCities[0]
             : uniqueCities.length > 1
-              ? `${uniqueCities.length} ciudades`
-              : "En mapa";
+              ? t("map.cities_count", { count: uniqueCities.length })
+              : t("map.on_map");
         return (
           <div className="hidden lg:flex items-center gap-1.5 absolute top-3 right-3 z-30 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md border border-slate-200/80 dark:border-slate-800/80 text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>
-              {label}: {mappedPlaces.length} {mappedPlaces.length === 1 ? "local" : "locales"}
+              {label}: {mappedPlaces.length}{" "}
+              {mappedPlaces.length === 1 ? t("places.locale_single") : t("places.locales_count")}
             </span>
           </div>
         );

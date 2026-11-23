@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { useT } from "@/lib/i18n/client";
 import { APP_VERSION } from "@/lib/version";
 
 type DocTab = "docs" | "changelog" | "readme";
@@ -45,6 +46,7 @@ function InlineMarkdown({ text }: { text: string }) {
 }
 
 export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
+  const { t } = useT();
   const [activeTab, setActiveTab] = useState<DocTab>(initialTab);
   const [lang, setLang] = useState<"es" | "en">("es");
   const [content, setContent] = useState<string>("");
@@ -233,10 +235,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shrink-0"
-              aria-label="Volver al explorador"
+              aria-label={t("docs.back_to_explorer")}
             >
               <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-              <span className="hidden sm:inline">Volver al explorador</span>
+              <span className="hidden sm:inline">{t("docs.back_to_explorer")}</span>
             </Link>
           </div>
 
@@ -280,10 +282,10 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               </div>
               <div>
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-                  Centro de Documentación
+                  {t("docs.center_title")}
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Guía oficial de uso, registro de versiones y detalles del proyecto GastroMap.
+                  {t("docs.center_subtitle")}
                 </p>
               </div>
             </div>
@@ -310,7 +312,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
                   }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">book</span>
-                <span className="truncate">Guía de uso</span>
+                <span className="truncate">{t("docs.user_guide")}</span>
               </button>
 
               <button

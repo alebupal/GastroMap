@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
 import {
-  toggleFavoriteAction,
+  setFavoriteAction,
   setPersonalStatusAction,
 } from "@/lib/actions/interactions";
 import { enqueueOfflineMutation } from "@/lib/offlineQueue";
@@ -81,14 +81,22 @@ export function PlaceCard({
     const nextFav = !favorite;
     setFavorite(nextFav);
     if (typeof navigator !== "undefined" && !navigator.onLine) {
-      await enqueueOfflineMutation({ type: "toggle_favorite", placeId: place.id });
+      await enqueueOfflineMutation({
+        type: "set_favorite",
+        placeId: place.id,
+        favorite: nextFav,
+      });
       toast(t("offline.queued_toast"), { kind: "info" });
       return;
     }
     try {
-      await toggleFavoriteAction(place.id);
+      await setFavoriteAction(place.id, nextFav);
     } catch {
-      await enqueueOfflineMutation({ type: "toggle_favorite", placeId: place.id });
+      await enqueueOfflineMutation({
+        type: "set_favorite",
+        placeId: place.id,
+        favorite: nextFav,
+      });
       toast(t("offline.queued_toast"), { kind: "info" });
     }
   }

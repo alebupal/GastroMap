@@ -292,7 +292,7 @@ export function ComparePlacesModal({
                     {p.tags.length > 0 && (
                       <div className="space-y-1.5">
                         <div className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Especialidades
+                          {t("ui.specialty")}
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {p.tags.slice(0, 5).map((tag) => (

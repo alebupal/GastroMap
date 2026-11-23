@@ -123,7 +123,13 @@
     "delete_filter_tooltip": "Eliminar filtro guardado",
     "clear_compare_tooltip": "Limpiar comparación",
     "share_view": "Compartir vista",
-    "share_view_copied": "Enlace con filtros copiado al portapapeles"
+    "share_view_copied": "Enlace con filtros copiado al portapapeles",
+    "compare_counter": "Comparar ({count}/3)",
+    "open_compare": "Abrir",
+    "radius_label": "Radio:",
+    "locating": "Localizando...",
+    "location_active": "Ubicación activa",
+    "new_badge": "Nuevo"
   },
   "cards": {
     "pending": "Pendiente",
@@ -866,5 +872,17 @@
     "featured_title": "Lugares Destacados",
     "filtered_title": "Resultados filtrados",
     "recommendations_count": "{count} recomendaciones gastronómicas"
+  },
+  "map": {
+    "cache_first_synced": "Base de datos sincronizada localmente (Cache First)",
+    "open_in_maps": "Abrir en Maps ↗",
+    "cities_count": "{count} ciudades",
+    "on_map": "En mapa"
+  },
+  "docs": {
+    "back_to_explorer": "Volver al explorador",
+    "center_title": "Centro de Documentación",
+    "center_subtitle": "Guía oficial de uso, registro de versiones y detalles del proyecto GastroMap.",
+    "user_guide": "Guía de uso"
   }
 }
