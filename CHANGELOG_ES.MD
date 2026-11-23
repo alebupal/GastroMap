@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Adaptación Integral Final a `DESIGN.md` e Iconografía Material Symbols**:
+  - Sustituidos los emojis de la barra de filtros (`Favoritos`, `Quiero ir`, `Ya he ido`, `Por descubrir`, `Grupos`, `Ciudades`, `Países`, `Mis filtros`) por iconos **Material Symbols Outlined** (`star`, `schedule`, `check_circle`, `auto_awesome`, `group`, `location_city`, `public`, `bookmark`) con soporte de nodos React en `SearchableSelect`.
+  - Rediseñados según `DESIGN.md` los modales `EditProfileModal` (`z-[1100]`, cierre con `Escape`, cabecera `manage_accounts`) y `EditPlaceModal`, así como las páginas de autenticación e invitaciones (`/setup`, `/invite/[token]` y `/groups/join/[token]`) con logotipo oficial `<GastroMapLogo />`, `ThemeToggle` y animación suave de entrada.
 - **Rediseño de los Modales «Mis Grupos Privados» e «Importar / Exportar» según `DESIGN.md`**:
   - `GroupsModal`: nuevo z-index `z-[1100]` (siempre sobre el mapa), cabecera con icono cuadrado naranja suave y cierre circular, avatares de iniciales por grupo, iconos Material Symbols Outlined (`group_add`, `edit`, `delete`, `link`, `add_link`, `logout`) y cierre con `Escape` / clic fuera.
   - `ExportImportModal`: pestañas segmentadas `rounded-full` en naranja oficial, 6 tarjetas de exportación con iconos Material Symbols, zona de subida renovada, plantillas descargables en píldoras y botones redondeados.

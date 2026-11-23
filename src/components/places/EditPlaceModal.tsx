@@ -137,10 +137,12 @@ export function EditPlaceModal({
       <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden">
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-xl">✏️</span>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/60 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+              <span className="material-symbols-outlined text-xl">edit_location_alt</span>
+            </div>
             <div className="min-w-0">
-              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 truncate tracking-tight">
                 {t("form.edit_title")}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -151,10 +153,10 @@ export function EditPlaceModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-sm font-bold"
+            className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer shrink-0"
             aria-label={t("common.close")}
           >
-            ✕
+            <span className="material-symbols-outlined text-lg leading-none">close</span>
           </button>
         </div>
 
@@ -336,20 +338,21 @@ export function EditPlaceModal({
           </div>
 
           {/* Acciones */}
-          <div className="pt-2 flex gap-2 sticky bottom-0 bg-white dark:bg-slate-900 pb-1">
+          <div className="pt-3 flex items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-slate-900 pb-1 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              className="px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
-              {saving ? t("common.loading") : t("form.save_changes")}
+              <span className="material-symbols-outlined text-sm leading-none">save</span>
+              <span>{saving ? t("common.loading") : t("form.save_changes")}</span>
             </button>
           </div>
         </form>

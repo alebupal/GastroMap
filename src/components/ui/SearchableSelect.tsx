@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 export interface SearchableSelectOption {
   value: string;
   label: string;
-  icon?: string;
+  icon?: ReactNode;
   subtitle?: string;
 }
 

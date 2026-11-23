@@ -895,11 +895,11 @@ export function PlacesExplorer({
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
           <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-0.5 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
             {[
-              { key: "all", label: `Todos (${initialPlaces.length})` },
-              { key: "favorite", label: `⭐ Favoritos (${initialPlaces.filter(p => p.isFavorite).length})` },
-              { key: "pending", label: `🕒 Quiero ir (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
-              { key: "visited_by_me", label: `✅ Ya he ido (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
-              { key: "untried", label: `✨ Por descubrir` },
+              { key: "all", icon: null, iconClass: "", label: `Todos (${initialPlaces.length})` },
+              { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `Favoritos (${initialPlaces.filter(p => p.isFavorite).length})` },
+              { key: "pending", icon: "schedule", iconClass: "text-orange-600 dark:text-orange-400", label: `Quiero ir (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
+              { key: "visited_by_me", icon: "check_circle", iconClass: "text-emerald-600 dark:text-emerald-400", label: `Ya he ido (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
+              { key: "untried", icon: "auto_awesome", iconClass: "text-amber-600 dark:text-amber-400", label: "Por descubrir" },
             ].map((item) => {
               const active = experienceFilter === item.key;
               const isUntried = item.key === "untried";
@@ -911,7 +911,7 @@ export function PlacesExplorer({
                     setExperienceFilter(active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter));
                     setCurrentPage(1);
                   }}
-                  className={`px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${
                     active
                       ? isUntried
                         ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
@@ -921,7 +921,16 @@ export function PlacesExplorer({
                       : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
                   }`}
                 >
-                  {item.label}
+                  {item.icon && (
+                    <span
+                      className={`material-symbols-outlined text-[15px] leading-none ${
+                        active && !isUntried ? "text-current" : item.iconClass
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                  )}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
@@ -987,7 +996,10 @@ export function PlacesExplorer({
         {/* Barra de filtros guardados del usuario */}
         {savedFilters.length > 0 && (
           <div className="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-2 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold text-slate-400 shrink-0">🔖 Mis filtros:</span>
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 shrink-0">
+              <span className="material-symbols-outlined text-sm text-orange-600 leading-none">bookmark</span>
+              <span>Mis filtros:</span>
+            </span>
             {savedFilters.map((sf) => (
               <div
                 key={sf.id}
@@ -1036,7 +1048,9 @@ export function PlacesExplorer({
                     : "bg-[#f2f3ff] dark:bg-slate-800 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                     }`}
                 >
-                  <span>👥</span>
+                  <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
+                    group
+                  </span>
                   <span>
                     {selectedGroupFilterIds.length === 0
                       ? t("places.groups_filter")
@@ -1116,7 +1130,11 @@ export function PlacesExplorer({
                 allOption={{
                   value: "all",
                   label: `${t("places.all_cities")} (${availableCities.length})`,
-                  icon: "🏙️",
+                  icon: (
+                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
+                      location_city
+                    </span>
+                  ),
                 }}
                 searchPlaceholder={t("location.city_placeholder")}
                 className="shrink-0"
@@ -1136,7 +1154,11 @@ export function PlacesExplorer({
                 allOption={{
                   value: "all",
                   label: `${t("places.all_countries")} (${allCountries.length})`,
-                  icon: "🌍",
+                  icon: (
+                    <span className="material-symbols-outlined text-[16px] leading-none text-orange-600 dark:text-orange-400">
+                      public
+                    </span>
+                  ),
                 }}
                 searchPlaceholder={t("location.country_placeholder")}
                 className="shrink-0"

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Final Full App Alignment with `DESIGN.md` & Material Symbols Iconography**:
+  - Replaced filter bar emojis (`Favorites`, `Want to go`, `Visited`, `To discover`, `Groups`, `Cities`, `Countries`, `Saved filters`) with **Material Symbols Outlined** (`star`, `schedule`, `check_circle`, `auto_awesome`, `group`, `location_city`, `public`, `bookmark`), adding `ReactNode` icon support in `SearchableSelect`.
+  - Redesigned `EditProfileModal` (`z-[1100]`, `Escape` dismiss, `manage_accounts` header), `EditPlaceModal`, and auth/invite pages (`/setup`, `/invite/[token]`, `/groups/join/[token]`) with `<GastroMapLogo />`, `ThemeToggle`, and smooth entrance animation.
 - **Redesign of «My Private Groups» & «Import / Export» Modals Following `DESIGN.md`**:
   - `GroupsModal`: elevated `z-[1100]` over map, soft orange icon header & circular close button, group initials avatars, Material Symbols Outlined icons, and `Escape` / backdrop dismissal.
   - `ExportImportModal`: segmented pill tabs in official orange, 6 export format cards with Material Symbols, revamped dropzone, pill sample templates, and rounded CTA buttons.
