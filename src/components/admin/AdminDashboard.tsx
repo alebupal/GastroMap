@@ -356,12 +356,13 @@ export function AdminDashboard({
             <div className="flex items-center gap-2">
               <GastroMapIcon className="w-5 h-5 rounded-[28%] shrink-0" />
               <span className="font-semibold text-slate-700 dark:text-slate-300">
-                Gastro<span className="text-[#ea580c]">Map</span> PWA
+                Gastro<span className="text-[#ea580c]">Map</span>
               </span>
+              <span className="text-slate-300 dark:text-slate-700">•</span>
               <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>
             </div>
             <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
-              <Link href="/docs" className="hover:text-orange-600 transition">API Docs</Link>
+              <Link href="/docs" className="hover:text-orange-600 transition">{t("nav.documentation")}</Link>
               <a
                 href="https://github.com/alebupal/GastroMap"
                 target="_blank"
@@ -370,7 +371,6 @@ export function AdminDashboard({
               >
                 GitHub
               </a>
-              <Link href="/docs" className="hover:text-orange-600 transition">Manifiesto Gastro</Link>
               <a
                 href="https://www.paypal.me/alebupal"
                 target="_blank"

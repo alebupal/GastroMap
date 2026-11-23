@@ -9,7 +9,6 @@ import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
-import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +32,6 @@ export default async function Home() {
     getSavedFiltersAction(),
     getT(),
   ]);
-
-  const version = APP_VERSION;
 
   // Mapa rápido de ID de ocasión a su objeto { name, icon }
   const occasionMap = occasionsList.reduce<Record<string, { name: string; icon: string }>>(
@@ -73,16 +70,15 @@ export default async function Home() {
           <div className="flex items-center gap-2">
             <GastroMapIcon className="w-6 h-6 shrink-0 shadow-xs rounded-[28%]" />
             <span className="font-bold text-slate-900 dark:text-slate-100">
-              Gastro<span className="text-[#ea580c]">Map</span> PWA <span className="text-orange-600 font-semibold">v{version}</span>
+              Gastro<span className="text-[#ea580c]">Map</span>
             </span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>
           </div>
 
           <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
-            <Link href="/docs" className="hover:text-orange-600 transition">API Docs</Link>
+            <Link href="/docs" className="hover:text-orange-600 transition">{t("nav.documentation")}</Link>
             <a href="https://github.com/alebupal/GastroMap" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">GitHub</a>
-            <Link href="/docs" className="hover:text-orange-600 transition">Manifiesto Gastro</Link>
             <a
               href="https://www.paypal.me/alebupal"
               target="_blank"
