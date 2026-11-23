@@ -76,6 +76,7 @@ export function PlacesExplorer({
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
+  const [showExtraFilters, setShowExtraFilters] = useState(false);
 
   // Grupos privados
   const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
@@ -1206,20 +1207,39 @@ export function PlacesExplorer({
             })}
           </div>
 
-          {/* Lado derecho: botón + Filtros y modo cuadrícula */}
+          {/* Lado derecho: botón + Filtros (despliega Categorías y Etiquetas) */}
           <div className="flex items-center gap-1.5 text-xs shrink-0">
             <button
               type="button"
-              onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition cursor-pointer"
+              onClick={() => setShowExtraFilters((prev) => !prev)}
+              aria-expanded={showExtraFilters}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition cursor-pointer ${
+                showExtraFilters
+                  ? "bg-orange-600 text-white shadow-xs"
+                  : "bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+              }`}
             >
               <span className="material-symbols-outlined text-sm leading-none">tune</span>
-              <span>+ Filtros</span>
+              <span>{showExtraFilters ? "Ocultar filtros" : "+ Filtros"}</span>
+              {selectedOccasions.length + selectedTags.length > 0 && (
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${
+                    showExtraFilters
+                      ? "bg-white/25 text-white"
+                      : "bg-orange-600 text-white"
+                  }`}
+                >
+                  {selectedOccasions.length + selectedTags.length}
+                </span>
+              )}
             </button>
           </div>
         </div>
       </section>
 
+      {/* Panel desplegable de Planes / Categorías y Etiquetas (solo visible al pulsar + Filtros) */}
+      {showExtraFilters && (
+        <div className="space-y-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 p-3 sm:p-4 shadow-xs animate-in fade-in duration-150">
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -1553,6 +1573,8 @@ export function PlacesExplorer({
               )}
             </HorizontalScroll>
           )}
+        </div>
+      )}
         </div>
       )}
 

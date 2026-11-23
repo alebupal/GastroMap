@@ -14,6 +14,7 @@ import { AdminStatsPanel } from "./AdminStatsPanel";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
+import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
@@ -96,22 +97,22 @@ export function AdminDashboard({
     icon: string;
     badge?: number;
   }> = [
-    { id: "stats", label: t("admin.tab_stats").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "bar_chart" },
-    {
-      id: "places",
-      label: t("admin.tab_places", { count: allPlaces.length })
-        .replace(/^[^\p{L}\p{N}]+/u, "")
-        .replace(/\s*\(\d+\)\s*$/, ""),
-      icon: "storefront",
-      badge: allPlaces.length,
-    },
-    { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
-    { id: "taxonomy", label: t("admin.tab_taxonomy").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "sell" },
-    { id: "invites", label: t("admin.tab_invites").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "confirmation_number" },
-    { id: "audit", label: t("admin.tab_audit").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "receipt_long" },
-    { id: "settings", label: t("admin.tab_settings").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "settings" },
-    { id: "demo", label: t("admin.tab_demo").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "science" },
-  ];
+      { id: "stats", label: t("admin.tab_stats").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "bar_chart" },
+      {
+        id: "places",
+        label: t("admin.tab_places", { count: allPlaces.length })
+          .replace(/^[^\p{L}\p{N}]+/u, "")
+          .replace(/\s*\(\d+\)\s*$/, ""),
+        icon: "storefront",
+        badge: allPlaces.length,
+      },
+      { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
+      { id: "taxonomy", label: t("admin.tab_taxonomy").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "sell" },
+      { id: "invites", label: t("admin.tab_invites").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "confirmation_number" },
+      { id: "audit", label: t("admin.tab_audit").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "receipt_long" },
+      { id: "settings", label: t("admin.tab_settings").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "settings" },
+      { id: "demo", label: t("admin.tab_demo").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "science" },
+    ];
 
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-4 gap-4">
@@ -143,17 +144,15 @@ export function AdminDashboard({
                 key={item.id}
                 type="button"
                 onClick={() => selectTab(item.id)}
-                className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs transition cursor-pointer ${
-                  active
-                    ? "bg-[#c2410c] text-white font-bold shadow-sm shadow-orange-900/20"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/70 font-medium"
-                }`}
+                className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs transition cursor-pointer ${active
+                  ? "bg-[#c2410c] text-white font-bold shadow-sm shadow-orange-900/20"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-white/80 dark:hover:bg-slate-800/70 font-medium"
+                  }`}
               >
                 <span className="flex items-center gap-2.5 min-w-0">
                   <span
-                    className={`material-symbols-outlined text-[18px] leading-none shrink-0 ${
-                      active ? "text-white" : "text-slate-500 dark:text-slate-400"
-                    }`}
+                    className={`material-symbols-outlined text-[18px] leading-none shrink-0 ${active ? "text-white" : "text-slate-500 dark:text-slate-400"
+                      }`}
                   >
                     {item.icon}
                   </span>
@@ -161,11 +160,10 @@ export function AdminDashboard({
                 </span>
                 {typeof item.badge === "number" && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
-                      active
-                        ? "bg-white/20 text-white"
-                        : "bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300"
-                    }`}
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${active
+                      ? "bg-white/20 text-white"
+                      : "bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300"
+                      }`}
                   >
                     {item.badge}
                   </span>
@@ -253,18 +251,18 @@ export function AdminDashboard({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-            <LanguageSelector />
-            <div className="hidden sm:flex items-center gap-1.5 pl-1">
-              <div className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center border border-orange-200 dark:border-orange-800">
-                {displayUsername.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
+              <LanguageSelector />
+              <div className="hidden sm:flex items-center gap-1.5 pl-1">
+                <div className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center border border-orange-200 dark:border-orange-800">
+                  {displayUsername.charAt(0).toUpperCase()}
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-black uppercase tracking-wider">
+                  ADMIN
+                </span>
               </div>
-              <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-black uppercase tracking-wider">
-                ADMIN
-              </span>
             </div>
-          </div>
         </header>
 
         {/* Contenido activo */}
