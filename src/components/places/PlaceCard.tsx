@@ -170,17 +170,6 @@ export function PlaceCard({
             </span>
           )}
 
-          {place.status === "temporarily_closed" && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
-              ⏸️ {t("cards.closed_temp")}
-            </span>
-          )}
-          {place.status === "permanently_closed" && (
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300">
-              🚫 {t("cards.closed_perm")}
-            </span>
-          )}
-
           {/* Ocasiones / Categorías */}
           {place.occasions.map((occId) => {
             const info = occasionMap[occId] || { name: occId, icon: "🏷️" };

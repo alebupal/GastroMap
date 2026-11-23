@@ -188,40 +188,6 @@ export function EditPlaceModal({
             />
           </div>
 
-          {/* Estado del establecimiento */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              {t("form.edit_status")}
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {[
-                { id: "active", label: t("form.status_active"), icon: "🟢" },
-                { id: "temporarily_closed", label: t("form.status_temp_closed"), icon: "⏸️" },
-                { id: "permanently_closed", label: t("form.status_perm_closed"), icon: "🚫" },
-              ].map((opt) => {
-                const active = status === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setStatus(opt.id)}
-                    className={`py-2 px-2 rounded-xl text-[11px] font-bold border transition cursor-pointer flex items-center justify-center gap-1 ${active
-                      ? opt.id === "active"
-                        ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
-                        : opt.id === "temporarily_closed"
-                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                          : "bg-red-600 border-red-600 text-white shadow-xs"
-                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                      }`}
-                  >
-                    <span>{opt.icon}</span>
-                    <span className="truncate">{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Enlace Google Maps */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
