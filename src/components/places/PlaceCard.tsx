@@ -114,6 +114,18 @@ export function PlaceCard({
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
+  async function handleInstagramShare() {
+    const { text } = buildShareText();
+    setShowShareMenu(false);
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(t("cards.instagram_copied_toast"), { kind: "info" });
+    } catch {
+      // Fallback silencioso
+    }
+    window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
+  }
+
   const canDelete = isAdmin;
   const canEdit = isAdmin || place.createdById === currentUserId;
 
@@ -543,6 +555,14 @@ export function PlaceCard({
                   >
                     <span className="material-symbols-outlined text-base leading-none">chat</span>
                     <span>{t("cards.share_whatsapp")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleInstagramShare}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-950/50 transition cursor-pointer text-left"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">photo_camera</span>
+                    <span>{t("cards.share_instagram")}</span>
                   </button>
                   <button
                     type="button"

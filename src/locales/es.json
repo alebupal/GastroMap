@@ -162,7 +162,9 @@
     "copy_place_tooltip": "Copiar datos del sitio",
     "copied_place_toast": "Sitio copiado al portapapeles",
     "share_whatsapp": "WhatsApp",
-    "share_native": "Más apps…"
+    "share_native": "Más apps…",
+    "share_instagram": "Instagram",
+    "instagram_copied_toast": "Datos copiados: pégalos en Instagram"
   },
   "location": {
     "title": "Localización y Coordenadas",
