@@ -6,6 +6,7 @@ import {
   toggleFavoriteAction,
   setPersonalStatusAction,
 } from "@/lib/actions/interactions";
+import { enqueueOfflineMutation } from "@/lib/offlineQueue";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { PlaceCommentsThread } from "./PlaceCommentsThread";
@@ -78,13 +79,41 @@ export function PlaceCard({
   async function handleToggleFavorite() {
     const nextFav = !favorite;
     setFavorite(nextFav);
-    await toggleFavoriteAction(place.id);
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await enqueueOfflineMutation({ type: "toggle_favorite", placeId: place.id });
+      toast(t("offline.queued_toast"), { kind: "info" });
+      return;
+    }
+    try {
+      await toggleFavoriteAction(place.id);
+    } catch {
+      await enqueueOfflineMutation({ type: "toggle_favorite", placeId: place.id });
+      toast(t("offline.queued_toast"), { kind: "info" });
+    }
   }
 
   async function handleStatusChange(newStatus: "pending" | "visited" | null) {
     const finalStatus = personalStatus === newStatus ? null : newStatus;
     setPersonalStatus(finalStatus);
-    await setPersonalStatusAction(place.id, finalStatus);
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await enqueueOfflineMutation({
+        type: "set_status",
+        placeId: place.id,
+        status: finalStatus,
+      });
+      toast(t("offline.queued_toast"), { kind: "info" });
+      return;
+    }
+    try {
+      await setPersonalStatusAction(place.id, finalStatus);
+    } catch {
+      await enqueueOfflineMutation({
+        type: "set_status",
+        placeId: place.id,
+        status: finalStatus,
+      });
+      toast(t("offline.queued_toast"), { kind: "info" });
+    }
   }
 
   const hasCoords = place.latitude != null && place.longitude != null;

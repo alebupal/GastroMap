@@ -121,7 +121,9 @@
     "save_filter_tooltip": "Save this combination of filters",
     "apply_filter_tooltip": "Apply saved filter",
     "delete_filter_tooltip": "Delete saved filter",
-    "clear_compare_tooltip": "Clear comparison"
+    "clear_compare_tooltip": "Clear comparison",
+    "share_view": "Share view",
+    "share_view_copied": "Filtered view link copied to clipboard"
   },
   "cards": {
     "pending": "Pending",
@@ -831,5 +833,23 @@
     "private_note_badge": "Private note only for you",
     "public_note_badge": "Public note",
     "private_notes_privacy": "Your private notes are only accessible from your profile."
+  },
+  "offline": {
+    "queued_toast": "Saved offline. It will automatically sync when you are back online.",
+    "synced_toast": "{count} offline change(s) synced successfully.",
+    "banner_offline_pending": "Offline — {count} change(s) pending sync",
+    "banner_offline": "Offline mode — You can browse places and queue changes locally",
+    "banner_pending": "{count} offline change(s) ready to sync",
+    "syncing": "Syncing...",
+    "sync_now": "Sync now"
+  },
+  "command_palette": {
+    "placeholder": "Search restaurant, city or quick action...",
+    "places_section": "Places",
+    "actions_section": "Quick actions",
+    "assistant_subtitle": "Filter step by step by your plan",
+    "no_results": "No results found for your query.",
+    "navigate": "navigate",
+    "select": "open"
   }
 }

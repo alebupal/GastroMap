@@ -8,6 +8,12 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Cola de Escritura Offline (IndexedDB) y Sincronización Automática**:
+  - Nueva utilidad `src/lib/offlineQueue.ts` que encola localmente en `IndexedDB` los cambios personales realizados sin cobertura o ante fallo de red: alternar favoritos, cambiar estado personal (`Quiero ir` / `Ya he ido`) y guardar puntuación o notas privadas.
+  - Nuevo componente `OfflineSyncBanner` que informa cuando estás sin conexión o tienes cambios pendientes, sincroniza automáticamente en orden FIFO al recuperar la conectividad y ofrece un botón manual `Sincronizar ahora`.
+- **Paleta de Comandos Rápida (`Ctrl+K` / `⌘+K`) y Sincronización de Filtros en la URL**:
+  - Nuevo modal `CommandPalette` accesible desde cualquier punto del explorador con `Ctrl+K` / `⌘+K` (o desde el botón `⌘K` integrado en la barra de búsqueda) con navegación completa por teclado (`↑`/`↓`, `Enter`, `Esc`) para saltar al instante a cualquier restaurante (en lista o en mapa) o lanzar acciones rápidas (`Añadir sitio`, `Al azar`, `Asistente`, `Importar / Exportar`, `Documentación`, `Administración`).
+  - Sincronización bidireccional de filtros activos (`q`, `city`, `country`, `price`, `exp`, `occ`, `tag`) con la URL del navegador mediante `history.replaceState` y nuevo botón `Compartir vista` para copiar un enlace directo con los filtros aplicados.
 - **Botón «Limpiar caché» (Service Worker y Teselas Offline)**:
   - Añadida utilidad cliente (`src/lib/cache.ts`) para vaciar todas las cachés PWA (`window.caches`), desregistrar el Service Worker y recargar la app limpia.
   - Disponible para cualquier usuario en el menú desplegable de perfil (`Limpiar caché`) y en `/admin > Configuración` junto al indicador en tiempo real del espacio ocupado en MB.

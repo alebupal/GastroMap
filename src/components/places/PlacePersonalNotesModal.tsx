@@ -6,6 +6,8 @@ import {
   setPersonalRatingAction,
   savePrivateNotesAction,
 } from "@/lib/actions/interactions";
+import { enqueueOfflineMutation } from "@/lib/offlineQueue";
+import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/lib/i18n/client";
 
 interface PlacePersonalNotesModalProps {
@@ -30,6 +32,7 @@ export function PlacePersonalNotesModal({
   onSave,
 }: PlacePersonalNotesModalProps) {
   const { t } = useT();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [rating, setRating] = useState<number | "">(
     initialRating !== null && initialRating !== undefined ? initialRating : ""
@@ -62,10 +65,33 @@ export function PlacePersonalNotesModal({
   async function handleSave() {
     setSaving(true);
     const parsedRating = rating === "" ? null : Number(rating);
-    await Promise.all([
-      setPersonalRatingAction(placeId, parsedRating),
-      savePrivateNotesAction(placeId, notes),
-    ]);
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await enqueueOfflineMutation({
+        type: "save_personal_notes",
+        placeId,
+        rating: parsedRating,
+        notes,
+      });
+      toast(t("offline.queued_toast"), { kind: "info" });
+      onSave?.(parsedRating, notes || null);
+      setSaving(false);
+      onClose();
+      return;
+    }
+    try {
+      await Promise.all([
+        setPersonalRatingAction(placeId, parsedRating),
+        savePrivateNotesAction(placeId, notes),
+      ]);
+    } catch {
+      await enqueueOfflineMutation({
+        type: "save_personal_notes",
+        placeId,
+        rating: parsedRating,
+        notes,
+      });
+      toast(t("offline.queued_toast"), { kind: "info" });
+    }
     onSave?.(parsedRating, notes || null);
     setSaving(false);
     onClose();

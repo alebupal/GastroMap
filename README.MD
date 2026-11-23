@@ -21,8 +21,8 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Fast classification by occasion (*Tapas, Full Meal, Trendy/Rooftops, Drinks, Coffee/Dessert*) and price range (`€` to `€€€€` or `???` so unknown places aren't left out).
 
 * **🔍 Main Explorer & Universal Search (Stitch UI/UX Design):**
-  * **Unified search bar**: Rounded search input with integrated inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
-  * **Segmented experience filters (Row 1)**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), active filter chip with quick dismiss (`✕`), and `💾 Save` button.
+  * **Unified search bar & Command Palette (`Ctrl+K` / `⌘+K`)**: Rounded search input with keyboard-driven `⌘K` quick launcher to jump to any place or action, plus inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
+  * **Segmented experience filters (Row 1) & Shareable Views**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), live URL query param sync with a **«Share view»** button, active filter chip (`✕`), and `💾 Save` button.
   * **Two-tier segmentation (Row 2)**: Searchable dropdowns for cities, countries (+195), explicit price range chips (`<15€`, `15-30€`, `30-50€`, `>50€`), and featured tags with `🎛️ + Filters`.
   * **Stitch-styled place cards**: Initials avatar in terracotta/amber gradient, address with pin, emerald price badge, favorite button (`favorite`), collection buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`), and author footer with actions.
   * **Modern pagination & synced map**: Circular pill buttons, live map floating count (`Granada Centro: X locales`), and `Cache First` local sync status bar with real-time coordinates.
@@ -55,7 +55,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Clean exclusive mobile tabs (`[🗺️ Map] | [📋 List]`) and bottom floating summary card on map pin selection with direct directions and synchronized jump to full place card with golden highlight.
   * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) 100% justified in an adaptive grid to maximize full screen width.
   * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.
-  * Installable on iOS and Android home screens as a Progressive Web App with **full Service Worker offline caching** (`/sw.js`) caching shell, pages, and map tiles for seamless offline browsing.
+  * Installable on iOS and Android home screens as a Progressive Web App with **full Service Worker offline caching (`/sw.js`) and an offline write queue**: toggle favorites, update personal statuses (`Want to go` / `Visited`), and save private notes without connectivity, with automatic synchronization once back online.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.
 
 * **🛡️ Security, Auditing & Backups:**

@@ -121,7 +121,9 @@
     "save_filter_tooltip": "Guardar esta combinación de filtros",
     "apply_filter_tooltip": "Aplicar filtro guardado",
     "delete_filter_tooltip": "Eliminar filtro guardado",
-    "clear_compare_tooltip": "Limpiar comparación"
+    "clear_compare_tooltip": "Limpiar comparación",
+    "share_view": "Compartir vista",
+    "share_view_copied": "Enlace con filtros copiado al portapapeles"
   },
   "cards": {
     "pending": "Pendiente",
@@ -831,5 +833,23 @@
     "private_note_badge": "Nota privada solo para ti",
     "public_note_badge": "Nota pública",
     "private_notes_privacy": "Tus notas privadas solo son accesibles desde tu perfil."
+  },
+  "offline": {
+    "queued_toast": "Guardado sin conexión. Se sincronizará automáticamente al volver a estar online.",
+    "synced_toast": "{count} cambio(s) offline sincronizado(s) correctamente.",
+    "banner_offline_pending": "Sin conexión — {count} cambio(s) pendiente(s) de sincronizar",
+    "banner_offline": "Modo sin conexión — Puedes consultar tus sitios y guardar cambios en cola",
+    "banner_pending": "{count} cambio(s) guardado(s) offline listo(s) para sincronizar",
+    "syncing": "Sincronizando...",
+    "sync_now": "Sincronizar ahora"
+  },
+  "command_palette": {
+    "placeholder": "Buscar restaurante, ciudad o acción rápida...",
+    "places_section": "Establecimientos",
+    "actions_section": "Acciones rápidas",
+    "assistant_subtitle": "Filtrar paso a paso según tu plan",
+    "no_results": "No se encontraron resultados para tu búsqueda.",
+    "navigate": "navegar",
+    "select": "abrir"
   }
 }

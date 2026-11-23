@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Offline Write Queue (IndexedDB) & Automatic Synchronization**:
+  - New `src/lib/offlineQueue.ts` utility that queues personal changes locally in `IndexedDB` when offline or on network failure: toggling favorites, changing personal status (`Want to go` / `Visited`), and saving personal ratings or private notes.
+  - New `OfflineSyncBanner` component displaying offline status or pending items, automatically flushing the queue in FIFO order upon reconnect, with a manual `Sync now` button.
+- **Quick Command Palette (`Ctrl+K` / `⌘+K`) & URL Filter Synchronization**:
+  - New `CommandPalette` modal accessible anywhere in the explorer via `Ctrl+K` / `⌘+K` (or the inline `⌘K` search bar shortcut) with full keyboard navigation (`↑`/`↓`, `Enter`, `Esc`) to jump straight to any place (in list or on map) or trigger quick actions (`Add place`, `Random`, `Assistant`, `Import / Export`, `Documentation`, `Admin`).
+  - Two-way sync between active explorer filters (`q`, `city`, `country`, `price`, `exp`, `occ`, `tag`) and browser URL query params via `history.replaceState`, plus a `Share view` button to copy the filtered link directly.
 - **«Clear Cache» Button (Service Worker & Offline Tiles)**:
   - Added client utility (`src/lib/cache.ts`) to purge all PWA caches (`window.caches`), unregister the Service Worker, and perform a clean reload.
   - Available to every user in the profile dropdown menu (`Clear cache`) and in `/admin > Settings` alongside the live storage usage estimate in MB.

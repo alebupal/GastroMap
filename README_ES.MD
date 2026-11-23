@@ -19,8 +19,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Clasificación ágil por planes (*Tapear, Comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
 * **🔍 Explorador Principal y Búsqueda Universal (Diseño Stitch UI/UX):**
-  * **Barra de búsqueda unificada**: Campo de búsqueda redondeado con píldoras de acción rápida integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
-  * **Filtros por experiencia segmentados (Fila 1)**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), chip de filtro activo con borrado rápido (`✕`) y botón `💾 Guardar`.
+  * **Barra de búsqueda unificada y Paleta de Comandos (`Ctrl+K` / `⌘+K`)**: Campo de búsqueda redondeado con acceso rápido `⌘K` navegable por teclado para saltar a cualquier sitio o acción, y píldoras integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
+  * **Filtros por experiencia segmentados (Fila 1) y Enlaces Compartibles**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), sincronización automática de filtros en la URL con botón **«Compartir vista»**, chip de filtro activo (`✕`) y botón `💾 Guardar`.
   * **Segmentación en dos niveles (Fila 2)**: Selectores desplegables de ciudades, países (+195), rangos de precio explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`) y categorías destacadas con botón `🎛️ + Filtros`.
   * **Tarjetas de locales estilo Stitch**: Avatar con iniciales en degradado terracota/ámbar, dirección con pin, badge de precio esmeralda, botón favorito (`favorite`), botones de colección (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`) y pie completo con autor y acciones.
   * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa (`Granada Centro: X locales`) e indicador de sincronización local `Cache First` con coordenadas en tiempo real.
@@ -53,7 +53,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
   * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) justificados al 100% en cuadrícula adaptable para aprovechar todo el espacio útil en pantalla.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
-  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline integral** (`/sw.js`) que almacena la aplicación, páginas y teselas de mapas para uso sin conexión a internet.
+  * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker, caché offline integral (`/sw.js`) y cola de escritura sin conexión**: puedes marcar favoritos, cambiar estados (`Quiero ir` / `Ya he ido`) y guardar notas privadas sin cobertura, y todo se sincroniza automáticamente al reconectar.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC).
 
 * **🛡️ Seguridad, Auditoría y Copias de Seguridad:**

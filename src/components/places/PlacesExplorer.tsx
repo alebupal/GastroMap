@@ -20,6 +20,10 @@ import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
+import { CommandPalette } from "@/components/ui/CommandPalette";
+import { useToast } from "@/components/ui/Toast";
+import { copyText } from "@/lib/clipboard";
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -66,6 +70,7 @@ export function PlacesExplorer({
   initialSavedFilters = [],
 }: PlacesExplorerProps) {
   const { t, locale } = useT();
+  const { toast } = useToast();
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
   // Filtros acumulables
@@ -163,12 +168,90 @@ export function PlacesExplorer({
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isExportImportOpen, setIsExportImportOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
   const [experienceFilter, setExperienceFilter] = useState<
     "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
+  const urlHydratedRef = useRef(false);
+
+  // Atajo global Ctrl+K / ⌘+K para abrir la paleta de comandos
+  useEffect(() => {
+    function onGlobalKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener("keydown", onGlobalKeyDown);
+    return () => window.removeEventListener("keydown", onGlobalKeyDown);
+  }, []);
+
+  // Restaurar filtros desde los query params de la URL al montar
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    const city = params.get("city");
+    const country = params.get("country");
+    const price = params.get("price");
+    const exp = params.get("exp");
+    const occ = params.get("occ");
+    const tag = params.get("tag");
+
+    if (q) setTextSearch(q);
+    if (city) setSelectedCity(city);
+    if (country) setSelectedCountry(country);
+    if (price) setSelectedPrices(price.split(",").filter(Boolean));
+    if (
+      exp === "visited_by_me" ||
+      exp === "untried" ||
+      exp === "favorite" ||
+      exp === "pending"
+    ) {
+      setExperienceFilter(exp);
+    }
+    if (occ) setSelectedOccasions(occ.split(",").filter(Boolean));
+    if (tag) setSelectedTags(tag.split(",").filter(Boolean));
+
+    urlHydratedRef.current = true;
+  }, []);
+
+  // Sincronizar filtros activos con la URL para compartir vistas filtradas
+  useEffect(() => {
+    if (typeof window === "undefined" || !urlHydratedRef.current) return;
+    const params = new URLSearchParams();
+    if (textSearch.trim()) params.set("q", textSearch.trim());
+    if (selectedCity !== "all") params.set("city", selectedCity);
+    if (selectedCountry !== "all") params.set("country", selectedCountry);
+    if (selectedPrices.length > 0) params.set("price", selectedPrices.join(","));
+    if (experienceFilter !== "all") params.set("exp", experienceFilter);
+    if (selectedOccasions.length > 0) params.set("occ", selectedOccasions.join(","));
+    if (selectedTags.length > 0) params.set("tag", selectedTags.join(","));
+
+    const qs = params.toString();
+    const nextUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    if (nextUrl !== `${window.location.pathname}${window.location.search}`) {
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [
+    textSearch,
+    selectedCity,
+    selectedCountry,
+    selectedPrices,
+    experienceFilter,
+    selectedOccasions,
+    selectedTags,
+  ]);
+
+  async function handleShareFilteredView() {
+    if (typeof window === "undefined") return;
+    const ok = await copyText(window.location.href);
+    if (ok) {
+      toast(t("places.share_view_copied"), { kind: "success" });
+    }
+  }
 
   // Registro PWA Service Worker y caché offline de favoritos / pendientes
   useEffect(() => {
@@ -193,15 +276,6 @@ export function PlacesExplorer({
     } catch {
       // Ignorar si localStorage no está disponible
     }
-
-    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
-    updateOnlineStatus();
-    window.addEventListener("online", updateOnlineStatus);
-    window.addEventListener("offline", updateOnlineStatus);
-    return () => {
-      window.removeEventListener("online", updateOnlineStatus);
-      window.removeEventListener("offline", updateOnlineStatus);
-    };
   }, [initialPlaces]);
 
   // Cargar grupos privados del usuario para el filtro rápido
@@ -732,13 +806,8 @@ export function PlacesExplorer({
 
   return (
     <div className="w-full space-y-4">
-      {/* Banner discreto en modo sin conexión (PWA offline) */}
-      {isOffline && (
-        <div className="px-4 py-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs font-semibold flex items-center justify-between gap-2">
-          <span>📡 Modo sin conexión — Consultando datos en caché offline</span>
-          <span className="text-[11px] opacity-75">Solo lectura</span>
-        </div>
-      )}
+      {/* Banner de modo offline y sincronización de cola IndexedDB */}
+      <OfflineSyncBanner />
 
       {/* =========================================================================
           1. HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida estilo Stitch
@@ -760,11 +829,19 @@ export function PlacesExplorer({
                 type="button"
                 onClick={() => setTextSearch("")}
                 className="p-0.5 rounded-full text-slate-400 hover:text-red-500 cursor-pointer"
-                title="Limpiar búsqueda"
+                title={t("places.clear_filter")}
               >
                 <span className="material-symbols-outlined text-sm leading-none">close</span>
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="hidden sm:inline-flex items-center gap-0.5 ml-1.5 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-orange-600 hover:border-orange-400 transition cursor-pointer shrink-0"
+              title="Ctrl+K / ⌘K"
+            >
+              ⌘K
+            </button>
           </div>
 
           {/* Acciones Rápidas en píldoras horizontales */}
@@ -938,19 +1015,30 @@ export function PlacesExplorer({
 
           <div className="flex items-center gap-2 text-xs">
             {activeFiltersCount > 0 && (
-              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-                <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">filter_alt</span>
-                <span className="font-semibold truncate max-w-[150px]">
-                  {t("places.active_filter_count", { count: activeFiltersCount })}
-                </span>
+              <>
+                <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                  <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">filter_alt</span>
+                  <span className="font-semibold truncate max-w-[150px]">
+                    {t("places.active_filter_count", { count: activeFiltersCount })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="text-slate-400 hover:text-red-500 font-bold ml-1 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
                 <button
                   type="button"
-                  onClick={resetAllFilters}
-                  className="text-slate-400 hover:text-red-500 font-bold ml-1 cursor-pointer"
+                  onClick={handleShareFilteredView}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/50 text-xs font-semibold transition cursor-pointer"
+                  title={t("places.share_view")}
                 >
-                  ✕
+                  <span className="material-symbols-outlined text-sm leading-none">share</span>
+                  <span className="hidden sm:inline">{t("places.share_view")}</span>
                 </button>
-              </div>
+              </>
             )}
             <button
               type="button"
@@ -1919,6 +2007,18 @@ export function PlacesExplorer({
           setCompareIds([]);
           setIsCompareOpen(false);
         }}
+      />
+
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        places={initialPlaces}
+        isAdmin={isAdmin}
+        onSelectPlaceOnMap={handleSelectOnMap}
+        onSelectPlaceInList={handleSelectInList}
+        onOpenRandom={() => setIsRandomModalOpen(true)}
+        onOpenAssistant={() => setIsAssistantOpen(true)}
+        onOpenExportImport={() => setIsExportImportOpen(true)}
       />
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}

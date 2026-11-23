@@ -93,14 +93,17 @@ When launching on a clean database:
 ## 4. Modules & Features
 
 ### 🍽️ Gastronomic Explorer (Main View - Stitch UI/UX Design)
-- **Unified Search & Inline Action Pills**: Live search field with custom search icon, clear button, and inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and prominent terracotta `➕ Add place`).
-- **Segmented Experience Status Bar (Row 1)**:
+- **Unified Search, Command Palette (`Ctrl+K` / `⌘+K`) & Inline Action Pills**: Live search field with a `⌘K` button to launch the keyboard-navigable command palette (`↑`/`↓`, `Enter`, `Esc`), clear button, and inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and prominent `➕ Add place`).
+- **Segmented Experience Status Bar (Row 1) & Shareable Views**:
   - `🌐 All`: Global catalog filtered by user access.
   - `⭐ Favorites`: Starred places for instant recall.
   - `🕒 Want to go`: Wishlist of restaurants to visit.
   - `✅ Visited`: Places you have already attended.
   - `✨ To discover`: Places in the catalog you haven't visited yet.
-  - Active filter chip with quick dismiss (`✕`) and `💾 Save` filter button.
+  - Active filter chip with quick dismiss (`✕`), **«Share view»** button (copies the live URL synced with active filters `q`, `city`, `country`, `price`, `exp`, `occ`, `tag`), and `💾 Save` filter button.
+- **Offline Write Queue & Automatic Sync**:
+  - When offline or on unstable connections, you can still toggle favorites, update personal statuses (`Want to go` / `Visited`), and save private ratings or notes.
+  - Pending mutations are stored in a persistent local queue (`IndexedDB`), surfaced via a discreet status banner, and automatically flushed in order when connectivity returns (or manually via `Sync now`).
 - **Segmentation Filters (Row 2)**:
   - `🏙️ Cities` and `🌍 Countries (195+)`: Searchable dropdown selectors.
   - `💶 Price Ranges`: Segmented pills for explicit brackets (`<15€`, `15-30€`, `30-50€`, `>50€`).

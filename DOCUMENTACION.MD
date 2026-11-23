@@ -93,14 +93,17 @@ Al acceder por primera vez a una instancia limpia:
 ## 4. Módulos y Funcionalidades
 
 ### 🍽️ Explorador Gastronómico (Vista Principal - Diseño Stitch UI/UX)
-- **Barra de Búsqueda y Acciones Rápidas Unificada**: Campo de búsqueda en vivo con icono temático, botón de borrado rápido y píldoras de acción integradas en línea (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y botón destacado terracota `➕ Añadir`).
-- **Selector de Experiencia Segmentado (Fila 1)**:
+- **Barra de Búsqueda, Paleta de Comandos (`Ctrl+K` / `⌘+K`) y Acciones Rápidas**: Campo de búsqueda en vivo con botón `⌘K` para abrir la paleta flotante navegable con teclado (`↑`/`↓`, `Enter`, `Esc`), botón de borrado rápido y píldoras de acción integradas en línea (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y botón destacado `➕ Añadir`).
+- **Selector de Experiencia Segmentado (Fila 1) y Vistas Compartibles**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
   - `🕒 Quiero ir`: Establecimientos pendientes en tu lista de deseos.
   - `✅ Ya he ido`: Locales que ya has visitado.
   - `✨ Por descubrir`: Locales del catálogo que aún no has visitado.
-  - Chip de filtro activo con eliminación directa (`✕`) y botón `💾 Guardar`.
+  - Chip de filtro activo con eliminación directa (`✕`), botón **«Compartir vista»** (copia la URL sincronizada con los filtros activos `q`, `city`, `country`, `price`, `exp`, `occ`, `tag`) y botón `💾 Guardar`.
+- **Modo Offline con Cola de Escritura y Sincronización Automática**:
+  - Si pierdes la cobertura mientras usas la app, puedes seguir marcando favoritos, cambiando estados personales (`Quiero ir` / `Ya he ido`) y guardando tu nota o puntuación privada.
+  - Los cambios se guardan en una cola local persistente (`IndexedDB`), se muestra un banner discreto con el contador pendiente y todo se sincroniza automáticamente en orden al volver a estar en línea (o manualmente con `Sincronizar ahora`).
 - **Filtros de Segmentación y Taxonomías (Fila 2)**:
   - `🏙️ Ciudades` y `🌍 Países (+195)`: Selectores desplegables con buscador integrado.
   - `💶 Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
