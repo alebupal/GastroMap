@@ -941,12 +941,6 @@ export function PlacesExplorer({
         isLocating={isLocating}
         onToggleLocation={userLocation ? handleDisableLocation : handleRequestLocation}
         onOpenRandom={() => setIsRandomModalOpen(true)}
-        availableCities={availableCities}
-        selectedCity={selectedCities[0] || "all"}
-        onSelectCity={(city) => {
-          setSelectedCities(city === "all" ? [] : [city]);
-          setSelectedTowns([]);
-        }}
         onOpenAssistant={() => setIsAssistantOpen(true)}
       />
 

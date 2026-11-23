@@ -26,9 +26,6 @@ interface MobileFilterBarProps {
   isLocating: boolean;
   onToggleLocation: () => void;
   onOpenRandom: () => void;
-  availableCities: string[];
-  selectedCity: string;
-  onSelectCity: (city: string) => void;
   onOpenAssistant: () => void;
 }
 
@@ -52,9 +49,6 @@ export function MobileFilterBar({
   isLocating,
   onToggleLocation,
   onOpenRandom,
-  availableCities,
-  selectedCity,
-  onSelectCity,
   onOpenAssistant,
 }: MobileFilterBarProps) {
   const { t } = useT();
@@ -271,7 +265,7 @@ export function MobileFilterBar({
         })}
       </div>
 
-      {/* Fila 3: Tira compacta de accesos estrella (Cerca de mí, Al azar, Ciudad y Asistente) */}
+      {/* Fila 3: Tira compacta de accesos estrella (Cerca de mí, Al azar y Asistente) */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 -mx-1 px-1">
         <button
           type="button"
@@ -300,33 +294,6 @@ export function MobileFilterBar({
           </span>
           <span>{t("places.roulette")}</span>
         </button>
-
-        {availableCities.length > 0 && (
-          <label
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap shrink-0 border transition ${
-              selectedCity !== "all"
-                ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-300"
-                : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
-              location_city
-            </span>
-            <select
-              value={selectedCity}
-              onChange={(e) => onSelectCity(e.target.value)}
-              className="bg-transparent focus:outline-none cursor-pointer font-bold max-w-[120px] truncate"
-              aria-label={t("places.city_filter")}
-            >
-              <option value="all">{t("places.all_cities")}</option>
-              {availableCities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
 
         <button
           type="button"
