@@ -18,14 +18,12 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Extracción y normalización automática de coordenadas y enlaces.
   * Clasificación ágil por planes (*Tapear, Comer, Postureo, Copas, Dulce/Café*) y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
-* **🔍 Encontrar un sitio («Asistente de Decisión» y Búsqueda Universal):**
-  * **Buscador en vivo universal**: Busca por cualquier texto — nombre, ciudad, notas públicas o privadas, etiquetas, ocasiones, creador o contenido de comentarios colaborativos.
-  * Filtros por distancia real (*Cerca de mí a 1, 5, 10 o 25 km*) impulsados por **PostGIS**.
-  * Selector mundial de países (+195 con banderas y buscador) y filtro por ciudades disponibles con selectores emergentes flotantes.
-  * Paginación flexible con selector de tamaño (10, 20, 50 o Todos).
-  * Búsqueda por ocasión, etiquetas gastronómicas, grupos privados y experiencia (*Favoritos*, *Quiero ir*, *Ya he ido*, *Por descubrir*).
-  * Organización visual optimizada en dos filas para móvil y PC sin elementos desalineados.
-  * **🎲 Botón «Elegir al azar»**: Cuando no hay acuerdo sobre dónde ir, la app selecciona una opción entre los resultados filtrados.
+* **🔍 Explorador Principal y Búsqueda Universal (Diseño Stitch UI/UX):**
+  * **Barra de búsqueda unificada**: Campo de búsqueda redondeado con píldoras de acción rápida integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
+  * **Filtros por experiencia segmentados (Fila 1)**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), chip de filtro activo con borrado rápido (`✕`) y botón `💾 Guardar`.
+  * **Segmentación en dos niveles (Fila 2)**: Selectores desplegables de ciudades, países (+195), rangos de precio explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`) y categorías destacadas con botón `🎛️ + Filtros`.
+  * **Tarjetas de locales estilo Stitch**: Avatar con iniciales en degradado terracota/ámbar, dirección con pin, badge de precio esmeralda, botón favorito (`favorite`), botones de colección (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`) y pie completo con autor y acciones.
+  * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa (`Granada Centro: X locales`) e indicador de sincronización local `Cache First` con coordenadas en tiempo real.
 
 * **🗺️ Mapa interactivo Leaflet:**
   * Teselas ligeras de OpenStreetMap / CartoDB (sin coste ni cuotas de Google Maps API).

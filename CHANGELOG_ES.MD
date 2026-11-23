@@ -8,6 +8,14 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Calco Fiel y Réplica Exacta del Diseño Stitch UI/UX (Explorador Principal y Mapa)**:
+  - Réplica completa de la interfaz de Stitch con Google Material Symbols Outlined y diseño a medida:
+    - Cabecera superior unificada con estado de conectividad PWA (`🟢 En línea • PWA Sync v0.1.0 Ready`), botón `📲 Instalar App PWA`, logotipo con insignia destacada `Explorar Mapa`, selector de tema segmentado (`light_mode` / `dark_mode`), selector de idioma, botón de donación y dropdown de perfil con insignia de rol `ADMIN`.
+    - Barra de búsqueda y herramientas integrada en tarjeta flotante única con píldoras de acción rápida en línea (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
+    - Barra de taxonomías y estados en dos niveles: fila superior con selector de estado personal segmentado (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), chip de filtro activo con borrado rápido y acceso a `💾 Guardar filtro`; fila inferior con selectores de ciudad, país, rango de precios (`<15€`, `15-30€`, `30-50€`, `>50€`), categorías y etiquetas destacadas con botón `🎛️ + Filtros`.
+    - Tarjetas de locales estilizadas idénticas a Stitch: avatar con iniciales del restaurante en degradado terracota/ámbar, dirección con icono de ubicación, badge de precio esmeralda, botón de favorito interactivo (`favorite`), etiquetas de estado y ocasiones, botones horizontales de colección (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`) y pie con autor y acciones completas (`Comentarios`, `Ver en mapa`, `Google Maps ↗`, `Editar`, `Eliminar`).
+    - Mapa interactivo con insignia flotante en tiempo real (`Granada Centro: X locales`), barra inferior de sincronización local (`Cache First`) con coordenadas geográficas y popups diseñados con la misma estética de la tarjeta.
+    - Paginación moderna con botones píldora circulares y pie de página completo de GastroMap PWA.
 - **Rediseño Visual Integral Inspirado en Stitch UI/UX**:
   - Incorporada la tipografía moderna **Plus Jakarta Sans** con pesos optimizados en toda la aplicación.
   - Nuevo conmutador de tema dual segmentado (`☀️ Claro` / `🌙 Oscuro`) en la cabecera con micro-interacciones suaves.

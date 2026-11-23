@@ -92,24 +92,29 @@ Al acceder por primera vez a una instancia limpia:
 
 ## 4. Módulos y Funcionalidades
 
-### 🍽️ Explorador Gastronómico (Vista Principal)
-- **Buscador Universal Integral**: Búsqueda instantánea en vivo por cualquier dato: nombre del establecimiento, ciudad, dirección, notas públicas, notas privadas personales, categorías/ocasiones, etiquetas, autor y el contenido completo de los comentarios colaborativos, con soporte multi-término.
-- **Acciones Rápidas y Filtros Guardados Justificados**: Botones de acceso rápido (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí` y `💾 Guardar filtro`) dispuestos en cuadrícula adaptable (`grid-cols-2 sm:grid-cols-4`) ocupando el 100% del ancho para aprovechar todo el espacio disponible.
-- **Registro con Coordenadas Obligatorias y Geocodificación**: Al añadir o editar un establecimiento, las coordenadas (latitud y longitud) son obligatorias para situarlo en el mapa. Al escribir una calle se geocodifica automáticamente mediante OpenStreetMap/Nominatim; si no se encuentran coordenadas, se despliegan campos numéricos manuales para introducirlas con total precisión.
-- **Filtros por Experiencia (Fila 1)**:
+### 🍽️ Explorador Gastronómico (Vista Principal - Diseño Stitch UI/UX)
+- **Barra de Búsqueda y Acciones Rápidas Unificada**: Campo de búsqueda en vivo con icono temático, botón de borrado rápido y píldoras de acción integradas en línea (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y botón destacado terracota `➕ Añadir`).
+- **Selector de Experiencia Segmentado (Fila 1)**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
   - `⭐ Favoritos`: Sitios marcados con estrella para acceso rápido.
   - `🕒 Quiero ir`: Establecimientos pendientes en tu lista de deseos.
   - `✅ Ya he ido`: Locales que ya has visitado.
   - `✨ Por descubrir`: Locales del catálogo que aún no has visitado.
-- **Filtros de Segmentación (Fila 2)**:
-  - `👥 Grupos`: Selector desplegable con soporte para filtrar por uno o varios grupos privados.
-  - `🌍 Países (+195)`: Selector con buscador integrado de todos los países del mundo.
-  - `🏙️ Ciudades`: Selector con buscador de las ciudades con locales en tu catálogo.
-  - `💶 Rangos de Precio Numéricos`: Clasificación por rangos explícitos (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
-- **Filtros por Categorías / Planes**: Multi-selección de ocasiones (*Comer, Tapear, Postureo, Copas, Dulce/Café, etc.*) con buscador en tiempo real y contador de sitios.
-- **Etiquetas Gastronómicas**: Filtro acumulable con nube de etiquetas (*#marisco, #altacocina, #granada, #michelin, #pizza, etc.*).
-- **Modos de Vista**: Alternancia fluida entre **Mapa interactivo** y **Lista de fichas**.
+  - Chip de filtro activo con eliminación directa (`✕`) y botón `💾 Guardar`.
+- **Filtros de Segmentación y Taxonomías (Fila 2)**:
+  - `🏙️ Ciudades` y `🌍 Países (+195)`: Selectores desplegables con buscador integrado.
+  - `💶 Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
+  - Ocasiones y etiquetas gastronómicas destacadas con botón desplegable `🎛️ + Filtros`.
+- **Tarjetas de Locales Estilo Stitch**:
+  - Avatar con iniciales del establecimiento sobre degradado terracota/ámbar.
+  - Nombre, dirección con chincheta, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
+  - Botones horizontales de colección rápida (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`).
+  - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Ver en mapa`, `Google Maps ↗`, `Editar`, `Eliminar`).
+- **Mapa Interactivo con Sincronización Local**:
+  - Insignia flotante superior derecha con recuento local en tiempo real (`Granada Centro: X locales`).
+  - Barra de estado inferior con indicador `Cache First` de base de datos sincronizada localmente y coordenadas latitud/longitud en vivo.
+  - Ventanas emergentes (popups) de mapa con diseño y estilo unificados con las tarjetas.
+- **Paginación Moderna**: Botones de paginación circulares tipo píldora (`< Anterior`, `1`, `2`, `...`, `Siguiente >`) con selector de tamaño y ordenación.
 
 ### 📱 Experiencia Móvil Optimizada
 - **Pestañas Exclusivas sin Duplicidades**: Alternancia limpia en la cabecera móvil mediante `[🗺️ Mapa] | [📋 Lista]` que muestra la vista seleccionada de forma limpia y despejada.

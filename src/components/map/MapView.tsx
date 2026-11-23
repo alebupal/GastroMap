@@ -42,50 +42,52 @@ const PRICE_RANGE_LABELS: Record<string, string> = {
   "???": "???",
 };
 
-// Función auxiliar para construir el contenido HTML enriquecido del popup
+// Función auxiliar para construir el contenido HTML enriquecido del popup estilo Stitch
 function getPlacePopupHtml(place: PlaceWithDetails, lat: number, lng: number) {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-  const distanceLabel =
-    typeof place.distanceMeters === "number"
-      ? `<span style="font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 6px; border-radius: 9999px;">📍 ${
-          place.distanceMeters < 1000
-            ? `${place.distanceMeters} m`
-            : `${(place.distanceMeters / 1000).toFixed(1)} km`
-        }</span>`
-      : "";
+  const initials =
+    place.name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((w) => w.charAt(0))
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "🍴";
 
-  const statusBanner =
-    place.status === "permanently_closed"
-      ? `<div style="margin-top: 6px;"><span style="font-size: 10px; font-weight: 700; color: #b91c1c; background: #fef2f2; padding: 2px 6px; border-radius: 9999px;">🚫 Cerrado permanentemente</span></div>`
-      : place.status === "temporarily_closed"
-      ? `<div style="margin-top: 6px;"><span style="font-size: 10px; font-weight: 700; color: #b45309; background: #fffbeb; padding: 2px 6px; border-radius: 9999px;">⏸️ Cerrado temporalmente</span></div>`
-      : "";
+  const priceLabel = PRICE_RANGE_LABELS[place.priceRange] || place.priceRange;
+  const statusLabel =
+    place.personalStatus === "visited"
+      ? "✅ Ya he ido"
+      : place.personalStatus === "pending"
+      ? "🕒 Pendiente"
+      : "✨ Por descubrir";
 
   return `
-    <div style="padding: 12px; min-width: 200px; max-width: 260px; font-family: system-ui, sans-serif;">
-      <div style="display: flex; align-items: start; justify-content: space-between; gap: 8px;">
-        <strong style="font-size: 14px; color: #0f172a; line-height: 1.2;">${place.name}</strong>
-        <span style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">${PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}</span>
+    <div style="padding: 10px 12px; min-width: 210px; max-width: 250px; font-family: 'Plus Jakarta Sans', system-ui, sans-serif;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="width: 24px; height: 24px; border-radius: 8px; background: #ffdbce; color: #370e00; font-weight: 800; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.06);">${initials}</span>
+          <strong style="font-size: 13px; color: #131b2e; font-weight: 700; line-height: 1.2;">${place.name}</strong>
+        </div>
+        <span style="font-size: 10px; font-weight: 700; color: #005236; background: #6ffbbe; padding: 1px 6px; border-radius: 9999px; white-space: nowrap;">${priceLabel}</span>
       </div>
-      ${statusBanner}
       ${
         place.city || place.address
-          ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">${place.city ? place.city : ""}${
+          ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #5a4138;">📍 ${place.city ? place.city : ""}${
               place.city && place.address ? " • " : ""
             }${place.address || ""}</p>`
           : ""
       }
-      ${distanceLabel ? `<div style="margin-top: 6px;">${distanceLabel}</div>` : ""}
       ${
         place.notes
-          ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 6px; border-radius: 6px;">«${linkifyHtml(place.notes)}»</p>`
+          ? `<p style="margin: 6px 0 0 0; font-size: 11px; color: #475569; font-style: italic; background: #f8fafc; padding: 4px 6px; border-radius: 6px;">«${linkifyHtml(place.notes)}»</p>`
           : ""
       }
-      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
-        <span style="font-size: 10px; color: #94a3b8;">Por @${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}</span>
-        <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 600; color: #2563eb; text-decoration: none;">
-          Cómo llegar ↗
+      <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid #eaedff; display: flex; align-items: center; justify-content: space-between; font-size: 10px;">
+        <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" style="color: #a33900; font-weight: 700; text-decoration: none;">
+          Abrir en Maps ↗
         </a>
+        <span style="background: #ffddb8; color: #684000; font-weight: 700; padding: 2px 6px; border-radius: 9999px;">${statusLabel}</span>
       </div>
     </div>
   `;
@@ -490,6 +492,11 @@ export default function MapView({
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
       <div ref={mapContainerRef} className="w-full h-full z-0" />
+      {/* Insignia flotante desktop estilo Stitch */}
+      <div className="hidden lg:flex items-center gap-1.5 absolute top-3 right-3 z-30 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md border border-slate-200/80 dark:border-slate-800/80 text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Granada Centro: {places.length} locales</span>
+      </div>
       {/* Botón flotante móvil para alternar entre interactuar con el mapa o hacer scroll vertical */}
       <div className="absolute top-3 right-3 z-30 lg:hidden">
         <button

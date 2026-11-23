@@ -5,18 +5,18 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #faf8ff;
+  --foreground: #131b2e;
 }
 
 .dark {
-  --background: #090d16;
+  --background: #0b1120;
   --foreground: #f1f5f9;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background: #090d16;
+    --background: #0b1120;
     --foreground: #f1f5f9;
   }
 }

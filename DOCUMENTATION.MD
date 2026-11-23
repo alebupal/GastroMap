@@ -92,24 +92,29 @@ When launching on a clean database:
 
 ## 4. Modules & Features
 
-### 🍽️ Gastronomic Explorer (Main View)
-- **Universal Multi-field Search**: Instant live search covering every field: establishment name, city, address, public notes, personal private notes, categories/occasions, tags, author, and full collaborative comments text, with multi-term support.
-- **100% Justified Quick Actions & Saved Filters**: Quick access toolbar buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`, and `💾 Save filter`) laid out in an adaptive full-width grid (`grid-cols-2 sm:grid-cols-4`) filling 100% of the available horizontal space.
-- **Mandatory Coordinates with Geocoding**: When creating or editing a place, latitude and longitude are mandatory to accurately locate it on the map. Typing a street triggers automatic OpenStreetMap/Nominatim geocoding; if no coordinates are found, manual numeric fields are presented for pinpoint input.
-- **Experience Filters (Row 1)**:
+### 🍽️ Gastronomic Explorer (Main View - Stitch UI/UX Design)
+- **Unified Search & Inline Action Pills**: Live search field with custom search icon, clear button, and inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and prominent terracotta `➕ Add place`).
+- **Segmented Experience Status Bar (Row 1)**:
   - `🌐 All`: Global catalog filtered by user access.
   - `⭐ Favorites`: Starred places for instant recall.
   - `🕒 Want to go`: Wishlist of restaurants to visit.
   - `✅ Visited`: Places you have already attended.
   - `✨ To discover`: Places in the catalog you haven't visited yet.
+  - Active filter chip with quick dismiss (`✕`) and `💾 Save` filter button.
 - **Segmentation Filters (Row 2)**:
-  - `👥 Groups`: Dropdown selector with multi-group support for private clusters.
-  - `🌍 Countries (195+)`: Searchable dropdown selector with all world countries and emoji flags.
-  - `🏙️ Cities`: Searchable dropdown selector with available cities in your catalog.
-  - `💶 Explicit Price Ranges`: Numbered price brackets (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`).
-- **Plans & Categories**: Multi-select tags (*Dine, Tapas, Posh/Trendy, Drinks, Coffee/Dessert*) with live counters.
-- **Gastronomic Tags**: Cumulative cloud tagging (*#seafood, #haute-cuisine, #michelin, #pizza*).
-- **Dual Display Modes**: Seamless toggling between **Leaflet Map** and **List Cards**.
+  - `🏙️ Cities` and `🌍 Countries (195+)`: Searchable dropdown selectors.
+  - `💶 Price Ranges`: Segmented pills for explicit brackets (`<15€`, `15-30€`, `30-50€`, `>50€`).
+  - Featured categories and gastronomic tags with expandable `🎛️ + Filters`.
+- **Stitch-styled Place Cards**:
+  - Restaurant initials avatar with terracotta/amber gradient badge.
+  - Name, address with pin, emerald price badge, and interactive favorite heart (`favorite`).
+  - Horizontal collection action buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`).
+  - Card footer with author badge and complete actions (`Comments`, `View on map`, `Google Maps ↗`, `Edit`, `Delete`).
+- **Interactive Map with Local Synchronization**:
+  - Floating top-right badge displaying live count (`Granada Centro: X locales`).
+  - Bottom local database sync bar (`Cache First`) with real-time latitude and longitude coordinates.
+  - Customized card popups matching the place card aesthetic.
+- **Modern Pagination**: Circular pill buttons (`< Previous`, `1`, `2`, `...`, `Next >`) with page size and sorting selectors.
 
 ### 📱 Optimized Mobile Experience
 - **Clean Exclusive Mobile Tabs**: Streamlined mobile header tabs `[🗺️ Map] | [📋 List]` keeping the active view clean without clutter or redundancy.

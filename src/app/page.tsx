@@ -46,9 +46,9 @@ export default async function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
-      {/* Contenedor principal responsive */}
-      <div className="max-w-6xl xl:max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex-1">
+    <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
+      {/* Contenedor principal responsive ancho completo Stitch */}
+      <div className="max-w-[1720px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-3 flex-1 flex flex-col gap-3">
         {/* 1. Barra de navegación y usuario */}
         <UserHeader currentUser={currentUser} />
 
@@ -78,57 +78,33 @@ export default async function Home() {
         )}
       </div>
 
-      {/* 4. Pie de página estilizado (estilo TVSpy con donación PayPal y enlaces a repo) */}
-      <footer className="mt-12 py-6 border-t border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 text-xs text-slate-500 dark:text-slate-400">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* 4. Pie de página estilizado Stitch */}
+      <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 mt-8">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800 dark:text-slate-300">GastroMap</span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
-              v{version}
+            <div className="w-6 h-6 rounded-lg bg-orange-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+              <span className="material-symbols-outlined text-sm leading-none">restaurant</span>
+            </div>
+            <span className="font-bold text-slate-900 dark:text-slate-100">
+              GastroMap PWA <span className="text-orange-600 font-semibold">v{version}</span>
             </span>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap justify-center">
-            {/* Botón de donación a PayPal estilo TVSpy */}
+          <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
+            <Link href="/docs" className="hover:text-orange-600 transition">API Docs</Link>
+            <a href="https://github.com/alebupal/GastroMap" target="_blank" rel="noopener noreferrer" className="hover:text-orange-600 transition">GitHub</a>
+            <Link href="/docs" className="hover:text-orange-600 transition">Manifiesto Gastro</Link>
             <a
               href="https://www.paypal.me/alebupal"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 dark:text-rose-400 font-semibold text-xs transition"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 font-bold transition shadow-xs"
             >
-              <span>❤️</span>
-              <span>{t("nav.donate_paypal")}</span>
+              <span className="material-symbols-outlined text-sm leading-none">favorite</span>
+              <span>{t("nav.donate")}</span>
             </a>
-
-            {/* Enlaces de repositorio, ecosistema y documentación estilo TVSPY */}
-            <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
-              <Link
-                href="/docs"
-                className="hover:text-amber-500 font-semibold transition flex items-center gap-1"
-                title={t("nav.documentation")}
-              >
-                <span>📘</span>
-                <span>{t("nav.documentation")}</span>
-              </Link>
-              <span>•</span>
-              <a
-                href="https://github.com/alebupal/GastroMap"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-amber-500 transition"
-              >
-                GitHub
-              </a>
-              <span>•</span>
-              <a
-                href="https://hub.docker.com/r/alebupal/gastromap"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-amber-500 transition"
-              >
-                Docker
-              </a>
-            </div>
           </div>
         </div>
       </footer>

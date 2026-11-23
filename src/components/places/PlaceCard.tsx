@@ -90,166 +90,131 @@ export function PlaceCard({
   const hasCoords = place.latitude != null && place.longitude != null;
 
   return (
-    <div
+    <article
       id={`place-card-${place.id}`}
-      className={`w-full p-4 sm:p-5 rounded-3xl border transition-all duration-300 text-left flex flex-col justify-between gap-3.5 backdrop-blur-xs ${isSelected
-        ? "border-amber-500 ring-2 ring-amber-500/50 shadow-xl bg-amber-500/5 dark:bg-amber-500/10"
-        : "border-slate-200/90 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-900/90 hover:border-slate-300 dark:hover:border-slate-700/80 shadow-md hover:shadow-xl"
-        }`}
+      className={`w-full p-4 rounded-2xl border transition-all duration-200 text-left flex flex-col justify-between gap-3 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md relative ${
+        isSelected
+          ? "ring-2 ring-orange-500/50 border-orange-500 shadow-md"
+          : "border-slate-200/80 dark:border-slate-800"
+      }`}
     >
       <div>
-        {/* Fila superior: Estado personal, Experiencia, Favorito y Precio */}
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Experiencia */}
-            {place.experienceStatus === "untried" && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/60 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800/50">
-                ✨ {t("cards.untried_badge")}
-              </span>
-            )}
-            {place.experienceStatus === "visited_by_me" && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
-                ✅ {t("cards.visited_badge")}
-              </span>
-            )}
-
-            {/* Puntuación personal si existe */}
-            {rating !== null && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50">
-                ⭐ {rating}/10
-              </span>
-            )}
-
-            {/* Estado del establecimiento si no está activo */}
-            {place.status === "temporarily_closed" && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60">
-                ⏸️ {t("cards.closed_temp")}
-              </span>
-            )}
-            {place.status === "permanently_closed" && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800/60">
-                🚫 {t("cards.closed_perm")}
-              </span>
-            )}
-
-            {/* Indicador de ficha privada o compartida con grupos */}
-            {!place.communityPublished &&
-              place.sharedGroupNames &&
-              place.sharedGroupNames.length > 0 ? (
-              place.sharedGroupNames.map((gName) => (
-                <span
-                  key={gName}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60"
-                >
-                  👥 {gName}
-                </span>
-              ))
-            ) : !place.communityPublished ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                🔒 {t("cards.private_badge")}
-              </span>
-            ) : null}
+        {/* Cabecera de Tarjeta: Avatar iniciales + Nombre + Dirección a la izquierda | Precio + Favorito a la derecha */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-orange-200/60 dark:border-orange-800/60">
+              {place.name
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((w) => w.charAt(0))
+                .slice(0, 2)
+                .join("")
+                .toUpperCase() || "🍴"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base leading-snug">
+                  {place.name}
+                </h3>
+                {typeof place.distanceMeters === "number" && (
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-[10px] font-semibold shrink-0">
+                    📍 {place.distanceMeters < 1000
+                      ? `${place.distanceMeters} m`
+                      : `${(place.distanceMeters / 1000).toFixed(1)} km`}
+                  </span>
+                )}
+              </div>
+              {(place.city || place.address) && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs text-orange-600 leading-none">location_on</span>
+                  <span>{place.city ? `${place.city}` : ""}{place.city && place.address ? " • " : ""}{place.address || ""}</span>
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Botón Favorito */}
+            <span className="px-2 py-0.5 rounded-full bg-[#6ffbbe] text-[#005236] font-bold text-[11px] shadow-xs">
+              {PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}
+            </span>
             <button
               type="button"
               onClick={handleToggleFavorite}
-              className="text-base hover:scale-125 active:scale-95 transition cursor-pointer p-1 min-w-[32px] min-h-[32px] flex items-center justify-center rounded-lg"
+              className="text-slate-400 hover:text-red-500 p-0.5 transition cursor-pointer hover:scale-110"
               title={favorite ? t("places.remove_favorite") : t("places.add_favorite")}
               aria-label={favorite ? t("places.remove_favorite") : t("places.add_favorite")}
             >
-              {favorite ? "⭐" : "🤍"}
-            </button>
-
-            {/* Precio */}
-            <span
-              className={`px-2.5 py-0.5 rounded-lg text-xs font-black tracking-tight border ${place.priceRange === "???"
-                ? "bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700/60"
-                : "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60"
-                }`}
-            >
-              {PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}
-            </span>
-          </div>
-        </div>
-
-        {/* Nombre, Avatar con Iniciales y Distancia */}
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/20 dark:from-amber-500/25 dark:to-orange-500/30 text-amber-700 dark:text-amber-300 font-black text-sm flex items-center justify-center shrink-0 border border-amber-500/30 shadow-xs">
-            {place.name
-              .split(/\s+/)
-              .filter(Boolean)
-              .map((w) => w.charAt(0))
-              .slice(0, 2)
-              .join("")
-              .toUpperCase() || "🍴"}
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base leading-snug">
-                {place.name}
-              </h3>
-              {typeof place.distanceMeters === "number" && (
-                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-[11px] font-semibold shrink-0">
-                  📍 {place.distanceMeters < 1000
-                    ? `${place.distanceMeters} m`
-                    : `${(place.distanceMeters / 1000).toFixed(1)} km`}
-                </span>
-              )}
-            </div>
-            {(place.city || place.address) && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
-                <span>📍</span>
-                <span>{place.city ? `${place.city}` : ""}{place.city && place.address ? " • " : ""}{place.address || ""}</span>
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Ocasiones / Planes (Multi-selección) */}
-        {place.occasions.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            {place.occasions.map((occId) => {
-              const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
-              return (
-                <span
-                  key={occId}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-[11px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800/40"
-                >
-                  <span>{info.icon}</span>
-                  <span>{info.name}</span>
-                </span>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Etiquetas gastronómicas visuales */}
-        {place.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {place.tags.map((t) => (
               <span
-                key={t}
-                className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/50 font-medium"
+                className={`material-symbols-outlined text-lg leading-none ${favorite ? "text-red-500" : ""}`}
+                style={favorite ? { fontVariationSettings: "'FILL' 1" } : undefined}
               >
-                #{t}
+                favorite
               </span>
-            ))}
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* Fila de Insignia de Estado Personal + Ocasiones / Categorías + Etiquetas */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+          {personalStatus === "visited" ? (
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
+              ✅ Ya he ido
+            </span>
+          ) : personalStatus === "pending" ? (
+            <span className="px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100 font-bold text-[11px]">
+              🕒 Quiero ir
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
+              ✨ Por descubrir
+            </span>
+          )}
+
+          {place.status === "temporarily_closed" && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
+              ⏸️ {t("cards.closed_temp")}
+            </span>
+          )}
+          {place.status === "permanently_closed" && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300">
+              🚫 {t("cards.closed_perm")}
+            </span>
+          )}
+
+          {/* Ocasiones / Categorías */}
+          {place.occasions.map((occId) => {
+            const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
+            return (
+              <span
+                key={occId}
+                className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
+              >
+                {info.icon} {info.name}
+              </span>
+            );
+          })}
+
+          {/* Etiquetas gastronómicas */}
+          {place.tags.map((tg) => (
+            <span
+              key={tg}
+              className="px-1.5 py-0.5 rounded bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-[11px]"
+            >
+              #{tg}
+            </span>
+          ))}
+        </div>
 
         {/* Notas públicas del creador */}
         {place.notes && (
-          <p className="mt-2.5 text-xs text-slate-700 dark:text-slate-300 italic bg-amber-50/60 dark:bg-slate-800/40 p-2.5 rounded-2xl border-l-2 border-amber-500/80">
+          <p className="mt-2 text-xs text-slate-700 dark:text-slate-300 italic bg-amber-50/60 dark:bg-slate-800/40 p-2.5 rounded-xl border-l-2 border-orange-500/80">
             «<LinkifiedText text={place.notes} />»
           </p>
         )}
 
         {/* Notas privadas personales (solo visibles por el usuario logueado) */}
         {privateNotes && (
-          <div className="mt-2 text-xs text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/30 p-2.5 rounded-2xl border border-amber-200 dark:border-amber-800/40 flex items-start justify-between gap-2">
+          <div className="mt-2 text-xs text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/40 flex items-start justify-between gap-2">
             <span className="italic">
               🔒 <LinkifiedText text={privateNotes} />
             </span>
@@ -264,64 +229,69 @@ export function PlaceCard({
         )}
 
         {/* Barra de Colección Personal (Quiero ir, Ya he ido, Mi nota) */}
-        <div className="mt-3.5 flex items-center gap-2 flex-wrap pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
+        <div className="mt-3 flex items-center gap-1.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
           <button
             type="button"
             onClick={() => handleStatusChange("pending")}
             aria-label={personalStatus === "pending" ? t("places.remove_pending") : t("places.add_pending")}
-            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${personalStatus === "pending"
-              ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
-              : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
-              }`}
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 ${
+              personalStatus === "pending"
+                ? "bg-[#fea619] text-[#2a1700] shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
+            }`}
           >
-            🕒 {personalStatus === "pending" ? t("cards.pending") : t("cards.want_to_go")}
+            <span className="material-symbols-outlined text-base leading-none">schedule</span>
+            <span>{personalStatus === "pending" ? t("cards.pending") : t("cards.want_to_go")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleStatusChange("visited")}
             aria-label={personalStatus === "visited" ? t("places.remove_visited") : t("places.mark_visited")}
-            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${personalStatus === "visited"
-              ? "bg-emerald-600 text-white font-bold shadow-sm"
-              : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
-              }`}
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 ${
+              personalStatus === "visited"
+                ? "bg-orange-600 text-white shadow-xs"
+                : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
+            }`}
           >
-            ✅ {personalStatus === "visited" ? t("cards.visited") : t("cards.visited")}
+            <span className="material-symbols-outlined text-base leading-none text-emerald-600 dark:text-emerald-400">check_circle</span>
+            <span>{t("cards.visited")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowNotesModal(true)}
             aria-label={t("cards.add_note_tooltip")}
-            className="py-1.5 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 active:scale-95"
+            className="py-1.5 px-3 rounded-xl text-xs font-semibold bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center justify-center gap-1 shrink-0 active:scale-95"
             title={t("cards.add_note_tooltip")}
           >
-            📝 {rating !== null ? `${rating}★` : t("cards.private_note")}
+            <span className="material-symbols-outlined text-sm leading-none text-orange-600">edit_note</span>
+            <span>{rating !== null ? `${rating}★` : t("cards.private_note")}</span>
           </button>
         </div>
       </div>
 
       {/* Pie de tarjeta: Autor con avatar, comentarios, Maps y Acciones */}
-      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold text-[9px] flex items-center justify-center border border-amber-500/20">
+          <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-900 font-bold text-[9px] flex items-center justify-center border border-orange-200">
             {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
           </span>
-          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+          <span className="font-bold text-slate-700 dark:text-slate-300">
             @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
           </span>
         </div>
 
-        <div className="flex items-center gap-x-2 gap-y-1.5 flex-wrap justify-start sm:justify-end">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Botón de comentarios */}
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
             aria-label={`${t("cards.comments")} (${commentsCount})`}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-amber-500 transition cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap"
+            className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer px-1 py-0.5 whitespace-nowrap"
             title={t("cards.comments")}
           >
-            <span>💬</span>
+            <span className="material-symbols-outlined text-sm leading-none">chat_bubble_outline</span>
             <span>{commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}</span>
           </button>
 
@@ -330,9 +300,10 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap"
+              className="inline-flex items-center gap-1 text-orange-600 dark:text-orange-400 font-bold hover:underline cursor-pointer px-1 py-0.5 whitespace-nowrap"
+              title="Centrar en mapa"
             >
-              <span>🗺️</span>
+              <span className="material-symbols-outlined text-sm leading-none">explore</span>
               <span>{t("places.view_map")}</span>
             </button>
           )}
@@ -343,27 +314,12 @@ export function PlaceCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Maps: ${place.name}`}
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline px-1.5 py-0.5 whitespace-nowrap"
+              className="inline-flex items-center gap-1 hover:text-orange-600 font-medium transition px-1 py-0.5 whitespace-nowrap"
+              title="Abrir en Google Maps"
             >
-              <span>📍</span>
-              <span>Maps ↗</span>
+              <span className="material-symbols-outlined text-sm leading-none">open_in_new</span>
+              <span>Google Maps</span>
             </a>
-          )}
-
-          {onToggleCompare && (
-            <button
-              type="button"
-              onClick={onToggleCompare}
-              aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
-              className={`inline-flex items-center gap-1 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 rounded-lg whitespace-nowrap ${isCompared
-                ? "bg-amber-500 text-slate-950 font-bold"
-                : "text-slate-500 dark:text-slate-400 hover:text-amber-500"
-                }`}
-              title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
-            >
-              <span>⚖️</span>
-              <span>{t("cards.compare")}</span>
-            </button>
           )}
 
           {canEdit && (
@@ -371,11 +327,10 @@ export function PlaceCard({
               type="button"
               onClick={() => setShowEditModal(true)}
               aria-label={t("cards.edit_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-500 text-xs font-semibold transition cursor-pointer px-1.5 py-0.5 whitespace-nowrap"
+              className="text-slate-400 hover:text-orange-600 transition cursor-pointer p-0.5"
               title={t("cards.edit_tooltip")}
             >
-              <span>✏️</span>
-              <span>{t("common.edit")}</span>
+              <span className="material-symbols-outlined text-sm leading-none">edit</span>
             </button>
           )}
 
@@ -384,11 +339,10 @@ export function PlaceCard({
               onClick={handleDelete}
               disabled={deleting}
               aria-label={t("cards.delete_tooltip")}
-              className="inline-flex items-center gap-1 text-slate-400 hover:text-red-500 text-xs font-semibold transition cursor-pointer disabled:opacity-40 px-1.5 py-0.5 whitespace-nowrap"
+              className="text-slate-400 hover:text-red-500 transition cursor-pointer disabled:opacity-40 p-0.5"
               title={t("cards.delete_tooltip")}
             >
-              <span>🗑️</span>
-              <span>{t("common.delete")}</span>
+              <span className="material-symbols-outlined text-sm leading-none">delete</span>
             </button>
           )}
         </div>
@@ -436,6 +390,6 @@ export function PlaceCard({
           onClose={() => setShowEditModal(false)}
         />
       )}
-    </div>
+    </article>
   );
 }

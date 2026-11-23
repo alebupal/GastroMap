@@ -740,82 +740,71 @@ export function PlacesExplorer({
       )}
 
       {/* =========================================================================
-          HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida
+          1. HERO ACTION HUB: Búsqueda interactiva y botones de acción rápida estilo Stitch
          ========================================================================= */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-md dark:border-slate-800 dark:bg-slate-950 dark:bg-gradient-to-b dark:from-slate-900/90 dark:to-slate-900/40 dark:shadow-xl backdrop-blur-md space-y-3.5 transition-colors duration-200">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Buscador de texto en vivo */}
-          <div className="relative flex-1">
+      <section className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-2 sm:px-3 border border-slate-200/70 dark:border-slate-800/70">
+        <div className="flex flex-col md:flex-row items-center gap-2">
+          {/* Buscador de texto en vivo redondeado estilo Stitch */}
+          <div className="relative flex-1 w-full flex items-center bg-[#f2f3ff] dark:bg-slate-800/70 rounded-full px-3.5 py-1.5 transition-all focus-within:ring-2 focus-within:ring-orange-500/50">
+            <span className="material-symbols-outlined text-orange-600 text-lg mr-2 select-none shrink-0">search</span>
             <input
               type="text"
               value={textSearch}
               onChange={(e) => setTextSearch(e.target.value)}
               placeholder={t("places.search_placeholder")}
-              className="w-full px-4 py-3 pl-10 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition shadow-inner"
+              className="w-full bg-transparent text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
             />
-            <span className="absolute left-3.5 top-3.5 text-slate-400 dark:text-slate-500 text-sm pointer-events-none">
-              🔍
-            </span>
             {textSearch && (
               <button
                 type="button"
                 onClick={() => setTextSearch("")}
-                className="absolute right-3.5 top-3.5 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer font-bold"
+                className="p-0.5 rounded-full text-slate-400 hover:text-red-500 cursor-pointer"
+                title="Limpiar búsqueda"
               >
-                ✕
+                <span className="material-symbols-outlined text-sm leading-none">close</span>
               </button>
             )}
           </div>
 
-          {/* Botón principal de Alta Rápida */}
-          <a
-            href="/new"
-            className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition active:scale-[0.98] shrink-0"
-          >
-            <span className="text-base">➕</span>
-            <span>{t("places.add_new")}</span>
-          </a>
-        </div>
-
-        {/* Barra de herramientas y filtros rápidos justificadas al 100% */}
-        <div className="w-full space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
-            {/* Botón Asistente Guiado */}
+          {/* Acciones Rápidas en píldoras horizontales */}
+          <div className="flex items-center gap-1.5 w-full md:w-auto shrink-0 justify-between md:justify-start overflow-x-auto">
+            {/* Asistente */}
             <button
               type="button"
               onClick={() => setIsAssistantOpen(true)}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 cursor-pointer"
+              title="Asistente"
             >
-              <span>🎯</span>
-              <span>{t("places.assistant")}</span>
+              <span className="material-symbols-outlined text-orange-600 text-base leading-none">assistant</span>
+              <span className="hidden sm:inline">{t("places.assistant")}</span>
               {activeFiltersCount > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] flex items-center justify-center font-black">
+                <span className="px-1.5 py-0.2 rounded-full bg-orange-600 text-white text-[10px] ml-0.5 font-bold">
                   {activeFiltersCount}
                 </span>
               )}
             </button>
 
-            {/* Botón Selector Aleatorio «🎲 Elegir al azar» */}
+            {/* Al azar */}
             <button
               type="button"
               onClick={() => setIsRandomModalOpen(true)}
               disabled={filteredPlaces.length === 0}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer disabled:opacity-40"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 cursor-pointer disabled:opacity-40"
               title={t("places.roulette_tooltip")}
             >
-              <span>🎲</span>
-              <span>{t("places.roulette")}</span>
+              <span className="material-symbols-outlined text-amber-500 text-base leading-none">casino</span>
+              <span className="hidden sm:inline">{t("places.roulette")}</span>
             </button>
 
-            {/* Botón Importar / Exportar */}
+            {/* Importar / Exportar */}
             <button
               type="button"
               onClick={() => setIsExportImportOpen(true)}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 cursor-pointer"
               title={t("places.export_import_tooltip")}
             >
-              <span>📦</span>
-              <span>{t("places.export_import")}</span>
+              <span className="material-symbols-outlined text-slate-500 text-base leading-none">import_export</span>
+              <span className="hidden sm:inline">{t("places.export_import")}</span>
             </button>
 
             {/* Cerca de mí */}
@@ -824,15 +813,15 @@ export function PlacesExplorer({
                 type="button"
                 onClick={handleRequestLocation}
                 disabled={isLocating}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 text-orange-600 dark:text-orange-400 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 cursor-pointer disabled:opacity-50"
               >
-                <span>{isLocating ? "⏳" : "📍"}</span>
-                <span>{isLocating ? "Localizando..." : t("places.near_me")}</span>
+                <span className="material-symbols-outlined text-base leading-none">{isLocating ? "hourglass_empty" : "near_me"}</span>
+                <span className="hidden sm:inline">{isLocating ? "Localizando..." : t("places.near_me")}</span>
               </button>
             ) : (
-              <div className="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold shrink-0">
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span className="truncate">Ubicación activa</span>
+                <span className="text-xs">Ubicación activa</span>
                 <button
                   type="button"
                   onClick={handleDisableLocation}
@@ -842,91 +831,18 @@ export function PlacesExplorer({
                 </button>
               </div>
             )}
-          </div>
 
-          {activeFiltersCount > 0 && (
-            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100/60 dark:border-slate-800/40 w-full">
-              <button
-                type="button"
-                onClick={() => setIsSaveFilterOpen((v) => !v)}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
-                title={t("places.save_filter_tooltip")}
-              >
-                <span>💾</span>
-                <span>{t("places.save_filter")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={resetAllFilters}
-                className="px-3 py-1.5 text-xs text-slate-400 hover:text-red-400 font-semibold underline cursor-pointer"
-              >
-                Limpiar filtros
-              </button>
-            </div>
-          )}
+            {/* Botón Añadir */}
+            <a
+              href="/new"
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-500 hover:from-orange-500 hover:to-amber-400 text-white text-xs font-bold shadow-sm hover:shadow transition shrink-0 ml-0.5"
+            >
+              <span className="material-symbols-outlined text-base leading-none">add</span>
+              <span>{t("places.add_new")}</span>
+            </a>
+          </div>
         </div>
-
-        {/* Mini formulario para guardar combinación actual de filtros */}
-        {isSaveFilterOpen && (
-          <form
-            onSubmit={handleSaveCurrentFilter}
-            className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/60 animate-in fade-in duration-150"
-          >
-            <input
-              type="text"
-              value={newFilterName}
-              onChange={(e) => setNewFilterName(e.target.value)}
-              placeholder="Ej. Tapear sin estrenar, Citas baratas..."
-              autoFocus
-              className="flex-1 px-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-600 transition"
-            />
-            <button
-              type="submit"
-              disabled={savingFilter || newFilterName.trim().length < 2}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
-            >
-              {savingFilter ? "..." : "Guardar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsSaveFilterOpen(false)}
-              className="px-2 py-1.5 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
-            >
-              ✕
-            </button>
-          </form>
-        )}
-
-        {/* Barra de filtros guardados del usuario */}
-        {savedFilters.length > 0 && (
-          <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-800/60 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-bold text-slate-400 shrink-0">🔖 Mis filtros:</span>
-            {savedFilters.map((sf) => (
-              <div
-                key={sf.id}
-                className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/70 text-[11px] shrink-0 overflow-hidden"
-              >
-                <button
-                  type="button"
-                  onClick={() => handleApplySavedFilter(sf)}
-                  className="px-2.5 py-1 font-semibold text-slate-700 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 transition cursor-pointer"
-                  title={t("places.apply_filter_tooltip")}
-                >
-                  {sf.name}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteSavedFilter(sf.id)}
-                  className="pr-2 pl-0.5 py-1 text-slate-400 hover:text-red-500 transition cursor-pointer text-[10px]"
-                  title={t("places.delete_filter_tooltip")}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      </section>
 
       {locationError && (
         <div className="p-3 rounded-2xl bg-red-950/40 border border-red-900/50 text-red-400 text-xs flex items-center justify-between">
@@ -958,9 +874,9 @@ export function PlacesExplorer({
                 key={r.label}
                 type="button"
                 onClick={() => setRadiusKm(r.val)}
-                className={`px-2.5 py-1 rounded-xl font-semibold shrink-0 transition cursor-pointer text-xs ${isSelected
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-900/60 border border-slate-800 text-slate-400 hover:bg-slate-800"
+                className={`px-2.5 py-1 rounded-full font-semibold shrink-0 transition cursor-pointer text-xs ${isSelected
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
                   }`}
               >
                 {r.label}
@@ -970,193 +886,339 @@ export function PlacesExplorer({
         </div>
       )}
 
-      {/* Contenedor ordenado de filtros de colección y segmentación */}
-      <div className="space-y-1.5 pb-1">
-        {/* Fila 1: Píldoras Rápidas de Colección y Experiencia */}
-        <HorizontalScroll className="flex items-center gap-1.5 text-xs">
-          {[
-            { key: "all", label: t("places.all"), icon: "🌐" },
-            { key: "favorite", label: t("places.favorites"), icon: "⭐" },
-            { key: "pending", label: t("places.want_to_go"), icon: "🕒" },
-            { key: "visited_by_me", label: t("places.visited"), icon: "✅" },
-            { key: "untried", label: t("places.unexplored"), icon: "✨" },
-          ].map((item) => {
-            const active = experienceFilter === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() =>
-                  setExperienceFilter(
-                    active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter)
-                  )
-                }
-                className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs ${active
-                  ? "bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-950 shadow-md"
-                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/80"
+      {/* =========================================================================
+          2. TAXONOMÍAS, FILTROS Y ESTADOS: Fila 1 y Fila 2 estilo Stitch
+         ========================================================================= */}
+      <section className="flex flex-col gap-2.5 bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70">
+        {/* Fila 1: Píldoras de Experiencia / Colección + Filtros Guardados */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
+          <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-0.5 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
+            {[
+              { key: "all", label: `Todos (${initialPlaces.length})` },
+              { key: "favorite", label: `⭐ Favoritos (${initialPlaces.filter(p => p.isFavorite).length})` },
+              { key: "pending", label: `🕒 Quiero ir (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
+              { key: "visited_by_me", label: `✅ Ya he ido (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
+              { key: "untried", label: `✨ Por descubrir` },
+            ].map((item) => {
+              const active = experienceFilter === item.key;
+              const isUntried = item.key === "untried";
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => {
+                    setExperienceFilter(active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter));
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${
+                    active
+                      ? isUntried
+                        ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
+                        : "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs"
+                      : isUntried
+                      ? "text-amber-800 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/40 hover:bg-amber-200/60 font-semibold"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
                   }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            {activeFiltersCount > 0 && (
+              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">filter_alt</span>
+                <span className="font-semibold truncate max-w-[150px]">Filtro activo ({activeFiltersCount})</span>
+                <button
+                  type="button"
+                  onClick={resetAllFilters}
+                  className="text-slate-400 hover:text-red-500 font-bold ml-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setIsSaveFilterOpen((v) => !v)}
+              className="flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition cursor-pointer"
+              title={t("places.save_filter_tooltip")}
+            >
+              <span className="material-symbols-outlined text-sm text-amber-600 leading-none">bookmark</span>
+              <span>{t("places.save_filter")}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mini formulario para guardar combinación actual de filtros */}
+        {isSaveFilterOpen && (
+          <form
+            onSubmit={handleSaveCurrentFilter}
+            className="flex items-center gap-2 pt-1 border-b border-slate-100 dark:border-slate-800/60 pb-2 animate-in fade-in duration-150"
+          >
+            <input
+              type="text"
+              value={newFilterName}
+              onChange={(e) => setNewFilterName(e.target.value)}
+              placeholder="Ej. Tapear sin estrenar, Citas baratas..."
+              autoFocus
+              className="flex-1 px-3 py-1.5 rounded-full text-xs bg-[#f2f3ff] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={savingFilter || newFilterName.trim().length < 2}
+              className="px-3 py-1.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
+            >
+              {savingFilter ? "..." : "Guardar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSaveFilterOpen(false)}
+              className="px-2 py-1.5 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
+            >
+              ✕
+            </button>
+          </form>
+        )}
+
+        {/* Barra de filtros guardados del usuario */}
+        {savedFilters.length > 0 && (
+          <div className="flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800/60 pb-2 overflow-x-auto no-scrollbar">
+            <span className="text-[11px] font-bold text-slate-400 shrink-0">🔖 Mis filtros:</span>
+            {savedFilters.map((sf) => (
+              <div
+                key={sf.id}
+                className="inline-flex items-center rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 text-[11px] shrink-0 overflow-hidden"
               >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </HorizontalScroll>
+                <button
+                  type="button"
+                  onClick={() => handleApplySavedFilter(sf)}
+                  className="px-2.5 py-0.5 font-semibold text-slate-700 dark:text-slate-200 hover:text-orange-600 transition cursor-pointer"
+                  title={t("places.apply_filter_tooltip")}
+                >
+                  {sf.name}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteSavedFilter(sf.id)}
+                  className="pr-2 pl-0.5 py-0.5 text-slate-400 hover:text-red-500 transition cursor-pointer text-[10px]"
+                  title={t("places.delete_filter_tooltip")}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* Fila 2: Segmentación por Grupos, Ubicación (País/Ciudad) y Presupuesto */}
-        <HorizontalScroll className="flex items-center gap-1.5 text-xs">
-          {/* Filtro por Grupos Privados */}
-          {myGroups.length > 0 && (
-            <div className="relative shrink-0">
-              <button
-                ref={groupBtnRef}
-                type="button"
-                onClick={() => {
-                  if (!isGroupFilterOpen) {
-                    updateGroupCoords();
-                    setIsGroupFilterOpen(true);
-                  } else {
-                    setIsGroupFilterOpen(false);
-                  }
-                }}
-                className={`px-3 py-1.5 rounded-xl font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
-                  ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-600/20"
-                  : "bg-white dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
-              >
-                <span>👥</span>
-                <span>
-                  {selectedGroupFilterIds.length === 0
-                    ? t("places.groups_filter")
-                    : selectedGroupFilterIds.length === 1
-                      ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
-                      : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
-                </span>
-                <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
-              </button>
+        {/* Fila 2: Segmentación por Grupos, Ubicación, Precios, Categorías y Tags */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            {/* Filtro por Grupos Privados */}
+            {myGroups.length > 0 && (
+              <div className="relative shrink-0">
+                <button
+                  ref={groupBtnRef}
+                  type="button"
+                  onClick={() => {
+                    if (!isGroupFilterOpen) {
+                      updateGroupCoords();
+                      setIsGroupFilterOpen(true);
+                    } else {
+                      setIsGroupFilterOpen(false);
+                    }
+                  }}
+                  className={`px-3 py-1 rounded-full font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
+                    ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                    : "bg-[#f2f3ff] dark:bg-slate-800 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                    }`}
+                >
+                  <span>👥</span>
+                  <span>
+                    {selectedGroupFilterIds.length === 0
+                      ? t("places.groups_filter")
+                      : selectedGroupFilterIds.length === 1
+                        ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
+                        : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
+                  </span>
+                  <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
+                </button>
 
-              {/* Popover desplegable visual de grupos privados (renderizado en portal) */}
-              {mounted && isGroupFilterOpen && groupCoords &&
-                createPortal(
-                  <div
-                    ref={groupMenuRef}
-                    style={{
-                      position: "fixed",
-                      top: `${groupCoords.top}px`,
-                      left: `${groupCoords.left}px`,
-                    }}
-                    className="z-[9999] w-64 sm:w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100"
-                  >
-                    <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
-                      <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                        {t("places.filter_by_group")}
-                      </span>
-                      {selectedGroupFilterIds.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGroupFilterIds([])}
-                          className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
-                        >
-                          {t("places.clear_filter")}
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="space-y-1">
-                      {myGroups.map((g) => {
-                        const isSelected = selectedGroupFilterIds.includes(g.id);
-                        return (
+                {mounted && isGroupFilterOpen && groupCoords &&
+                  createPortal(
+                    <div
+                      ref={groupMenuRef}
+                      style={{
+                        position: "fixed",
+                        top: `${groupCoords.top}px`,
+                        left: `${groupCoords.left}px`,
+                      }}
+                      className="z-[9999] w-64 sm:w-72 max-h-64 overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-3 space-y-2 text-left animate-in fade-in zoom-in-95 duration-100"
+                    >
+                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {t("places.filter_by_group")}
+                        </span>
+                        {selectedGroupFilterIds.length > 0 && (
                           <button
-                            key={g.id}
                             type="button"
-                            onClick={() => {
-                              setSelectedGroupFilterIds((prev) =>
-                                prev.includes(g.id)
-                                  ? prev.filter((id) => id !== g.id)
-                                  : [...prev, g.id]
-                              );
-                            }}
-                            className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
-                              ? "bg-blue-600 text-white font-bold"
-                              : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
-                              }`}
+                            onClick={() => setSelectedGroupFilterIds([])}
+                            className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
                           >
-                            <span className="truncate">👥 {g.name}</span>
-                            {isSelected && <span className="text-xs">✓</span>}
+                            {t("places.clear_filter")}
                           </button>
-                        );
-                      })}
-                    </div>
-                  </div>,
-                  document.body
-                )}
-            </div>
-          )}
+                        )}
+                      </div>
 
-          {/* Filtros de País y Ciudad con selector y buscador integrado */}
-          {allCountries.length > 0 && (
-            <SearchableSelect
-              value={selectedCountry}
-              onChange={(val) => {
-                setSelectedCountry(val);
-                setSelectedCity("all");
-                setCurrentPage(1);
-              }}
-              options={countryOptions}
-              allOption={{
-                value: "all",
-                label: `${t("places.all_countries")} (${allCountries.length})`,
-                icon: "🌍",
-              }}
-              searchPlaceholder={t("location.country_placeholder")}
-              className="shrink-0"
-            />
-          )}
+                      <div className="space-y-1">
+                        {myGroups.map((g) => {
+                          const isSelected = selectedGroupFilterIds.includes(g.id);
+                          return (
+                            <button
+                              key={g.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedGroupFilterIds((prev) =>
+                                  prev.includes(g.id)
+                                    ? prev.filter((id) => id !== g.id)
+                                    : [...prev, g.id]
+                                );
+                              }}
+                              className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
+                                ? "bg-blue-600 text-white font-bold"
+                                : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                                }`}
+                            >
+                              <span className="truncate">👥 {g.name}</span>
+                              {isSelected && <span className="text-xs">✓</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>,
+                    document.body
+                  )}
+              </div>
+            )}
 
-          {availableCities.length > 0 && (
-            <SearchableSelect
-              value={selectedCity}
-              onChange={(val) => {
-                setSelectedCity(val);
-                setCurrentPage(1);
-              }}
-              options={cityOptions}
-              allOption={{
-                value: "all",
-                label: `${t("places.all_cities")} (${availableCities.length})`,
-                icon: "🏙️",
-              }}
-              searchPlaceholder={t("location.city_placeholder")}
-              className="shrink-0"
-            />
-          )}
+            {/* Ciudad */}
+            {availableCities.length > 0 && (
+              <SearchableSelect
+                value={selectedCity}
+                onChange={(val) => {
+                  setSelectedCity(val);
+                  setCurrentPage(1);
+                }}
+                options={cityOptions}
+                allOption={{
+                  value: "all",
+                  label: `${t("places.all_cities")} (${availableCities.length})`,
+                  icon: "🏙️",
+                }}
+                searchPlaceholder={t("location.city_placeholder")}
+                className="shrink-0"
+              />
+            )}
 
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 shrink-0 mx-0.5"></div>
+            {/* Países */}
+            {allCountries.length > 0 && (
+              <SearchableSelect
+                value={selectedCountry}
+                onChange={(val) => {
+                  setSelectedCountry(val);
+                  setSelectedCity("all");
+                  setCurrentPage(1);
+                }}
+                options={countryOptions}
+                allOption={{
+                  value: "all",
+                  label: `${t("places.all_countries")} (${allCountries.length})`,
+                  icon: "🌍",
+                }}
+                searchPlaceholder={t("location.country_placeholder")}
+                className="shrink-0"
+              />
+            )}
 
-          {/* Filtros de Rango de Precio */}
-          {[
-            { id: "€", label: "< 15 €" },
-            { id: "€€", label: "15 - 30 €" },
-            { id: "€€€", label: "30 - 50 €" },
-            { id: "€€€€", label: "> 50 €" },
-          ].map((item) => {
-            const active = selectedPrices.includes(item.id);
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => togglePrice(item.id)}
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition cursor-pointer border ${active
-                  ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
-                  : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+            {/* Precios */}
+            {[
+              { id: "€", label: "< 15 €" },
+              { id: "€€", label: "15 - 30 €" },
+              { id: "€€€", label: "30 - 50 €" },
+              { id: "€€€€", label: "> 50 €" },
+            ].map((item) => {
+              const active = selectedPrices.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => togglePrice(item.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
+                    active
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
                   }`}
-              >
-                {item.label}
-              </button>
-            );
-          })}
-        </HorizontalScroll>
-      </div>
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+
+            {/* Categorías destacadas */}
+            {occasionsList.slice(0, 2).map((occ) => {
+              const isSelected = selectedOccasions.includes(occ.id);
+              return (
+                <button
+                  key={occ.id}
+                  type="button"
+                  onClick={() => toggleOccasion(occ.id)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition cursor-pointer flex items-center gap-1 ${
+                    isSelected
+                      ? "bg-[#855300] text-white font-bold shadow-xs"
+                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  <span>{occ.icon}</span>
+                  <span>{occ.name}</span>
+                </button>
+              );
+            })}
+
+            {/* Tags destacados */}
+            {tagsList.slice(0, 2).map((tg) => {
+              const isSelectedTag = selectedTags.includes(tg.id);
+              return (
+                <button
+                  key={tg.id}
+                  type="button"
+                  onClick={() => toggleTag(tg.id)}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
+                    isSelectedTag
+                      ? "bg-orange-600 text-white font-bold"
+                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                  }`}
+                >
+                  #{tg.name}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Lado derecho: botón + Filtros y modo cuadrícula */}
+          <div className="flex items-center gap-1.5 text-xs shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold transition cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm leading-none">tune</span>
+              <span>+ Filtros</span>
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
@@ -1564,12 +1626,16 @@ export function PlacesExplorer({
                 className="w-full h-[58vh] sm:h-[520px] lg:h-[calc(100vh-14rem)] min-h-[380px]"
               />
             </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-500 px-2 flex-wrap gap-1">
-              <span>
-                {t("places.showing_geolocated", {
-                  count: filteredPlaces.filter((p) => p.latitude != null).length,
-                })}
-              </span>
+            <div className="flex items-center justify-between px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 rounded-xl text-xs font-medium">
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Base de datos sincronizada localmente (Cache First)</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+                <span>Lat: 37.1773° N</span>
+                <span>•</span>
+                <span>Lon: 3.5986° W</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1599,17 +1665,16 @@ export function PlacesExplorer({
             </div>
           ) : (
             <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-14 lg:pb-0">
-              <div className="flex items-center justify-between gap-2 text-xs text-slate-500 font-medium px-1 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
+              <div className="flex items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium px-1 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-orange-600 text-sm">
                     {filteredPlaces.length} {filteredPlaces.length === 1 ? t("places.locale_single") : t("places.locales_count")}
                   </span>
-                  {totalPages > 1 && (
-                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800">
-                      {t("places.page_of", { current: currentPage, total: totalPages })}
-                    </span>
-                  )}
-                  {textSearch && <span className="hidden sm:inline text-slate-400">• «{textSearch}»</span>}
+                  <span className="text-slate-300 dark:text-slate-700">•</span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] text-xs font-bold shadow-2xs">
+                    {t("places.page_of", { current: currentPage, total: totalPages })}
+                  </span>
+                  {textSearch && <span className="hidden sm:inline text-slate-400 text-xs">• «{textSearch}»</span>}
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1667,84 +1732,61 @@ export function PlacesExplorer({
                 />
               ))}
 
-              {/* Barra de Paginación */}
+              {/* Barra de Paginación Moderna estilo Stitch */}
               {(totalPages > 1 || filteredPlaces.length > 10) && (
-                <div className="pt-3 pb-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 dark:border-slate-800 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">
-                      {t("places.showing_range", {
-                        start: filteredPlaces.length > 0 ? startIndex + 1 : 0,
-                        end: Math.min(startIndex + pageSize, filteredPlaces.length),
-                        total: filteredPlaces.length,
+                <nav className="flex items-center justify-between bg-white dark:bg-slate-900 px-3.5 py-2 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-sm leading-none">chevron_left</span>
+                    <span>{t("places.previous")}</span>
+                  </button>
+
+                  <div className="flex items-center gap-1 font-semibold text-xs">
+                    {Array.from({ length: totalPages }, (_, idx) => idx + 1)
+                      .filter(
+                        (p) =>
+                          p === 1 ||
+                          p === totalPages ||
+                          Math.abs(p - currentPage) <= 1
+                      )
+                      .map((p, idx, arr) => {
+                        const prev = arr[idx - 1];
+                        const showEllipsis = prev && p - prev > 1;
+                        return (
+                          <span key={p} className="flex items-center gap-1">
+                            {showEllipsis && (
+                              <span className="text-slate-400 px-0.5 text-xs">…</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handlePageChange(p)}
+                              className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition cursor-pointer ${
+                                currentPage === p
+                                  ? "bg-orange-600 text-white shadow-xs"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          </span>
+                        );
                       })}
-                    </span>
-                    <select
-                      value={pageSize}
-                      onChange={(e) => {
-                        setPageSize(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer"
-                      aria-label={t("places.page_size")}
-                    >
-                      <option value={10}>10 {t("places.per_page")}</option>
-                      <option value={20}>20 {t("places.per_page")}</option>
-                      <option value={50}>50 {t("places.per_page")}</option>
-                      <option value={10000}>{t("places.all")}</option>
-                    </select>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage <= 1}
-                      className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
-                    >
-                      {t("places.previous")}
-                    </button>
-
-                    <div className="flex items-center gap-1 mx-1">
-                      {Array.from({ length: totalPages }, (_, idx) => idx + 1)
-                        .filter(
-                          (p) =>
-                            p === 1 ||
-                            p === totalPages ||
-                            Math.abs(p - currentPage) <= 1
-                        )
-                        .map((p, idx, arr) => {
-                          const prev = arr[idx - 1];
-                          const showEllipsis = prev && p - prev > 1;
-                          return (
-                            <span key={p} className="flex items-center gap-1">
-                              {showEllipsis && (
-                                <span className="text-slate-400 px-0.5 text-xs">…</span>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handlePageChange(p)}
-                                className={`w-7 h-7 rounded-xl font-bold text-xs flex items-center justify-center transition cursor-pointer ${currentPage === p
-                                  ? "bg-amber-500 text-slate-950 shadow-xs"
-                                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                  }`}
-                              >
-                                {p}
-                              </button>
-                            </span>
-                          );
-                        })}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage >= totalPages}
-                      className="px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition text-xs"
-                    >
-                      {t("places.next")}
-                    </button>
-                  </div>
-                </div>
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-900 dark:text-orange-200 text-xs font-bold hover:bg-orange-200 dark:hover:bg-orange-900/60 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                  >
+                    <span>{t("places.next")}</span>
+                    <span className="material-symbols-outlined text-sm leading-none">chevron_right</span>
+                  </button>
+                </nav>
               )}
             </div>
           )}

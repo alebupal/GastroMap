@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Faithful 1:1 Visual Replication of the Stitch UI/UX Design (Main Explorer & Map)**:
+  - Exact match of the Stitch interface incorporating Google Material Symbols Outlined and customized tokens:
+    - Unified top header featuring connectivity state (`🟢 Online • PWA Sync v0.1.0 Ready`), `📲 Install PWA App` prompt, brand logo with prominent `Explore Map` badge, segmented theme switcher (`light_mode` / `dark_mode`), locale picker, donate pill, and user profile avatar with `ADMIN` badge.
+    - Floating search and tools card with inline action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
+    - Two-tier taxonomy and filters card: top row with segmented personal status buttons (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), active filter chips with instant clear, and save filter shortcut; bottom row with city, country, price tiers (`<15€`, `15-30€`, `30-50€`, `>50€`), category tags, and an expandable `🎛️ + Filters` toggle.
+    - Place cards visually identical to Stitch: initials badge in warm terracotta, location pin, emerald price chip, Material Symbol favorite heart, status badges, horizontal collection action buttons (`🕒 Pending`, `✅ Visited`, `📝 My note`), and author footer with quick tools.
+    - Interactive map featuring a floating summary badge (`Granada Centro: X places`), a bottom `Cache First` local database sync indicator with real-time latitude/longitude coordinates, and popups matching the card aesthetic.
+    - Modern pill-based pagination navigation and official GastroMap PWA footer.
 - **Complete Visual Redesign Inspired by Stitch UI/UX**:
   - Integrated modern **Plus Jakarta Sans** typography with optimized weights across the entire application.
   - New segmented dual theme switcher (`☀️ Light` / `🌙 Dark`) in the header with smooth micro-interactions.

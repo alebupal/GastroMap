@@ -20,14 +20,12 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Automatic coordinate and link normalization.
   * Fast classification by occasion (*Tapas, Full Meal, Trendy/Rooftops, Drinks, Coffee/Dessert*) and price range (`€` to `€€€€` or `???` so unknown places aren't left out).
 
-* **🔍 Decision Assistant & Universal Search:**
-  * **Universal live search**: Search across any field — name, city, public or private notes, tags, occasions, creator, or collaborative comment contents.
-  * Real distance filters (*Nearby within 1, 5, 10, or 25 km*) powered by **PostGIS**.
-  * Worldwide country selector (195+ countries with emoji flags & instant search) and available cities filter with floating popovers.
-  * Flexible pagination with page size options (10, 20, 50, or All).
-  * Filter by occasion, culinary tags, private sharing groups, and past experience (*Favorites*, *Want to go*, *Visited*, *To discover*).
-  * Streamlined two-row responsive layout for mobile and desktop without awkward wrapping.
-  * **🎲 Random Picker Button**: When nobody can agree, let the app pick a spot from your filtered list.
+* **🔍 Main Explorer & Universal Search (Stitch UI/UX Design):**
+  * **Unified search bar**: Rounded search input with integrated inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
+  * **Segmented experience filters (Row 1)**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), active filter chip with quick dismiss (`✕`), and `💾 Save` button.
+  * **Two-tier segmentation (Row 2)**: Searchable dropdowns for cities, countries (+195), explicit price range chips (`<15€`, `15-30€`, `30-50€`, `>50€`), and featured tags with `🎛️ + Filters`.
+  * **Stitch-styled place cards**: Initials avatar in terracotta/amber gradient, address with pin, emerald price badge, favorite button (`favorite`), collection buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`), and author footer with actions.
+  * **Modern pagination & synced map**: Circular pill buttons, live map floating count (`Granada Centro: X locales`), and `Cache First` local sync status bar with real-time coordinates.
 
 * **🗺️ Interactive Leaflet Map:**
   * Free, lightweight OpenStreetMap / CartoDB tiles (zero Google Maps API billing or quotas).
