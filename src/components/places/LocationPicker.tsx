@@ -94,25 +94,60 @@ export function LocationPicker({
     return formatCityCountry(manualCity, countryName);
   }, [isSpain, selectedMunicipality, selectedCountry, customCountry, manualCity]);
 
-  // Notificar al componente padre cuando cambie cualquier valor
+  const onLocationChangeRef = useRef(onLocationChange);
   useEffect(() => {
-    if (onLocationChange) {
-      onLocationChange({
-        city: effectiveCity,
-        address,
-        latitude: lat,
-        longitude: lng,
-      });
+    onLocationChangeRef.current = onLocationChange;
+  }, [onLocationChange]);
+
+  // Guarda el último valor emitido al padre para evitar bucles ping-pong al rebotar props
+  const lastEmittedRef = useRef<{
+    city: string;
+    address: string;
+    latitude: string;
+    longitude: string;
+  } | null>(null);
+
+  // Notificar al componente padre solo cuando cambien los valores efectivos
+  useEffect(() => {
+    const next = {
+      city: effectiveCity,
+      address,
+      latitude: lat,
+      longitude: lng,
+    };
+    const prev = lastEmittedRef.current;
+    if (
+      prev &&
+      prev.city === next.city &&
+      prev.address === next.address &&
+      prev.latitude === next.latitude &&
+      prev.longitude === next.longitude
+    ) {
+      return;
     }
-  }, [effectiveCity, address, lat, lng, onLocationChange]);
+    lastEmittedRef.current = next;
+    onLocationChangeRef.current?.(next);
+  }, [effectiveCity, address, lat, lng]);
 
-  // Si cambian las props iniciales (ej. por autocompletado de URL de Maps)
+  // Si cambian las props iniciales desde fuera (ej. por autocompletado de URL de Maps)
   useEffect(() => {
-    if (initialLat) setLat(initialLat);
-    if (initialLng) setLng(initialLng);
-    if (initialAddress) setAddress(initialAddress);
+    const last = lastEmittedRef.current;
+    const isExternalLat = Boolean(initialLat) && initialLat !== last?.latitude && initialLat !== lat;
+    const isExternalLng = Boolean(initialLng) && initialLng !== last?.longitude && initialLng !== lng;
+    const isExternalAddr =
+      Boolean(initialAddress) && initialAddress !== last?.address && initialAddress !== address;
+    const isExternalCity =
+      Boolean(initialCity) && initialCity !== last?.city && initialCity !== effectiveCity;
 
-    if (initialCity && initialCity !== effectiveCity) {
+    if (!isExternalLat && !isExternalLng && !isExternalAddr && !isExternalCity) {
+      return;
+    }
+
+    if (isExternalLat) setLat(initialLat);
+    if (isExternalLng) setLng(initialLng);
+    if (isExternalAddr) setAddress(initialAddress);
+
+    if (isExternalCity) {
       const parsed = parseCityCountry(initialCity);
       const matched = findCountry(parsed.country);
       if (matched) {
@@ -134,6 +169,7 @@ export function LocationPicker({
         setManualCity(parsed.city);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCity, initialAddress, initialLat, initialLng]);
 
   // Búsqueda en vivo con debounce
