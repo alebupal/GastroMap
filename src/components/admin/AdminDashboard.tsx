@@ -332,7 +332,10 @@ export function AdminDashboard({
         </header>
 
         {/* Contenido activo */}
-        <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <main
+          key={activeTab}
+          className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 gm-tab-in"
+        >
           {activeTab === "stats" && <AdminStatsPanel />}
 
           {activeTab === "places" && (

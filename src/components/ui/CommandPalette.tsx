@@ -186,12 +186,12 @@ export function CommandPalette({
 
   const modal = (
     <div
-      className="fixed inset-0 z-[1200] flex items-start justify-center pt-[10vh] p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
+      className="fixed inset-0 z-[1200] flex items-start justify-center pt-[10vh] p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col max-h-[75vh]">
+      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col max-h-[75vh] gm-modal-in">
         {/* Input de búsqueda rápida */}
         <div className="px-4 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
           <span className="material-symbols-outlined text-xl text-orange-600 shrink-0">search</span>

@@ -76,13 +76,13 @@ export function PlaceVisitsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150 text-left">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden gm-modal-in">
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
           <div className="min-w-0">
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <span>📅</span>
+              <span className="material-symbols-outlined text-lg text-orange-600 leading-none">calendar_today</span>
               <span>{t("notes_visits.visits_title")}</span>
               <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
                 {visits.length}

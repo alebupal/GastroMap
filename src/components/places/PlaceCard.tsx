@@ -280,7 +280,14 @@ export function PlaceCard({
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
             }`}
           >
-            <span className="material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0">schedule</span>
+            <span
+              key={personalStatus === "pending" ? "pend-on" : "pend-off"}
+              className={`material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0 ${
+                personalStatus === "pending" ? "gm-pop" : ""
+              }`}
+            >
+              schedule
+            </span>
             <span className="truncate">{t("cards.pending")}</span>
           </button>
 

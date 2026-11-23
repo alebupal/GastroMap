@@ -189,7 +189,7 @@ export function SearchableSelect({
               top: `${coords.top}px`,
               left: `${coords.left}px`,
             }}
-            className="z-[9999] w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col animate-in fade-in zoom-in-95 duration-100"
+            className="z-[9999] w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
           >
             {/* Buscador superior sin anillo naranja invasivo */}
             <div className="relative shrink-0">

@@ -2180,21 +2180,26 @@ export function PlacesExplorer({
                 </div>
               </div>
 
-              {/* Tarjetas paginadas */}
-              {paginatedPlaces.map((place) => (
-                <PlaceCard
-                  key={place.id}
-                  place={place}
-                  currentUserId={currentUserId}
-                  isAdmin={isAdmin}
-                  occasionMap={occasionMap}
-                  occasionsList={occasionsList}
-                  availableTags={tagsList.map((t) => t.name)}
-                  onSelectOnMap={() => handleSelectOnMap(place.id)}
-                  isCompared={compareIds.includes(place.id)}
-                  onToggleCompare={() => toggleComparePlace(place.id)}
-                  isSelected={selectedPlaceId === place.id}
-                />
+              {/* Tarjetas paginadas con entrada escalonada sutil */}
+              {paginatedPlaces.map((place, idx) => (
+                <div
+                  key={`${place.id}-p${currentPage}`}
+                  className="gm-list-item-in"
+                  style={{ animationDelay: `${Math.min(idx, 5) * 28}ms` }}
+                >
+                  <PlaceCard
+                    place={place}
+                    currentUserId={currentUserId}
+                    isAdmin={isAdmin}
+                    occasionMap={occasionMap}
+                    occasionsList={occasionsList}
+                    availableTags={tagsList.map((t) => t.name)}
+                    onSelectOnMap={() => handleSelectOnMap(place.id)}
+                    isCompared={compareIds.includes(place.id)}
+                    onToggleCompare={() => toggleComparePlace(place.id)}
+                    isSelected={selectedPlaceId === place.id}
+                  />
+                </div>
               ))}
 
               {/* Barra de Paginación Moderna estilo Stitch */}

@@ -204,7 +204,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
             {/* Menú Desplegable Flotante */}
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl z-50 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl z-50 p-2 space-y-1 gm-popover-in">
                 {/* Cabecera con datos del usuario */}
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center justify-between gap-1">
