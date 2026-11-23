@@ -8,6 +8,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Logotipo Oficial «Radar y Plato»**:
+  - Integrado el isotipo oficial de GastroMap (cuadrado redondeado naranja con aros concéntricos de radar/plato y punto central) junto a la tipografía oficial `GastroMap` en la cabecera, pie de página, pantalla de inicio de sesión y como icono oficial PWA / favicon (`public/icon.svg`).
 - **Calco Fiel y Réplica Exacta del Diseño Stitch UI/UX (Explorador Principal y Mapa)**:
   - Réplica completa de la interfaz de Stitch con Google Material Symbols Outlined y diseño a medida:
     - Cabecera superior unificada con estado de conectividad PWA (`🟢 En línea • PWA Sync v0.1.0 Ready`), botón `📲 Instalar App PWA`, logotipo con insignia destacada `Explorar Mapa`, selector de tema segmentado (`light_mode` / `dark_mode`), selector de idioma, botón de donación y dropdown de perfil con insignia de rol `ADMIN`.

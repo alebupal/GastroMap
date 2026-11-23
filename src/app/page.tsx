@@ -9,6 +9,7 @@ import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
+import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
 
@@ -82,11 +83,9 @@ export default async function Home() {
       <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 mt-8">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-orange-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-              <span className="material-symbols-outlined text-sm leading-none">restaurant</span>
-            </div>
+            <GastroMapIcon className="w-6 h-6 shrink-0 shadow-xs rounded-[28%]" />
             <span className="font-bold text-slate-900 dark:text-slate-100">
-              GastroMap PWA <span className="text-orange-600 font-semibold">v{version}</span>
+              Gastro<span className="text-[#ea580c]">Map</span> PWA <span className="text-orange-600 font-semibold">v{version}</span>
             </span>
             <span className="text-slate-300 dark:text-slate-700">•</span>
             <span>© 2026 Exploración Gastronómica. Todos los derechos reservados.</span>

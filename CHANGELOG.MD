@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Official «Radar & Plate» Brand Logo**:
+  - Integrated the official GastroMap icon (orange rounded square with concentric radar/plate rings and center dot) alongside the `GastroMap` wordmark across the header, footer, login screen, and PWA / favicon asset (`public/icon.svg`).
 - **Faithful 1:1 Visual Replication of the Stitch UI/UX Design (Main Explorer & Map)**:
   - Exact match of the Stitch interface incorporating Google Material Symbols Outlined and customized tokens:
     - Unified top header featuring connectivity state (`🟢 Online • PWA Sync v0.1.0 Ready`), `📲 Install PWA App` prompt, brand logo with prominent `Explore Map` badge, segmented theme switcher (`light_mode` / `dark_mode`), locale picker, donate pill, and user profile avatar with `ADMIN` badge.

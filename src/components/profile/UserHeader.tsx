@@ -8,6 +8,7 @@ import { GroupsModal } from "./GroupsModal";
 import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
 
@@ -86,13 +87,11 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
       <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-3 sm:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
         {/* Brand / Logo + Pill Explorar Mapa */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition">
-              <span className="material-symbols-outlined text-base">restaurant</span>
-            </div>
-            <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900 dark:text-slate-100">
-              Gastro<span className="text-orange-600">Map</span>
-            </span>
+          <Link href="/" className="flex items-center group shrink-0">
+            <GastroMapLogo
+              iconClassName="w-8 h-8 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform"
+              textClassName="text-lg sm:text-xl"
+            />
           </Link>
           <span className="hidden sm:inline-flex items-center px-3 py-1 rounded-full bg-orange-600 text-white font-bold text-xs shadow-xs">
             Explorar Mapa
