@@ -492,11 +492,31 @@ export default function MapView({
   return (
     <div className={`relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}>
       <div ref={mapContainerRef} className="w-full h-full z-0" />
-      {/* Insignia flotante desktop estilo Stitch */}
-      <div className="hidden lg:flex items-center gap-1.5 absolute top-3 right-3 z-30 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md border border-slate-200/80 dark:border-slate-800/80 text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span>Granada Centro: {places.length} locales</span>
-      </div>
+      {/* Insignia flotante desktop dinámica con recuento real */}
+      {(() => {
+        const mappedPlaces = places.filter((p) => p.latitude != null && p.longitude != null);
+        const uniqueCities = Array.from(
+          new Set(
+            mappedPlaces
+              .map((p) => (p.city ? p.city.split(",")[0].trim() : ""))
+              .filter(Boolean)
+          )
+        );
+        const label =
+          uniqueCities.length === 1
+            ? uniqueCities[0]
+            : uniqueCities.length > 1
+              ? `${uniqueCities.length} ciudades`
+              : "En mapa";
+        return (
+          <div className="hidden lg:flex items-center gap-1.5 absolute top-3 right-3 z-30 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm shadow-md border border-slate-200/80 dark:border-slate-800/80 text-xs font-bold text-slate-800 dark:text-slate-200 pointer-events-none">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>
+              {label}: {mappedPlaces.length} {mappedPlaces.length === 1 ? "local" : "locales"}
+            </span>
+          </div>
+        );
+      })()}
       {/* Botón flotante móvil para alternar entre interactuar con el mapa o hacer scroll vertical */}
       <div className="absolute top-3 right-3 z-30 lg:hidden">
         <button
