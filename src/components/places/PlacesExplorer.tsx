@@ -1650,26 +1650,9 @@ export function PlacesExplorer({
       {/* Panel desplegable de Planes / Categorías y Etiquetas (solo visible al pulsar + Filtros o icono tune en móvil) */}
       {showExtraFilters && (
         <div className="space-y-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800/70 p-3 sm:p-4 shadow-xs animate-in fade-in duration-150">
-          {/* Acciones rápidas y filtros extra compactos en móvil */}
+          {/* Acciones y filtros extra exclusivos del panel desplegable móvil (sin repetir los de arriba) */}
           <div className="lg:hidden space-y-2.5 pb-2.5 border-b border-slate-100 dark:border-slate-800">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              <button
-                type="button"
-                onClick={() => setIsAssistantOpen(true)}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-orange-600 text-base leading-none">assistant</span>
-                <span>{t("places.assistant")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRandomModalOpen(true)}
-                disabled={filteredPlaces.length === 0}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold shrink-0 cursor-pointer disabled:opacity-40"
-              >
-                <span className="material-symbols-outlined text-amber-500 text-base leading-none">casino</span>
-                <span>{t("places.roulette")}</span>
-              </button>
+            <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 type="button"
                 onClick={() => setIsExportImportOpen(true)}
@@ -1677,19 +1660,6 @@ export function PlacesExplorer({
               >
                 <span className="material-symbols-outlined text-slate-500 text-base leading-none">import_export</span>
                 <span>{t("places.export_import")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={userLocation ? handleDisableLocation : handleRequestLocation}
-                disabled={isLocating}
-                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold shrink-0 cursor-pointer ${
-                  userLocation
-                    ? "bg-blue-600 text-white"
-                    : "bg-[#f2f3ff] dark:bg-slate-800 text-orange-600 dark:text-orange-400"
-                }`}
-              >
-                <span className="material-symbols-outlined text-base leading-none">near_me</span>
-                <span>{t("places.near_me")}</span>
               </button>
               {activeFiltersCount > 0 && (
                 <button
