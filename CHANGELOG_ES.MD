@@ -8,6 +8,11 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Micro-interacciones Sutiles, View Transitions, Iconografía Unificada y Mejoras de Explorador**:
+  - Unificada toda la iconografía de interfaz en **Google Material Symbols Outlined** (selectores, toasts, tarjetas, modales, administración e invitaciones), conservando banderas y emojis gastronómicos, y limpiando iconos duplicados en las traducciones.
+  - Nuevo pack de micro-interacciones CSS respetuoso con `prefers-reduced-motion`: **View Transitions API** al cambiar Claro/Oscuro, **píldora deslizante** en `ThemeToggle`, `StatsModal` y `ExportImportModal`, animación de giro/balanceo del sol y la luna, **contadores animados (`AnimatedNumber`)** en KPIs, barras de progreso crecientes, **skeletons shimmer**, entrada escalonada en el listado, despliegue fluido al abrir paneles de filtros y pulso radar en el pin seleccionado del mapa y en *Cerca de mí*.
+  - Nuevas utilidades en el explorador: **copiado rápido del sitio** desde cada tarjeta (`content_copy → check` con toast), **filtro de nota mínima** (`★ 7+`, `★ 8+`, `★ 9+`) dentro de *Más filtros*, **estado vacío accionable** con chips para retirar filtros individuales sin resetear todo, y filtros avanzados de búsqueda en el **Registro de Auditoría** (`/admin`).
+  - Completadas todas las traducciones faltantes (`es.json`, `en.json` y `translations.csv`, 882 claves) y sustituido el `<select>` nativo de paginación/ordenación por el componente `CustomSelect`.
 - **Mejoras de Ingeniería, Esquema `places.country`, Cola Offline Idempotente y Modularización**:
   - Añadida columna nativa `country` en `places` (`drizzle/0011_little_phantom_reporter.sql`), ampliado `occasions.icon` a `varchar(50)` para soportar nombres largos de Material Symbols, y migrada la base de datos local (países y 8 categorías de Opción A) mediante `scripts/migrate-country-and-occasions.mjs`.
   - Cola offline de favoritos convertida en idempotente (`set_favorite` + `setFavoriteAction`) para evitar inversiones accidentales al reintentar tras cortes de red.

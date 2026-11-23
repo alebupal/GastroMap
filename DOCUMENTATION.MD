@@ -105,19 +105,20 @@ When launching on a clean database:
   - When offline or on unstable connections, you can still toggle favorites, update personal statuses (`Want to go` / `Visited`), and save private ratings or notes.
   - Pending mutations are stored in a persistent local queue (`IndexedDB`), surfaced via a discreet status banner, and automatically flushed in order when connectivity returns (or manually via `Sync now`).
 - **Segmentation Filters (Row 2)**:
-  - `🏙️ Cities` and `🌍 Countries (195+)`: Searchable dropdown selectors.
-  - `💶 Price Ranges`: Segmented pills for explicit brackets (`<15€`, `15-30€`, `30-50€`, `>50€`).
-  - Featured categories and gastronomic tags (8 default plans customizable with emojis or **Material Symbols** icons in `/admin > Taxonomy`) with expandable `🎛️ + Filters`.
+  - `Countries (195+)` and `Cities`: Searchable dropdown selectors.
+  - `Price Ranges`: Segmented pills for explicit brackets (`<15€`, `15-30€`, `30-50€`, `>50€`).
+  - `Minimum Rating`: Quick filter (`★ 7+`, `★ 8+`, `★ 9+`) inside the animated `+ Filters` panel, alongside categories and gastronomic tags (8 default plans customizable with emojis or **Material Symbols** icons in `/admin > Taxonomy`).
+  - **Actionable Empty State**: When a filter combination yields 0 results, clickable chips let you remove any single active filter without resetting the entire search.
 - **Stitch-styled Place Cards**:
-  - Restaurant initials avatar with terracotta/amber gradient badge.
-  - Name, address with pin, emerald price badge, and interactive favorite heart (`favorite`).
-  - Horizontal collection action buttons (`🕒 Want to go`, `✅ Visited`, `📝 My note`).
-  - Card footer with author badge and complete actions (`Comments`, `View on map`, `Google Maps ↗`, `Edit`, `Delete`).
+  - Restaurant initials avatar, address with pin, emerald price badge, and interactive favorite heart (`favorite`).
+  - Horizontal collection action buttons (`Want to go`, `Visited`, `My note`) with tactile micro-interactions.
+  - Card footer with author badge and complete actions (`Comments`, `Compare`, `Map`, `Google Maps`, **one-tap copy/share place info**, `Edit`, `Delete`).
 - **Interactive Map with Local Synchronization**:
-  - Floating top-right badge displaying live count.
+  - Floating top-right badge displaying live count and a subtle radar pulse ring on the selected pin.
   - Bottom local database sync bar (`Cache First`) and default **«Scroll list»** mode on mobile for smooth scrolling.
   - Fully localized map popups matching the place card aesthetic.
-- **Modern Pagination**: Circular pill buttons (`< Previous`, `1`, `2`, `...`, `Next >`) with page size and sorting selectors.
+- **Micro-Interactions, View Transitions & Modern Pagination**:
+  - Smooth Light/Dark switching via the **View Transitions API**, sliding pill indicators on segmented controls, animated KPI counters, growing progress bars, shimmer skeletons, and circular pagination with custom dropdown selectors (`CustomSelect`), all respecting `prefers-reduced-motion`.
 
 ### 📱 Optimized Mobile Experience (Stitch Design)
 - **Compact Header + Fixed Bottom Navigation (`MobileBottomNav`)**: Thumb-friendly navigation (`Explore`, `Add`, `Stats`, `Menu`), top search trigger for the command palette, and floating **`Add place` FAB**.

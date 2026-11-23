@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getUserStatsAction, type UserStatsData, type CountItem } from "@/lib/actions/stats";
 import { useT } from "@/lib/i18n/client";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -299,15 +300,23 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
           </button>
         </div>
 
-        {/* Pestañas segmentadas estilo Stitch */}
+        {/* Pestañas segmentadas estilo Stitch con píldora deslizante */}
         <div className="px-5 sm:px-6 pb-3 shrink-0">
-          <div className="grid grid-cols-2 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+          <div className="relative grid grid-cols-2 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                activeTab === "wrapped"
+                  ? "translate-x-full bg-orange-600"
+                  : "translate-x-0 bg-white dark:bg-slate-900"
+              }`}
+            />
             <button
               type="button"
               onClick={() => setActiveTab("overview")}
-              className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 activeTab === "overview"
-                  ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                  ? "text-slate-900 dark:text-slate-100"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
@@ -317,9 +326,9 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
             <button
               type="button"
               onClick={() => setActiveTab("wrapped")}
-              className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 activeTab === "wrapped"
-                  ? "bg-orange-600 text-white shadow-sm"
+                  ? "text-white"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
@@ -354,7 +363,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <span>{t("cards.visited")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-400 mt-1.5">
-                    {stats.visitedCount}
+                    <AnimatedNumber value={stats.visitedCount} />
                   </div>
                 </div>
 
@@ -364,7 +373,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <span>{t("places.favorites")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-amber-700 dark:text-amber-400 mt-1.5">
-                    {stats.favoritesCount}
+                    <AnimatedNumber value={stats.favoritesCount} />
                   </div>
                 </div>
 
@@ -374,7 +383,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <span>{t("places.want_to_go")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-orange-600 dark:text-orange-400 mt-1.5">
-                    {stats.pendingCount}
+                    <AnimatedNumber value={stats.pendingCount} />
                   </div>
                 </div>
 
@@ -384,7 +393,11 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <span>{t("ui.avg_rating")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-1.5">
-                    {stats.averageRating !== null ? `${stats.averageRating}` : "—"}
+                    {stats.averageRating !== null ? (
+                      <AnimatedNumber value={stats.averageRating} decimals={1} />
+                    ) : (
+                      "—"
+                    )}
                     {stats.averageRating !== null && (
                       <span className="text-sm font-bold text-slate-400">/10</span>
                     )}

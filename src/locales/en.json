@@ -132,7 +132,10 @@
     "new_badge": "New",
     "geo_not_supported": "Your browser does not support geolocation.",
     "geo_permission_denied": "Location permission denied.",
-    "geo_unavailable": "Could not obtain your location."
+    "geo_unavailable": "Could not obtain your location.",
+    "min_rating_label": "Min rating",
+    "min_rating_any": "Any",
+    "active_filters_remove_hint": "Remove a filter to broaden results:"
   },
   "cards": {
     "pending": "Pending",
@@ -154,7 +157,10 @@
     "website_tooltip": "Visit official website",
     "phone_tooltip": "Call: {phone}",
     "edit_tooltip": "Edit place",
-    "delete_tooltip": "Delete place"
+    "delete_tooltip": "Delete place",
+    "copy_place": "Share",
+    "copy_place_tooltip": "Copy place info",
+    "copied_place_toast": "Place copied to clipboard"
   },
   "location": {
     "title": "Location & Coordinates",

@@ -105,19 +105,20 @@ Al acceder por primera vez a una instancia limpia:
   - Si pierdes la cobertura mientras usas la app, puedes seguir marcando favoritos, cambiando estados personales (`Quiero ir` / `Ya he ido`) y guardando tu nota o puntuación privada.
   - Los cambios se guardan en una cola local persistente (`IndexedDB`), se muestra un banner discreto con el contador pendiente y todo se sincroniza automáticamente en orden al volver a estar en línea (o manualmente con `Sincronizar ahora`).
 - **Filtros de Segmentación y Taxonomías (Fila 2)**:
-  - `🏙️ Ciudades` y `🌍 Países (+195)`: Selectores desplegables con buscador integrado.
-  - `💶 Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
-  - Ocasiones y etiquetas gastronómicas destacadas (8 planes por defecto personalizables con emojis o iconos **Material Symbols** desde `/admin > Taxonomía`) con botón desplegable `🎛️ + Filtros`.
+  - `Países (+195)` y `Ciudades`: Selectores desplegables con buscador integrado.
+  - `Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
+  - `Nota mínima`: Filtro rápido (`★ 7+`, `★ 8+`, `★ 9+`) dentro del panel animado `+ Filtros`, junto a ocasiones y etiquetas gastronómicas (8 planes por defecto personalizables con emojis o iconos **Material Symbols** desde `/admin > Taxonomía`).
+  - **Estado vacío accionable**: Si una combinación de filtros no devuelve resultados, aparecen chips clicables para retirar un filtro individual sin reiniciar toda la búsqueda.
 - **Tarjetas de Locales Estilo Stitch**:
-  - Avatar con iniciales del establecimiento sobre degradado terracota/ámbar.
-  - Nombre, dirección con chincheta, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
-  - Botones horizontales de colección rápida (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`).
-  - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Ver en mapa`, `Google Maps ↗`, `Editar`, `Eliminar`).
+  - Avatar con iniciales del establecimiento, dirección con pin, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
+  - Botones horizontales de colección rápida (`Pendiente`, `Ya he ido`, `Mi nota`) con micro-interacciones táctiles.
+  - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Comparar`, `Mapa`, `Google Maps`, **copiado rápido de datos del sitio**, `Editar`, `Eliminar`).
 - **Mapa Interactivo con Sincronización Local**:
-  - Insignia flotante superior derecha con recuento local en tiempo real.
+  - Insignia flotante superior derecha con recuento local en tiempo real y pulso radar en el pin seleccionado.
   - Barra de estado inferior con indicador `Cache First` de base de datos sincronizada localmente y modo **«Deslizar lista»** activado por defecto en móvil.
   - Ventanas emergentes (popups) de mapa traducidas y con diseño unificado con las tarjetas.
-- **Paginación Moderna**: Botones de paginación circulares tipo píldora (`< Anterior`, `1`, `2`, `...`, `Siguiente >`) con selector de tamaño y ordenación.
+- **Micro-interacciones, View Transitions y Paginación Moderna**:
+  - Transición suave de tema Claro/Oscuro vía **View Transitions API**, píldora deslizante en selectores segmentados, contadores animados en KPIs, barras crecientes, skeletons *shimmer* y botones de paginación circulares con selectores desplegables personalizados (`CustomSelect`). Todo respetando `prefers-reduced-motion`.
 
 ### 📱 Experiencia Móvil Optimizada (Diseño Stitch)
 - **Cabecera Compacta + Barra Inferior Fija (`MobileBottomNav`)**: Navegación con el pulgar (`Explorar`, `Añadir`, `Estadísticas`, `Menú`), lupa rápida en cabecera para abrir la paleta de comandos y botón flotante **FAB `Añadir sitio`**.

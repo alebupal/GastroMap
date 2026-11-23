@@ -178,6 +178,7 @@ export function PlacesExplorer({
   const [experienceFilter, setExperienceFilter] = useState<
     "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
+  const [minRating, setMinRating] = useState<number | null>(null);
   const urlHydratedRef = useRef(false);
 
   // Atajo global Ctrl+K / ⌘+K y botón lupa móvil para abrir la paleta de comandos
@@ -443,6 +444,7 @@ export function PlacesExplorer({
     setSelectedCountry("all");
     setSelectedCity("all");
     setExperienceFilter("all");
+    setMinRating(null);
     setTextSearch("");
     setUserLocation(null);
     setRadiusKm(null);
@@ -615,6 +617,11 @@ export function PlacesExplorer({
       );
     }
 
+    // 9. Filtro por Nota Mínima
+    if (minRating !== null) {
+      result = result.filter((p) => p.rating !== null && p.rating !== undefined && p.rating >= minRating);
+    }
+
     // Ordenación configurable por el usuario
     const priceOrder: Record<string, number> = {
       "€": 1,
@@ -665,6 +672,7 @@ export function PlacesExplorer({
     selectedCity,
     selectedGroupFilterIds,
     experienceFilter,
+    minRating,
     userLocation,
     radiusKm,
     sortBy,
@@ -682,6 +690,7 @@ export function PlacesExplorer({
     selectedCity,
     selectedGroupFilterIds,
     experienceFilter,
+    minRating,
     radiusKm,
     sortBy,
   ]);
@@ -816,6 +825,7 @@ export function PlacesExplorer({
     (selectedCountry !== "all" ? 1 : 0) +
     (selectedCity !== "all" ? 1 : 0) +
     (experienceFilter !== "all" ? 1 : 0) +
+    (minRating !== null ? 1 : 0) +
     (userLocation ? 1 : 0) +
     (textSearch.trim() ? 1 : 0);
 
@@ -948,8 +958,11 @@ export function PlacesExplorer({
                 <span className="hidden sm:inline">{isLocating ? t("places.locating") : t("places.near_me")}</span>
               </button>
             ) : (
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold shrink-0">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-500 dark:text-blue-400 border border-blue-500/25 text-xs font-semibold shrink-0 gm-popover-in">
+                <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                  <span className="gm-pin-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                </span>
                 <span className="text-xs">{t("places.location_active")}</span>
                 <button
                   type="button"
@@ -1383,23 +1396,30 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setShowExtraFilters((prev) => !prev)}
               aria-expanded={showExtraFilters}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition cursor-pointer ${
+              className={`group flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all duration-200 active:scale-95 cursor-pointer ${
                 showExtraFilters
                   ? "bg-orange-600 text-white shadow-xs"
                   : "bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">tune</span>
+              <span
+                className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${
+                  showExtraFilters ? "rotate-90" : "group-hover:rotate-12"
+                }`}
+              >
+                tune
+              </span>
               <span>{showExtraFilters ? t("places.hide_filters") : t("places.more_filters")}</span>
-              {selectedOccasions.length + selectedTags.length > 0 && (
+              {selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0) > 0 && (
                 <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none ${
+                  key={selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0)}
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none gm-pop ${
                     showExtraFilters
                       ? "bg-white/25 text-white"
                       : "bg-orange-600 text-white"
                   }`}
                 >
-                  {selectedOccasions.length + selectedTags.length}
+                  {selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0)}
                 </span>
               )}
             </button>
@@ -1409,7 +1429,7 @@ export function PlacesExplorer({
 
       {/* Panel desplegable de Filtros Avanzados (en móvil con cabecera, secciones claras y pie de confirmación) */}
       {showExtraFilters && (
-        <div className="space-y-3.5 rounded-3xl lg:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-md lg:shadow-xs animate-in fade-in duration-150">
+        <div className="space-y-3.5 rounded-3xl lg:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 shadow-md lg:shadow-xs gm-panel-reveal">
           {/* Cabecera del panel de filtros en móvil */}
           <div className="lg:hidden flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
@@ -1575,6 +1595,38 @@ export function PlacesExplorer({
               </div>
             )}
           </div>
+          {/* Filtro rápido por Nota mínima (visible en escritorio y móvil dentro de Más filtros) */}
+          <div className="flex items-center justify-between gap-2 flex-wrap pb-2.5 border-b border-slate-100 dark:border-slate-800">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
+              <span>{t("places.min_rating_label")}</span>
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[
+                { val: null as number | null, label: t("places.min_rating_any") },
+                { val: 7, label: "★ 7+" },
+                { val: 8, label: "★ 8+" },
+                { val: 9, label: "★ 9+" },
+              ].map((opt) => {
+                const active = minRating === opt.val;
+                return (
+                  <button
+                    key={String(opt.val)}
+                    type="button"
+                    onClick={() => setMinRating(opt.val)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-150 active:scale-95 cursor-pointer ${
+                      active
+                        ? "bg-amber-500 text-white shadow-xs"
+                        : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
       {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -1634,7 +1686,7 @@ export function PlacesExplorer({
 
         {/* Buscador de categorías si está abierto */}
         {isOccasionSearchOpen && (
-          <div className="relative animate-in fade-in duration-150">
+          <div className="relative gm-panel-reveal">
             <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
               search
             </span>
@@ -1658,7 +1710,7 @@ export function PlacesExplorer({
         )}
 
         {isOccasionsWrapped ? (
-          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-150">
+          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
@@ -1815,7 +1867,7 @@ export function PlacesExplorer({
           </div>
 
           {isTagsExpanded ? (
-            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 animate-in fade-in duration-150">
+            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
               <div className="relative">
                 <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
                   search
@@ -2054,7 +2106,7 @@ export function PlacesExplorer({
             </div>
           )}
           {filteredPlaces.length === 0 ? (
-            <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
+            <div className="p-8 sm:p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs gm-list-item-in">
               <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-3">
                 <span className="material-symbols-outlined text-2xl leading-none">search_off</span>
               </div>
@@ -2064,10 +2116,126 @@ export function PlacesExplorer({
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 max-w-xs mx-auto">
                 {t("places.no_results_hint")}
               </p>
+
+              {/* Chips clicables para quitar solo un filtro activo */}
+              {activeFiltersCount > 0 && (
+                <div className="mb-4 space-y-2">
+                  <p className="text-[11px] font-semibold text-slate-400">
+                    {t("places.active_filters_remove_hint")}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    {textSearch.trim() && (
+                      <button
+                        type="button"
+                        onClick={() => setTextSearch("")}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>«{textSearch.trim()}»</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                    {experienceFilter !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => setExperienceFilter("all")}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>
+                          {experienceFilter === "favorite"
+                            ? t("places.favorites")
+                            : experienceFilter === "visited_by_me"
+                            ? t("places.visited")
+                            : experienceFilter === "pending"
+                            ? t("places.want_to_go")
+                            : t("places.unexplored")}
+                        </span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                    {selectedCountry !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedCountry("all");
+                          setSelectedCity("all");
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>{selectedCountry}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                    {selectedCity !== "all" && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCity("all")}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>{selectedCity}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                    {minRating !== null && (
+                      <button
+                        type="button"
+                        onClick={() => setMinRating(null)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 text-[11px] font-bold hover:bg-amber-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>★ {minRating}+</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                    {selectedPrices.map((pr) => (
+                      <button
+                        key={pr}
+                        type="button"
+                        onClick={() => togglePrice(pr)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>{pr}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    ))}
+                    {selectedOccasions.map((occId) => (
+                      <button
+                        key={occId}
+                        type="button"
+                        onClick={() => toggleOccasion(occId)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>{occasionMap[occId]?.name || occId}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    ))}
+                    {selectedTags.map((tg) => (
+                      <button
+                        key={tg}
+                        type="button"
+                        onClick={() => toggleTag(tg)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>#{tg}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    ))}
+                    {userLocation && (
+                      <button
+                        type="button"
+                        onClick={handleDisableLocation}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800/60 text-[11px] font-bold hover:bg-blue-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span>{t("places.location_active")}</span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={resetAllFilters}
-                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition active:scale-95 cursor-pointer"
               >
                 {t("places.reset_filters")}
               </button>

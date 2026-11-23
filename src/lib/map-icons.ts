@@ -57,12 +57,17 @@ export function createPlaceMarkerIcon(
     ? `<span class="material-symbols-outlined" style="font-size: ${emojiSize}px; color: #ffffff; line-height: 1;">${iconEmoji.slice(3)}</span>`
     : iconEmoji;
 
+  const selectedRadarHtml = isSelected
+    ? `<div class="gm-pin-pulse" style="position: absolute; left: 50%; top: ${cy}px; width: ${w}px; height: ${w}px; margin-left: -${w / 2}px; margin-top: -${w / 2}px; border-radius: 9999px; border: 2.5px solid ${colors.bg}; background: ${colors.bg}22; pointer-events: none;"></div>`
+    : "";
+
   const html = `
     <div style="position: relative; width: ${w}px; height: ${h}px; filter: drop-shadow(0 4px 10px rgba(0,0,0,${
     isSelected ? 0.5 : 0.3
   })); cursor: pointer; transform: ${
     isSelected ? "scale(1.18)" : "scale(1)"
   }; transition: transform 0.2s ease;">
+      ${selectedRadarHtml}
       <!-- Pin SVG con forma de gota invertida -->
       <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; position: absolute; left: 0; top: 0; overflow: visible;">
         <path d="M${cx} ${h} C${cx} ${h} 2 ${cy + 12} 2 ${cy} C2 ${cy - r} ${cx - r} 2 ${cx} 2 C${

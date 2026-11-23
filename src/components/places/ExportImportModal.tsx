@@ -590,15 +590,21 @@ ${wpts}
           </button>
         </div>
 
-        {/* Pestañas segmentadas estilo DESIGN.md */}
+        {/* Pestañas segmentadas estilo DESIGN.md con píldora deslizante */}
         <div className="px-5 sm:px-6 pt-3.5 shrink-0">
-          <div className="grid grid-cols-2 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+          <div className="relative grid grid-cols-2 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-orange-600 shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                tab === "import" ? "translate-x-full" : "translate-x-0"
+              }`}
+            />
             <button
               type="button"
               onClick={() => setTab("export")}
-              className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 tab === "export"
-                  ? "bg-orange-600 text-white shadow-sm"
+                  ? "text-white"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
@@ -610,9 +616,9 @@ ${wpts}
             <button
               type="button"
               onClick={() => setTab("import")}
-              className={`py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
                 tab === "import"
-                  ? "bg-orange-600 text-white shadow-sm"
+                  ? "text-white"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >

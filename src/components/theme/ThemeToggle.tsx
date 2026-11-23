@@ -9,18 +9,27 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`inline-flex items-center bg-slate-100 dark:bg-slate-800/90 rounded-full p-0.5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs ${className}`}
+      className={`relative grid grid-cols-2 items-center bg-slate-100 dark:bg-slate-800/90 rounded-full p-0.5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs ${className}`}
       role="group"
       aria-label={t("theme.toggle_aria")}
     >
+      {/* Píldora deslizante */}
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] rounded-full shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          theme === "dark"
+            ? "translate-x-full bg-slate-900"
+            : "translate-x-0 bg-white"
+        }`}
+      />
       <button
         type="button"
         onClick={() => {
           if (theme !== "light") toggleTheme();
         }}
-        className={`group flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer ${
+        className={`relative z-10 group flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 active:scale-95 cursor-pointer ${
           theme === "light"
-            ? "bg-white text-slate-900 shadow-sm"
+            ? "text-slate-900"
             : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
         }`}
         title={t("theme.switch_to_light")}
@@ -43,9 +52,9 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         onClick={() => {
           if (theme !== "dark") toggleTheme();
         }}
-        className={`group flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer ${
+        className={`relative z-10 group flex items-center justify-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 active:scale-95 cursor-pointer ${
           theme === "dark"
-            ? "bg-slate-900 text-amber-400 shadow-sm"
+            ? "text-amber-400"
             : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
         }`}
         title={t("theme.switch_to_dark")}

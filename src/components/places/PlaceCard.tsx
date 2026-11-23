@@ -61,6 +61,28 @@ export function PlaceCard({
   const [showComments, setShowComments] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [copiedPlace, setCopiedPlace] = useState(false);
+
+  async function handleCopyPlace() {
+    const parts = [place.name];
+    if (place.address || place.city) {
+      parts.push([place.address, place.city].filter(Boolean).join(", "));
+    }
+    if (place.googleMapsUrl) {
+      parts.push(place.googleMapsUrl);
+    } else if (place.latitude != null && place.longitude != null) {
+      parts.push(`https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`);
+    }
+    const text = parts.join(" — ");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedPlace(true);
+      toast(t("cards.copied_place_toast"), { kind: "success" });
+      setTimeout(() => setCopiedPlace(false), 1800);
+    } catch {
+      // Fallback silencioso si el navegador bloquea el portapapeles
+    }
+  }
 
   const canDelete = isAdmin;
   const canEdit = isAdmin || place.createdById === currentUserId;
@@ -395,6 +417,25 @@ export function PlaceCard({
               <span>Google Maps</span>
             </a>
           )}
+
+          <button
+            type="button"
+            onClick={handleCopyPlace}
+            aria-label={t("cards.copy_place_tooltip")}
+            title={t("cards.copy_place_tooltip")}
+            className={`inline-flex items-center transition cursor-pointer p-0.5 active:scale-90 ${
+              copiedPlace
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-slate-400 hover:text-orange-600"
+            }`}
+          >
+            <span
+              key={copiedPlace ? "copy-ok" : "copy-idle"}
+              className={`material-symbols-outlined text-sm leading-none ${copiedPlace ? "gm-pop" : ""}`}
+            >
+              {copiedPlace ? "check" : "content_copy"}
+            </span>
+          </button>
 
           {canEdit && (
             <button

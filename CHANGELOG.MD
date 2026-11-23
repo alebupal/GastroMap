@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Subtle Micro-Interactions, View Transitions, Unified Iconography & Explorer Upgrades**:
+  - Unified all UI iconography under **Google Material Symbols Outlined** (dropdowns, toasts, cards, modals, admin tables, and invitations) while keeping language flags and food emojis, removing duplicate leading emojis from i18n strings.
+  - Added a pure-CSS micro-interaction suite respecting `prefers-reduced-motion`: **View Transitions API** smooth Light/Dark switching, **sliding pill indicators** in `ThemeToggle`, `StatsModal`, and `ExportImportModal`, sun/moon icon animations, **animated KPI counters (`AnimatedNumber`)**, animated progress bars, **shimmer skeletons**, subtle staggered list entry, smooth filter panel unfold animations, and a radar pulse ring on the selected Leaflet map pin and active *Near me* badge.
+  - Added explorer quality-of-life upgrades: **one-tap copy/share place** button on every card (`content_copy → check` + toast), **minimum rating filter** (`★ 7+`, `★ 8+`, `★ 9+`) inside *More filters*, **actionable empty state** with removable active-filter chips, and advanced search filters in the **Audit Log** (`/admin`).
+  - Completed all remaining missing translations across `es.json`, `en.json`, and `translations.csv` (882 keys) and replaced native sort/page-size selects with `CustomSelect`.
 - **Engineering Hardening, `places.country` Column, Idempotent Offline Queue & Modularization**:
   - Added native `country` column to `places` (`drizzle/0011_little_phantom_reporter.sql`), widened `occasions.icon` to `varchar(50)` for long Material Symbol identifiers, and migrated the local database (countries and 8 default categories) via `scripts/migrate-country-and-occasions.mjs`.
   - Made offline favorite mutations idempotent (`set_favorite` + `setFavoriteAction`) so retries never invert user state.

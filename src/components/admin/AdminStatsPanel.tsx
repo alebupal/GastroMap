@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getAdminStatsAction, type AdminStatsData, type CountItem } from "@/lib/actions/stats";
 import { useT } from "@/lib/i18n/client";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 function AdminBarCard({
   title,
@@ -147,7 +148,7 @@ export function AdminStatsPanel() {
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalUsers}
+            <AnimatedNumber value={stats.totalUsers} />
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
             {stats.activeUsers} {t("admin_stats.kpi_users_active")}
@@ -166,7 +167,7 @@ export function AdminStatsPanel() {
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalPlaces}
+            <AnimatedNumber value={stats.totalPlaces} />
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
             {stats.communityPlaces} {t("admin_stats.kpi_places_com")} • {stats.privatePlaces} {t("admin_stats.kpi_places_priv")}
@@ -182,7 +183,7 @@ export function AdminStatsPanel() {
             <span className="material-symbols-outlined text-sm text-emerald-500">trending_up</span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalComments}
+            <AnimatedNumber value={stats.totalComments} />
           </div>
           <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold mt-1">
             +{stats.last30Days.comments} (30d)
@@ -197,7 +198,7 @@ export function AdminStatsPanel() {
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalVisits}
+            <AnimatedNumber value={stats.totalVisits} />
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
             +{stats.last30Days.visits} (30d)
@@ -215,7 +216,7 @@ export function AdminStatsPanel() {
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalOccasions}/{stats.totalTags}
+            <AnimatedNumber value={stats.totalOccasions} />/<AnimatedNumber value={stats.totalTags} />
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
             {t("admin_stats.kpi_taxonomy_sub")}
@@ -230,7 +231,7 @@ export function AdminStatsPanel() {
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            {stats.totalGroups}
+            <AnimatedNumber value={stats.totalGroups} />
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
             {stats.privatePlaces} {t("admin_stats.kpi_places_priv")}

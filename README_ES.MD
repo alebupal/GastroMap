@@ -21,8 +21,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **🔍 Explorador Principal y Búsqueda Universal (Diseño Stitch UI/UX):**
   * **Barra de búsqueda unificada y Paleta de Comandos (`Ctrl+K` / `⌘+K`)**: Campo de búsqueda redondeado con acceso rápido `⌘K` navegable por teclado para saltar a cualquier sitio o acción, y píldoras integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
   * **Filtros por experiencia segmentados (Fila 1) y Enlaces Compartibles**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), sincronización automática de filtros en la URL con botón **«Compartir vista»**, chip de filtro activo (`✕`) y botón `💾 Guardar`.
-  * **Segmentación en dos niveles (Fila 2)**: Selectores desplegables de ciudades, países (+195), rangos de precio explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`) y categorías destacadas con botón `🎛️ + Filtros`.
-  * **Tarjetas de locales estilo Stitch**: Avatar con iniciales en degradado terracota/ámbar, dirección con pin, badge de precio esmeralda, botón favorito (`favorite`), botones de colección (`🕒 Pendiente`, `✅ Ya he ido`, `📝 Mi nota`) y pie completo con autor y acciones.
+  * **Segmentación en dos niveles (Fila 2)**: Selectores desplegables de países (+195) y ciudades, rangos de precio explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`), filtro rápido por **nota mínima** (`★ 7+`, `★ 8+`, `★ 9+`), categorías destacadas con panel desplegable animado `+ Filtros` y estado vacío con chips para quitar filtros individuales.
+  * **Tarjetas de locales estilo Stitch**: Avatar con iniciales, dirección con pin, badge de precio esmeralda, botón favorito, botones de colección (`Pendiente`, `Ya he ido`, `Mi nota`), **copiado rápido de datos del local** y pie completo con autor y acciones.
   * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa e indicador de sincronización local `Cache First`, con modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll cómodamente sin quedar atrapado en el mapa.
 
 * **🗺️ Mapa interactivo Leaflet:**

@@ -45,9 +45,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   function setTheme(newTheme: Theme) {
-    setThemeState(newTheme);
-    localStorage.setItem("gastromap_theme", newTheme);
-    applyThemeClass(newTheme);
+    const commit = () => {
+      setThemeState(newTheme);
+      localStorage.setItem("gastromap_theme", newTheme);
+      applyThemeClass(newTheme);
+    };
+
+    if (
+      typeof document !== "undefined" &&
+      "startViewTransition" in document &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      (document as Document & { startViewTransition: (cb: () => void) => void }).startViewTransition(
+        commit
+      );
+    } else {
+      commit();
+    }
   }
 
   function toggleTheme() {

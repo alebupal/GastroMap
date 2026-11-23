@@ -132,7 +132,10 @@
     "new_badge": "Nuevo",
     "geo_not_supported": "Tu navegador no soporta geolocalización.",
     "geo_permission_denied": "Permiso de ubicación denegado.",
-    "geo_unavailable": "No se pudo obtener tu ubicación."
+    "geo_unavailable": "No se pudo obtener tu ubicación.",
+    "min_rating_label": "Nota mínima",
+    "min_rating_any": "Todas",
+    "active_filters_remove_hint": "Quita algún filtro para ampliar resultados:"
   },
   "cards": {
     "pending": "Pendiente",
@@ -154,7 +157,10 @@
     "website_tooltip": "Visitar página web oficial",
     "phone_tooltip": "Llamar: {phone}",
     "edit_tooltip": "Editar establecimiento",
-    "delete_tooltip": "Eliminar sitio"
+    "delete_tooltip": "Eliminar sitio",
+    "copy_place": "Compartir",
+    "copy_place_tooltip": "Copiar datos del sitio",
+    "copied_place_toast": "Sitio copiado al portapapeles"
   },
   "location": {
     "title": "Localización y Coordenadas",
