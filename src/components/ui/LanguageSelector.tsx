@@ -1,11 +1,12 @@
 "use client";
 
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useT } from "@/lib/i18n/client";
 import { LOCALES, type Locale } from "@/lib/i18n/config";
 
-const DEFAULT_NAMES: Array<{ code: Locale; name: string; flag: string; short: string }> = [
-  { code: "es", name: "Español", flag: "🇪🇸", short: "ES" },
-  { code: "en", name: "English", flag: "🇬🇧", short: "EN" },
+const DEFAULT_NAMES: Array<{ code: Locale; name: string; flag: string }> = [
+  { code: "es", name: "Español", flag: "🇪🇸" },
+  { code: "en", name: "English", flag: "🇬🇧" },
 ];
 
 export function LanguageSelector({
@@ -16,58 +17,130 @@ export function LanguageSelector({
   className?: string;
 } = {}) {
   const { locale, setLocale, t } = useT();
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const options =
-    names && names.length
-      ? names.map((o) => {
-          const base = DEFAULT_NAMES.find((d) => d.code === o.code);
-          return {
-            code: o.code,
-            name: o.name,
-            flag: base?.flag || "🌐",
-            short: o.code.toUpperCase(),
-          };
-        })
-      : LOCALES.map((c) => {
-          const base = DEFAULT_NAMES.find((d) => d.code === c);
-          return (
-            base || {
-              code: c,
-              name: c.toUpperCase(),
-              flag: "🌐",
-              short: c.toUpperCase(),
-            }
-          );
-        });
+  const options = useMemo(() => {
+    if (names && names.length) {
+      return names.map((o) => {
+        const base = DEFAULT_NAMES.find((d) => d.code === o.code);
+        return {
+          code: o.code,
+          name: o.name,
+          flag: base?.flag || "🌐",
+        };
+      });
+    }
+    return LOCALES.map((c) => {
+      const base = DEFAULT_NAMES.find((d) => d.code === c);
+      return base || { code: c, name: c.toUpperCase(), flag: "🌐" };
+    });
+  }, [names]);
+
+  const current = options.find((o) => o.code === locale) || options[0];
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return options;
+    return options.filter(
+      (o) => o.name.toLowerCase().includes(q) || o.code.toLowerCase().includes(q)
+    );
+  }, [options, query]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   return (
-    <div
-      role="group"
-      aria-label={t("common.language")}
-      className={`inline-flex items-center bg-[#f2f3ff] dark:bg-slate-800/90 rounded-full p-0.5 border border-slate-200/80 dark:border-slate-700/60 shadow-xs ${className}`}
-    >
-      {options.map((o) => {
-        const active = locale === o.code;
-        return (
-          <button
-            key={o.code}
-            type="button"
-            onClick={() => {
-              if (!active) setLocale(o.code);
-            }}
-            aria-pressed={active}
-            title={o.name}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
-              active
-                ? "bg-orange-600 text-white shadow-xs"
-                : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-            }`}
-          >
-            <span className="leading-none">{o.flag}</span>
-            <span>{o.short}</span>
-          </button>
-        );
-      })}
+    <div ref={containerRef} className={`relative inline-block ${className}`}>
+      <button
+        type="button"
+        onClick={() => {
+          setIsOpen((prev) => !prev);
+          setQuery("");
+        }}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={t("common.language")}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/90 hover:bg-slate-200/80 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/60 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs transition cursor-pointer"
+      >
+        <span className="leading-none">{current?.flag}</span>
+        <span>{current?.name}</span>
+        <span
+          className={`material-symbols-outlined text-sm text-slate-400 leading-none transition-transform duration-150 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        >
+          expand_more
+        </span>
+      </button>
+
+      {isOpen && (
+        <div
+          role="listbox"
+          aria-label={t("common.language")}
+          className="absolute right-0 top-full mt-2 min-w-[164px] max-h-64 overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl dark:shadow-2xl z-[1050] p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150"
+        >
+          {options.length > 6 && (
+            <div className="p-1 pb-1.5">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("common.language") + "..."}
+                autoFocus
+                className="w-full px-2.5 py-1.5 rounded-xl bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              />
+            </div>
+          )}
+
+          {filtered.map((o) => {
+            const active = o.code === locale;
+            return (
+              <button
+                key={o.code}
+                type="button"
+                role="option"
+                aria-selected={active}
+                onClick={() => {
+                  setIsOpen(false);
+                  if (!active) setLocale(o.code);
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs transition cursor-pointer text-left ${
+                  active
+                    ? "bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 font-extrabold"
+                    : "text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold"
+                }`}
+              >
+                <span className="inline-flex items-center gap-2 min-w-0">
+                  <span className="leading-none">{o.flag}</span>
+                  <span className="truncate">{o.name}</span>
+                </span>
+                {active && (
+                  <span className="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400 leading-none shrink-0">
+                    check
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
