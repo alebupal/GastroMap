@@ -318,11 +318,13 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
   return (
     <div className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm text-left">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">👥</span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-xl leading-none">group</span>
+          </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
               {t("admin_users.title")}
             </h3>
             <p className="text-xs text-slate-500">

@@ -507,21 +507,21 @@ export function TaxonomyManager({
               {/* Barra de herramientas: Buscador y Acciones masivas */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                 <div className="relative flex-1">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                    search
+                  </span>
                   <input
                     type="text"
                     value={occasionSearch}
                     onChange={(e) => setOccasionSearch(e.target.value)}
-                    placeholder={t("admin_taxonomy.search_occasions")}
-                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder={t("admin_taxonomy.search_occasions").replace(/^🔍\s*/, "")}
+                    className="w-full pl-9 pr-8 py-2 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
-                  <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
-                    🔍
-                  </span>
                   {occasionSearch && (
                     <button
                       type="button"
                       onClick={() => setOccasionSearch("")}
-                      className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-200"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
                     >
                       ✕
                     </button>
@@ -731,21 +731,21 @@ export function TaxonomyManager({
               {/* Barra de herramientas: Buscador y Acciones masivas */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                 <div className="relative flex-1">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                    search
+                  </span>
                   <input
                     type="text"
                     value={tagSearch}
                     onChange={(e) => setTagSearch(e.target.value)}
-                    placeholder={t("admin_taxonomy.search_tags")}
-                    className="w-full px-3 py-1.5 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    placeholder={t("admin_taxonomy.search_tags").replace(/^🔍\s*/, "")}
+                    className="w-full pl-9 pr-8 py-2 rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
-                  <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
-                    🔍
-                  </span>
                   {tagSearch && (
                     <button
                       type="button"
                       onClick={() => setTagSearch("")}
-                      className="absolute right-2.5 top-1.5 text-xs text-slate-400 hover:text-slate-200"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 cursor-pointer"
                     >
                       ✕
                     </button>

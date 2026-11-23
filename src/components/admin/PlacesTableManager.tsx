@@ -277,7 +277,9 @@ export function PlacesTableManager({
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-2.5 flex-1 flex-wrap sm:flex-nowrap">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <span className="absolute left-3 top-2.5 text-xs text-slate-400 dark:text-slate-500">🔍</span>
+            <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+              search
+            </span>
             <input
               type="text"
               value={searchQuery}
@@ -285,8 +287,8 @@ export function PlacesTableManager({
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder={t("admin_places.search_placeholder")}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              placeholder={t("admin_places.search_placeholder").replace(/^🔍\s*/, "")}
+              className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
