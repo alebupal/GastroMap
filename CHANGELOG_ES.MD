@@ -8,6 +8,11 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Visual Integral Inspirado en Stitch UI/UX**:
+  - Incorporada la tipografía moderna **Plus Jakarta Sans** con pesos optimizados en toda la aplicación.
+  - Nuevo conmutador de tema dual segmentado (`☀️ Claro` / `🌙 Oscuro`) en la cabecera con micro-interacciones suaves.
+  - Franja superior persistente de estado PWA (`🟢 En línea • PWA Sync v0.1.0 Ready`) y acceso rápido directo al panel de administración.
+  - Tarjetas de establecimientos rediseñadas con avatar distintivo con las iniciales del restaurante, badge de precio en verde esmeralda y barra de acciones de colección personal justificada.
 - **Caché Offline Integral para PWA**:
   - Nuevo Service Worker con precaché de la aplicación, almacenamiento dinámico de teselas de mapas (`gastromap-tiles-v1`), assets inmutables y documentos HTML con fallback automático, permitiendo navegar y consultar locales sin conexión a internet desde el móvil instalado.
 - **Coordenadas Obligatorias con Geocodificación y Fallback Manual**:

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Complete Visual Redesign Inspired by Stitch UI/UX**:
+  - Integrated modern **Plus Jakarta Sans** typography with optimized weights across the entire application.
+  - New segmented dual theme switcher (`☀️ Light` / `🌙 Dark`) in the header with smooth micro-interactions.
+  - Persistent top PWA status bar (`🟢 Online • PWA Sync v0.1.0 Ready`) and direct quick-action link to the admin panel.
+  - Revamped place cards featuring gastronomic initials avatar badges, emerald price chips, and justified personal collection action bars.
 - **Full Offline PWA Caching**:
   - Enhanced Service Worker featuring core application precaching, map tile caching (`gastromap-tiles-v1`), immutable asset caching, and HTML page fallbacks, enabling complete offline functionality when installed on mobile devices.
 - **Mandatory Coordinates with Geocoding and Manual Fallback**:

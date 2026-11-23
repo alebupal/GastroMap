@@ -238,6 +238,7 @@ GastroMap está construido bajo los principios de modularidad, tipado estricto y
 ```
 
 - **Single Source of Truth de Versión**: La versión de la aplicación se centraliza en `package.json` y se consume en cliente y servidor a través de `src/lib/version.ts`.
+- **Diseño Visual e Identidad (Stitch UI/UX)**: Interfaz construida con la tipografía geométrica Plus Jakarta Sans, paleta gastronómica cálida, avatares de iniciales y conmutador segmentado para temas claro y oscuro.
 - **Drizzle ORM con TypeScript**: Migraciones versionadas en `drizzle/` aplicables de forma determinista y tipos inferidos para el 100% de los esquemas.
 - **Caché Offline Integral y PWA**: Service Worker (`/sw.js`) con almacenamiento local que precachea la aplicación, almacena en caché las teselas de mapas (`gastromap-tiles-v1`) y ofrece respaldo completo sin conexión a internet para consultar el catálogo y mapas guardados en movilidad, sótanos o zonas rurales.
 - **Tests Automatizados**: Suite de pruebas nativas con `npm test` verificando consistencia de traducciones, fórmulas espaciales, seguridad y parsers.

@@ -51,6 +51,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Selector integrado en la cabecera persistente y scripts CLI para sincronizar con hojas de cálculo (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
+  * Rediseño visual de alta gama con tipografía **Plus Jakarta Sans**, selector dual segmentado de tema, franja de estado PWA y tarjetas con avatares de iniciales gastronómicas.
   * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
   * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) justificados al 100% en cuadrícula adaptable para aprovechar todo el espacio útil en pantalla.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.

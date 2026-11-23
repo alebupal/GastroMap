@@ -53,6 +53,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Header language selector persisted via cookies, plus CLI synchronization scripts (`npm run i18n:export`, `npm run i18n:import`, `npm run i18n:check`).
 
 * **📱 Mobile Experience (PWA), Full Offline Cache & Dark/Light Mode:**
+  * High-end visual redesign featuring **Plus Jakarta Sans** typography, segmented dual theme switcher, PWA status strip, and place cards with culinary initials avatars.
   * Clean exclusive mobile tabs (`[🗺️ Map] | [📋 List]`) and bottom floating summary card on map pin selection with direct directions and synchronized jump to full place card with golden highlight.
   * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) 100% justified in an adaptive grid to maximize full screen width.
   * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.

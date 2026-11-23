@@ -208,6 +208,7 @@ In the **Import / Export** modal (`📦`):
 ## 10. Technical Architecture & Scalability
 
 - **Single Source of Truth**: App version centralized in `package.json` consumed via `src/lib/version.ts`.
+- **Visual Design & Identity (Stitch UI/UX)**: Interface powered by Plus Jakarta Sans typography, warm culinary palette, initials avatar badges, and segmented dual light/dark theme switcher.
 - **Drizzle ORM & TypeScript**: Typed schema models and deterministic SQL migrations in `drizzle/`.
 - **Offline PWA & Full Cache**: Service Worker (`/sw.js`) with offline caching for application assets, visited pages, and map tiles (`gastromap-tiles-v1`), enabling full catalog and map access without internet connection in rural areas, basements, or offline mode.
 - **Automated Tests**: Native test runner via `npm test` verifying i18n, Haversine formulas, security, and GPX output.

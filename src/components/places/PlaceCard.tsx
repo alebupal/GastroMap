@@ -175,8 +175,17 @@ export function PlaceCard({
           </div>
         </div>
 
-        {/* Nombre y Distancia */}
-        <div className="flex items-start justify-between gap-2">
+        {/* Nombre, Avatar con Iniciales y Distancia */}
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/20 dark:from-amber-500/25 dark:to-orange-500/30 text-amber-700 dark:text-amber-300 font-black text-sm flex items-center justify-center shrink-0 border border-amber-500/30 shadow-xs">
+            {place.name
+              .split(/\s+/)
+              .filter(Boolean)
+              .map((w) => w.charAt(0))
+              .slice(0, 2)
+              .join("")
+              .toUpperCase() || "🍴"}
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-extrabold text-slate-900 dark:text-slate-100 text-base leading-snug">
@@ -191,7 +200,7 @@ export function PlaceCard({
               )}
             </div>
             {(place.city || place.address) && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 truncate flex items-center gap-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
                 <span>📍</span>
                 <span>{place.city ? `${place.city}` : ""}{place.city && place.address ? " • " : ""}{place.address || ""}</span>
               </p>
@@ -255,12 +264,12 @@ export function PlaceCard({
         )}
 
         {/* Barra de Colección Personal (Quiero ir, Ya he ido, Mi nota) */}
-        <div className="mt-3.5 flex items-center gap-2 flex-wrap pt-2.5 border-t border-slate-200 dark:border-slate-800/60">
+        <div className="mt-3.5 flex items-center gap-2 flex-wrap pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
           <button
             type="button"
             onClick={() => handleStatusChange("pending")}
             aria-label={personalStatus === "pending" ? t("places.remove_pending") : t("places.add_pending")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${personalStatus === "pending"
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${personalStatus === "pending"
               ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
               : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
               }`}
@@ -272,7 +281,7 @@ export function PlaceCard({
             type="button"
             onClick={() => handleStatusChange("visited")}
             aria-label={personalStatus === "visited" ? t("places.remove_visited") : t("places.mark_visited")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 active:scale-95 ${personalStatus === "visited"
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${personalStatus === "visited"
               ? "bg-emerald-600 text-white font-bold shadow-sm"
               : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50"
               }`}
@@ -284,7 +293,7 @@ export function PlaceCard({
             type="button"
             onClick={() => setShowNotesModal(true)}
             aria-label={t("cards.add_note_tooltip")}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center gap-1.5 ml-auto active:scale-95"
+            className="py-1.5 px-3 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 active:scale-95"
             title={t("cards.add_note_tooltip")}
           >
             📝 {rating !== null ? `${rating}★` : t("cards.private_note")}
@@ -292,11 +301,16 @@ export function PlaceCard({
         </div>
       </div>
 
-      {/* Pie de tarjeta: Autor, comentarios, Maps y Borrar */}
-      <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
-        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">
-          {t("cards.by_author", { author: place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "") })}
-        </span>
+      {/* Pie de tarjeta: Autor con avatar, comentarios, Maps y Acciones */}
+      <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold text-[9px] flex items-center justify-center border border-amber-500/20">
+            {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
+          </span>
+          <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+            @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+          </span>
+        </div>
 
         <div className="flex items-center gap-x-2 gap-y-1.5 flex-wrap justify-start sm:justify-end">
           {/* Botón de comentarios */}

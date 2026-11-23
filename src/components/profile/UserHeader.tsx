@@ -56,6 +56,33 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
   return (
     <>
+      {/* Barra de estado PWA y sincronización estilo Stitch */}
+      <div className="w-full bg-slate-100/80 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/70 rounded-2xl px-3 sm:px-4 py-1.5 mb-3 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            En línea
+          </span>
+          <span className="text-slate-300 dark:text-slate-700">•</span>
+          <span className="font-medium">PWA Sync v{APP_VERSION} Ready</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {currentUser.role === "admin" && (
+            <Link
+              href="#admin"
+              onClick={() => {
+                const el = document.getElementById("admin");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold text-[10px] transition cursor-pointer"
+            >
+              <span>⚙️</span>
+              <span>{t("nav.admin")}</span>
+            </Link>
+          )}
+        </div>
+      </div>
+
       <header className="w-full flex items-center justify-between py-2.5 sm:py-3 mb-4 sm:mb-6 border-b border-slate-200 dark:border-slate-800/80 gap-2">
         {/* Brand / Logo */}
         <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
