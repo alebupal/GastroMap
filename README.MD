@@ -54,7 +54,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **📱 Mobile Experience (PWA), Full Offline Cache & Dark/Light Mode:**
   * Clean exclusive mobile tabs (`[🗺️ Map] | [📋 List]`) and bottom floating summary card on map pin selection with direct directions and synchronized jump to full place card with golden highlight.
-  * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) cleanly centered for effortless one-handed mobile navigation.
+  * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) 100% justified in an adaptive grid to maximize full screen width.
   * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.
   * Installable on iOS and Android home screens as a Progressive Web App with **full Service Worker offline caching** (`/sw.js`) caching shell, pages, and map tiles for seamless offline browsing.
   * Zero-flicker Dark and Light mode toggle (☀️ / 🌙) with persistent local storage.

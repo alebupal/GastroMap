@@ -52,7 +52,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
   * Pestañas exclusivas móviles (`[🗺️ Mapa] | [📋 Lista]`) y tarjeta flotante inferior al seleccionar cualquier chincheta con botón «Cómo llegar» y navegación sincronizada a la ficha completa con resalte dorado.
-  * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) perfectamente centrados y cómodos para uso táctil.
+  * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) justificados al 100% en cuadrícula adaptable para aprovechar todo el espacio útil en pantalla.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker y caché offline integral** (`/sw.js`) que almacena la aplicación, páginas y teselas de mapas para uso sin conexión a internet.
   * Selector interactivo de Modo Claro y Modo Oscuro (☀️ / 🌙) persistente en `localStorage`, sin parpadeo (FOUC).

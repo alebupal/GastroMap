@@ -19,8 +19,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Retiradas las métricas obsoletas de visitas con fecha, sustituidas por sitios probados, favoritos guardados, sitios aportados y comentarios/reseñas aportadas en el año.
 - **Jerarquía Visual y Corrección de Z-Index en el Mapa**:
   - Corregida la superposición del botón flotante «🖐️ Mover mapa» sobre el modal de estadísticas y los diálogos modales de la aplicación.
-- **Centrado de Acciones Rápidas y Etiqueta en «Guardar filtro»**:
-  - Botones inferiores de herramientas bajo «Añadir sitio» centrados estéticamente en dispositivos móviles y etiqueta de texto visible para «💾 Guardar filtro».
+- **Distribución Justificada al 100% de Acciones Rápidas y Etiqueta en «Guardar filtro»**:
+  - Botones inferiores bajo «Añadir sitio» configurados en cuadrícula responsive (`grid-cols-2 sm:grid-cols-4`) ocupando el 100% del ancho disponible sin huecos desaprovechados y con etiqueta de texto visible para «💾 Guardar filtro».
 - **Animación de Giro del Dado y Rediseño de Acciones en «Al azar»**:
   - Animación continua de rotación en el dado (`animate-spin`) durante el proceso de tirada aleatoria.
   - Distribución equilibrada en cuadrícula de 2 columnas para «Ver en el listado» y «Ver en el mapa» evitando saltos de línea antiestéticos y eliminando emojis duplicados en los botones.

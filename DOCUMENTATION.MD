@@ -94,7 +94,7 @@ When launching on a clean database:
 
 ### 🍽️ Gastronomic Explorer (Main View)
 - **Universal Multi-field Search**: Instant live search covering every field: establishment name, city, address, public notes, personal private notes, categories/occasions, tags, author, and full collaborative comments text, with multi-term support.
-- **Centered Quick Actions & Saved Filters**: Quick access toolbar buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`, and `💾 Save filter`) ergonomically centered on mobile screens.
+- **100% Justified Quick Actions & Saved Filters**: Quick access toolbar buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`, and `💾 Save filter`) laid out in an adaptive full-width grid (`grid-cols-2 sm:grid-cols-4`) filling 100% of the available horizontal space.
 - **Mandatory Coordinates with Geocoding**: When creating or editing a place, latitude and longitude are mandatory to accurately locate it on the map. Typing a street triggers automatic OpenStreetMap/Nominatim geocoding; if no coordinates are found, manual numeric fields are presented for pinpoint input.
 - **Experience Filters (Row 1)**:
   - `🌐 All`: Global catalog filtered by user access.

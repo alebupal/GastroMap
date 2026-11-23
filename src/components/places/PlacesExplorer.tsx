@@ -777,14 +777,14 @@ export function PlacesExplorer({
           </a>
         </div>
 
-        {/* Barra de herramientas y filtros rápidos */}
-        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+        {/* Barra de herramientas y filtros rápidos justificadas al 100% */}
+        <div className="w-full space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800/60">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
             {/* Botón Asistente Guiado */}
             <button
               type="button"
               onClick={() => setIsAssistantOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
             >
               <span>🎯</span>
               <span>{t("places.assistant")}</span>
@@ -800,7 +800,7 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setIsRandomModalOpen(true)}
               disabled={filteredPlaces.length === 0}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer disabled:opacity-40"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer disabled:opacity-40"
               title={t("places.roulette_tooltip")}
             >
               <span>🎲</span>
@@ -811,30 +811,28 @@ export function PlacesExplorer({
             <button
               type="button"
               onClick={() => setIsExportImportOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
               title={t("places.export_import_tooltip")}
             >
               <span>📦</span>
               <span>{t("places.export_import")}</span>
             </button>
-          </div>
 
-          {/* Lado derecho: Cerca de mí y botón limpiar */}
-          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {/* Cerca de mí */}
             {!userLocation ? (
               <button
                 type="button"
                 onClick={handleRequestLocation}
                 disabled={isLocating}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
+                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-semibold transition cursor-pointer disabled:opacity-50"
               >
                 <span>{isLocating ? "⏳" : "📍"}</span>
                 <span>{isLocating ? "Localizando..." : t("places.near_me")}</span>
               </button>
             ) : (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+              <div className="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span>Ubicación activa</span>
+                <span className="truncate">Ubicación activa</span>
                 <button
                   type="button"
                   onClick={handleDisableLocation}
@@ -844,28 +842,28 @@ export function PlacesExplorer({
                 </button>
               </div>
             )}
-
-            {activeFiltersCount > 0 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsSaveFilterOpen((v) => !v)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
-                  title={t("places.save_filter_tooltip")}
-                >
-                  <span>💾</span>
-                  <span>{t("places.save_filter")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={resetAllFilters}
-                  className="text-xs text-slate-400 hover:text-red-400 underline cursor-pointer"
-                >
-                  Limpiar
-                </button>
-              </>
-            )}
           </div>
+
+          {activeFiltersCount > 0 && (
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100/60 dark:border-slate-800/40 w-full">
+              <button
+                type="button"
+                onClick={() => setIsSaveFilterOpen((v) => !v)}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-bold transition cursor-pointer"
+                title={t("places.save_filter_tooltip")}
+              >
+                <span>💾</span>
+                <span>{t("places.save_filter")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="px-3 py-1.5 text-xs text-slate-400 hover:text-red-400 font-semibold underline cursor-pointer"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mini formulario para guardar combinación actual de filtros */}

@@ -19,8 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed outdated visit date counts in favor of places tried, saved favorites, catalog contributions, and reviews posted during the year.
 - **Z-Index Layering Fix for Map Controls**:
   - Fixed floating «🖐️ Move map» button incorrectly overlaying the statistics modal and other full-screen dialogs.
-- **Centered Quick Actions & Save Filter Button Label**:
-  - Centered quick action buttons below «Add place» on mobile viewports and restored persistent text label on the «💾 Save filter» button.
+- **100% Justified Quick Actions Grid & Label on «Save filter»**:
+  - Action buttons below «Add place» arranged in a responsive grid (`grid-cols-2 sm:grid-cols-4`) filling 100% of the available width without unused gaps, plus visible text label on «💾 Save filter».
 - **Spinning Dice Animation & Modal Action Redesign in «Random»**:
   - Continuous rotating animation on the header dice (`animate-spin`) while picking a random place.
   - Balanced 2-column grid layout for «View in list» and «View on map» eliminating awkward text breaks and removing duplicated emojis.

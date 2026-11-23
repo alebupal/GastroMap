@@ -94,7 +94,7 @@ Al acceder por primera vez a una instancia limpia:
 
 ### 🍽️ Explorador Gastronómico (Vista Principal)
 - **Buscador Universal Integral**: Búsqueda instantánea en vivo por cualquier dato: nombre del establecimiento, ciudad, dirección, notas públicas, notas privadas personales, categorías/ocasiones, etiquetas, autor y el contenido completo de los comentarios colaborativos, con soporte multi-término.
-- **Acciones Rápidas y Filtros Guardados Centrados**: Botones de acceso rápido (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí` y `💾 Guardar filtro`) dispuestos de forma centrada para uso táctil ergonómico en dispositivos móviles.
+- **Acciones Rápidas y Filtros Guardados Justificados**: Botones de acceso rápido (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí` y `💾 Guardar filtro`) dispuestos en cuadrícula adaptable (`grid-cols-2 sm:grid-cols-4`) ocupando el 100% del ancho para aprovechar todo el espacio disponible.
 - **Registro con Coordenadas Obligatorias y Geocodificación**: Al añadir o editar un establecimiento, las coordenadas (latitud y longitud) son obligatorias para situarlo en el mapa. Al escribir una calle se geocodifica automáticamente mediante OpenStreetMap/Nominatim; si no se encuentran coordenadas, se despliegan campos numéricos manuales para introducirlas con total precisión.
 - **Filtros por Experiencia (Fila 1)**:
   - `🌐 Todos`: Catálogo global visible según tus permisos.
