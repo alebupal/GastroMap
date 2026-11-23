@@ -26,6 +26,11 @@ cd GastroMap && <comando>
 
 ---
 
+## 🎨 Sistema de Diseño Obligatorio (`DESIGN.md`)
+> ⚠️ **REGLA VISUAL:** Antes de crear o modificar cualquier componente, vista, modal o botón, lee y sigue obligatoriamente [**DESIGN.md**](DESIGN.md) (logotipo oficial `GastroMapLogo`, paleta unificada `orange-600` `#ea580c`, superficies `#faf8ff` / `#0b1120`, tipografía `Plus Jakarta Sans`, iconos Material Symbols, radios `rounded-full` / `rounded-2xl` / `rounded-3xl` y patrón de modales `z-[1100]`).
+
+---
+
 ## 🗺️ Mapa de Archivos Clave
 
 ### 1. Interfaz de Usuario y Vistas Principales (`src/components/`)
