@@ -425,8 +425,8 @@ export function TaxonomyManager({
     setBulkDeleteModal(null);
   }
 
-  const headerIcon =
-    section === "occasions" ? "🍽️" : section === "tags" ? "🏷️" : "🏷️";
+  const headerMaterialIcon =
+    section === "occasions" ? "restaurant_menu" : "sell";
   const headerTitle =
     section === "occasions"
       ? `${t("admin_taxonomy.title_occasions")} (${occasionsList.length})`
@@ -440,11 +440,15 @@ export function TaxonomyManager({
 
   return (
     <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs text-left">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-xl shrink-0">{headerIcon}</span>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-xl leading-none">
+              {headerMaterialIcon}
+            </span>
+          </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 truncate">
               {headerTitle}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -540,7 +544,7 @@ export function TaxonomyManager({
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
                     }`}
                   >
-                    <span>🧹</span>
+                    <span className="material-symbols-outlined text-sm leading-none">cleaning_services</span>
                     <span>{t("admin_taxonomy.delete_empty", { count: String(emptyOccasions.length) })}</span>
                   </button>
 
@@ -551,7 +555,7 @@ export function TaxonomyManager({
                       onClick={() => handleOpenBulkDelete("occasions")}
                       className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
-                      <span>🗑️</span>
+                      <span className="material-symbols-outlined text-sm leading-none">delete</span>
                       <span>{t("admin_taxonomy.delete_selected", { count: String(selectedOccasionIds.size) })}</span>
                     </button>
                   )}
@@ -638,8 +642,9 @@ export function TaxonomyManager({
                             }
                             className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] hover:bg-slate-300 transition cursor-pointer"
                             title={t("common.edit")}
+                            aria-label={t("common.edit")}
                           >
-                            ✏️
+                            <span className="material-symbols-outlined text-[15px] leading-none">edit</span>
                           </button>
                           <button
                             onClick={() => {
@@ -649,8 +654,9 @@ export function TaxonomyManager({
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
                             title={t("admin_taxonomy.merge_title")}
+                            aria-label={t("admin_taxonomy.merge_title")}
                           >
-                            🔀
+                            <span className="material-symbols-outlined text-[15px] leading-none">merge</span>
                           </button>
                           <button
                             onClick={() => {
@@ -666,8 +672,9 @@ export function TaxonomyManager({
                             }}
                             className="px-2 py-1 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[11px] hover:bg-red-200 transition cursor-pointer"
                             title={t("common.delete")}
+                            aria-label={t("common.delete")}
                           >
-                            🗑️
+                            <span className="material-symbols-outlined text-[15px] leading-none">delete</span>
                           </button>
                         </div>
                       </div>
@@ -764,7 +771,7 @@ export function TaxonomyManager({
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
                     }`}
                   >
-                    <span>🧹</span>
+                    <span className="material-symbols-outlined text-sm leading-none">cleaning_services</span>
                     <span>{t("admin_taxonomy.delete_empty", { count: String(emptyTags.length) })}</span>
                   </button>
 
@@ -775,7 +782,7 @@ export function TaxonomyManager({
                       onClick={() => handleOpenBulkDelete("tags")}
                       className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
-                      <span>🗑️</span>
+                      <span className="material-symbols-outlined text-sm leading-none">delete</span>
                       <span>{t("admin_taxonomy.delete_selected", { count: String(selectedTagIds.size) })}</span>
                     </button>
                   )}
@@ -854,8 +861,9 @@ export function TaxonomyManager({
                             }
                             className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] hover:bg-slate-300 transition cursor-pointer"
                             title={t("common.edit")}
+                            aria-label={t("common.edit")}
                           >
-                            ✏️
+                            <span className="material-symbols-outlined text-[15px] leading-none">edit</span>
                           </button>
                           <button
                             onClick={() => {
@@ -865,8 +873,9 @@ export function TaxonomyManager({
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
                             title={t("admin_taxonomy.merge_title")}
+                            aria-label={t("admin_taxonomy.merge_title")}
                           >
-                            🔀
+                            <span className="material-symbols-outlined text-[15px] leading-none">merge</span>
                           </button>
                           <button
                             onClick={() => {
@@ -882,8 +891,9 @@ export function TaxonomyManager({
                             }}
                             className="px-2 py-1 rounded bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 text-[11px] hover:bg-red-200 transition cursor-pointer"
                             title={t("common.delete")}
+                            aria-label={t("common.delete")}
                           >
-                            🗑️
+                            <span className="material-symbols-outlined text-[15px] leading-none">delete</span>
                           </button>
                         </div>
                       </div>
