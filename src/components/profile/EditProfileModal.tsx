@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { updateMyProfileAction } from "@/lib/actions/users";
 import { useT } from "@/lib/i18n/client";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import type { Locale } from "@/lib/i18n/config";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -180,15 +182,12 @@ export function EditProfileModal({
             <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               {t("common.language")}
             </label>
-            <select
+            <LanguageSelector
               name="locale"
-              value={userLocale}
-              onChange={(e) => setUserLocale(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40 font-semibold cursor-pointer"
-            >
-              <option value="es">🇪🇸 Español</option>
-              <option value="en">🇬🇧 English</option>
-            </select>
+              value={(userLocale as Locale) || "es"}
+              onChange={(next) => setUserLocale(next)}
+              fullWidth
+            />
           </div>
 
           {/* Sección de cambio de contraseña */}
