@@ -225,11 +225,6 @@ export async function updatePlaceAction(
   const website = (formData.get("website") as string)?.trim() || null;
   const phone = (formData.get("phone") as string)?.trim() || null;
   const priceRange = (formData.get("priceRange") as string) || "???";
-  const rawStatus = (formData.get("status") as string) || "active";
-  const status =
-    rawStatus === "temporarily_closed" || rawStatus === "permanently_closed"
-      ? rawStatus
-      : "active";
   const notes = (formData.get("notes") as string)?.trim() || null;
   const communityPublished = formData.get("communityPublished") !== "false";
 
@@ -296,7 +291,6 @@ export async function updatePlaceAction(
       website,
       phone,
       priceRange,
-      status,
       notes,
       communityPublished,
       updatedAt: new Date(),
@@ -357,7 +351,7 @@ export async function updatePlaceAction(
     entityType: "place",
     entityId: placeId,
     action: "place_updated",
-    metadata: { name, status },
+    metadata: { name },
   });
 
   revalidatePath("/");

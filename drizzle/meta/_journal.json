@@ -71,6 +71,13 @@
       "when": 1795089301548,
       "tag": "0009_premium_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795427335966,
+      "tag": "0010_dark_crusher_hogan",
+      "breakpoints": true
     }
   ]
 }

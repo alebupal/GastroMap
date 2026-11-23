@@ -8,6 +8,8 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Eliminación Completa del Campo «Estado del Establecimiento» (`places.status`)**:
+  - Eliminada la columna `status` de la tabla `places` en el esquema Drizzle (`src/db/schema.ts`), generada su migración SQL oficial en `drizzle/` y limpiadas todas las referencias en acciones de servidor, estadísticas, semilla demo, exportación JSON y UI.
 - **Rediseño Stitch de la Pantalla «Añadir Sitio» (`/new`)**:
   - Cabecera unificada (`UserHeader`), título con botón circular de retorno e insignia `NUEVO`, y pie de página minimalista coherente con toda la web.
   - Formulario modular en tarjetas independientes `rounded-3xl`: *Asistente Rápido de Google Maps*, *Nombre con detector de duplicados*, *Ubicación y Coordenadas*, *Planes/Ocasiones* con contador, *Presupuesto aproximado* segmentado con rangos explícitos, *Etiquetas*, *Notas* y tarjetas seleccionables de *Visibilidad (Comunidad / Privado)* con botones píldora finales.

@@ -16,12 +16,6 @@ const PRICE_OPTIONS = [
   { id: "€€€€", label: "> 50 €" },
 ];
 
-const STATUS_OPTIONS = [
-  { id: "active", label: "Activo", icon: "🟢" },
-  { id: "temporarily_closed", label: "Cerrado temp.", icon: "⏸️" },
-  { id: "permanently_closed", label: "Cerrado perm.", icon: "🚫" },
-] as const;
-
 interface EditPlaceModalProps {
   place: PlaceWithDetails;
   occasionsList: Array<{ id: string; name: string; icon: string }>;
@@ -45,7 +39,6 @@ export function EditPlaceModal({
   const [lat, setLat] = useState(place.latitude != null ? String(place.latitude) : "");
   const [lng, setLng] = useState(place.longitude != null ? String(place.longitude) : "");
   const [priceRange, setPriceRange] = useState(place.priceRange || "???");
-  const [status, setStatus] = useState<string>(place.status || "active");
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(place.occasions || []);
   const [notes, setNotes] = useState(place.notes || "");
   const [communityPublished, setCommunityPublished] = useState<boolean>(place.communityPublished);
@@ -117,7 +110,6 @@ export function EditPlaceModal({
     formData.set("latitude", lat);
     formData.set("longitude", lng);
     formData.set("priceRange", priceRange);
-    formData.set("status", status);
     formData.set("notes", notes);
     formData.set("communityPublished", communityPublished ? "true" : "false");
 

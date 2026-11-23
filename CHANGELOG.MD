@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Complete Removal of Establishment Status (`places.status`)**:
+  - Dropped the `status` column from `places` in the Drizzle schema (`src/db/schema.ts`), generated the official SQL migration in `drizzle/`, and cleaned all references across server actions, stats, demo seed, JSON export, and UI.
 - **Stitch Redesign of «Add Place» Screen (`/new`)**:
   - Unified header (`UserHeader`), back button with `NEW` badge, and consistent minimalist footer.
   - Modular `rounded-3xl` card form: *Google Maps Quick Assistant*, *Name with duplicate detection*, *Location & Coordinates*, *Occasions* with selected count, segmented *Budget* with explicit price labels, *Tags*, *Notes*, selectable *Visibility cards (Community / Private)*, and rounded pill action buttons.

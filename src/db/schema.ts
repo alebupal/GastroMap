@@ -72,7 +72,6 @@ export const places = pgTable(
     longitude: doublePrecision("longitude"),
     googleMapsUrl: text("google_maps_url"),
     priceRange: varchar("price_range", { length: 10 }).notNull().default("???"), // '€' | '€€' | '€€€' | '€€€€' | '???'
-    status: varchar("status", { length: 30 }).notNull().default("active"), // 'active' | 'temporarily_closed' | 'permanently_closed'
     notes: text("notes"),
     communityPublished: boolean("community_published").notNull().default(true),
     website: text("website"),

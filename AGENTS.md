@@ -67,7 +67,7 @@ cd GastroMap && <comando>
 
 ### 1. Esquema de Base de Datos (`src/db/schema.ts`)
 - **`users`:** `id`, `username`, `email`, `name`, `passwordHash`, `role`, `status`, `locale` (`es` \| `en`).
-- **`places`:** `id`, `name`, `address`, `city` (`"Ciudad, País"`), `latitude`, `longitude`, `googleMapsUrl`, `priceRange`, `status`, `notes`, `website`, `phone`, `communityPublished`, `createdById`.
+- **`places`:** `id`, `name`, `address`, `city` (`"Ciudad, País"`), `latitude`, `longitude`, `googleMapsUrl`, `priceRange`, `notes`, `website`, `phone`, `communityPublished`, `createdById`.
 - **`occasions`** y **`placeOccasions`**: Planes/categorías (`tapear`, `comer`, etc.).
 - **`tags`** y **`placeTags`**: Etiquetas normalizadas (`pescaitofrito`, `michelin`, etc.).
 - **`userPlaces`**: Interacciones privadas del usuario (favorito, estado `visited`/`pending`, notas privadas, puntuación).

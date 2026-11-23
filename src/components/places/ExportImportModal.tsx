@@ -385,7 +385,6 @@ export function ExportImportModal({ isOpen, onClose, places }: ExportImportModal
       latitude: p.latitude,
       longitude: p.longitude,
       priceRange: p.priceRange,
-      status: p.status,
       googleMapsUrl: p.googleMapsUrl,
       notes: p.notes,
       occasions: p.occasions,

@@ -59,7 +59,6 @@ export interface AdminStatsData {
   totalPlaces: number;
   communityPlaces: number;
   privatePlaces: number;
-  closedPlaces: number;
   totalComments: number;
   totalVisits: number;
   totalGroups: number;
@@ -338,7 +337,6 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
   const communityPlacesList = allPlaces.filter((p) => p.communityPublished);
   const communityPlaceIds = new Set(communityPlacesList.map((p) => p.id));
   const privatePlaces = allPlaces.length - communityPlacesList.length;
-  const closedPlaces = allPlaces.filter((p) => p.status !== "active").length;
 
   // Actividad últimos 30 días
   const last30Days = {
@@ -463,7 +461,6 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     totalPlaces: allPlaces.length,
     communityPlaces: communityPlacesList.length,
     privatePlaces,
-    closedPlaces,
     totalComments: allComments.length,
     totalVisits: allVisits.length,
     totalGroups: allGroups.length,

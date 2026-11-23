@@ -221,8 +221,8 @@ export function AdminStatsPanel() {
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
             {stats.totalGroups}
           </div>
-          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
-            {stats.closedPlaces} {t("admin_stats.kpi_closed_places")}
+          <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
+            {stats.privatePlaces} {t("admin_stats.kpi_places_priv")}
           </div>
         </div>
       </div>
