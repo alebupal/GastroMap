@@ -981,22 +981,6 @@ export function PlacesExplorer({
 
           {/* Acciones Rápidas en píldoras horizontales */}
           <div className="flex items-center gap-1.5 w-full md:w-auto shrink-0 justify-between md:justify-start overflow-x-auto">
-            {/* Asistente */}
-            <button
-              type="button"
-              onClick={() => setIsAssistantOpen(true)}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition shrink-0 cursor-pointer"
-              title="Asistente"
-            >
-              <span className="material-symbols-outlined text-orange-600 text-base leading-none">assistant</span>
-              <span className="hidden sm:inline">{t("places.assistant")}</span>
-              {activeFiltersCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-orange-600 text-white text-[10px] ml-0.5 font-bold">
-                  {activeFiltersCount}
-                </span>
-              )}
-            </button>
-
             {/* Al azar */}
             <button
               type="button"
@@ -1483,36 +1467,32 @@ export function PlacesExplorer({
             })}
           </div>
 
-          {/* Lado derecho: botón + Filtros (despliega Categorías y Etiquetas) */}
+          {/* Lado derecho: botón unificado Filtros (abre el modal completo de filtros) */}
           <div className="flex items-center gap-1.5 text-xs shrink-0">
             <button
               type="button"
-              onClick={() => setShowExtraFilters((prev) => !prev)}
-              aria-expanded={showExtraFilters}
-              className={`group flex items-center gap-1.5 px-3 py-1 rounded-full font-semibold transition-all duration-200 active:scale-95 cursor-pointer ${
-                showExtraFilters
-                  ? "bg-orange-600 text-white shadow-xs"
-                  : "bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+              onClick={() => setIsAssistantOpen(true)}
+              aria-expanded={isAssistantOpen}
+              className={`group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-extrabold transition-all duration-200 active:scale-95 cursor-pointer border ${
+                isAssistantOpen || activeFiltersCount > 0
+                  ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/25"
+                  : "bg-orange-50 dark:bg-orange-950/50 border-orange-200/90 dark:border-orange-800/70 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/80"
               }`}
             >
               <span
                 className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${
-                  showExtraFilters ? "rotate-90" : "group-hover:rotate-12"
+                  isAssistantOpen ? "rotate-90" : "group-hover:rotate-12"
                 }`}
               >
                 tune
               </span>
-              <span>{showExtraFilters ? t("places.hide_filters") : t("places.more_filters")}</span>
-              {selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0) > 0 && (
+              <span>{t("places.more_filters").replace(/^\+\s*/, "")}</span>
+              {activeFiltersCount > 0 && (
                 <span
-                  key={selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0)}
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black leading-none gm-pop ${
-                    showExtraFilters
-                      ? "bg-white/25 text-white"
-                      : "bg-orange-600 text-white"
-                  }`}
+                  key={activeFiltersCount}
+                  className="min-w-[16px] h-[16px] px-1 rounded-full bg-white text-orange-700 text-[10px] font-black inline-flex items-center justify-center leading-none gm-pop"
                 >
-                  {selectedOccasions.length + selectedTags.length + (minRating !== null ? 1 : 0)}
+                  {activeFiltersCount}
                 </span>
               )}
             </button>
