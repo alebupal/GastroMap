@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Rediseño Stitch de la Pantalla «Añadir Sitio» (`/new`)**:
+  - Cabecera unificada (`UserHeader`), título con botón circular de retorno e insignia `NUEVO`, y pie de página minimalista coherente con toda la web.
+  - Formulario modular en tarjetas independientes `rounded-3xl`: *Asistente Rápido de Google Maps*, *Nombre con detector de duplicados*, *Ubicación y Coordenadas*, *Planes/Ocasiones* con contador, *Presupuesto aproximado* segmentado con rangos explícitos, *Etiquetas*, *Notas* y tarjetas seleccionables de *Visibilidad (Comunidad / Privado)* con botones píldora finales.
 - **Rediseño de la Pantalla de Documentación (`/docs`) según `DESIGN.md`**:
   - Cabecera unificada con logotipo oficial `<GastroMapLogo />`, botón `Volver al explorador`, conmutador de tema (`ThemeToggle`), selector segmentado `ES / EN` y botón `Donar`.
   - Tarjeta hero con pestañas segmentadas (`Guía de uso`, `Changelog`, `README`), visor Markdown renovado con soporte para código inline y citas en paleta oficial naranja `#ea580c`, y pie de página minimalista coherente con toda la web.

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Stitch Redesign of «Add Place» Screen (`/new`)**:
+  - Unified header (`UserHeader`), back button with `NEW` badge, and consistent minimalist footer.
+  - Modular `rounded-3xl` card form: *Google Maps Quick Assistant*, *Name with duplicate detection*, *Location & Coordinates*, *Occasions* with selected count, segmented *Budget* with explicit price labels, *Tags*, *Notes*, selectable *Visibility cards (Community / Private)*, and rounded pill action buttons.
 - **Documentation Screen (`/docs`) Redesign Following `DESIGN.md`**:
   - Unified header with official `<GastroMapLogo />`, `Back to explorer` pill, `ThemeToggle`, segmented `ES / EN` switcher, and `Donate` pill.
   - Hero card with segmented tabs (`User Guide`, `Changelog`, `README`), refined Markdown renderer with inline code & blockquote styling in official `#ea580c` orange, and consistent minimalist footer.
