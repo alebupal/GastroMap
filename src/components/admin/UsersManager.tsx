@@ -23,7 +23,6 @@ interface UsersManagerProps {
 
 export function UsersManager({ currentUserId }: UsersManagerProps) {
   const { t } = useT();
-  const [isOpen, setIsOpen] = useState(true);
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,10 +114,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   }
 
   useEffect(() => {
-    if (isOpen) {
-      loadUsers();
-    }
-  }, [isOpen]);
+    loadUsers();
+  }, []);
 
   // Filtrar lista de usuarios reactivamente por nombre, email o username
   const filteredUsers = useMemo(() => {
@@ -332,16 +329,9 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-orange-600 hover:bg-orange-700 text-white transition active:scale-95 cursor-pointer"
-        >
-          {isOpen ? t("common.collapse") : t("common.manage")}
-        </button>
       </div>
 
-      {isOpen && (
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
           {error && (
             <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium">
               ⚠️ {error}
@@ -695,8 +685,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               />
             </div>
           )}
-        </div>
-      )}
+      </div>
 
       {/* Modal para resetear contraseña */}
       {passwordUserId && (
