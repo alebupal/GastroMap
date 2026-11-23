@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { UsersManager } from "./UsersManager";
@@ -71,15 +71,29 @@ export function AdminDashboard({
 
   const [activeTab, setActiveTab] = useState<AdminTab>(resolvedInitialTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setIsUserMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isUserMenuOpen]);
 
   const displayUsername =
     currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "");
-  const initials = (currentUser.name || displayUsername)
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
   function selectTab(tab: AdminTab) {
     setActiveTab(tab);
@@ -183,32 +197,6 @@ export function AdminDashboard({
           </Link>
         </nav>
       </div>
-
-      {/* Tarjeta de usuario y Cerrar Sesión */}
-      <div className="rounded-2xl bg-white dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800 p-3 shadow-xs space-y-2.5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center shrink-0 border border-orange-200/80 dark:border-orange-800/60">
-            {initials}
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-              {displayUsername}
-            </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
-              Super Admin
-            </div>
-          </div>
-        </div>
-
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className="w-full py-1.5 px-3 rounded-xl bg-rose-100/80 hover:bg-rose-200/90 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold text-[11px] transition cursor-pointer"
-          >
-            {t("nav.logout")}
-          </button>
-        </form>
-      </div>
     </div>
   );
 
@@ -251,18 +239,89 @@ export function AdminDashboard({
             </div>
           </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <ThemeToggle />
-              <LanguageSelector />
-              <div className="hidden sm:flex items-center gap-1.5 pl-1">
-                <div className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center border border-orange-200 dark:border-orange-800">
-                  {displayUsername.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2 shrink-0">
+            <ThemeToggle />
+            <LanguageSelector />
+
+            {/* Menú desplegable de usuario en el header (igual que en la app principal) */}
+            <div className="relative shrink-0" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 p-1 pl-1 pr-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                aria-label="Abrir menú de usuario"
+                aria-expanded={isUserMenuOpen}
+              >
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center shadow-xs border border-orange-200 dark:border-orange-800">
+                    {displayUsername.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                    Admin
+                  </span>
                 </div>
-                <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-black uppercase tracking-wider">
-                  ADMIN
+                <span className="material-symbols-outlined text-sm text-slate-400">
+                  {isUserMenuOpen ? "expand_less" : "expand_more"}
                 </span>
-              </div>
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl z-50 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                        @{displayUsername}
+                      </span>
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
+                        ADMIN
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                      {currentUser.email}
+                    </p>
+                  </div>
+
+                  <div className="pt-1 space-y-0.5 text-xs">
+                    <Link
+                      href="/"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition text-left group"
+                    >
+                      <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                        map
+                      </span>
+                      <span>Ver Explorador</span>
+                    </Link>
+
+                    <Link
+                      href="/docs"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition text-left group"
+                    >
+                      <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                        menu_book
+                      </span>
+                      <span>{t("nav.documentation")}</span>
+                    </Link>
+                  </div>
+
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                    <form action={logoutAction}>
+                      <button
+                        type="submit"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition cursor-pointer text-left text-xs"
+                      >
+                        <span className="material-symbols-outlined text-[18px] leading-none">
+                          logout
+                        </span>
+                        <span>{t("nav.logout")}</span>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
+          </div>
         </header>
 
         {/* Contenido activo */}
