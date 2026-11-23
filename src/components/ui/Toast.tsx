@@ -31,7 +31,11 @@ const STYLES: Record<ToastKind, string> = {
   error: "bg-red-600 border-red-400/60 text-white",
   info: "bg-slate-800 border-slate-600 text-slate-100",
 };
-const ICONS: Record<ToastKind, string> = { success: "✅", error: "⚠️", info: "ℹ️" };
+const ICONS: Record<ToastKind, string> = {
+  success: "check_circle",
+  error: "warning",
+  info: "info",
+};
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -72,7 +76,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             className={`pointer-events-auto flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border shadow-2xl text-xs font-semibold animate-in fade-in slide-in-from-bottom-2 ${STYLES[t.kind]}`}
           >
-            <span aria-hidden>{ICONS[t.kind]}</span>
+            <span
+              className="material-symbols-outlined text-base leading-none shrink-0"
+              aria-hidden="true"
+            >
+              {ICONS[t.kind]}
+            </span>
             <span className="flex-1">{t.message}</span>
             {t.actionLabel && t.onAction && (
               <button

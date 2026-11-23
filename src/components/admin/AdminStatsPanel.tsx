@@ -343,11 +343,13 @@ export function AdminStatsPanel() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0 text-[10px] font-bold">
-                    <span className="px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                      ⭐ {p.favoritesCount}
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                      <span className="material-symbols-outlined text-xs leading-none">star</span>
+                      <span>{p.favoritesCount}</span>
                     </span>
-                    <span className="px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                      ✅ {p.visitedCount}
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                      <span className="material-symbols-outlined text-xs leading-none">check_circle</span>
+                      <span>{p.visitedCount}</span>
                     </span>
                     {p.avgRating !== null && (
                       <span className="px-1.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/60 text-violet-800 dark:text-violet-300">

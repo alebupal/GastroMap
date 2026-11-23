@@ -95,10 +95,10 @@ export function CountrySelect({ value, onChange, className = "" }: CountrySelect
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("location.country_placeholder")}
-              className="w-full px-2.5 py-1.5 pl-7 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 transition"
+              className="w-full px-2.5 py-1.5 pl-8 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-0 focus:border-slate-400 dark:focus:border-slate-500 transition"
             />
-            <span className="absolute left-2 top-1.5 text-xs text-slate-400 pointer-events-none">
-              🔍
+            <span className="material-symbols-outlined text-sm text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+              search
             </span>
             {query && (
               <button

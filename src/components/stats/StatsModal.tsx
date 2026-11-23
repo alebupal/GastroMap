@@ -13,6 +13,7 @@ interface StatsModalProps {
 
 function MiniBarList({
   title,
+  icon,
   items,
   prefix = "",
   topBarClass = "bg-orange-600",
@@ -21,6 +22,7 @@ function MiniBarList({
   footerBadge,
 }: {
   title: string;
+  icon?: string;
   items: CountItem[];
   prefix?: string;
   topBarClass?: string;
@@ -34,8 +36,13 @@ function MiniBarList({
   return (
     <div className="p-4 rounded-2xl bg-[#f4f5ff]/80 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-3">
       <div className="space-y-2.5">
-        <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-          {title}
+        <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          {icon && (
+            <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+              {icon}
+            </span>
+          )}
+          <span>{title}</span>
         </h4>
         <div className="space-y-2">
           {items.map((item, idx) => {
@@ -44,15 +51,17 @@ function MiniBarList({
               <div key={item.label} className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span
-                    className={`truncate ${
+                    className={`truncate inline-flex items-center gap-1 ${
                       isTop
                         ? `font-bold ${topLabelClass}`
                         : "font-medium text-slate-700 dark:text-slate-300"
                     }`}
                   >
-                    {item.icon ? `${item.icon} ` : ""}
-                    {prefix}
-                    {item.label}
+                    {item.icon && <OccasionIcon icon={item.icon} msClassName="text-[14px]" />}
+                    <span className="truncate">
+                      {prefix}
+                      {item.label}
+                    </span>
                   </span>
                   <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 shrink-0 ml-2">
                     {item.count}
@@ -299,7 +308,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <span>📊</span>
+              <span className="material-symbols-outlined text-sm leading-none">bar_chart</span>
               <span>{t("stats.overview_tab").replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
             <button
@@ -311,7 +320,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <span>🎁</span>
+              <span className="material-symbols-outlined text-sm leading-none">featured_seasonal_and_gifts</span>
               <span>{t("stats.wrapped_tab", { year: selectedYear }).replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
           </div>
@@ -327,7 +336,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                    <span>✅</span>
+                    <span className="material-symbols-outlined text-xs leading-none">check_circle</span>
                     <span>{t("cards.visited")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-emerald-700 dark:text-emerald-400 mt-1.5">
@@ -337,7 +346,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
                 <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                    <span>⭐</span>
+                    <span className="material-symbols-outlined text-xs leading-none">star</span>
                     <span>{t("places.favorites")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-amber-700 dark:text-amber-400 mt-1.5">
@@ -347,7 +356,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
                 <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
-                    <span>🕒</span>
+                    <span className="material-symbols-outlined text-xs leading-none">schedule</span>
                     <span>{t("places.want_to_go")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-orange-600 dark:text-orange-400 mt-1.5">
@@ -357,7 +366,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
                 <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                    <span>🏆</span>
+                    <span className="material-symbols-outlined text-xs leading-none">emoji_events</span>
                     <span>{t("ui.avg_rating")}</span>
                   </div>
                   <div className="text-3xl sm:text-4xl font-black text-slate-700 dark:text-slate-200 mt-1.5">
@@ -405,21 +414,24 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               {/* Gráficas 2x2 estilo Stitch */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <MiniBarList
-                  title={`🏙️ ${t("stats.top_cities")}`}
+                  title={t("stats.top_cities")}
+                  icon="location_city"
                   items={stats.topCities}
                   topBarClass="bg-orange-600"
                   restBarClass="bg-orange-300 dark:bg-orange-500/40"
                   topLabelClass="text-orange-700 dark:text-orange-400"
                 />
                 <MiniBarList
-                  title={`🍽️ ${t("stats.top_occasions")}`}
+                  title={t("stats.top_occasions")}
+                  icon="restaurant"
                   items={stats.topOccasions}
                   topBarClass="bg-amber-500"
                   restBarClass="bg-amber-200 dark:bg-amber-500/40"
                   topLabelClass="text-amber-700 dark:text-amber-400"
                 />
                 <MiniBarList
-                  title={`💶 ${t("stats.price_distribution")}`}
+                  title={t("stats.price_distribution")}
+                  icon="payments"
                   items={stats.priceDistribution}
                   topBarClass="bg-emerald-700"
                   restBarClass="bg-emerald-400/70 dark:bg-emerald-500/40"
@@ -431,7 +443,8 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   }
                 />
                 <MiniBarList
-                  title={`🏷️ ${t("stats.top_tags")}`}
+                  title={t("stats.top_tags")}
+                  icon="sell"
                   items={stats.topTags}
                   prefix="#"
                   topBarClass="bg-orange-600"
@@ -473,7 +486,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 <div className="relative flex items-start justify-between gap-2">
                   <div className="space-y-1.5">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-xs text-[10px] font-black uppercase tracking-widest">
-                      <span>🍽️</span>
+                      <span className="material-symbols-outlined text-xs leading-none">restaurant</span>
                       <span>GastroMap Wrapped</span>
                     </span>
                     <h4 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
@@ -531,7 +544,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
-                          🏙️ Ciudad estrella
+                          Ciudad estrella
                         </span>
                         <span className="material-symbols-outlined text-sm text-orange-500">location_on</span>
                       </div>
@@ -548,7 +561,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-600">
-                          🎯 Plan predilecto
+                          Plan predilecto
                         </span>
                         <OccasionIcon icon={stats.wrapped.topOccasion.icon} className="text-sm" msClassName="text-base" />
                       </div>
@@ -565,7 +578,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     <div className="p-3.5 rounded-2xl bg-white text-slate-900 shadow-sm">
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
-                          🏷️ Especialidad
+                          Especialidad
                         </span>
                         <span className="text-emerald-600 font-black text-xs">#</span>
                       </div>
@@ -581,15 +594,18 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   {stats.wrapped.topRatedPlace && (
                     <div className="sm:col-span-3 p-3.5 rounded-2xl bg-white/95 text-slate-900 shadow-sm flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
-                          🏆 Tu favorito del año
+                        <div className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
+                          <span className="material-symbols-outlined text-xs leading-none">emoji_events</span>
+                          <span>Tu favorito del año</span>
                         </div>
                         <div className="font-black text-sm mt-0.5 truncate">
                           {stats.wrapped.topRatedPlace.name}
                         </div>
                       </div>
-                      <div className="text-xs font-bold text-slate-600 shrink-0">
-                        {stats.wrapped.topRatedPlace.city || "—"} • ⭐ {stats.wrapped.topRatedPlace.rating}/10
+                      <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 shrink-0">
+                        <span>{stats.wrapped.topRatedPlace.city || "—"} •</span>
+                        <span className="material-symbols-outlined text-xs text-amber-500 leading-none">star</span>
+                        <span>{stats.wrapped.topRatedPlace.rating}/10</span>
                       </div>
                     </div>
                   )}

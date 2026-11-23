@@ -327,7 +327,10 @@ export function EditPlaceModal({
                           : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                           }`}
                       >
-                        <span>👥 {g.name}</span>
+                        <span className="inline-flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs leading-none">group</span>
+                          <span>{g.name}</span>
+                        </span>
                         {active && <span className="text-[10px]">✓</span>}
                       </button>
                     );

@@ -259,7 +259,7 @@ export function ComparePlacesModal({
                       </div>
                       <div className="flex flex-wrap gap-1">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                             p.personalStatus === "visited"
                               ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
                               : p.personalStatus === "pending"
@@ -267,11 +267,20 @@ export function ComparePlacesModal({
                                 : "bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300"
                           }`}
                         >
-                          {p.personalStatus === "visited"
-                            ? `✅ ${t("cards.visited")}`
-                            : p.personalStatus === "pending"
-                              ? `🕒 ${t("places.want_to_go")}`
-                              : `✨ ${t("cards.untried_badge")}`}
+                          <span className="material-symbols-outlined text-xs leading-none">
+                            {p.personalStatus === "visited"
+                              ? "check_circle"
+                              : p.personalStatus === "pending"
+                                ? "schedule"
+                                : "auto_awesome"}
+                          </span>
+                          <span>
+                            {p.personalStatus === "visited"
+                              ? t("cards.visited")
+                              : p.personalStatus === "pending"
+                                ? t("places.want_to_go")
+                                : t("cards.untried_badge")}
+                          </span>
                         </span>
                         {p.occasions.slice(0, 3).map((occId) => {
                           const info = occasionMap[occId] || { name: occId, icon: "🍽️" };
@@ -310,8 +319,9 @@ export function ComparePlacesModal({
                     {/* Bloque blanco de notas y valoración */}
                     <div className="p-3 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-700/60 space-y-1.5">
                       <div className="flex items-center justify-between text-[10px] font-bold">
-                        <span className="text-slate-500 dark:text-slate-400">
-                          💬 {p.commentsCount || 0} {t("compare.comments").toLowerCase()}
+                        <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
+                          <span className="material-symbols-outlined text-xs leading-none">chat_bubble</span>
+                          <span>{p.commentsCount || 0} {t("compare.comments").toLowerCase()}</span>
                         </span>
                         <span className="text-amber-600 dark:text-amber-400">
                           {p.rating !== null && p.rating !== undefined
@@ -381,7 +391,7 @@ export function ComparePlacesModal({
                 {verdict.topActivity && (
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
                     <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1">
-                      <span>⭐</span>
+                      <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
                       <span>Más destacado:</span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
@@ -395,7 +405,7 @@ export function ComparePlacesModal({
                 {verdict.cheapest && (
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
                     <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1">
-                      <span>⚡</span>
+                      <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">bolt</span>
                       <span>Opción más económica:</span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
@@ -407,7 +417,9 @@ export function ComparePlacesModal({
                 {verdict.closest && (
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800">
                     <div className="font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1">
-                      <span>{verdict.hasDistances ? "📍" : "✨"}</span>
+                      <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                        {verdict.hasDistances ? "near_me" : "auto_awesome"}
+                      </span>
                       <span>{verdict.hasDistances ? "Más cercano:" : "Para descubrir:"}</span>
                     </div>
                     <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">

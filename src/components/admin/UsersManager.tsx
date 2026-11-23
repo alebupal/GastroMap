@@ -333,8 +333,9 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
       <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
           {error && (
-            <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium">
-              ⚠️ {error}
+            <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
+              <span>{error}</span>
             </div>
           )}
 

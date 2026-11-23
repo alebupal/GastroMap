@@ -112,9 +112,9 @@ export function RandomPickerModal({
           <div>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-[10px] font-black uppercase tracking-wider">
               <span
-                className={`inline-block leading-none ${isSpinning ? "animate-spin" : ""}`}
+                className={`material-symbols-outlined text-xs leading-none ${isSpinning ? "animate-spin" : ""}`}
               >
-                🎲
+                casino
               </span>
               <span>{t("ui.indecision_mode")}</span>
             </span>
@@ -157,7 +157,7 @@ export function RandomPickerModal({
             </span>
             {excludeVisited && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100/90 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
-                <span>✨</span>
+                <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
                 <span>Solo &quot;Por descubrir&quot;</span>
               </span>
             )}
@@ -169,7 +169,7 @@ export function RandomPickerModal({
           <div className="relative pt-2">
             {/* Insignia flotante superior derecha */}
             <div className="absolute -top-0.5 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
-              <span>✨</span>
+              <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
               <span>{t("ui.recommended_dest")}</span>
             </div>
 
@@ -226,34 +226,34 @@ export function RandomPickerModal({
                     ))}
                     {selectedPlace.isFavorite ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                        <span>⭐</span>
+                        <span className="material-symbols-outlined text-xs leading-none">star</span>
                         <span>{t("ui.in_favorites")}</span>
                       </span>
                     ) : selectedPlace.personalStatus === "visited" ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                        <span>✅</span>
+                        <span className="material-symbols-outlined text-xs leading-none">check_circle</span>
                         <span>{t("ui.already_tried")}</span>
                       </span>
                     ) : selectedPlace.personalStatus === "pending" ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                        <span>🕒</span>
+                        <span className="material-symbols-outlined text-xs leading-none">schedule</span>
                         <span>{t("ui.in_wishlist")}</span>
                       </span>
                     ) : !selectedPlace.communityPublished ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200">
-                        <span>🔒</span>
+                        <span className="material-symbols-outlined text-xs leading-none">lock</span>
                         <span>{t("ui.private_card")}</span>
                       </span>
                     ) : (selectedPlace.commentsCount || 0) > 0 ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                        <span>💬</span>
+                        <span className="material-symbols-outlined text-xs leading-none">chat_bubble</span>
                         <span>
                           {selectedPlace.commentsCount} {t("compare.comments").toLowerCase()}
                         </span>
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300">
-                        <span>✨</span>
+                        <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
                         <span>{t("places.unexplored")}</span>
                       </span>
                     )}

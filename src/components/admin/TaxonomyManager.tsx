@@ -920,7 +920,7 @@ export function TaxonomyManager({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
             <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
-              <span className="text-2xl">🧹</span>
+              <span className="material-symbols-outlined text-2xl leading-none">cleaning_services</span>
               <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {t(
                   emptyConfirmModal.type === "occasions"
@@ -988,7 +988,7 @@ export function TaxonomyManager({
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
             <div className="flex items-center gap-2.5 text-red-600 dark:text-red-400">
-              <span className="text-2xl">🗑️</span>
+              <span className="material-symbols-outlined text-2xl leading-none">delete</span>
               <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {t(
                   bulkDeleteModal.type === "occasions"

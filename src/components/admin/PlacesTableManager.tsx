@@ -457,8 +457,9 @@ export function PlacesTableManager({
                     </span>
                   ))}
                   {hasCoords ? (
-                    <span className="text-[10px] text-blue-600 dark:text-blue-400 font-mono font-semibold ml-auto">
-                      📍 {place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}
+                    <span className="inline-flex items-center gap-0.5 text-[10px] text-blue-600 dark:text-blue-400 font-mono font-semibold ml-auto">
+                      <span className="material-symbols-outlined text-xs leading-none">location_on</span>
+                      <span>{place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}</span>
                     </span>
                   ) : (
                     <span className="text-[10px] text-slate-400 dark:text-slate-600 ml-auto">
@@ -605,7 +606,7 @@ export function PlacesTableManager({
                       <td className="p-3 whitespace-nowrap">
                         {hasCoords ? (
                           <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
-                            <span>📍</span>
+                            <span className="material-symbols-outlined text-sm leading-none">location_on</span>
                             <span>{place.latitude?.toFixed(3)}, {place.longitude?.toFixed(3)}</span>
                           </span>
                         ) : (

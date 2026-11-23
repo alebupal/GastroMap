@@ -976,7 +976,10 @@ export function PlacesExplorer({
 
       {locationError && (
         <div className="p-3 rounded-2xl bg-red-950/40 border border-red-900/50 text-red-400 text-xs flex items-center justify-between">
-          <span>⚠️ {locationError}</span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-base leading-none">warning</span>
+            <span>{locationError}</span>
+          </span>
           <button
             onClick={() => setLocationError(null)}
             className="text-xs font-bold text-red-400 cursor-pointer"
@@ -1248,7 +1251,10 @@ export function PlacesExplorer({
                                 : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                                 }`}
                             >
-                              <span className="truncate">👥 {g.name}</span>
+                              <span className="inline-flex items-center gap-1.5 truncate">
+                                <span className="material-symbols-outlined text-xs leading-none shrink-0">group</span>
+                                <span className="truncate">{g.name}</span>
+                              </span>
                               {isSelected && <span className="text-xs">✓</span>}
                             </button>
                           );
@@ -2049,7 +2055,9 @@ export function PlacesExplorer({
           )}
           {filteredPlaces.length === 0 ? (
             <div className="p-10 text-center rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-xs">
-              <div className="text-4xl mb-3">🔍</div>
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 flex items-center justify-center mx-auto mb-3">
+                <span className="material-symbols-outlined text-2xl leading-none">search_off</span>
+              </div>
               <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
                 {t("places.no_results")}
               </h3>
@@ -2257,7 +2265,7 @@ export function PlacesExplorer({
         <div className="fixed bottom-20 lg:bottom-5 left-1/2 -translate-x-1/2 z-[955] max-w-[calc(100vw-1.5rem)]">
           <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
             <span className="text-xs font-bold flex items-center gap-1.5">
-              <span>⚖️</span>
+              <span className="material-symbols-outlined text-base text-orange-400 leading-none">compare_arrows</span>
               <span>{t("places.compare_counter", { count: compareIds.length })}</span>
             </span>
             <button
@@ -2362,7 +2370,9 @@ export function PlacesExplorer({
                 <span className="text-xs font-black px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
                   {selectedPlace.priceRange}
                 </span>
-                {selectedPlace.isFavorite && <span className="text-xs">⭐</span>}
+                {selectedPlace.isFavorite && (
+                  <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
+                )}
                 <span className="text-xs font-bold text-slate-500 truncate">
                   {selectedPlace.city || ""}
                 </span>
@@ -2392,9 +2402,10 @@ export function PlacesExplorer({
                 href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.latitude},${selectedPlace.longitude}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 py-2 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-center border border-blue-200 dark:border-blue-900/40"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-center border border-blue-200 dark:border-blue-900/40"
               >
-                {t("places.get_directions")}
+                <span className="material-symbols-outlined text-sm leading-none">directions</span>
+                <span>{t("places.get_directions")}</span>
               </a>
             )}
             <button

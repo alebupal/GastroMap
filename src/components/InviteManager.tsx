@@ -102,7 +102,9 @@ export function InviteManager() {
       {/* Cabecera */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <span className="text-xl">🎟️</span>
+          <span className="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-lg leading-none">confirmation_number</span>
+          </span>
           <div>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span>{t("invites.title")}</span>
@@ -121,13 +123,17 @@ export function InviteManager() {
           onClick={() => setIsFormOpen(!isFormOpen)}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer self-start sm:self-center shadow-xs"
         >
-          <span>{isFormOpen ? "✕" : `➕ ${t("invites.generate_btn")}`}</span>
+          <span className="material-symbols-outlined text-sm leading-none">
+            {isFormOpen ? "close" : "add"}
+          </span>
+          {!isFormOpen && <span>{t("invites.generate_btn")}</span>}
         </button>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-medium">
-          ⚠️ {error}
+        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1.5">
+          <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
+          <span>{error}</span>
         </div>
       )}
 
@@ -232,9 +238,12 @@ export function InviteManager() {
             type="button"
             onClick={loadInvitations}
             disabled={loadingList}
-            className="text-[11px] text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
-            {loadingList ? t("invites.refreshing") : t("invites.refresh")}
+            <span className={`material-symbols-outlined text-xs leading-none ${loadingList ? "animate-spin" : ""}`}>
+              refresh
+            </span>
+            <span>{loadingList ? t("invites.refreshing") : t("invites.refresh")}</span>
           </button>
         </h4>
 
@@ -320,6 +329,9 @@ export function InviteManager() {
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                         title={t("invites.copy_link")}
                       >
+                        <span className="material-symbols-outlined text-xs leading-none">
+                          {copiedToken === inv.id ? "check" : "content_copy"}
+                        </span>
                         <span>{copiedToken === inv.id ? t("invites.copied_btn") : t("invites.copy_link_btn")}</span>
                       </button>
                     )}
@@ -331,7 +343,7 @@ export function InviteManager() {
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 text-[11px] font-bold transition cursor-pointer disabled:opacity-40"
                       title={isActive ? t("invites.revoke_btn") : t("invites.delete_btn")}
                     >
-                      <span>🗑️</span>
+                      <span className="material-symbols-outlined text-xs leading-none">delete</span>
                       <span>{deletingId === inv.id ? t("invites.deleting") : isActive ? t("invites.revoke_btn") : t("invites.delete_btn")}</span>
                     </button>
                   </div>

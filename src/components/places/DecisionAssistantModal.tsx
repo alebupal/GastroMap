@@ -388,7 +388,7 @@ export function DecisionAssistantModal({
                     : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                <span>✨</span>
+                <span className="material-symbols-outlined text-base leading-none">auto_awesome</span>
                 <span>{t("assistant.untried")}</span>
               </button>
 
@@ -401,7 +401,7 @@ export function DecisionAssistantModal({
                     : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                <span>✅</span>
+                <span className="material-symbols-outlined text-base leading-none">check_circle</span>
                 <span>{t("assistant.visited_by_me")}</span>
               </button>
 
@@ -414,7 +414,7 @@ export function DecisionAssistantModal({
                     : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                <span>⭐</span>
+                <span className="material-symbols-outlined text-base leading-none">star</span>
                 <span>{t("assistant.favorites_only")}</span>
               </button>
 

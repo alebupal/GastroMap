@@ -84,8 +84,8 @@ export function OccasionPicker({
       <div className="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-2.5">
         {occasions.length > 6 && (
           <div className="relative">
-            <span className="absolute left-2.5 top-2 text-xs text-slate-400 pointer-events-none">
-              🔍
+            <span className="material-symbols-outlined text-base text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+              search
             </span>
             <input
               type="text"

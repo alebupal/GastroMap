@@ -299,12 +299,12 @@ export function LocationPicker({
             placeholder={t("location.search_placeholder")}
             className="w-full px-3 py-2 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
-          <span className="absolute left-2.5 top-2.5 text-xs text-slate-400 pointer-events-none">
-            📍
+          <span className="material-symbols-outlined text-base text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+            location_on
           </span>
           {isSearching && (
-            <span className="absolute right-2.5 top-2.5 text-xs text-amber-500 animate-spin">
-              ⏳
+            <span className="material-symbols-outlined text-base text-amber-500 animate-spin absolute right-2.5 top-1/2 -translate-y-1/2 leading-none">
+              progress_activity
             </span>
           )}
         </div>
@@ -441,10 +441,13 @@ export function LocationPicker({
             type="button"
             onClick={() => handleGeocodeAddress()}
             disabled={isGeocodingAddress || address.trim().length < 2}
-            className="px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shrink-0 transition disabled:opacity-40 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold shrink-0 transition disabled:opacity-40 cursor-pointer"
             title={t("location.search_coords_btn")}
           >
-            {isGeocodingAddress ? "⏳ " + t("location.searching_coords") : "🔍 " + t("location.search_coords_btn")}
+            <span className={`material-symbols-outlined text-sm leading-none ${isGeocodingAddress ? "animate-spin" : ""}`}>
+              {isGeocodingAddress ? "progress_activity" : "search"}
+            </span>
+            <span>{isGeocodingAddress ? t("location.searching_coords") : t("location.search_coords_btn")}</span>
           </button>
         </div>
       </div>
@@ -474,7 +477,7 @@ export function LocationPicker({
         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-              <span>📍</span>
+              <span className="material-symbols-outlined text-sm leading-none">location_on</span>
               <span>{t("location.manual_coords_title")}</span>
             </span>
             {lat && lng && (
@@ -526,7 +529,7 @@ export function LocationPicker({
       ) : (
         <div className="flex items-center justify-between text-xs px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
           <p className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 font-mono">
-            <span>🌐</span>
+            <span className="material-symbols-outlined text-sm text-orange-600 leading-none">public</span>
             <span>
               {t("location.coords_label", {
                 lat: parseFloat(lat).toFixed(4),
@@ -537,9 +540,10 @@ export function LocationPicker({
           <button
             type="button"
             onClick={() => setShowManualCoords(true)}
-            className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
           >
-            ✏️ {t("location.edit_coords")}
+            <span className="material-symbols-outlined text-xs leading-none">edit</span>
+            <span>{t("location.edit_coords")}</span>
           </button>
         </div>
       )}

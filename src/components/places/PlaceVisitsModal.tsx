@@ -101,8 +101,9 @@ export function PlaceVisitsModal({
 
         <div className="p-5 space-y-4 overflow-y-auto flex-1">
           {error && (
-            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs">
-              ⚠️ {error}
+            <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
+              <span>{error}</span>
             </div>
           )}
 
@@ -111,8 +112,9 @@ export function PlaceVisitsModal({
             onSubmit={handleAddVisit}
             className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 space-y-2.5"
           >
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              ➕ {t("notes_visits.register_visit")}
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm text-orange-600 leading-none">add_circle</span>
+              <span>{t("notes_visits.register_visit")}</span>
             </h4>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -178,17 +180,20 @@ export function PlaceVisitsModal({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                        📅{" "}
-                        {new Date(v.visitedAt).toLocaleDateString("es-ES", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                      <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-800 dark:text-slate-200">
+                        <span className="material-symbols-outlined text-sm text-slate-400 leading-none">calendar_today</span>
+                        <span>
+                          {new Date(v.visitedAt).toLocaleDateString("es-ES", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </span>
                       </span>
                       {v.rating !== null && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                          ⭐ {v.rating}/10
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                          <span className="material-symbols-outlined text-xs leading-none">star</span>
+                          <span>{v.rating}/10</span>
                         </span>
                       )}
                     </div>

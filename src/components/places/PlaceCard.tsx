@@ -156,9 +156,12 @@ export function PlaceCard({
                 </h3>
                 {typeof place.distanceMeters === "number" && (
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 text-[10px] font-semibold shrink-0">
-                    📍 {place.distanceMeters < 1000
-                      ? `${place.distanceMeters} m`
-                      : `${(place.distanceMeters / 1000).toFixed(1)} km`}
+                    <span className="material-symbols-outlined text-[12px] leading-none">near_me</span>
+                    <span>
+                      {place.distanceMeters < 1000
+                        ? `${place.distanceMeters} m`
+                        : `${(place.distanceMeters / 1000).toFixed(1)} km`}
+                    </span>
                   </span>
                 )}
               </div>
@@ -246,8 +249,13 @@ export function PlaceCard({
         {/* Notas privadas personales (solo visibles por el usuario logueado) */}
         {privateNotes && (
           <div className="mt-2 text-xs text-amber-900 dark:text-amber-300 bg-amber-100/70 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/40 flex items-start justify-between gap-2">
-            <span className="italic">
-              🔒 <LinkifiedText text={privateNotes} />
+            <span className="italic inline-flex items-start gap-1">
+              <span className="material-symbols-outlined text-[14px] leading-none mt-0.5 text-amber-600 dark:text-amber-400 shrink-0">
+                lock
+              </span>
+              <span>
+                <LinkifiedText text={privateNotes} />
+              </span>
             </span>
             <button
               type="button"
