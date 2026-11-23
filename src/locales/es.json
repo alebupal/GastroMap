@@ -135,7 +135,10 @@
     "geo_unavailable": "No se pudo obtener tu ubicación.",
     "min_rating_label": "Nota mínima",
     "min_rating_any": "Todas",
-    "active_filters_remove_hint": "Quita algún filtro para ampliar resultados:"
+    "active_filters_remove_hint": "Quita algún filtro para ampliar resultados:",
+    "towns_filter": "Pueblos",
+    "all_towns": "Todos los pueblos",
+    "search_towns_placeholder": "Buscar pueblo o municipio..."
   },
   "cards": {
     "pending": "Pendiente",

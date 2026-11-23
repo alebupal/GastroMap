@@ -135,7 +135,10 @@
     "geo_unavailable": "Could not obtain your location.",
     "min_rating_label": "Min rating",
     "min_rating_any": "Any",
-    "active_filters_remove_hint": "Remove a filter to broaden results:"
+    "active_filters_remove_hint": "Remove a filter to broaden results:",
+    "towns_filter": "Towns",
+    "all_towns": "All towns",
+    "search_towns_placeholder": "Search town or municipality..."
   },
   "cards": {
     "pending": "Pending",
