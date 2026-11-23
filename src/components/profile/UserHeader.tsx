@@ -130,18 +130,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
           {/* Selector de idioma */}
           <LanguageSelector />
 
-          {/* Botón Donar */}
-          <a
-            href="https://www.paypal.me/alebupal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/80 dark:border-rose-900/50 hover:bg-rose-600 hover:text-white hover:border-rose-600 font-semibold text-xs transition shadow-xs group"
-            title={t("nav.donate_paypal")}
-          >
-            <span className="material-symbols-outlined text-sm text-rose-500 group-hover:text-white transition-colors">favorite</span>
-            <span>{t("nav.donate")}</span>
-          </a>
-
           {/* Botón Panel Admin */}
           {currentUser.role === "admin" && (
             <Link
@@ -260,18 +248,6 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                     <span className="text-base">⚙️</span>
                     <span>{t("nav.profile")}</span>
                   </button>
-
-                  {/* Enlace de donación en móvil */}
-                  <a
-                    href="https://www.paypal.me/alebupal"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="md:hidden w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-medium transition text-left"
-                  >
-                    <span className="text-base">❤️</span>
-                    <span>{t("nav.donate_paypal")}</span>
-                  </a>
                 </div>
 
                 {/* Divisor y botón de cerrar sesión */}
