@@ -792,6 +792,8 @@
     "single_delete_leave_empty_tag": "Places will be left without this tag.",
     "single_delete_title_occasion": "Delete category «{name}»?",
     "single_delete_title_tag": "Delete tag «{name}»?",
+    "single_delete_success_occasion": "✓ Category «{name}» deleted.",
+    "single_delete_success_tag": "✓ Tag «{name}» deleted.",
     "assigned_warning": "⚠️ This classification is assigned to {count} places.",
     "assigned_warning_one": "⚠️ This classification is assigned to 1 place.",
     "reassign_radio": "Replace with another existing",

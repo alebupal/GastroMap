@@ -202,6 +202,8 @@
 "admin_taxonomy.single_delete_leave_empty_occasion","Los sitios se quedan sin esta categoría.","Places will be left without this category."
 "admin_taxonomy.single_delete_leave_empty_tag","Los sitios se quedan sin esta etiqueta.","Places will be left without this tag."
 "admin_taxonomy.single_delete_safe_hint","Ningún establecimiento tiene asignada esta clasificación. Se eliminará de forma segura.","No places are assigned to this classification. It will be safely removed."
+"admin_taxonomy.single_delete_success_occasion","✓ Categoría «{name}» eliminada.","✓ Category «{name}» deleted."
+"admin_taxonomy.single_delete_success_tag","✓ Etiqueta «{name}» eliminada.","✓ Tag «{name}» deleted."
 "admin_taxonomy.single_delete_title_occasion","¿Eliminar categoría «{name}»?","Delete category «{name}»?"
 "admin_taxonomy.single_delete_title_tag","¿Eliminar etiqueta «{name}»?","Delete tag «{name}»?"
 "admin_taxonomy.subtitle_occasions","Define las categorías para clasificar planes (ej: tapeo, cena romántica...)","Define categories to classify occasions (e.g. tapas, romantic dinner...)"

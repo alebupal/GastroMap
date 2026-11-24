@@ -23,6 +23,7 @@ import {
   formatOccasionOptionLabel,
 } from "@/components/ui/OccasionIcon";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
 
 interface TaxonomyManagerProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
@@ -38,6 +39,7 @@ export function TaxonomyManager({
   defaultOpen = false,
 }: TaxonomyManagerProps) {
   const { t } = useT();
+  const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"occasions" | "tags">(section || "occasions");
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -256,25 +258,43 @@ export function TaxonomyManager({
     setLoading(true);
     setError(null);
     const replacement = deleteMode === "reassign" ? replacementTarget : undefined;
+    const deletedId = itemToDelete.id;
+    const deletedName = itemToDelete.name;
 
     if (itemToDelete.type === "occasion") {
-      const deletedId = itemToDelete.id;
-      await deleteOccasionAction(deletedId, replacement);
-      setOccasionsList((prev) => prev.filter((o) => o.id !== deletedId));
-      setSelectedOccasionIds((prev) => {
-        const next = new Set(prev);
-        next.delete(deletedId);
-        return next;
-      });
+      const res = await deleteOccasionAction(deletedId, replacement);
+      if (res?.error) {
+        setError(res.error);
+        toast(res.error, { kind: "error" });
+      } else {
+        setOccasionsList((prev) => prev.filter((o) => o.id !== deletedId));
+        setSelectedOccasionIds((prev) => {
+          const next = new Set(prev);
+          next.delete(deletedId);
+          return next;
+        });
+        const msg = t("admin_taxonomy.single_delete_success_occasion", { name: deletedName });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
+        setTimeout(() => setSuccessMessage(null), 4000);
+      }
     } else {
-      const deletedId = itemToDelete.id;
-      await deleteTagAction(deletedId, replacement);
-      setTagsList((prev) => prev.filter((t) => t.id !== deletedId));
-      setSelectedTagIds((prev) => {
-        const next = new Set(prev);
-        next.delete(deletedId);
-        return next;
-      });
+      const res = await deleteTagAction(deletedId, replacement);
+      if (res?.error) {
+        setError(res.error);
+        toast(res.error, { kind: "error" });
+      } else {
+        setTagsList((prev) => prev.filter((t) => t.id !== deletedId));
+        setSelectedTagIds((prev) => {
+          const next = new Set(prev);
+          next.delete(deletedId);
+          return next;
+        });
+        const msg = t("admin_taxonomy.single_delete_success_tag", { name: deletedName });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
+        setTimeout(() => setSuccessMessage(null), 4000);
+      }
     }
 
     router.refresh();
@@ -348,7 +368,9 @@ export function TaxonomyManager({
           idsToDelete.forEach((id) => next.delete(id));
           return next;
         });
-        setSuccessMessage(t("admin_taxonomy.delete_empty_success_occasions", { count: res.count ?? idsToDelete.length }));
+        const msg = t("admin_taxonomy.delete_empty_success_occasions", { count: res.count ?? idsToDelete.length });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
         setTimeout(() => setSuccessMessage(null), 3500);
       }
     } else {
@@ -356,6 +378,7 @@ export function TaxonomyManager({
       const res = await deleteEmptyTagsAction(tagsToDelete);
       if (res.error) {
         setError(res.error);
+        toast(res.error, { kind: "error" });
       } else {
         setTagsList((prev) => prev.filter((t) => !tagsToDelete.includes(t.id)));
         setSelectedTagIds((prev) => {
@@ -363,7 +386,9 @@ export function TaxonomyManager({
           tagsToDelete.forEach((id) => next.delete(id));
           return next;
         });
-        setSuccessMessage(t("admin_taxonomy.delete_empty_success_tags", { count: res.count ?? tagsToDelete.length }));
+        const msg = t("admin_taxonomy.delete_empty_success_tags", { count: res.count ?? tagsToDelete.length });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
         setTimeout(() => setSuccessMessage(null), 3500);
       }
     }
@@ -405,17 +430,22 @@ export function TaxonomyManager({
       } else {
         setOccasionsList((prev) => prev.filter((o) => !bulkDeleteModal.ids.includes(o.id)));
         setSelectedOccasionIds(new Set());
-        setSuccessMessage(t("admin_taxonomy.bulk_delete_success_occasions", { count: res.count ?? bulkDeleteModal.ids.length }));
+        const msg = t("admin_taxonomy.bulk_delete_success_occasions", { count: res.count ?? bulkDeleteModal.ids.length });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
         setTimeout(() => setSuccessMessage(null), 3500);
       }
     } else {
       const res = await deleteMultipleTagsAction(bulkDeleteModal.ids);
       if (res.error) {
         setError(res.error);
+        toast(res.error, { kind: "error" });
       } else {
         setTagsList((prev) => prev.filter((t) => !bulkDeleteModal.ids.includes(t.id)));
         setSelectedTagIds(new Set());
-        setSuccessMessage(t("admin_taxonomy.bulk_delete_success_tags", { count: res.count ?? bulkDeleteModal.ids.length }));
+        const msg = t("admin_taxonomy.bulk_delete_success_tags", { count: res.count ?? bulkDeleteModal.ids.length });
+        setSuccessMessage(msg);
+        toast(msg, { kind: "success" });
         setTimeout(() => setSuccessMessage(null), 3500);
       }
     }

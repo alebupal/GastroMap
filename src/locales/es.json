@@ -792,6 +792,8 @@
     "single_delete_leave_empty_tag": "Los sitios se quedan sin esta etiqueta.",
     "single_delete_title_occasion": "¿Eliminar categoría «{name}»?",
     "single_delete_title_tag": "¿Eliminar etiqueta «{name}»?",
+    "single_delete_success_occasion": "✓ Categoría «{name}» eliminada.",
+    "single_delete_success_tag": "✓ Etiqueta «{name}» eliminada.",
     "assigned_warning": "⚠️ Esta clasificación está asignada a {count} establecimientos.",
     "assigned_warning_one": "⚠️ Esta clasificación está asignada a 1 establecimiento.",
     "reassign_radio": "Reemplazar por otra existente",
