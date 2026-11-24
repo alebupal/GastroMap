@@ -9,6 +9,7 @@ import {
 } from "@/lib/actions/places";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -23,6 +24,7 @@ export function PlacesTableManager({
   occasionsList = [],
 }: PlacesTableManagerProps) {
   const { t, locale } = useT();
+  const { toast } = useToast();
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,6 +157,7 @@ export function PlacesTableManager({
 
     if (res.error) {
       setStatusMessage({ type: "error", text: res.error });
+      toast(res.error, { kind: "error" });
     } else {
       setPlacesList((prev) => prev.filter((p) => p.id !== place.id));
       setSelectedIds((prev) => {
@@ -162,7 +165,9 @@ export function PlacesTableManager({
         next.delete(place.id);
         return next;
       });
-      setStatusMessage({ type: "success", text: t("admin_places.delete_success", { name: place.name }) });
+      const msg = t("admin_places.delete_success", { name: place.name });
+      setStatusMessage({ type: "success", text: msg });
+      toast(msg, { kind: "success" });
     }
   }
 
@@ -206,6 +211,7 @@ export function PlacesTableManager({
 
     if (res.error) {
       setStatusMessage({ type: "error", text: res.error });
+      toast(res.error, { kind: "error" });
     } else {
       setPlacesList((prev) => prev.filter((p) => !selectedIds.has(p.id)));
       setSelectedIds(new Set());
@@ -214,6 +220,7 @@ export function PlacesTableManager({
           ? t("admin_places.delete_bulk_success_single")
           : t("admin_places.delete_bulk_success", { count: String(count) });
       setStatusMessage({ type: "success", text: successMsg });
+      toast(successMsg, { kind: "success" });
     }
   }
 
@@ -230,6 +237,7 @@ export function PlacesTableManager({
 
     if (res.error) {
       setStatusMessage({ type: "error", text: res.error });
+      toast(res.error, { kind: "error" });
     } else {
       setPlacesList((prev) => prev.filter((p) => p.id !== mergeSource.id));
       setSelectedIds((prev) => {
@@ -237,10 +245,12 @@ export function PlacesTableManager({
         next.delete(mergeSource.id);
         return next;
       });
+      const mergeMsg = `«${mergeSource.name}» se ha fusionado correctamente dentro de «${targetPlace.name}».`;
       setStatusMessage({
         type: "success",
-        text: `«${mergeSource.name}» se ha fusionado correctamente dentro de «${targetPlace.name}».`,
+        text: mergeMsg,
       });
+      toast(mergeMsg, { kind: "success" });
       setMergeSource(null);
       setMergeTargetId("");
       setMergeSearch("");

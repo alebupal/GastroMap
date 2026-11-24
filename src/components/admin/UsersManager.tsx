@@ -15,6 +15,7 @@ import {
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
 import type { Locale } from "@/lib/i18n/config";
 
 interface UsersManagerProps {
@@ -23,6 +24,7 @@ interface UsersManagerProps {
 
 export function UsersManager({ currentUserId }: UsersManagerProps) {
   const { t } = useT();
+  const { toast } = useToast();
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -216,8 +218,11 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const res = await deleteMultipleUsersAction(Array.from(selectedUserIds));
     if (res.error) {
       setError(res.error);
+      toast(res.error, { kind: "error" });
     } else {
-      setSuccess(`${res.count || count} usuarios eliminados con éxito.`);
+      const msg = `${res.count || count} usuarios eliminados con éxito.`;
+      setSuccess(msg);
+      toast(msg, { kind: "success" });
       setSelectedUserIds(new Set());
       await loadUsers();
     }
@@ -271,8 +276,11 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const res = await deleteUserAction(user.id);
     if (res.error) {
       setError(res.error);
+      toast(res.error, { kind: "error" });
     } else {
-      setSuccess(`Usuario @${user.username || user.name} eliminado.`);
+      const msg = `Usuario @${user.username || user.name} eliminado.`;
+      setSuccess(msg);
+      toast(msg, { kind: "success" });
       setSelectedUserIds((prev) => {
         const next = new Set(prev);
         next.delete(user.id);
