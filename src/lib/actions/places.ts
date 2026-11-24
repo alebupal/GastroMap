@@ -20,7 +20,7 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
-import { resolveGoogleMapsUrl, parseGoogleMapsUrl } from "@/lib/maps";
+import { resolveGoogleMapsDetails, parseGoogleMapsUrl } from "@/lib/maps";
 import {
   searchAddressNominatim,
   reverseGeocodeNominatim,
@@ -59,19 +59,41 @@ export interface CreatePlaceResult {
 }
 
 export async function parseUrlAction(rawUrl: string) {
-  const resolved = await resolveGoogleMapsUrl(rawUrl);
-  const parsed = parseGoogleMapsUrl(resolved);
+  const resolvedDetails = await resolveGoogleMapsDetails(rawUrl);
+  const parsed = parseGoogleMapsUrl(resolvedDetails.resolvedUrl);
 
-  // Si hemos extraído coordenadas del enlace de Maps, hacemos geocodificación inversa
-  // para obtener calle, municipio y provincia automáticamente
+  // Combinar datos de la URL con metadatos Open Graph de Google Maps (nombre, dirección, precio y coords embebidas)
+  const latitude = parsed.latitude ?? resolvedDetails.htmlLat;
+  const longitude = parsed.longitude ?? resolvedDetails.htmlLng;
+  const name = parsed.name || resolvedDetails.ogName;
+  const address = resolvedDetails.ogAddress;
+  const priceRange = resolvedDetails.ogPriceRange;
+  const categoryHint = resolvedDetails.ogCategoryHint;
+
   let locationDetails: GeocodingResult | null = null;
-  if (parsed.latitude && parsed.longitude) {
-    locationDetails = await reverseGeocodeNominatim(parsed.latitude, parsed.longitude);
+  if (latitude && longitude) {
+    locationDetails = await reverseGeocodeNominatim(latitude, longitude);
+  } else if (address || name) {
+    // Fallback: si el enlace (ej. ?cid=...) no traía coordenadas, geocodificamos dirección o nombre
+    const fallbackResults = await searchAddressNominatim(address || name || "");
+    if (fallbackResults.length > 0) {
+      locationDetails = fallbackResults[0];
+    }
   }
 
   return {
     ...parsed,
-    resolvedUrl: resolved,
+    name: name || locationDetails?.name,
+    address:
+      address ||
+      (locationDetails?.road
+        ? `${locationDetails.road}${locationDetails.postcode ? `, ${locationDetails.postcode}` : ""}`
+        : undefined),
+    priceRange,
+    categoryHint,
+    latitude: latitude ?? locationDetails?.latitude,
+    longitude: longitude ?? locationDetails?.longitude,
+    resolvedUrl: resolvedDetails.resolvedUrl,
     locationDetails,
   };
 }
@@ -189,7 +211,7 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
   }
 
   revalidatePath("/");
-  redirect("/");
+  redirect(`/?focus=${encodeURIComponent(newPlace.id)}`);
 }
 
 export async function updatePlaceAction(

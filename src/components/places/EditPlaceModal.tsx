@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n/client";
 import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
+import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", label: "???" },
@@ -91,9 +92,21 @@ export function EditPlaceModal({
       if (parsed.name && !name.trim()) setName(parsed.name);
       if (parsed.latitude) setLat(String(parsed.latitude));
       if (parsed.longitude) setLng(String(parsed.longitude));
-      if (parsed.locationDetails) {
-        if (parsed.locationDetails.road) setAddress(parsed.locationDetails.road);
-        if (parsed.locationDetails.city) setCity(parsed.locationDetails.city);
+      if (parsed.resolvedUrl) setGoogleMapsUrl(parsed.resolvedUrl);
+      if (parsed.priceRange && priceRange === "???") setPriceRange(parsed.priceRange);
+      if (parsed.address) {
+        setAddress(parsed.address);
+      } else if (parsed.locationDetails?.road) {
+        setAddress(
+          `${parsed.locationDetails.road}${
+            parsed.locationDetails.postcode ? `, ${parsed.locationDetails.postcode}` : ""
+          }`
+        );
+      }
+      if (parsed.locationDetails?.city) {
+        setCity(
+          formatCityCountry(parsed.locationDetails.city, parsed.locationDetails.country)
+        );
       }
     } catch {
       setError(t("form.maps_parse_error"));
@@ -131,7 +144,15 @@ export function EditPlaceModal({
       setError(res.error);
     } else {
       onClose();
-      window.location.reload();
+      if (typeof window !== "undefined") {
+        const nextUrl = new URL(window.location.href);
+        if (nextUrl.pathname === "/") {
+          nextUrl.searchParams.set("focus", place.id);
+          window.location.href = nextUrl.toString();
+        } else {
+          window.location.reload();
+        }
+      }
     }
   }
 

@@ -180,6 +180,7 @@ export function PlacesExplorer({
   >("all");
   const [minRating, setMinRating] = useState<number | null>(null);
   const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
+  const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const urlHydratedRef = useRef(false);
 
   function toggleCountry(country: string) {
@@ -234,6 +235,7 @@ export function PlacesExplorer({
     const occ = params.get("occ");
     const tag = params.get("tag");
     const towns = params.get("towns");
+    const focus = params.get("focus");
 
     if (q) setTextSearch(q);
     if (city && city !== "all") setSelectedCities(city.split(",").filter(Boolean));
@@ -250,6 +252,7 @@ export function PlacesExplorer({
     if (occ) setSelectedOccasions(occ.split(",").filter(Boolean));
     if (tag) setSelectedTags(tag.split(",").filter(Boolean));
     if (towns) setSelectedTowns(towns.split(",").filter(Boolean));
+    if (focus) setPendingFocusId(focus);
 
     urlHydratedRef.current = true;
   }, []);
@@ -782,6 +785,33 @@ export function PlacesExplorer({
     () => (selectedPlaceId ? filteredPlaces.find((p) => p.id === selectedPlaceId) || null : null),
     [filteredPlaces, selectedPlaceId]
   );
+
+  // Enfocar automáticamente un sitio recién añadido o editado (?focus=id)
+  useEffect(() => {
+    if (!pendingFocusId) return;
+    const placeIndex = filteredPlaces.findIndex((p) => p.id === pendingFocusId);
+    if (placeIndex === -1) return;
+
+    setSelectedPlaceId(pendingFocusId);
+    const targetPage = Math.floor(placeIndex / pageSize) + 1;
+    if (targetPage !== currentPage) {
+      setCurrentPage(targetPage);
+    }
+
+    const focusTargetId = pendingFocusId;
+    setPendingFocusId(null);
+
+    if (typeof window !== "undefined") {
+      const scrollToCard = () => {
+        const el = document.getElementById(`place-card-${focusTargetId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      };
+      setTimeout(scrollToCard, 80);
+      setTimeout(scrollToCard, 250);
+    }
+  }, [pendingFocusId, filteredPlaces, pageSize, currentPage]);
 
   function handlePageChange(newPage: number) {
     if (newPage < 1 || newPage > totalPages) return;

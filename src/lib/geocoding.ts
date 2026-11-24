@@ -4,6 +4,7 @@ export interface GeocodingResult {
   displayName: string;
   road?: string;
   houseNumber?: string;
+  postcode?: string;
   city?: string;
   province?: string;
   country?: string;
@@ -57,6 +58,7 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
         name: item.name || undefined,
         road: road ? `${road}${houseNumber ? ` ${houseNumber}` : ""}` : undefined,
         houseNumber,
+        postcode: addr.postcode,
         city,
         province,
         country: addr.country,
@@ -112,6 +114,7 @@ export async function reverseGeocodeNominatim(
       name: item.name || addr.amenity || addr.restaurant || addr.bar || undefined,
       road: road ? `${road}${houseNumber ? ` ${houseNumber}` : ""}` : undefined,
       houseNumber,
+      postcode: addr.postcode,
       city,
       province,
       country: addr.country,

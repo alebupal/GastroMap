@@ -14,6 +14,7 @@ import { LocationPicker } from "@/components/places/LocationPicker";
 import type { Occasion } from "@/db/schema";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
+import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", hint: "Sin estimación" },
@@ -111,16 +112,25 @@ export function NewPlaceForm({
       if (parsed.resolvedUrl) {
         setUrl(parsed.resolvedUrl);
       }
-      if (parsed.locationDetails) {
-        if (parsed.locationDetails.road) {
-          setAddress(parsed.locationDetails.road);
-        }
-        if (parsed.locationDetails.city) {
-          setCity(parsed.locationDetails.city);
-        }
-        if (!name && parsed.locationDetails.name) {
-          setName(parsed.locationDetails.name);
-        }
+      if (parsed.priceRange && priceRange === "???") {
+        setPriceRange(parsed.priceRange);
+      }
+      if (parsed.address) {
+        setAddress(parsed.address);
+      } else if (parsed.locationDetails?.road) {
+        setAddress(
+          `${parsed.locationDetails.road}${
+            parsed.locationDetails.postcode ? `, ${parsed.locationDetails.postcode}` : ""
+          }`
+        );
+      }
+      if (parsed.locationDetails?.city) {
+        setCity(
+          formatCityCountry(parsed.locationDetails.city, parsed.locationDetails.country)
+        );
+      }
+      if (!name && parsed.locationDetails?.name) {
+        setName(parsed.locationDetails.name);
       }
     } catch {
       // Ignorar fallo de parseo
