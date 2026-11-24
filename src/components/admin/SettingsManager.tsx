@@ -190,6 +190,39 @@ export function SettingsManager({
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
                   {t("admin.settings.google_places_hint")}
                 </p>
+
+                <details className="mt-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/70 px-3.5 py-2.5 text-[11px] text-slate-600 dark:text-slate-300 group">
+                  <summary className="flex items-center justify-between gap-2 cursor-pointer select-none font-bold text-slate-700 dark:text-slate-200 list-none [&::-webkit-details-marker]:hidden">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400 leading-none">
+                        help_outline
+                      </span>
+                      <span>{t("admin.settings.google_places_guide_title")}</span>
+                    </span>
+                    <span className="material-symbols-outlined text-base text-slate-400 transition-transform group-open:rotate-180 leading-none">
+                      expand_more
+                    </span>
+                  </summary>
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
+                    <ol className="list-decimal list-inside space-y-1.5 leading-relaxed">
+                      <li>{t("admin.settings.google_places_guide_step1")}</li>
+                      <li>{t("admin.settings.google_places_guide_step2")}</li>
+                      <li>{t("admin.settings.google_places_guide_step3")}</li>
+                    </ol>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      {t("admin.settings.google_places_guide_note")}
+                    </p>
+                    <a
+                      href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-bold text-orange-600 dark:text-orange-400 hover:underline pt-0.5"
+                    >
+                      <span>{t("admin.settings.google_places_guide_link")}</span>
+                      <span className="material-symbols-outlined text-xs leading-none">open_in_new</span>
+                    </a>
+                  </div>
+                </details>
               </div>
 
               <div className="flex items-center justify-between pt-1">

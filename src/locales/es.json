@@ -392,7 +392,13 @@
       "save_btn": "Guardar Ajustes",
       "google_places_label": "Google Places API Key (opcional)",
       "google_places_placeholder": "AIzaSy... (dejar vacío para usar OpenStreetMap gratis)",
-      "google_places_hint": "Si la configuras, el botón «Analizar» en /new obtiene nombre oficial, descripción editorial, rango de precios y planes desde Google Places API (New). Sin clave, usa OpenStreetMap + Open Graph gratis."
+      "google_places_hint": "Si la configuras, el botón «Analizar» en /new obtiene nombre oficial, descripción editorial, rango de precios y planes desde Google Places API (New). Sin clave, usa OpenStreetMap + Open Graph gratis.",
+      "google_places_guide_title": "¿Cómo obtener tu Google Places API Key?",
+      "google_places_guide_step1": "Accede a Google Cloud Console y crea o selecciona un proyecto.",
+      "google_places_guide_step2": "En APIs y servicios › Biblioteca, busca y activa «Places API (New)».",
+      "google_places_guide_step3": "En Credenciales › Crear credenciales › Clave de API, copia la clave y pégala arriba (opcionalmente restríngela a «Places API (New)»).",
+      "google_places_guide_note": "Google incluye cuota gratuita mensual (más que suficiente para uso personal o en grupo a 0 €). Es totalmente opcional.",
+      "google_places_guide_link": "Abrir Google Cloud Console"
     }
   },
   "notes_visits": {
