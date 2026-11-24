@@ -1421,10 +1421,10 @@ export function PlacesExplorer({
 
             {/* Precios */}
             {[
-              { id: "€", label: "< 15 €" },
-              { id: "€€", label: "15 - 30 €" },
-              { id: "€€€", label: "30 - 50 €" },
-              { id: "€€€€", label: "> 50 €" },
+              { id: "€", label: "10-20 €" },
+              { id: "€€", label: "20-30 €" },
+              { id: "€€€", label: "30-40 €" },
+              { id: "€€€€", label: "40-50 €" },
             ].map((item) => {
               const active = selectedPrices.includes(item.id);
               return (
@@ -1657,10 +1657,10 @@ export function PlacesExplorer({
               </span>
               <div className="grid grid-cols-4 gap-1.5">
                 {[
-                  { val: "€", label: "< 15 €" },
-                  { val: "€€", label: "15 - 30 €" },
-                  { val: "€€€", label: "30 - 50 €" },
-                  { val: "€€€€", label: "> 50 €" },
+                  { val: "€", label: "10-20 €" },
+                  { val: "€€", label: "20-30 €" },
+                  { val: "€€€", label: "30-40 €" },
+                  { val: "€€€€", label: "40-50 €" },
                 ].map((pr) => {
                   const active = selectedPrices.includes(pr.val);
                   return (

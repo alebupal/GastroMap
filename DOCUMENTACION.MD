@@ -106,7 +106,7 @@ Al acceder por primera vez a una instancia limpia:
   - Los cambios se guardan en una cola local persistente (`IndexedDB`), se muestra un banner discreto con el contador pendiente y todo se sincroniza automáticamente en orden al volver a estar en línea (o manualmente con `Sincronizar ahora`).
 - **Filtros de Segmentación y Taxonomías (Fila 2)**:
   - `Países (+195)` y `Ciudades`: Selectores desplegables con buscador integrado.
-  - `Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`<15€`, `15-30€`, `30-50€`, `>50€`).
+  - `Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`10-20 €`, `20-30 €`, `30-40 €`, `40-50 €`).
   - `Nota mínima`: Filtro rápido (`★ 7+`, `★ 8+`, `★ 9+`) dentro del panel animado `+ Filtros`, junto a ocasiones y etiquetas gastronómicas (8 planes por defecto personalizables con emojis o iconos **Material Symbols** desde `/admin > Taxonomía`).
   - **Estado vacío accionable**: Si una combinación de filtros no devuelve resultados, aparecen chips clicables para retirar un filtro individual sin reiniciar toda la búsqueda.
 - **Tarjetas de Locales Estilo Stitch**:

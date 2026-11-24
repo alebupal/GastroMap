@@ -18,10 +18,10 @@ import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", hint: "Sin estimación" },
-  { id: "€", hint: "< 15 €" },
-  { id: "€€", hint: "15 - 30 €" },
-  { id: "€€€", hint: "30 - 50 €" },
-  { id: "€€€€", hint: "> 50 €" },
+  { id: "€", hint: "10-20 €" },
+  { id: "€€", hint: "20-30 €" },
+  { id: "€€€", hint: "30-40 €" },
+  { id: "€€€€", hint: "40-50 €" },
 ];
 
 interface NewPlaceFormProps {

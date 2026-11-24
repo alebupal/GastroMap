@@ -16,10 +16,10 @@ import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
-  "€": "< 15 €",
-  "€€": "15 - 30 €",
-  "€€€": "30 - 50 €",
-  "€€€€": "> 50 €",
+  "€": "10-20 €",
+  "€€": "20-30 €",
+  "€€€": "30-40 €",
+  "€€€€": "40-50 €",
   "???": "???",
 };
 

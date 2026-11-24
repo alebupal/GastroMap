@@ -12,10 +12,10 @@ import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", label: "???" },
-  { id: "€", label: "< 15 €" },
-  { id: "€€", label: "15 - 30 €" },
-  { id: "€€€", label: "30 - 50 €" },
-  { id: "€€€€", label: "> 50 €" },
+  { id: "€", label: "10-20 €" },
+  { id: "€€", label: "20-30 €" },
+  { id: "€€€", label: "30-40 €" },
+  { id: "€€€€", label: "40-50 €" },
 ];
 
 interface EditPlaceModalProps {

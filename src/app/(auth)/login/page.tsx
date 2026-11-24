@@ -85,7 +85,7 @@ export default async function LoginPage() {
               </span>
               <div>
                 <div className="font-extrabold leading-tight">Tapear</div>
-                <div className="text-[10px] text-white/80">15 - 30 € • ★</div>
+                <div className="text-[10px] text-white/80">20-30 € • ★</div>
               </div>
             </div>
 

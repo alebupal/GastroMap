@@ -45,9 +45,9 @@ function inferPriceRangeFromText(text: string): "€" | "€€" | "€€€" |
   if (rangeMatch) {
     const maxVal = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : parseInt(rangeMatch[3], 10);
     if (!isNaN(maxVal)) {
-      if (maxVal <= 15) return "€";
+      if (maxVal <= 20) return "€";
       if (maxVal <= 30) return "€€";
-      if (maxVal <= 50) return "€€€";
+      if (maxVal <= 40) return "€€€";
       return "€€€€";
     }
   }

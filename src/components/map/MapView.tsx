@@ -36,10 +36,10 @@ const SPAIN_CENTER: [number, number] = [40.4168, -3.7038];
 const SPAIN_DEFAULT_ZOOM = 6;
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
-  "€": "< 15 €",
-  "€€": "15 - 30 €",
-  "€€€": "30 - 50 €",
-  "€€€€": "> 50 €",
+  "€": "10-20 €",
+  "€€": "20-30 €",
+  "€€€": "30-40 €",
+  "€€€€": "40-50 €",
   "???": "???",
 };
 
