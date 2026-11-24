@@ -64,6 +64,72 @@ export async function saveSettingAction(key: string, value: string) {
   return { success: true };
 }
 
+export interface TestGooglePlacesKeyResult {
+  ok: boolean;
+  code?: "unauthorized" | "empty" | "network" | "api_error";
+  status?: number;
+  message?: string;
+  sampleName?: string;
+}
+
+export async function testGooglePlacesApiKeyAction(
+  apiKeyInput?: string
+): Promise<TestGooglePlacesKeyResult> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { ok: false, code: "unauthorized" };
+  }
+
+  const key =
+    (apiKeyInput ?? "").trim() ||
+    (await getSetting("google_places_api_key"))?.trim() ||
+    "";
+
+  if (!key) {
+    return { ok: false, code: "empty" };
+  }
+
+  try {
+    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": key,
+        "X-Goog-FieldMask": "places.displayName",
+      },
+      body: JSON.stringify({
+        textQuery: "Puerta del Sol, Madrid",
+        languageCode: "es",
+        maxResultCount: 1,
+      }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        code: "api_error",
+        status: res.status,
+        message:
+          (typeof data?.error?.message === "string" && data.error.message) ||
+          res.statusText ||
+          `HTTP ${res.status}`,
+      };
+    }
+
+    const sampleName =
+      Array.isArray(data?.places) && data.places[0]?.displayName?.text
+        ? String(data.places[0].displayName.text)
+        : undefined;
+
+    return { ok: true, sampleName };
+  } catch {
+    return { ok: false, code: "network" };
+  }
+}
+
 export async function resetApplicationAction() {
   const currentUser = await getCurrentUser();
   if (!currentUser || currentUser.role !== "admin") {

@@ -398,7 +398,13 @@
       "google_places_guide_step2": "En APIs y servicios › Biblioteca, busca y activa «Places API (New)».",
       "google_places_guide_step3": "En Credenciales › Crear credenciales › Clave de API, copia la clave y pégala arriba (opcionalmente restríngela a «Places API (New)»).",
       "google_places_guide_note": "Google incluye cuota gratuita mensual (más que suficiente para uso personal o en grupo a 0 €). Es totalmente opcional.",
-      "google_places_guide_link": "Abrir Google Cloud Console"
+      "google_places_guide_link": "Abrir Google Cloud Console",
+      "test_btn": "Probar API Key",
+      "testing": "Probando...",
+      "test_ok": "✓ API Key válida y operativa con Places API (New)",
+      "test_empty": "Introduce una API Key antes de probar.",
+      "test_error": "Error al validar la API Key",
+      "test_network_error": "No se pudo conectar con Google Places API (error de red o tiempo agotado)."
     }
   },
   "notes_visits": {

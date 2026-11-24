@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { saveSettingAction, resetApplicationAction } from "@/lib/actions/settings";
+import {
+  saveSettingAction,
+  resetApplicationAction,
+  testGooglePlacesApiKeyAction,
+} from "@/lib/actions/settings";
 import { clearAppOfflineCache, getBrowserCacheEstimate } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
 
@@ -18,6 +22,8 @@ export function SettingsManager({
   const [googlePlacesApiKey, setGooglePlacesApiKey] = useState(initialGooglePlacesApiKey || "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [testingKey, setTestingKey] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; text: string } | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +84,38 @@ export function SettingsManager({
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  }
+
+  async function handleTestApiKey() {
+    if (!googlePlacesApiKey.trim()) {
+      setTestResult({ ok: false, text: t("admin.settings.test_empty") });
+      return;
+    }
+    setTestingKey(true);
+    setTestResult(null);
+    try {
+      const res = await testGooglePlacesApiKeyAction(googlePlacesApiKey);
+      if (res.ok) {
+        setTestResult({
+          ok: true,
+          text: t("admin.settings.test_ok"),
+        });
+      } else if (res.code === "empty") {
+        setTestResult({ ok: false, text: t("admin.settings.test_empty") });
+      } else if (res.code === "network") {
+        setTestResult({ ok: false, text: t("admin.settings.test_network_error") });
+      } else {
+        const detail = res.message ? `: ${res.message}` : "";
+        setTestResult({
+          ok: false,
+          text: `${t("admin.settings.test_error")}${res.status ? ` (HTTP ${res.status})` : ""}${detail}`,
+        });
+      }
+    } catch {
+      setTestResult({ ok: false, text: t("admin.settings.test_network_error") });
+    } finally {
+      setTestingKey(false);
+    }
   }
 
   async function handleRestoreFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -182,11 +220,28 @@ export function SettingsManager({
                 <input
                   type="password"
                   value={googlePlacesApiKey}
-                  onChange={(e) => setGooglePlacesApiKey(e.target.value)}
+                  onChange={(e) => {
+                    setGooglePlacesApiKey(e.target.value);
+                    if (testResult) setTestResult(null);
+                  }}
                   placeholder={t("admin.settings.google_places_placeholder")}
                   autoComplete="off"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
                 />
+                {testResult && (
+                  <div
+                    className={`mt-2 p-2.5 rounded-xl text-[11px] font-semibold flex items-start gap-1.5 ${
+                      testResult.ok
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
+                        : "bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-sm leading-none shrink-0 mt-0.5">
+                      {testResult.ok ? "check_circle" : "error"}
+                    </span>
+                    <span className="break-words">{testResult.text}</span>
+                  </div>
+                )}
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
                   {t("admin.settings.google_places_hint")}
                 </p>
@@ -225,18 +280,32 @@ export function SettingsManager({
                 </details>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                   {saved && t("admin.settings.saved")}
                 </span>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
-                >
-                  {saving ? t("common.saving") : t("admin.settings.save_btn")}
-                </button>
+                <div className="flex items-center gap-2 ml-auto">
+                  <button
+                    type="button"
+                    onClick={handleTestApiKey}
+                    disabled={testingKey || !googlePlacesApiKey.trim()}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer"
+                  >
+                    <span className={`material-symbols-outlined text-sm leading-none ${testingKey ? "animate-spin" : ""}`}>
+                      {testingKey ? "progress_activity" : "verified"}
+                    </span>
+                    <span>{testingKey ? t("admin.settings.testing") : t("admin.settings.test_btn")}</span>
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+                  >
+                    {saving ? t("common.saving") : t("admin.settings.save_btn")}
+                  </button>
+                </div>
               </div>
             </form>
           )}
