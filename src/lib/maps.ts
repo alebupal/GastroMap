@@ -30,6 +30,12 @@ function decodeHtmlEntities(str: string): string {
     .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
 }
 
+function isGenericGoogleMapsDescription(text: string): boolean {
+  return /(find local businesses|view maps|driving directions|google maps|busca negocios locales|consulta mapas|informaci[oó]n sobre rutas|before you continue|antes de ir a google)/i.test(
+    text
+  );
+}
+
 function inferPriceRangeFromText(text: string): "€" | "€€" | "€€€" | "€€€€" | undefined {
   // 1. Símbolos explícitos (€€€€, $$$, etc.)
   const symMatch = text.match(/(?:^|[\s·•(])([€$£]{1,4})(?:[\s·•)]|$)/);
@@ -127,14 +133,21 @@ export async function resolveGoogleMapsDetails(rawInput: string): Promise<Resolv
       html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["']/i);
     if (ogDescMatch) {
       const desc = decodeHtmlEntities(ogDescMatch[1]).trim();
-      result.ogPriceRange = inferPriceRangeFromText(desc);
-      // Extraer categoría legible quitando estrellas y símbolos de precio
-      const descParts = desc
-        .split(/\s*[·•]\s*/)
-        .map((p) => p.trim())
-        .filter((p) => p && !/^[★☆\d.,()€$£\s-]+$/.test(p));
-      if (descParts.length > 0) {
-        result.ogCategoryHint = descParts[0];
+      if (!isGenericGoogleMapsDescription(desc)) {
+        result.ogPriceRange = inferPriceRangeFromText(desc);
+        // Extraer categoría legible quitando estrellas y símbolos de precio
+        const descParts = desc
+          .split(/\s*[·•]\s*/)
+          .map((p) => p.trim())
+          .filter(
+            (p) =>
+              p &&
+              !/^[★☆\d.,()€$£\s-]+$/.test(p) &&
+              !isGenericGoogleMapsDescription(p)
+          );
+        if (descParts.length > 0) {
+          result.ogCategoryHint = descParts[0];
+        }
       }
     }
 
@@ -248,6 +261,20 @@ function mapGooglePriceLevel(
   }
 }
 
+function mapGooglePriceRange(
+  priceRange?: { startPrice?: { units?: string }; endPrice?: { units?: string } }
+): "€" | "€€" | "€€€" | "€€€€" | undefined {
+  if (!priceRange) return undefined;
+  const endUnits = priceRange.endPrice?.units ? parseInt(priceRange.endPrice.units, 10) : NaN;
+  const startUnits = priceRange.startPrice?.units ? parseInt(priceRange.startPrice.units, 10) : NaN;
+  const ref = !isNaN(endUnits) ? endUnits : !isNaN(startUnits) ? startUnits : NaN;
+  if (isNaN(ref)) return undefined;
+  if (ref <= 20) return "€";
+  if (ref <= 30) return "€€";
+  if (ref <= 40) return "€€€";
+  return "€€€€";
+}
+
 /**
  * Opción A: Consulta oficial a Google Places API (New) usando la clave opcional configurada en /admin.
  * Devuelve nombre oficial, dirección, coordenadas, rango de precio, descripción editorial y tipos.
@@ -291,7 +318,7 @@ export async function fetchGooglePlacesDetails(params: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask":
-          "places.displayName,places.formattedAddress,places.location,places.priceLevel,places.editorialSummary,places.primaryType,places.types,places.websiteUri,places.nationalPhoneNumber",
+          "places.displayName,places.formattedAddress,places.location,places.priceLevel,places.priceRange,places.editorialSummary,places.primaryType,places.primaryTypeDisplayName,places.types,places.websiteUri,places.nationalPhoneNumber",
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(5000),
@@ -307,8 +334,9 @@ export async function fetchGooglePlacesDetails(params: {
       address: place.formattedAddress || undefined,
       latitude: typeof place.location?.latitude === "number" ? place.location.latitude : undefined,
       longitude: typeof place.location?.longitude === "number" ? place.location.longitude : undefined,
-      priceRange: mapGooglePriceLevel(place.priceLevel),
-      description: place.editorialSummary?.text || undefined,
+      priceRange: mapGooglePriceLevel(place.priceLevel) || mapGooglePriceRange(place.priceRange),
+      description:
+        place.editorialSummary?.text || place.primaryTypeDisplayName?.text || undefined,
       primaryType: place.primaryType || undefined,
       types: Array.isArray(place.types) ? place.types : undefined,
       website: place.websiteUri || undefined,
