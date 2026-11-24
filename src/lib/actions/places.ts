@@ -20,7 +20,13 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
-import { resolveGoogleMapsDetails, parseGoogleMapsUrl } from "@/lib/maps";
+import {
+  resolveGoogleMapsDetails,
+  parseGoogleMapsUrl,
+  fetchGooglePlacesDetails,
+  suggestOccasionsFromMetadata,
+} from "@/lib/maps";
+import { getSetting } from "@/lib/actions/settings";
 import {
   searchAddressNominatim,
   reverseGeocodeNominatim,
@@ -59,27 +65,93 @@ export interface CreatePlaceResult {
 }
 
 export async function parseUrlAction(rawUrl: string) {
-  const resolvedDetails = await resolveGoogleMapsDetails(rawUrl);
+  const [resolvedDetails, googlePlacesApiKey] = await Promise.all([
+    resolveGoogleMapsDetails(rawUrl),
+    getSetting("google_places_api_key"),
+  ]);
   const parsed = parseGoogleMapsUrl(resolvedDetails.resolvedUrl);
 
-  // Combinar datos de la URL con metadatos Open Graph de Google Maps (nombre, dirección, precio y coords embebidas)
-  const latitude = parsed.latitude ?? resolvedDetails.htmlLat;
-  const longitude = parsed.longitude ?? resolvedDetails.htmlLng;
-  const name = parsed.name || resolvedDetails.ogName;
-  const address = resolvedDetails.ogAddress;
-  const priceRange = resolvedDetails.ogPriceRange;
-  const categoryHint = resolvedDetails.ogCategoryHint;
+  // Datos base desde la URL + Open Graph
+  let latitude = parsed.latitude ?? resolvedDetails.htmlLat;
+  let longitude = parsed.longitude ?? resolvedDetails.htmlLng;
+  let name = parsed.name || resolvedDetails.ogName;
+  let address = resolvedDetails.ogAddress;
+  let priceRange = resolvedDetails.ogPriceRange;
+  let description: string | undefined;
+  let website: string | undefined;
+  let phone: string | undefined;
+  let googleTypes: string[] | undefined;
+  let source: "google_places" | "openstreetmap" | "url" = "url";
 
+  // Opción A: Si el admin configuró Google Places API Key, enriquecemos de forma oficial
+  if (googlePlacesApiKey && (name || address)) {
+    const query = [name, address].filter(Boolean).join(", ");
+    const gp = await fetchGooglePlacesDetails({
+      apiKey: googlePlacesApiKey,
+      query,
+      latitude,
+      longitude,
+    });
+    if (gp) {
+      source = "google_places";
+      if (gp.name) name = gp.name;
+      if (gp.address) address = gp.address;
+      if (gp.latitude != null) latitude = gp.latitude;
+      if (gp.longitude != null) longitude = gp.longitude;
+      if (gp.priceRange) priceRange = gp.priceRange;
+      if (gp.description) description = gp.description;
+      if (gp.website) website = gp.website;
+      if (gp.phone) phone = gp.phone;
+      googleTypes = [
+        ...(gp.primaryType ? [gp.primaryType] : []),
+        ...(gp.types || []),
+      ];
+    }
+  }
+
+  // Opción B (siempre activa / respaldo gratuito): Nominatim OpenStreetMap con extratags=1
   let locationDetails: GeocodingResult | null = null;
   if (latitude && longitude) {
     locationDetails = await reverseGeocodeNominatim(latitude, longitude);
   } else if (address || name) {
-    // Fallback: si el enlace (ej. ?cid=...) no traía coordenadas, geocodificamos dirección o nombre
     const fallbackResults = await searchAddressNominatim(address || name || "");
     if (fallbackResults.length > 0) {
       locationDetails = fallbackResults[0];
     }
   }
+
+  if (locationDetails) {
+    if (source === "url") source = "openstreetmap";
+    if (!description) {
+      if (locationDetails.extratags?.description) {
+        description = locationDetails.extratags.description;
+      } else if (locationDetails.extratags?.cuisine) {
+        const cleanCuisine = locationDetails.extratags.cuisine
+          .split(";")
+          .map((c) => c.replace(/_/g, " ").trim())
+          .filter(Boolean)
+          .join(", ");
+        if (cleanCuisine) description = `Cocina: ${cleanCuisine}`;
+      } else if (resolvedDetails.ogCategoryHint) {
+        description = resolvedDetails.ogCategoryHint;
+      }
+    }
+    if (!website && locationDetails.extratags?.website) {
+      website = locationDetails.extratags.website;
+    }
+    if (!phone && locationDetails.extratags?.phone) {
+      phone = locationDetails.extratags.phone;
+    }
+  } else if (!description && resolvedDetails.ogCategoryHint) {
+    description = resolvedDetails.ogCategoryHint;
+  }
+
+  const suggestedOccasions = suggestOccasionsFromMetadata({
+    types: googleTypes,
+    categoryHint: resolvedDetails.ogCategoryHint,
+    cuisine: locationDetails?.extratags?.cuisine,
+    amenity: locationDetails?.extratags?.amenity,
+  });
 
   return {
     ...parsed,
@@ -90,7 +162,12 @@ export async function parseUrlAction(rawUrl: string) {
         ? `${locationDetails.road}${locationDetails.postcode ? `, ${locationDetails.postcode}` : ""}`
         : undefined),
     priceRange,
-    categoryHint,
+    description,
+    suggestedOccasions,
+    website,
+    phone,
+    source,
+    categoryHint: resolvedDetails.ogCategoryHint,
     latitude: latitude ?? locationDetails?.latitude,
     longitude: longitude ?? locationDetails?.longitude,
     resolvedUrl: resolvedDetails.resolvedUrl,

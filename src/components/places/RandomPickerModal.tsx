@@ -16,13 +16,13 @@ interface RandomPickerModalProps {
 function formatPriceLabel(priceRange: string | null | undefined, fallback: string) {
   switch (priceRange) {
     case "€":
-      return "10-20 €";
+      return "< 20 €";
     case "€€":
       return "20-30 €";
     case "€€€":
       return "30-40 €";
     case "€€€€":
-      return "40-50 €";
+      return "> 40 €";
     default:
       return fallback;
   }
@@ -86,11 +86,11 @@ export function RandomPickerModal({
 
   const initials = selectedPlace
     ? selectedPlace.name
-        .split(/\s+/)
-        .map((w) => w[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+      .split(/\s+/)
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
     : "GM";
 
   return (
@@ -175,9 +175,8 @@ export function RandomPickerModal({
 
             <div
               key={isSpinning ? "spinning" : `winner-${selectedPlace.id}`}
-              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 sm:p-5 space-y-3.5 transition-all duration-150 ${
-                isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
-              }`}
+              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 sm:p-5 space-y-3.5 transition-all duration-150 ${isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
+                }`}
             >
               <div className="flex items-start gap-3.5">
                 {/* Avatar de iniciales naranja oficial con insignia de cubiertos */}
@@ -367,15 +366,13 @@ export function RandomPickerModal({
             role="switch"
             aria-checked={excludeVisited}
             onClick={() => setExcludeVisited((prev) => !prev)}
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
-              excludeVisited ? "bg-orange-600" : "bg-slate-300 dark:bg-slate-700"
-            }`}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${excludeVisited ? "bg-orange-600" : "bg-slate-300 dark:bg-slate-700"
+              }`}
             aria-label={t("ui.exclude_visited")}
           >
             <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${
-                excludeVisited ? "translate-x-5" : "translate-x-0"
-              }`}
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition duration-200 ${excludeVisited ? "translate-x-5" : "translate-x-0"
+                }`}
             />
           </button>
         </div>

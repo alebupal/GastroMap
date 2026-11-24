@@ -7,15 +7,18 @@ import { useT } from "@/lib/i18n/client";
 
 interface SettingsManagerProps {
   initialCartoApiKey?: string | null;
+  initialGooglePlacesApiKey?: string | null;
   totalPlacesCount?: number;
 }
 
 export function SettingsManager({
   initialCartoApiKey = "",
+  initialGooglePlacesApiKey = "",
   totalPlacesCount = 0,
 }: SettingsManagerProps) {
   const { t } = useT();
   const [cartoApiKey, setCartoApiKey] = useState(initialCartoApiKey || "");
+  const [googlePlacesApiKey, setGooglePlacesApiKey] = useState(initialGooglePlacesApiKey || "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -73,7 +76,10 @@ export function SettingsManager({
     setSaving(true);
     setSaved(false);
 
-    await saveSettingAction("carto_api_key", cartoApiKey);
+    await Promise.all([
+      saveSettingAction("carto_api_key", cartoApiKey),
+      saveSettingAction("google_places_api_key", googlePlacesApiKey),
+    ]);
 
     setSaving(false);
     setSaved(true);
@@ -188,6 +194,23 @@ export function SettingsManager({
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
                   {t("admin.settings.carto_hint")}
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  {t("admin.settings.google_places_label")}
+                </label>
+                <input
+                  type="password"
+                  value={googlePlacesApiKey}
+                  onChange={(e) => setGooglePlacesApiKey(e.target.value)}
+                  placeholder={t("admin.settings.google_places_placeholder")}
+                  autoComplete="off"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
+                  {t("admin.settings.google_places_hint")}
                 </p>
               </div>
 

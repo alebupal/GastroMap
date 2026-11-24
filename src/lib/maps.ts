@@ -216,3 +216,147 @@ export function parseGoogleMapsUrl(rawUrl: string): ParsedMapUrl {
 
   return result;
 }
+
+export interface GooglePlacesEnrichment {
+  name?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  priceRange?: "€" | "€€" | "€€€" | "€€€€";
+  description?: string;
+  primaryType?: string;
+  types?: string[];
+  website?: string;
+  phone?: string;
+}
+
+function mapGooglePriceLevel(
+  level?: string
+): "€" | "€€" | "€€€" | "€€€€" | undefined {
+  switch (level) {
+    case "PRICE_LEVEL_FREE":
+    case "PRICE_LEVEL_INEXPENSIVE":
+      return "€";
+    case "PRICE_LEVEL_MODERATE":
+      return "€€";
+    case "PRICE_LEVEL_EXPENSIVE":
+      return "€€€";
+    case "PRICE_LEVEL_VERY_EXPENSIVE":
+      return "€€€€";
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Opción A: Consulta oficial a Google Places API (New) usando la clave opcional configurada en /admin.
+ * Devuelve nombre oficial, dirección, coordenadas, rango de precio, descripción editorial y tipos.
+ */
+export async function fetchGooglePlacesDetails(params: {
+  apiKey: string;
+  query: string;
+  latitude?: number;
+  longitude?: number;
+}): Promise<GooglePlacesEnrichment | null> {
+  const apiKey = params.apiKey.trim();
+  const textQuery = params.query.trim();
+  if (!apiKey || !textQuery) return null;
+
+  try {
+    const body: Record<string, unknown> = {
+      textQuery,
+      languageCode: "es",
+      maxResultCount: 1,
+    };
+    if (
+      typeof params.latitude === "number" &&
+      typeof params.longitude === "number" &&
+      !isNaN(params.latitude) &&
+      !isNaN(params.longitude)
+    ) {
+      body.locationBias = {
+        circle: {
+          center: {
+            latitude: params.latitude,
+            longitude: params.longitude,
+          },
+          radius: 500.0,
+        },
+      };
+    }
+
+    const res = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask":
+          "places.displayName,places.formattedAddress,places.location,places.priceLevel,places.editorialSummary,places.primaryType,places.types,places.websiteUri,places.nationalPhoneNumber",
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(5000),
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    const place = Array.isArray(data?.places) ? data.places[0] : null;
+    if (!place) return null;
+
+    return {
+      name: place.displayName?.text || undefined,
+      address: place.formattedAddress || undefined,
+      latitude: typeof place.location?.latitude === "number" ? place.location.latitude : undefined,
+      longitude: typeof place.location?.longitude === "number" ? place.location.longitude : undefined,
+      priceRange: mapGooglePriceLevel(place.priceLevel),
+      description: place.editorialSummary?.text || undefined,
+      primaryType: place.primaryType || undefined,
+      types: Array.isArray(place.types) ? place.types : undefined,
+      website: place.websiteUri || undefined,
+      phone: place.nationalPhoneNumber || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Sugiere planes/ocasiones de GastroMap a partir de tipos de Google Places,
+ * categoría Open Graph o extratags de OpenStreetMap (cuisine / amenity).
+ */
+export function suggestOccasionsFromMetadata(input: {
+  types?: string[];
+  categoryHint?: string;
+  cuisine?: string;
+  amenity?: string;
+}): string[] {
+  const haystack = [
+    ...(input.types || []),
+    input.categoryHint || "",
+    input.cuisine || "",
+    input.amenity || "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const suggestions = new Set<string>();
+  if (/(breakfast|brunch|bakery|panader|desayun|churrer)/.test(haystack)) {
+    suggestions.add("desayuno");
+  }
+  if (/(cafe|coffee|cafeter|tea_house|pastel|ice_cream|helad|meriend|sweet|dessert)/.test(haystack)) {
+    suggestions.add("cafe");
+  }
+  if (/(tapas|taberna|mes[oó]n|bar|pub|cervecer|vinoteca|wine_bar)/.test(haystack)) {
+    suggestions.add("tapear");
+  }
+  if (/(cocktail|coctel|night_club|lounge|copas|pub)/.test(haystack)) {
+    suggestions.add("copas");
+  }
+  if (/(fast_food|burger|hamburgues|pizza|kebab|taco|ramen|street_food|sandwich|bocad)/.test(haystack)) {
+    suggestions.add("informal");
+  }
+  if (/(restaurant|restaurante|steak|seafood|marisquer|mediterranean|spanish|italian|japanese|mexican|bistro)/.test(haystack)) {
+    suggestions.add("comer");
+  }
+
+  return Array.from(suggestions);
+}

@@ -1145,21 +1145,19 @@ export function PlacesExplorer({
                     setExperienceFilter(active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter));
                     setCurrentPage(1);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${
-                    active
-                      ? isUntried
-                        ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
-                        : "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs"
-                      : isUntried
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${active
+                    ? isUntried
+                      ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
+                      : "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs"
+                    : isUntried
                       ? "text-amber-800 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/40 hover:bg-amber-200/60 font-semibold"
                       : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
-                  }`}
+                    }`}
                 >
                   {item.icon && (
                     <span
-                      className={`material-symbols-outlined text-[15px] leading-none ${
-                        active && !isUntried ? "text-current" : item.iconClass
-                      }`}
+                      className={`material-symbols-outlined text-[15px] leading-none ${active && !isUntried ? "text-current" : item.iconClass
+                        }`}
                     >
                       {item.icon}
                     </span>
@@ -1421,10 +1419,10 @@ export function PlacesExplorer({
 
             {/* Precios */}
             {[
-              { id: "€", label: "10-20 €" },
+              { id: "€", label: "< 20 €" },
               { id: "€€", label: "20-30 €" },
               { id: "€€€", label: "30-40 €" },
-              { id: "€€€€", label: "40-50 €" },
+              { id: "€€€€", label: "> 40 €" },
             ].map((item) => {
               const active = selectedPrices.includes(item.id);
               return (
@@ -1432,11 +1430,10 @@ export function PlacesExplorer({
                   key={item.id}
                   type="button"
                   onClick={() => togglePrice(item.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
-                    active
-                      ? "bg-emerald-600 text-white shadow-xs"
-                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  }`}
+                  className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${active
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
                 >
                   {item.label}
                 </button>
@@ -1451,11 +1448,10 @@ export function PlacesExplorer({
                   key={occ.id}
                   type="button"
                   onClick={() => toggleOccasion(occ.id)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition cursor-pointer flex items-center gap-1 ${
-                    isSelected
-                      ? "bg-[#855300] text-white font-bold shadow-xs"
-                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                  }`}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition cursor-pointer flex items-center gap-1 ${isSelected
+                    ? "bg-[#855300] text-white font-bold shadow-xs"
+                    : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
                 >
                   <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
                   <span>{occ.name}</span>
@@ -1471,11 +1467,10 @@ export function PlacesExplorer({
                   key={tg.id}
                   type="button"
                   onClick={() => toggleTag(tg.id)}
-                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${
-                    isSelectedTag
-                      ? "bg-orange-600 text-white font-bold"
-                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
-                  }`}
+                  className={`px-2 py-0.5 rounded text-[11px] font-medium transition cursor-pointer ${isSelectedTag
+                    ? "bg-orange-600 text-white font-bold"
+                    : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
                 >
                   #{tg.name}
                 </button>
@@ -1489,16 +1484,14 @@ export function PlacesExplorer({
               type="button"
               onClick={() => setIsAssistantOpen(true)}
               aria-expanded={isAssistantOpen}
-              className={`group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-extrabold transition-all duration-200 active:scale-95 cursor-pointer border ${
-                isAssistantOpen || activeFiltersCount > 0
-                  ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/25"
-                  : "bg-orange-50 dark:bg-orange-950/50 border-orange-200/90 dark:border-orange-800/70 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/80"
-              }`}
+              className={`group flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-extrabold transition-all duration-200 active:scale-95 cursor-pointer border ${isAssistantOpen || activeFiltersCount > 0
+                ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/25"
+                : "bg-orange-50 dark:bg-orange-950/50 border-orange-200/90 dark:border-orange-800/70 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/80"
+                }`}
             >
               <span
-                className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${
-                  isAssistantOpen ? "rotate-90" : "group-hover:rotate-12"
-                }`}
+                className={`material-symbols-outlined text-sm leading-none transition-transform duration-300 ${isAssistantOpen ? "rotate-90" : "group-hover:rotate-12"
+                  }`}
               >
                 tune
               </span>
@@ -1657,10 +1650,10 @@ export function PlacesExplorer({
               </span>
               <div className="grid grid-cols-4 gap-1.5">
                 {[
-                  { val: "€", label: "10-20 €" },
+                  { val: "€", label: "< 20 €" },
                   { val: "€€", label: "20-30 €" },
                   { val: "€€€", label: "30-40 €" },
-                  { val: "€€€€", label: "40-50 €" },
+                  { val: "€€€€", label: "> 40 €" },
                 ].map((pr) => {
                   const active = selectedPrices.includes(pr.val);
                   return (
@@ -1668,11 +1661,10 @@ export function PlacesExplorer({
                       key={pr.val}
                       type="button"
                       onClick={() => togglePrice(pr.val)}
-                      className={`py-2 px-1 rounded-2xl text-[11px] font-extrabold text-center transition cursor-pointer border ${
-                        active
-                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                          : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200"
-                      }`}
+                      className={`py-2 px-1 rounded-2xl text-[11px] font-extrabold text-center transition cursor-pointer border ${active
+                        ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                        : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                        }`}
                     >
                       {pr.label}
                     </button>
@@ -1701,11 +1693,10 @@ export function PlacesExplorer({
                               : [...prev, g.id]
                           )
                         }
-                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer border ${
-                          active
-                            ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                            : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                        }`}
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer border ${active
+                          ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                          : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                          }`}
                       >
                         <span className="material-symbols-outlined text-sm leading-none">
                           group
@@ -1737,11 +1728,10 @@ export function PlacesExplorer({
                     key={String(opt.val)}
                     type="button"
                     onClick={() => setMinRating(opt.val)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-150 active:scale-95 cursor-pointer ${
-                      active
-                        ? "bg-amber-500 text-white shadow-xs"
-                        : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                    }`}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-150 active:scale-95 cursor-pointer ${active
+                      ? "bg-amber-500 text-white shadow-xs"
+                      : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
                   >
                     {opt.label}
                   </button>
@@ -1750,364 +1740,363 @@ export function PlacesExplorer({
             </div>
           </div>
 
-      {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-[11px] px-0.5">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400 uppercase tracking-wider">
-              {t("places.plans_title")} ({occasionsList.length})
-            </span>
-            {selectedOccasions.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setSelectedOccasions([])}
-                className="text-red-400 hover:underline font-bold cursor-pointer"
-              >
-                {selectedOccasions.length === 1
-                  ? t("places.remove_filter_single")
-                  : t("places.remove_filter_multiple", { count: selectedOccasions.length })}
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            {occasionsList.length > 4 && (
-              <button
-                type="button"
-                onClick={() => setIsOccasionSearchOpen(!isOccasionSearchOpen)}
-                className={`font-semibold transition cursor-pointer inline-flex items-center gap-1 ${
-                  isOccasionSearchOpen || occasionSearchQuery
-                    ? "text-orange-600 dark:text-orange-400"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-                title={t("places.search_categories_title")}
-              >
-                <span className="material-symbols-outlined text-[15px] leading-none">search</span>
-                <span className="hidden sm:inline">{t("places.search_categories_btn")}</span>
-              </button>
-            )}
-
-            {occasionsList.length > 4 && (
-              <button
-                type="button"
-                onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
-                className="font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition cursor-pointer inline-flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[15px] leading-none">
-                  {isOccasionsWrapped ? "view_carousel" : "grid_view"}
+          {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] px-0.5">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-400 uppercase tracking-wider">
+                  {t("places.plans_title")} ({occasionsList.length})
                 </span>
-                <span>
-                  {(isOccasionsWrapped ? t("places.row_mode") : t("places.grid_mode")).replace(
-                    /^[↔⊞]\s*/,
-                    ""
-                  )}
-                </span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Buscador de categorías si está abierto */}
-        {isOccasionSearchOpen && (
-          <div className="relative gm-panel-reveal">
-            <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
-              search
-            </span>
-            <input
-              type="text"
-              value={occasionSearchQuery}
-              onChange={(e) => setOccasionSearchQuery(e.target.value)}
-              placeholder={t("places.search_occasions_placeholder")}
-              className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
-            />
-            {occasionSearchQuery && (
-              <button
-                type="button"
-                onClick={() => setOccasionSearchQuery("")}
-                className="absolute right-2.5 top-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-        )}
-
-        {isOccasionsWrapped ? (
-          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setSelectedOccasions([])}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${selectedOccasions.length === 0
-                  ? "bg-orange-600 text-white shadow-md font-black"
-                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
-              >
-                🍽️ {t("places.all_plans")}
-              </button>
-              {(occasionSearchQuery.trim()
-                ? filteredOccasions
-                : filteredOccasions.slice(0, visibleOccasionsCount)
-              ).map((occ) => {
-                const isSelected = selectedOccasions.includes(occ.id);
-                return (
+                {selectedOccasions.length > 0 && (
                   <button
-                    key={occ.id}
                     type="button"
-                    onClick={() => toggleOccasion(occ.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${isSelected
-                      ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
-                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
-                      }`}
+                    onClick={() => setSelectedOccasions([])}
+                    className="text-red-400 hover:underline font-bold cursor-pointer"
                   >
-                    <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
-                    <span>{occ.name}</span>
-                    {(occ.placesCount || 0) > 0 && (
-                      <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
-                    )}
+                    {selectedOccasions.length === 1
+                      ? t("places.remove_filter_single")
+                      : t("places.remove_filter_multiple", { count: selectedOccasions.length })}
                   </button>
-                );
-              })}
+                )}
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                {occasionsList.length > 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsOccasionSearchOpen(!isOccasionSearchOpen)}
+                    className={`font-semibold transition cursor-pointer inline-flex items-center gap-1 ${isOccasionSearchOpen || occasionSearchQuery
+                      ? "text-orange-600 dark:text-orange-400"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                      }`}
+                    title={t("places.search_categories_title")}
+                  >
+                    <span className="material-symbols-outlined text-[15px] leading-none">search</span>
+                    <span className="hidden sm:inline">{t("places.search_categories_btn")}</span>
+                  </button>
+                )}
+
+                {occasionsList.length > 4 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsOccasionsWrapped(!isOccasionsWrapped)}
+                    className="font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[15px] leading-none">
+                      {isOccasionsWrapped ? "view_carousel" : "grid_view"}
+                    </span>
+                    <span>
+                      {(isOccasionsWrapped ? t("places.row_mode") : t("places.grid_mode")).replace(
+                        /^[↔⊞]\s*/,
+                        ""
+                      )}
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
 
-            {!occasionSearchQuery.trim() &&
-              (filteredOccasions.length > visibleOccasionsCount ||
-                visibleOccasionsCount > 12) && (
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-                  {filteredOccasions.length > visibleOccasionsCount ? (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleOccasionsCount((c) => c + 12)}
-                      className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                    >
-                      {t("places.show_more_remaining", {
-                        count: filteredOccasions.length - visibleOccasionsCount,
-                      })}
-                    </button>
-                  ) : (
-                    <span className="text-slate-400">{t("places.showing_all_categories")}</span>
-                  )}
-                  {visibleOccasionsCount > 12 && (
-                    <button
-                      type="button"
-                      onClick={() => setVisibleOccasionsCount(12)}
-                      className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
-                    >
-                      {t("places.show_less")}
-                    </button>
-                  )}
-                </div>
-              )}
-          </div>
-        ) : (
-          <HorizontalScroll className="flex items-center gap-1.5 pb-1">
-            <button
-              type="button"
-              onClick={() => setSelectedOccasions([])}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${selectedOccasions.length === 0
-                ? "bg-orange-600 text-white shadow-md font-black"
-                : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
-                }`}
-            >
-              🍽️ {t("places.all_plans")}
-            </button>
-            {(occasionSearchQuery.trim()
-              ? filteredOccasions
-              : filteredOccasions.slice(0, visibleOccasionsCount)
-            ).map((occ) => {
-              const isSelected = selectedOccasions.includes(occ.id);
-              return (
-                <button
-                  key={occ.id}
-                  type="button"
-                  onClick={() => toggleOccasion(occ.id)}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${isSelected
-                    ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
-                    : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
-                    }`}
-                >
-                  <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
-                  <span>{occ.name}</span>
-                  {(occ.placesCount || 0) > 0 && (
-                    <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
-                  )}
-                </button>
-              );
-            })}
-            {!occasionSearchQuery.trim() && filteredOccasions.length > visibleOccasionsCount && (
-              <button
-                type="button"
-                onClick={() => setVisibleOccasionsCount((c) => c + 12)}
-                className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
-              >
-                {t("places.show_more_count", {
-                  count: filteredOccasions.length - visibleOccasionsCount,
-                })}
-              </button>
-            )}
-          </HorizontalScroll>
-        )}
-      </div>
-
-      {/* Filtro por Etiquetas Populares (acumulables, ordenadas por uso, con buscador y Mostrar más) */}
-      {sortedTags.length > 0 && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[11px] px-0.5">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                {t("places.tags_title")} ({sortedTags.length})
-              </span>
-              {selectedTags.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedTags([])}
-                  className="text-red-500 hover:underline font-bold cursor-pointer"
-                >
-                  {selectedTags.length === 1
-                    ? t("places.remove_filter_single")
-                    : t("places.remove_filter_multiple", { count: selectedTags.length })}
-                </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsTagsExpanded(!isTagsExpanded)}
-                className="font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer inline-flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[15px] leading-none">
-                  {isTagsExpanded ? "expand_less" : "search"}
-                </span>
-                <span>
-                  {(isTagsExpanded
-                    ? t("places.hide_search")
-                    : t("places.search_show_more")
-                  ).replace(/^[^\p{L}\p{N}]+/u, "")}
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {isTagsExpanded ? (
-            <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
-              <div className="relative">
+            {/* Buscador de categorías si está abierto */}
+            {isOccasionSearchOpen && (
+              <div className="relative gm-panel-reveal">
                 <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
                   search
                 </span>
                 <input
                   type="text"
-                  value={tagSearchQuery}
-                  onChange={(e) => setTagSearchQuery(e.target.value)}
-                  placeholder={t("places.search_tags_placeholder")}
-                  className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
+                  value={occasionSearchQuery}
+                  onChange={(e) => setOccasionSearchQuery(e.target.value)}
+                  placeholder={t("places.search_occasions_placeholder")}
+                  className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
                 />
-                {tagSearchQuery && (
+                {occasionSearchQuery && (
                   <button
                     type="button"
-                    onClick={() => setTagSearchQuery("")}
+                    onClick={() => setOccasionSearchQuery("")}
                     className="absolute right-2.5 top-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
                   >
                     ✕
                   </button>
                 )}
               </div>
+            )}
 
-              <div className="flex flex-wrap gap-1.5">
-                {filteredTags.length === 0 ? (
-                  <p className="text-[11px] text-slate-400 italic py-1">
-                    {t("places.no_tags_found", { query: tagSearchQuery })}
-                  </p>
-                ) : (
-                  (tagSearchQuery.trim()
-                    ? filteredTags.slice(0, 40)
-                    : filteredTags.slice(0, visibleTagsCount)
-                  ).map((t) => {
+            {isOccasionsWrapped ? (
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedOccasions([])}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${selectedOccasions.length === 0
+                      ? "bg-orange-600 text-white shadow-md font-black"
+                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                      }`}
+                  >
+                    🍽️ {t("places.all_plans")}
+                  </button>
+                  {(occasionSearchQuery.trim()
+                    ? filteredOccasions
+                    : filteredOccasions.slice(0, visibleOccasionsCount)
+                  ).map((occ) => {
+                    const isSelected = selectedOccasions.includes(occ.id);
+                    return (
+                      <button
+                        key={occ.id}
+                        type="button"
+                        onClick={() => toggleOccasion(occ.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${isSelected
+                          ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
+                          : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
+                          }`}
+                      >
+                        <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
+                        <span>{occ.name}</span>
+                        {(occ.placesCount || 0) > 0 && (
+                          <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {!occasionSearchQuery.trim() &&
+                  (filteredOccasions.length > visibleOccasionsCount ||
+                    visibleOccasionsCount > 12) && (
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                      {filteredOccasions.length > visibleOccasionsCount ? (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleOccasionsCount((c) => c + 12)}
+                          className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                        >
+                          {t("places.show_more_remaining", {
+                            count: filteredOccasions.length - visibleOccasionsCount,
+                          })}
+                        </button>
+                      ) : (
+                        <span className="text-slate-400">{t("places.showing_all_categories")}</span>
+                      )}
+                      {visibleOccasionsCount > 12 && (
+                        <button
+                          type="button"
+                          onClick={() => setVisibleOccasionsCount(12)}
+                          className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                        >
+                          {t("places.show_less")}
+                        </button>
+                      )}
+                    </div>
+                  )}
+              </div>
+            ) : (
+              <HorizontalScroll className="flex items-center gap-1.5 pb-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedOccasions([])}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition cursor-pointer ${selectedOccasions.length === 0
+                    ? "bg-orange-600 text-white shadow-md font-black"
+                    : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 shadow-xs dark:shadow-none"
+                    }`}
+                >
+                  🍽️ {t("places.all_plans")}
+                </button>
+                {(occasionSearchQuery.trim()
+                  ? filteredOccasions
+                  : filteredOccasions.slice(0, visibleOccasionsCount)
+                ).map((occ) => {
+                  const isSelected = selectedOccasions.includes(occ.id);
+                  return (
+                    <button
+                      key={occ.id}
+                      type="button"
+                      onClick={() => toggleOccasion(occ.id)}
+                      className={`px-3.5 py-2 rounded-2xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer ${isSelected
+                        ? "bg-orange-600 text-white shadow-md font-black ring-2 ring-orange-500/40"
+                        : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100 shadow-xs dark:shadow-none"
+                        }`}
+                    >
+                      <OccasionIcon icon={occ.icon} msClassName="text-[14px]" />
+                      <span>{occ.name}</span>
+                      {(occ.placesCount || 0) > 0 && (
+                        <span className="text-[10px] opacity-60 ml-0.5">({occ.placesCount})</span>
+                      )}
+                    </button>
+                  );
+                })}
+                {!occasionSearchQuery.trim() && filteredOccasions.length > visibleOccasionsCount && (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleOccasionsCount((c) => c + 12)}
+                    className="px-3 py-2 rounded-2xl text-xs font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
+                  >
+                    {t("places.show_more_count", {
+                      count: filteredOccasions.length - visibleOccasionsCount,
+                    })}
+                  </button>
+                )}
+              </HorizontalScroll>
+            )}
+          </div>
+
+          {/* Filtro por Etiquetas Populares (acumulables, ordenadas por uso, con buscador y Mostrar más) */}
+          {sortedTags.length > 0 && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] px-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {t("places.tags_title")} ({sortedTags.length})
+                  </span>
+                  {selectedTags.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTags([])}
+                      className="text-red-500 hover:underline font-bold cursor-pointer"
+                    >
+                      {selectedTags.length === 1
+                        ? t("places.remove_filter_single")
+                        : t("places.remove_filter_multiple", { count: selectedTags.length })}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsTagsExpanded(!isTagsExpanded)}
+                    className="font-semibold text-slate-500 dark:text-slate-400 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer inline-flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[15px] leading-none">
+                      {isTagsExpanded ? "expand_less" : "search"}
+                    </span>
+                    <span>
+                      {(isTagsExpanded
+                        ? t("places.hide_search")
+                        : t("places.search_show_more")
+                      ).replace(/^[^\p{L}\p{N}]+/u, "")}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {isTagsExpanded ? (
+                <div className="p-3 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2.5 gm-panel-reveal">
+                  <div className="relative">
+                    <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      value={tagSearchQuery}
+                      onChange={(e) => setTagSearchQuery(e.target.value)}
+                      placeholder={t("places.search_tags_placeholder")}
+                      className="w-full pl-9 pr-8 py-1.5 rounded-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition"
+                    />
+                    {tagSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setTagSearchQuery("")}
+                        className="absolute right-2.5 top-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {filteredTags.length === 0 ? (
+                      <p className="text-[11px] text-slate-400 italic py-1">
+                        {t("places.no_tags_found", { query: tagSearchQuery })}
+                      </p>
+                    ) : (
+                      (tagSearchQuery.trim()
+                        ? filteredTags.slice(0, 40)
+                        : filteredTags.slice(0, visibleTagsCount)
+                      ).map((t) => {
+                        const isSelected = selectedTags.includes(t.id);
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => toggleTag(t.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${isSelected
+                              ? "bg-orange-100 dark:bg-orange-500/20 border-orange-300 dark:border-orange-500/50 text-orange-900 dark:text-orange-300 font-bold ring-1 ring-orange-500/30 shadow-xs"
+                              : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
+                              }`}
+                          >
+                            #{t.name}
+                            {t.placesCount > 0 && (
+                              <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {!tagSearchQuery.trim() &&
+                    (filteredTags.length > visibleTagsCount || visibleTagsCount > 24) && (
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                        {filteredTags.length > visibleTagsCount ? (
+                          <button
+                            type="button"
+                            onClick={() => setVisibleTagsCount((c) => c + 24)}
+                            className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                          >
+                            {t("places.show_more_remaining", {
+                              count: filteredTags.length - visibleTagsCount,
+                            })}
+                          </button>
+                        ) : (
+                          <span className="text-slate-400">{t("places.showing_all_tags")}</span>
+                        )}
+                        {visibleTagsCount > 24 && (
+                          <button
+                            type="button"
+                            onClick={() => setVisibleTagsCount(24)}
+                            className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                          >
+                            {t("places.show_less")}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                </div>
+              ) : (
+                <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
+                  {defaultTags.map((t) => {
                     const isSelected = selectedTags.includes(t.id);
                     return (
                       <button
                         key={t.id}
                         type="button"
                         onClick={() => toggleTag(t.id)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition cursor-pointer border ${isSelected
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${isSelected
                           ? "bg-orange-100 dark:bg-orange-500/20 border-orange-300 dark:border-orange-500/50 text-orange-900 dark:text-orange-300 font-bold ring-1 ring-orange-500/30 shadow-xs"
-                          : "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
+                          : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
                           }`}
                       >
-                        #{t.name}
+                        <span>#{t.name}</span>
                         {t.placesCount > 0 && (
-                          <span className="ml-1 opacity-60 text-[10px]">({t.placesCount})</span>
+                          <span className="ml-1 text-[10px] opacity-60">({t.placesCount})</span>
                         )}
                       </button>
                     );
-                  })
-                )}
-              </div>
-
-              {!tagSearchQuery.trim() &&
-                (filteredTags.length > visibleTagsCount || visibleTagsCount > 24) && (
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
-                    {filteredTags.length > visibleTagsCount ? (
-                      <button
-                        type="button"
-                        onClick={() => setVisibleTagsCount((c) => c + 24)}
-                        className="font-bold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                      >
-                        {t("places.show_more_remaining", {
-                          count: filteredTags.length - visibleTagsCount,
-                        })}
-                      </button>
-                    ) : (
-                      <span className="text-slate-400">{t("places.showing_all_tags")}</span>
-                    )}
-                    {visibleTagsCount > 24 && (
-                      <button
-                        type="button"
-                        onClick={() => setVisibleTagsCount(24)}
-                        className="font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
-                      >
-                        {t("places.show_less")}
-                      </button>
-                    )}
-                  </div>
-                )}
-            </div>
-          ) : (
-            <HorizontalScroll className="flex items-center gap-1 pb-1 text-xs">
-              {defaultTags.map((t) => {
-                const isSelected = selectedTags.includes(t.id);
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => toggleTag(t.id)}
-                    className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium shrink-0 transition cursor-pointer border ${isSelected
-                      ? "bg-orange-100 dark:bg-orange-500/20 border-orange-300 dark:border-orange-500/50 text-orange-900 dark:text-orange-300 font-bold ring-1 ring-orange-500/30 shadow-xs"
-                      : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-xs dark:shadow-none"
-                      }`}
-                  >
-                    <span>#{t.name}</span>
-                    {t.placesCount > 0 && (
-                      <span className="ml-1 text-[10px] opacity-60">({t.placesCount})</span>
-                    )}
-                  </button>
-                );
-              })}
-              {sortedTags.length > defaultTags.length && (
-                <button
-                  type="button"
-                  onClick={() => setIsTagsExpanded(true)}
-                  className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
-                >
-                  {t("places.show_more_count", {
-                    count: sortedTags.length - defaultTags.length,
                   })}
-                </button>
+                  {sortedTags.length > defaultTags.length && (
+                    <button
+                      type="button"
+                      onClick={() => setIsTagsExpanded(true)}
+                      className="px-2.5 py-0.5 rounded-lg text-[11px] font-bold shrink-0 border border-dashed border-orange-400/70 dark:border-orange-500/40 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
+                    >
+                      {t("places.show_more_count", {
+                        count: sortedTags.length - defaultTags.length,
+                      })}
+                    </button>
+                  )}
+                </HorizontalScroll>
               )}
-            </HorizontalScroll>
+            </div>
           )}
-        </div>
-      )}
 
           {/* Pie de utilidades y botón aplicar en móvil */}
           <div className="lg:hidden pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
@@ -2157,9 +2146,8 @@ export function PlacesExplorer({
       <div className="flex flex-col lg:grid lg:grid-cols-12 lg:gap-6 lg:items-start pt-0 lg:pt-2">
         {/* Columna Mapa: en desktop siempre visible; en móvil visible arriba cuando activeMobileView === "map" */}
         <div
-          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${
-            activeMobileView === "list" ? "hidden lg:block" : "block order-1"
-          }`}
+          className={`w-full lg:col-span-7 xl:col-span-7 lg:order-2 ${activeMobileView === "list" ? "hidden lg:block" : "block order-1"
+            }`}
         >
           <div className="lg:sticky lg:top-4 space-y-2 pb-0">
             <div className="rounded-3xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-lg lg:shadow-xl dark:shadow-2xl">
@@ -2187,11 +2175,10 @@ export function PlacesExplorer({
         {/* Columna Lista de Tarjetas: en desktop siempre visible; en móvil Bottom Sheet bajo el mapa o lista completa */}
         <div
           id="places-list-top"
-          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${
-            activeMobileView === "map"
-              ? "-mt-5 relative z-[450] rounded-t-[28px] bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] px-3 pt-3 pb-24 lg:mt-0 lg:z-auto lg:rounded-none lg:bg-transparent lg:dark:bg-transparent lg:border-0 lg:shadow-none lg:p-0"
-              : "pb-24 lg:pb-0"
-          }`}
+          className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${activeMobileView === "map"
+            ? "-mt-5 relative z-[450] rounded-t-[28px] bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] px-3 pt-3 pb-24 lg:mt-0 lg:z-auto lg:rounded-none lg:bg-transparent lg:dark:bg-transparent lg:border-0 lg:shadow-none lg:p-0"
+            : "pb-24 lg:pb-0"
+            }`}
         >
           {/* Tirador superior y cabecera Stitch del Bottom Sheet en móvil */}
           {activeMobileView === "map" && (
@@ -2267,10 +2254,10 @@ export function PlacesExplorer({
                           {experienceFilter === "favorite"
                             ? t("places.favorites")
                             : experienceFilter === "visited_by_me"
-                            ? t("places.visited")
-                            : experienceFilter === "pending"
-                            ? t("places.want_to_go")
-                            : t("places.unexplored")}
+                              ? t("places.visited")
+                              : experienceFilter === "pending"
+                                ? t("places.want_to_go")
+                                : t("places.unexplored")}
                         </span>
                         <span className="material-symbols-outlined text-xs leading-none">close</span>
                       </button>
@@ -2376,9 +2363,8 @@ export function PlacesExplorer({
           ) : (
             <div className="space-y-3.5 lg:max-h-[calc(100vh-14rem)] lg:overflow-y-auto lg:pr-1 no-scrollbar pb-4 lg:pb-0">
               <div
-                className={`${
-                  activeMobileView === "map" ? "hidden lg:flex" : "flex"
-                } items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium px-1 flex-wrap`}
+                className={`${activeMobileView === "map" ? "hidden lg:flex" : "flex"
+                  } items-center justify-between gap-2 text-xs text-slate-700 dark:text-slate-300 font-medium px-1 flex-wrap`}
               >
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold text-orange-600 text-sm">
@@ -2428,16 +2414,16 @@ export function PlacesExplorer({
                         },
                         ...(userLocation
                           ? [
-                              {
-                                value: "distance" as const,
-                                label: t("places.sort_distance"),
-                                icon: (
-                                  <span className="material-symbols-outlined text-[15px] text-blue-600 dark:text-blue-400 leading-none">
-                                    near_me
-                                  </span>
-                                ),
-                              },
-                            ]
+                            {
+                              value: "distance" as const,
+                              label: t("places.sort_distance"),
+                              icon: (
+                                <span className="material-symbols-outlined text-[15px] text-blue-600 dark:text-blue-400 leading-none">
+                                  near_me
+                                </span>
+                              ),
+                            },
+                          ]
                           : []),
                         {
                           value: "rating",
@@ -2535,11 +2521,10 @@ export function PlacesExplorer({
                             <button
                               type="button"
                               onClick={() => handlePageChange(p)}
-                              className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition cursor-pointer ${
-                                currentPage === p
-                                  ? "bg-orange-600 text-white shadow-xs"
-                                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                              }`}
+                              className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center transition cursor-pointer ${currentPage === p
+                                ? "bg-orange-600 text-white shadow-xs"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                                }`}
                             >
                               {p}
                             </button>

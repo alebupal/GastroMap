@@ -106,7 +106,7 @@ When launching on a clean database:
   - Pending mutations are stored in a persistent local queue (`IndexedDB`), surfaced via a discreet status banner, and automatically flushed in order when connectivity returns (or manually via `Sync now`).
 - **Segmentation Filters (Row 2)**:
   - `Countries (195+)` and `Cities`: Searchable dropdown selectors.
-  - `Price Ranges`: Segmented pills for explicit brackets (`10-20 €`, `20-30 €`, `30-40 €`, `40-50 €`).
+  - `Price Ranges`: Segmented pills for explicit brackets (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`).
   - `Minimum Rating`: Quick filter (`★ 7+`, `★ 8+`, `★ 9+`) inside the animated `+ Filters` panel, alongside categories and gastronomic tags (8 default plans customizable with emojis or **Material Symbols** icons in `/admin > Taxonomy`).
   - **Actionable Empty State**: When a filter combination yields 0 results, clickable chips let you remove any single active filter without resetting the entire search.
 - **Stitch-styled Place Cards**:

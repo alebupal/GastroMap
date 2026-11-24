@@ -12,10 +12,10 @@ import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", label: "???" },
-  { id: "€", label: "10-20 €" },
+  { id: "€", label: "< 20 €" },
   { id: "€€", label: "20-30 €" },
   { id: "€€€", label: "30-40 €" },
-  { id: "€€€€", label: "40-50 €" },
+  { id: "€€€€", label: "> 40 €" },
 ];
 
 interface EditPlaceModalProps {
@@ -94,6 +94,7 @@ export function EditPlaceModal({
       if (parsed.longitude) setLng(String(parsed.longitude));
       if (parsed.resolvedUrl) setGoogleMapsUrl(parsed.resolvedUrl);
       if (parsed.priceRange && priceRange === "???") setPriceRange(parsed.priceRange);
+      if (parsed.description && !notes.trim()) setNotes(parsed.description);
       if (parsed.address) {
         setAddress(parsed.address);
       } else if (parsed.locationDetails?.road) {

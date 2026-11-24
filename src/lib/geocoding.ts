@@ -1,5 +1,14 @@
 import { APP_VERSION } from "./version";
 
+export interface GeocodingExtraTags {
+  cuisine?: string;
+  amenity?: string;
+  website?: string;
+  phone?: string;
+  description?: string;
+  openingHours?: string;
+}
+
 export interface GeocodingResult {
   displayName: string;
   road?: string;
@@ -9,8 +18,37 @@ export interface GeocodingResult {
   province?: string;
   country?: string;
   name?: string;
+  extratags?: GeocodingExtraTags;
   latitude: number;
   longitude: number;
+}
+
+function parseExtraTags(raw: any): GeocodingExtraTags | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const parsed: GeocodingExtraTags = {
+    cuisine: typeof raw.cuisine === "string" ? raw.cuisine : undefined,
+    amenity: typeof raw.amenity === "string" ? raw.amenity : undefined,
+    website:
+      typeof raw.website === "string"
+        ? raw.website
+        : typeof raw["contact:website"] === "string"
+        ? raw["contact:website"]
+        : undefined,
+    phone:
+      typeof raw.phone === "string"
+        ? raw.phone
+        : typeof raw["contact:phone"] === "string"
+        ? raw["contact:phone"]
+        : undefined,
+    description:
+      typeof raw["description:es"] === "string"
+        ? raw["description:es"]
+        : typeof raw.description === "string"
+        ? raw.description
+        : undefined,
+    openingHours: typeof raw.opening_hours === "string" ? raw.opening_hours : undefined,
+  };
+  return Object.values(parsed).some(Boolean) ? parsed : undefined;
 }
 
 /**
@@ -20,8 +58,8 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
   const trimmed = query.trim();
   if (trimmed.length < 3) return [];
 
-  // Búsqueda mundial sin restricción de país
-  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(
+  // Búsqueda mundial sin restricción de país con extratags de OpenStreetMap (cocina, web, tipo)
+  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=6&q=${encodeURIComponent(
     trimmed
   )}`;
 
@@ -62,6 +100,7 @@ export async function searchAddressNominatim(query: string): Promise<GeocodingRe
         city,
         province,
         country: addr.country,
+        extratags: parseExtraTags(item.extratags),
         latitude: parseFloat(item.lat),
         longitude: parseFloat(item.lon),
       };
@@ -80,7 +119,7 @@ export async function reverseGeocodeNominatim(
   lat: number,
   lng: number
 ): Promise<GeocodingResult | null> {
-  const url = `https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${lat}&lon=${lng}`;
+  const url = `https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&extratags=1&lat=${lat}&lon=${lng}`;
 
   try {
     const res = await fetch(url, {
@@ -118,6 +157,7 @@ export async function reverseGeocodeNominatim(
       city,
       province,
       country: addr.country,
+      extratags: parseExtraTags(item.extratags),
       latitude: parseFloat(item.lat),
       longitude: parseFloat(item.lon),
     };

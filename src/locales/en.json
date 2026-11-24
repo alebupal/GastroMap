@@ -302,7 +302,9 @@
     "public_for_community": "Public for your community",
     "visibility_hint": "Choose who can see this place in their searches.",
     "price_no_estimate": "No estimate",
-    "maps_parse_error": "We could not automatically parse the Google Maps link."
+    "maps_parse_error": "We could not automatically parse the Google Maps link.",
+    "analyze_button": "Analyze",
+    "analyzing": "Analyzing..."
   },
   "profile": {
     "title": "Edit my profile",
@@ -387,7 +389,10 @@
       "carto_placeholder": "Enter your carto.com API Key if you have one...",
       "carto_hint": "If left blank, GastroMap automatically uses open OpenStreetMap layers at no cost and without watermarks.",
       "saved": "✓ Settings saved",
-      "save_btn": "Save Settings"
+      "save_btn": "Save Settings",
+      "google_places_label": "Google Places API Key (optional)",
+      "google_places_placeholder": "AIzaSy... (leave blank to use free OpenStreetMap)",
+      "google_places_hint": "When configured, the «Analyze» button in /new fetches official name, editorial description, price level, and plans from Google Places API (New). Without a key, it falls back to free OpenStreetMap + Open Graph."
     }
   },
   "notes_visits": {

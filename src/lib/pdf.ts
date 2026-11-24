@@ -192,10 +192,10 @@ export function generatePlacesPdf(places: PdfPlaceItem[], title: string = "Gastr
       rawPrice = "€".repeat(Math.min(4, Math.max(1, eurCount)));
     }
     const priceMap: Record<string, string> = {
-      "€": "10-20 €",
+      "€": "< 20 €",
       "€€": "20-30 €",
       "€€€": "30-40 €",
-      "€€€€": "40-50 €",
+      "€€€€": "> 40 €",
     };
     const priceStr = rawPrice && priceMap[rawPrice]
       ? `${rawPrice} (${priceMap[rawPrice]})`

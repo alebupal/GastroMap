@@ -302,7 +302,9 @@
     "public_for_community": "Público para tu comunidad",
     "visibility_hint": "Decide quién puede consultar este establecimiento en sus búsquedas.",
     "price_no_estimate": "Sin estimación",
-    "maps_parse_error": "No pudimos leer automáticamente el enlace de Google Maps."
+    "maps_parse_error": "No pudimos leer automáticamente el enlace de Google Maps.",
+    "analyze_button": "Analizar",
+    "analyzing": "Analizando..."
   },
   "profile": {
     "title": "Editar mi perfil",
@@ -387,7 +389,10 @@
       "carto_placeholder": "Introduce tu API Key de carto.com si dispones de una...",
       "carto_hint": "Si se deja en blanco, GastroMap utiliza automáticamente las capas abiertas de OpenStreetMap sin coste ni marcas de agua.",
       "saved": "✓ Configuración guardada",
-      "save_btn": "Guardar Ajustes"
+      "save_btn": "Guardar Ajustes",
+      "google_places_label": "Google Places API Key (opcional)",
+      "google_places_placeholder": "AIzaSy... (dejar vacío para usar OpenStreetMap gratis)",
+      "google_places_hint": "Si la configuras, el botón «Analizar» en /new obtiene nombre oficial, descripción editorial, rango de precios y planes desde Google Places API (New). Sin clave, usa OpenStreetMap + Open Graph gratis."
     }
   },
   "notes_visits": {

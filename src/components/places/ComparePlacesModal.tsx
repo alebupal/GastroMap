@@ -27,13 +27,13 @@ const PRICE_RANK: Record<string, number> = {
 function formatPriceBracket(priceRange: string | null | undefined) {
   switch (priceRange) {
     case "€":
-      return "10-20 € (€)";
+      return "< 20 € (€)";
     case "€€":
       return "20-30 € (€€)";
     case "€€€":
       return "30-40 € (€€€)";
     case "€€€€":
-      return "40-50 € (€€€€)";
+      return "> 40 € (€€€€)";
     default:
       return "Precio libre";
   }

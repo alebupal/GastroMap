@@ -18,10 +18,10 @@ import { formatCityCountry } from "@/lib/location";
 
 const PRICE_OPTIONS = [
   { id: "???", hint: "Sin estimación" },
-  { id: "€", hint: "10-20 €" },
+  { id: "€", hint: "< 20 €" },
   { id: "€€", hint: "20-30 €" },
   { id: "€€€", hint: "30-40 €" },
-  { id: "€€€€", hint: "40-50 €" },
+  { id: "€€€€", hint: "> 40 €" },
 ];
 
 interface NewPlaceFormProps {
@@ -48,6 +48,7 @@ export function NewPlaceForm({
   const [lat, setLat] = useState<string>("");
   const [lng, setLng] = useState<string>("");
   const [priceRange, setPriceRange] = useState("???");
+  const [notes, setNotes] = useState("");
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
@@ -114,6 +115,16 @@ export function NewPlaceForm({
       }
       if (parsed.priceRange && priceRange === "???") {
         setPriceRange(parsed.priceRange);
+      }
+      if (parsed.description && !notes.trim()) {
+        setNotes(parsed.description);
+      }
+      if (parsed.suggestedOccasions && parsed.suggestedOccasions.length > 0) {
+        const validIds = new Set(availableOccasions.map((o) => o.id));
+        const matched = parsed.suggestedOccasions.filter((id) => validIds.has(id));
+        if (matched.length > 0) {
+          setSelectedOccasions(matched);
+        }
       }
       if (parsed.address) {
         setAddress(parsed.address);
@@ -202,7 +213,7 @@ export function NewPlaceForm({
               onChange={(e) => setUrl(e.target.value)}
               onPaste={(e) => {
                 const pasted = e.clipboardData.getData("text").trim();
-                if (/^https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
+                if (/https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
                   setUrl(pasted);
                   setTimeout(() => handleAutoResolve(pasted), 0);
                 }
@@ -217,8 +228,10 @@ export function NewPlaceForm({
             disabled={resolving || !url}
             className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shrink-0 shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-sm leading-none">bolt</span>
-            <span>{resolving ? t("form.import_reading") : t("form.import_button")}</span>
+            <span className={`material-symbols-outlined text-sm leading-none ${resolving ? "animate-spin" : ""}`}>
+              {resolving ? "progress_activity" : "auto_awesome"}
+            </span>
+            <span>{resolving ? t("form.analyzing") : t("form.analyze_button")}</span>
           </button>
         </div>
 
@@ -420,6 +433,8 @@ export function NewPlaceForm({
         <textarea
           name="notes"
           rows={3}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
           placeholder={t("form.notes_placeholder")}
           className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 resize-y transition"
         />
