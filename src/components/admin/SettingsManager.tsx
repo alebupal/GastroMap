@@ -6,18 +6,15 @@ import { clearAppOfflineCache, getBrowserCacheEstimate } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
 
 interface SettingsManagerProps {
-  initialCartoApiKey?: string | null;
   initialGooglePlacesApiKey?: string | null;
   totalPlacesCount?: number;
 }
 
 export function SettingsManager({
-  initialCartoApiKey = "",
   initialGooglePlacesApiKey = "",
   totalPlacesCount = 0,
 }: SettingsManagerProps) {
   const { t } = useT();
-  const [cartoApiKey, setCartoApiKey] = useState(initialCartoApiKey || "");
   const [googlePlacesApiKey, setGooglePlacesApiKey] = useState(initialGooglePlacesApiKey || "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -76,10 +73,7 @@ export function SettingsManager({
     setSaving(true);
     setSaved(false);
 
-    await Promise.all([
-      saveSettingAction("carto_api_key", cartoApiKey),
-      saveSettingAction("google_places_api_key", googlePlacesApiKey),
-    ]);
+    await saveSettingAction("google_places_api_key", googlePlacesApiKey);
 
     setSaving(false);
     setSaved(true);
@@ -182,22 +176,6 @@ export function SettingsManager({
           {isOpen && (
             <form onSubmit={handleSave} className="mt-4 pt-4 border-t border-slate-200/70 dark:border-slate-800 space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  {t("admin.settings.carto_label")}
-                </label>
-                <input
-                  type="text"
-                  value={cartoApiKey}
-                  onChange={(e) => setCartoApiKey(e.target.value)}
-                  placeholder={t("admin.settings.carto_placeholder")}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-                />
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
-                  {t("admin.settings.carto_hint")}
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   {t("admin.settings.google_places_label")}
                 </label>
@@ -345,7 +323,7 @@ export function SettingsManager({
               Proveedor de Geo
             </div>
             <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
-              {cartoApiKey ? "CartoDB + OpenStreetMap" : "OpenStreetMap / Nominatim"}
+              {googlePlacesApiKey ? "Google Places + OpenStreetMap" : "OpenStreetMap / Nominatim"}
             </div>
             <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
               • API Operativa

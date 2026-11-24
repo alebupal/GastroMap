@@ -28,7 +28,6 @@ interface MapViewProps {
   radiusKm?: number | null;
   occasionMap?: Record<string, { name: string; icon: string }>;
   className?: string;
-  cartoApiKey?: string | null;
   isFiltered?: boolean;
 }
 
@@ -107,7 +106,6 @@ export default function MapView({
   radiusKm,
   occasionMap = {},
   className = "w-full h-[60vh] sm:h-[500px]",
-  cartoApiKey,
   isFiltered = false,
 }: MapViewProps) {
   const { t } = useT();
@@ -143,14 +141,10 @@ export default function MapView({
       touchZoom: !isMobileViewport,
     });
 
-    // Capa de tiles: si el usuario ha configurado Carto API Key usa Voyager, si no OpenStreetMap oficial sin marcas de agua
-    const tileUrl = cartoApiKey
-      ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=${cartoApiKey}`
-      : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-
-    L.tileLayer(tileUrl, {
+    // Capa de tiles: OpenStreetMap oficial 100% gratuito y sin claves
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
-      subdomains: cartoApiKey ? "abcd" : "abc",
+      subdomains: "abc",
     }).addTo(map);
 
     // Atribución discreta

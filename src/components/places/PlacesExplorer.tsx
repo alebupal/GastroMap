@@ -36,7 +36,6 @@ interface PlacesExplorerProps {
   currentUserId: string;
   isAdmin: boolean;
   occasionMap: Record<string, { name: string; icon: string }>;
-  cartoApiKey?: string | null;
   initialSavedFilters?: SavedFilterItem[];
 }
 
@@ -70,7 +69,6 @@ export function PlacesExplorer({
   currentUserId,
   isAdmin,
   occasionMap,
-  cartoApiKey,
   initialSavedFilters = [],
 }: PlacesExplorerProps) {
   const { t, locale } = useT();
@@ -2158,7 +2156,6 @@ export function PlacesExplorer({
                 userLocation={userLocation}
                 radiusKm={radiusKm}
                 occasionMap={occasionMap}
-                cartoApiKey={cartoApiKey}
                 isFiltered={isFiltered}
                 className="w-full h-[44vh] min-h-[300px] sm:h-[460px] lg:h-[calc(100vh-14rem)] lg:min-h-[380px]"
               />

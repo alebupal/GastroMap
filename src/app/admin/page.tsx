@@ -35,11 +35,10 @@ export default async function AdminPage({
   const resolvedParams = searchParams ? await searchParams : undefined;
   const initialTab = resolvedParams?.tab;
 
-  const [places, occasionsList, tagsList, cartoApiKey, googlePlacesApiKey] = await Promise.all([
+  const [places, occasionsList, tagsList, googlePlacesApiKey] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
-    getSetting("carto_api_key"),
     getSetting("google_places_api_key"),
   ]);
 
@@ -48,7 +47,6 @@ export default async function AdminPage({
       initialOccasions={occasionsList}
       initialTags={tagsList}
       allPlaces={places}
-      cartoApiKey={cartoApiKey}
       googlePlacesApiKey={googlePlacesApiKey}
       currentUser={currentUser}
       initialTab={initialTab}

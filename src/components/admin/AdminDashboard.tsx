@@ -44,7 +44,6 @@ interface AdminDashboardProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: { id: string; name: string; placesCount: number }[];
   allPlaces?: PlaceWithDetails[];
-  cartoApiKey?: string | null;
   googlePlacesApiKey?: string | null;
   currentUser: {
     id: string;
@@ -60,7 +59,6 @@ export function AdminDashboard({
   initialOccasions,
   initialTags,
   allPlaces = [],
-  cartoApiKey,
   googlePlacesApiKey,
   currentUser,
   initialTab,
@@ -369,7 +367,6 @@ export function AdminDashboard({
 
           {activeTab === "settings" && (
             <SettingsManager
-              initialCartoApiKey={cartoApiKey}
               initialGooglePlacesApiKey={googlePlacesApiKey}
               totalPlacesCount={allPlaces.length}
             />

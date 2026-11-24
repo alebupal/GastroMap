@@ -3,7 +3,6 @@ import Link from "next/link";
 import { countUsers, getCurrentUser } from "@/lib/auth";
 import { getAllPlaces } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
-import { getSetting } from "@/lib/actions/settings";
 import { getSavedFiltersAction } from "@/lib/actions/saved-filters";
 import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
@@ -25,11 +24,10 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, cartoApiKey, savedFiltersList, t] = await Promise.all([
+  const [places, occasionsList, tagsList, savedFiltersList, t] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
-    getSetting("carto_api_key"),
     getSavedFiltersAction(),
     getT(),
   ]);
@@ -59,7 +57,6 @@ export default async function Home() {
             currentUserId={currentUser.id}
             isAdmin={currentUser.role === "admin"}
             occasionMap={occasionMap}
-            cartoApiKey={cartoApiKey}
             initialSavedFilters={savedFiltersList}
           />
         </section>
