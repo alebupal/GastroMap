@@ -1066,5 +1066,10 @@
     "desc_added_by_group": "Places added to GastroMap by any of the selected people.",
     "include_me": "Include me too",
     "chip_label": "With friends ({count})"
+  },
+  "impersonation": {
+    "btn_login_as": "Log in as",
+    "banner_text": "You are browsing with {user}'s account",
+    "stop_btn": "Log out"
   }
 }

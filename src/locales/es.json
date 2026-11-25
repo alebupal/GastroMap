@@ -1066,5 +1066,10 @@
     "desc_added_by_group": "Establecimientos que añadió a GastroMap alguna de las personas elegidas.",
     "include_me": "Incluirme a mí también",
     "chip_label": "Con amigos ({count})"
+  },
+  "impersonation": {
+    "btn_login_as": "Entrar como",
+    "banner_text": "Estás navegando con la cuenta de {user}",
+    "stop_btn": "Cerrar sesión"
   }
 }

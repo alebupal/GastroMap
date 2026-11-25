@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-25
 
 ### Añadido
+- **Iniciar Sesión como Usuario (Suplantación Segura para Administradores)**:
+  - Nuevo botón **«Entrar como»** en `/admin > Usuarios` (`UsersManager`) que permite a un administrador navegar temporalmente por toda la aplicación con la sesión exacta de cualquier usuario activo (sin alterar su `lastLoginAt` ni pedir su contraseña).
+  - Nueva barra fija superior (**Top Alert** `ImpersonationBanner`) visible en toda la app indicando con qué cuenta estás navegando y un botón **«Cerrar sesión»** que invalida la sesión temporal y restaura automáticamente tu sesión de administrador en `/admin`, registrando inicio y fin en `audit_logs`.
 - **Auditoría Completa, Limpieza de Registros Antiguos y Moderación de Comentarios por Admin**:
   - Nuevos botones en `/admin > Auditoría` (`Limpiar > 30d`, `Limpiar > 90d` y `Vaciar todo`) con confirmación y toast para mantener ligero el historial (`purgeAuditLogsAction`), junto a etiquetas legibles para todas las acciones y búsqueda insensible a tildes.
   - Cobertura ampliada de `audit_logs`: ahora también se registran altas de sitios (`place_created`), borrados en lote, comentarios (publicar, editar y eliminar), usuarios (crear, registrar, cambiar rol, resetear contraseña y eliminar), invitaciones, ajustes del sistema, listas y purgas de auditoría.

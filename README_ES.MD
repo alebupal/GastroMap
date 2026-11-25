@@ -68,7 +68,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Renderizado Markdown enriquecido con badges de versiones (`🏷️`), viñetas estilizadas (`✓`), bloques de código y banner de agradecimiento.
 
 * **🛠️ Panel de Administración y Limpieza:**
-  * Gestión completa de usuarios: alta directa manual, edición exhaustiva de perfiles (nombre, @username, email, rol, estado) y restablecimiento instantáneo de contraseñas.
+  * Gestión completa de usuarios: alta directa manual, edición exhaustiva de perfiles (nombre, @username, email, rol, estado), restablecimiento instantáneo de contraseñas y modo **«Entrar como usuario»** (con alerta superior y retorno en un clic al panel admin).
   * Registro integral de invitaciones privadas: listado con estados en tiempo real (Activa 🟢, Usada ✓, Caducada ⏳), copia de enlaces al portapapeles y revocación anticipada antes de caducar.
   * Tabla paginada de gestión global de establecimientos con fusión de duplicados, eliminación masiva y **registro de auditoría** de acciones críticas.
   * Gestión avanzada de taxonomía con bloques independientes para Categorías y Etiquetas, borrado masivo y botón «🧹 Eliminar vacías» con confirmación.

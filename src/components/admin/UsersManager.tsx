@@ -13,6 +13,7 @@ import {
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { impersonateUserAction } from "@/lib/actions/auth";
 import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
@@ -37,6 +38,23 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [pageSize, setPageSize] = useState(10);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [deletingMultiple, setDeletingMultiple] = useState(false);
+  const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null);
+
+  async function handleImpersonate(u: SafeUser) {
+    if (u.id === currentUserId || u.status === "disabled") return;
+    setImpersonatingUserId(u.id);
+    try {
+      const res = await impersonateUserAction(u.id);
+      if (res.error) {
+        toast(res.error, { kind: "error" });
+        setImpersonatingUserId(null);
+      } else {
+        window.location.href = "/";
+      }
+    } catch {
+      setImpersonatingUserId(null);
+    }
+  }
 
   // Formulario de añadir usuario a mano
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
@@ -623,6 +641,23 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     </div>
 
                     <div className="flex items-center justify-end sm:justify-start gap-1.5 flex-wrap pt-2.5 border-t border-slate-200/70 dark:border-slate-800 sm:pt-0 sm:border-0 shrink-0">
+                      {!isMe && u.status !== "disabled" && (
+                        <button
+                          type="button"
+                          onClick={() => handleImpersonate(u)}
+                          disabled={impersonatingUserId !== null}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/50 border border-orange-200/80 dark:border-orange-800/60 text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-[11px] font-bold transition cursor-pointer disabled:opacity-50"
+                          title={t("impersonation.btn_login_as")}
+                        >
+                          <span className="material-symbols-outlined text-[15px] leading-none">login</span>
+                          <span>
+                            {impersonatingUserId === u.id
+                              ? t("common.loading")
+                              : t("impersonation.btn_login_as")}
+                          </span>
+                        </button>
+                      )}
+
                       <button
                         type="button"
                         onClick={() => handleToggleRole(u)}

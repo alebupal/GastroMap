@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-25
 
 ### Added
+- **Admin «Log in as User» (Secure Impersonation)**:
+  - New **«Log in as»** button in `/admin > Users` (`UsersManager`) allowing administrators to browse the entire app temporarily as any active user (without modifying their `lastLoginAt` or requiring their password).
+  - Global sticky **Top Alert** banner (`ImpersonationBanner`) showing which account you are viewing and a **«Log out»** button that revokes the temporary session and restores your admin session back to `/admin`, with both start and end logged in `audit_logs`.
 - **Comprehensive Audit Trail, Old-Record Cleanup & Admin Comment Moderation**:
   - New maintenance buttons in `/admin > Audit Log` (`Clean > 30d`, `Clean > 90d`, and `Clear all`) with confirmation and toast feedback (`purgeAuditLogsAction`), plus human-readable labels for every action and accent-insensitive search.
   - Expanded `audit_logs` coverage: place creation (`place_created`), bulk deletions, comments (create, edit, delete), user lifecycle (create, register, role change, password reset, delete), invitations, system settings, lists, and audit purges are now all logged.

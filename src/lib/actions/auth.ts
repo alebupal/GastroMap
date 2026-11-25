@@ -14,6 +14,9 @@ import {
   createSession,
   setSessionCookie,
   deleteSessionCookie,
+  setImpersonatorSessionCookie,
+  deleteImpersonatorSessionCookie,
+  validateSessionToken,
   getCurrentUser,
   countUsers,
   invalidateSession,
@@ -161,6 +164,110 @@ export async function logoutAction(): Promise<void> {
   if (sessionId) {
     await invalidateSession(sessionId);
   }
+  await deleteSessionCookie();
+  await deleteImpersonatorSessionCookie();
+  redirect("/login");
+}
+
+/**
+ * Permite a un administrador iniciar sesión temporalmente como otro usuario activo
+ * conservando su sesión de administrador en una cookie HttpOnly separada.
+ */
+export async function impersonateUserAction(
+  targetUserId: string
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") {
+    return { error: "No autorizado. Solo los administradores pueden usar esta opción." };
+  }
+
+  if (targetUserId === currentUser.id) {
+    return { error: "Ya estás conectado con esta cuenta." };
+  }
+
+  const [targetUser] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, targetUserId))
+    .limit(1);
+
+  if (!targetUser) {
+    return { error: "Usuario no encontrado." };
+  }
+
+  if (targetUser.status === "disabled") {
+    return { error: "No puedes entrar como un usuario desactivado." };
+  }
+
+  const cookieStore = await (await import("next/headers")).cookies();
+  const existingImpersonatorToken = cookieStore.get("gastromap_impersonator_session")?.value;
+  const currentAdminToken = existingImpersonatorToken || cookieStore.get("gastromap_session")?.value;
+
+  if (!currentAdminToken) {
+    return { error: "Sesión de administrador no válida." };
+  }
+
+  const adminAuth = await validateSessionToken(currentAdminToken);
+  if (!adminAuth || adminAuth.user.role !== "admin") {
+    return { error: "Sesión de administrador no válida." };
+  }
+
+  // Guardar sesión del admin en cookie dedicada y crear sesión temporal para el usuario destino
+  await setImpersonatorSessionCookie(adminAuth.session.id, adminAuth.session.expiresAt);
+  const impersonatedSession = await createSession(targetUser.id, false);
+  await setSessionCookie(impersonatedSession.id, impersonatedSession.expiresAt);
+
+  await logAudit({
+    actorUserId: adminAuth.user.id,
+    entityType: "user",
+    entityId: targetUser.id,
+    action: "impersonation_started",
+    metadata: {
+      targetUsername: targetUser.username || targetUser.name,
+    },
+  });
+
+  revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Finaliza la suplantación de usuario y restaura automáticamente la sesión del administrador.
+ */
+export async function stopImpersonationAction(): Promise<void> {
+  const cookieStore = await (await import("next/headers")).cookies();
+  const currentSessionId = cookieStore.get("gastromap_session")?.value;
+  const adminSessionId = cookieStore.get("gastromap_impersonator_session")?.value;
+
+  let targetUsername: string | null = null;
+  if (currentSessionId) {
+    const currentAuth = await validateSessionToken(currentSessionId);
+    if (currentAuth) {
+      targetUsername = currentAuth.user.username || currentAuth.user.name;
+    }
+    if (currentSessionId !== adminSessionId) {
+      await invalidateSession(currentSessionId);
+    }
+  }
+
+  await deleteImpersonatorSessionCookie();
+
+  if (adminSessionId) {
+    const adminAuth = await validateSessionToken(adminSessionId);
+    if (adminAuth && adminAuth.user.role === "admin") {
+      await setSessionCookie(adminAuth.session.id, adminAuth.session.expiresAt);
+      await logAudit({
+        actorUserId: adminAuth.user.id,
+        entityType: "user",
+        entityId: adminAuth.user.id,
+        action: "impersonation_ended",
+        metadata: { targetUsername },
+      });
+      revalidatePath("/");
+      redirect("/admin");
+    }
+  }
+
   await deleteSessionCookie();
   redirect("/login");
 }

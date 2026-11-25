@@ -26,6 +26,8 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   user_enabled: { label: "Usuario reactivado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
   user_deleted: { label: "Usuario eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
   users_bulk_deleted: { label: "Usuarios eliminados (lote)", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  impersonation_started: { label: "Acceso como usuario", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  impersonation_ended: { label: "Fin acceso como usuario", color: "bg-slate-500/15 text-slate-600 dark:text-slate-300 border-slate-500/30" },
   invitation_created: { label: "Invitación creada", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
   invitation_deleted: { label: "Invitación eliminada", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
   setting_updated: { label: "Ajuste actualizado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },

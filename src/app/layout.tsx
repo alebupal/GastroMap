@@ -3,9 +3,11 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale } from "@/lib/i18n/server";
 import { getMessages } from "@/lib/i18n/messages";
+import { getImpersonationState } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "GastroMap - Gestor Gastronómico",
@@ -34,7 +36,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
+  const [locale, impersonation] = await Promise.all([
+    getLocale(),
+    getImpersonationState(),
+  ]);
   const messages = getMessages(locale);
 
   return (
@@ -75,7 +80,15 @@ export default async function RootLayout({
       <body className="antialiased min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200">
         <I18nProvider locale={locale} messages={messages}>
           <ThemeProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              {impersonation && (
+                <ImpersonationBanner
+                  targetName={impersonation.targetName}
+                  targetUsername={impersonation.targetUsername}
+                />
+              )}
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </I18nProvider>
       </body>

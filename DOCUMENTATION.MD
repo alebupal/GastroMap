@@ -194,6 +194,7 @@ In the **Import / Export** modal (`📦`):
 - **Selective Demo Cleanup**: Button to wipe only the 50 demo places and demo community users without affecting custom places.
 - **Danger Zone — Reset Application**: Administrative wipe clearing all places, comments, groups, invitations, and collaborator accounts while preserving the current administrator account.
 - **Full Database Backup & Restore**: One-click full JSON database export and restore from **Admin Dashboard > Settings > Backup** with audit logging (works seamlessly even on fresh `/setup` installs while preserving your active admin session and all relational IDs).
+- **Log in as User (Secure Impersonation)**: From `/admin > Users`, administrators can click **«Log in as»** on any active account to experience GastroMap exactly as that user. A sticky top alert banner always shows the active account with a **«Log out»** button to return to `/admin`, logged in the audit trail.
 
 ---
 

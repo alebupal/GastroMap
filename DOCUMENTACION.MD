@@ -197,6 +197,7 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 - **Borrado Selectivo de Datos Demo**: Permite limpiar los 50 establecimientos y usuarios predefinidos de la semilla de prueba sin alterar los sitios propios ni los grupos creados por el usuario.
 - **Zona de Peligro — Resetear Aplicación**: Herramienta irreversible para vaciar completamente la base de datos (sitios, comentarios, grupos, miembros e invitaciones) conservando únicamente la cuenta del administrador actual.
 - **Copia de Seguridad y Restauración Integral**: En el Panel de Administración > Ajustes > Copia de Seguridad, puedes descargar un volcado íntegro en JSON de todas las tablas relacionales y **restaurarlo** en cualquier momento (incluso en una nueva instalación tras `/setup`, conservando automáticamente tu sesión activa y todas las referencias del backup).
+- **Entrar como Usuario (Suplantación Segura)**: Desde `/admin > Usuarios`, los administradores pueden pulsar **«Entrar como»** en cualquier cuenta activa para ver GastroMap exactamente como ese usuario. Un banner superior fijo indica en todo momento la cuenta activa e incluye un botón **«Cerrar sesión»** para regresar al panel de administración con registro automático en auditoría.
 
 ---
 

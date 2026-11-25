@@ -7,6 +7,7 @@ import { runMigrations } from "@/db/migrate";
 import { users, sessions, type User, type Session } from "@/db/schema";
 
 const SESSION_COOKIE_NAME = "gastromap_session";
+const IMPERSONATOR_COOKIE_NAME = "gastromap_impersonator_session";
 const SESSION_DURATION_DAYS = 30;
 
 /**
@@ -57,7 +58,10 @@ export async function countUsers(): Promise<number> {
 /**
  * Crea una sesión de base de datos para un usuario.
  */
-export async function createSession(userId: string): Promise<Session> {
+export async function createSession(
+  userId: string,
+  updateLastLogin = true
+): Promise<Session> {
   const sessionId = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * SESSION_DURATION_DAYS);
 
@@ -70,10 +74,12 @@ export async function createSession(userId: string): Promise<Session> {
     })
     .returning();
 
-  await db
-    .update(users)
-    .set({ lastLoginAt: new Date() })
-    .where(eq(users.id, userId));
+  if (updateLastLogin) {
+    await db
+      .update(users)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(users.id, userId));
+  }
 
   return session;
 }
@@ -151,6 +157,72 @@ export async function deleteSessionCookie(): Promise<void> {
     maxAge: 0,
     path: "/",
   });
+}
+
+/**
+ * Guarda la cookie HttpOnly con la sesión original del administrador durante una suplantación.
+ */
+export async function setImpersonatorSessionCookie(
+  sessionId: string,
+  expiresAt: Date
+): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(IMPERSONATOR_COOKIE_NAME, sessionId, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.COOKIE_SECURE === "true",
+    expires: expiresAt,
+    path: "/",
+  });
+}
+
+/**
+ * Elimina la cookie de sesión del administrador suplantador.
+ */
+export async function deleteImpersonatorSessionCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(IMPERSONATOR_COOKIE_NAME, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.COOKIE_SECURE === "true",
+    maxAge: 0,
+    path: "/",
+  });
+}
+
+/**
+ * Devuelve el estado de suplantación activo si un administrador está navegando como otro usuario.
+ */
+export async function getImpersonationState(): Promise<{
+  targetName: string;
+  targetUsername: string | null;
+  adminName: string;
+  adminUsername: string | null;
+} | null> {
+  try {
+    const cookieStore = await cookies();
+    const adminSessionId = cookieStore.get(IMPERSONATOR_COOKIE_NAME)?.value;
+    const currentSessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+    if (!adminSessionId || !currentSessionId) return null;
+
+    const [adminAuth, targetAuth] = await Promise.all([
+      validateSessionToken(adminSessionId),
+      validateSessionToken(currentSessionId),
+    ]);
+
+    if (!adminAuth || adminAuth.user.role !== "admin" || !targetAuth) {
+      return null;
+    }
+
+    return {
+      targetName: targetAuth.user.name,
+      targetUsername: targetAuth.user.username,
+      adminName: adminAuth.user.name,
+      adminUsername: adminAuth.user.username,
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**

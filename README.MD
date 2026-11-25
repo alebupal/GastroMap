@@ -70,7 +70,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Rich Markdown renderer styled with version badges (`🏷️`), checklist items (`✓`), code blocks, and support options.
 
 * **🛠️ Admin Dashboard & Database Integrity:**
-  * Complete user management: create users directly, edit profile fields (name, @username, email, role, status), and perform instant password resets.
+  * Complete user management: create users directly, edit profile fields (name, @username, email, role, status), perform instant password resets, and use **«Log in as user»** (with a persistent top alert banner and one-click return to admin).
   * Advanced invitation registry: list all issued tokens with real-time status (Active 🟢, Used ✓, Expired ⏳), copy links on demand, and revoke invitations before their expiration date.
   * Paginated global places table with duplicate merging, bulk deletion, and an administrative **Audit Log** tracking critical actions.
   * Strict taxonomy management: dedicated Categories and Tags sections, bulk delete, and «🧹 Delete empty» with pre-confirmation modals.
