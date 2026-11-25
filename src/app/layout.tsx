@@ -6,7 +6,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLocale } from "@/lib/i18n/server";
-import { getMessages } from "@/lib/i18n/messages";
+import { getMessages, translate } from "@/lib/i18n/messages";
 import { getImpersonationState } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -83,8 +83,12 @@ export default async function RootLayout({
             <ToastProvider>
               {impersonation && (
                 <ImpersonationBanner
-                  targetName={impersonation.targetName}
-                  targetUsername={impersonation.targetUsername}
+                  bannerText={translate(messages, "impersonation.banner_text", {
+                    user: impersonation.targetUsername
+                      ? `${impersonation.targetName} (@${impersonation.targetUsername})`
+                      : impersonation.targetName,
+                  })}
+                  stopLabel={translate(messages, "impersonation.stop_btn")}
                 />
               )}
               {children}
