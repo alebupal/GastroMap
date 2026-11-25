@@ -408,8 +408,8 @@
     }
   },
   "notes_visits": {
-    "personal_notes_title": "Private notes & rating",
-    "personal_notes_hint": "Only you can see this note and rating.",
+    "personal_notes_title": "Personal rating",
+    "personal_notes_hint": "Only you can see this rating.",
     "rating_label": "Rating (1 to 10)",
     "no_rating": "No rating",
     "visits_title": "My recorded visits",
@@ -594,7 +594,11 @@
     "rating_prefix": "Rating: {rating}/10",
     "you_badge": "YOU",
     "public_note": "Public note",
-    "empty_private_notes": "You do not have private notes for this place yet. Select Private note above to add one."
+    "empty_private_notes": "You do not have private notes for this place yet. Tap \"Add comment or note\" and choose Private note to add one.",
+    "add_comment_btn": "Add comment or note",
+    "hide_form_btn": "Hide form",
+    "edit_private_note": "Edit private note",
+    "delete_private_note_confirm": "Delete your private note?"
   },
   "pagination": {
     "showing": "Showing",

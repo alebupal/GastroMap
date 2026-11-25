@@ -381,7 +381,7 @@ export function PlaceCard({
             </span>
             <button
               type="button"
-              onClick={() => setShowNotesModal(true)}
+              onClick={() => setShowComments(true)}
               className="text-[10px] text-amber-700 dark:text-amber-400 font-bold hover:underline shrink-0 cursor-pointer"
             >
               {t("common.edit")}
@@ -442,7 +442,7 @@ export function PlaceCard({
             className="py-1.5 px-2.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center justify-center gap-1 shrink-0 active:scale-95"
             title={t("cards.add_note_tooltip")}
           >
-            <span className="material-symbols-outlined text-sm leading-none text-orange-600">edit_note</span>
+            <span className="material-symbols-outlined text-sm leading-none text-amber-500">star</span>
             <span>{rating !== null ? `${rating}★` : t("cards.private_note")}</span>
           </button>
         </div>
@@ -606,7 +606,7 @@ export function PlaceCard({
         onOpenPrivateNotesModal={() => setShowNotesModal(true)}
       />
 
-      {/* Modal de notas y valoración privada */}
+      {/* Modal de valoración privada */}
       <PlacePersonalNotesModal
         placeId={place.id}
         placeName={place.name}
@@ -614,9 +614,8 @@ export function PlaceCard({
         initialNotes={privateNotes}
         isOpen={showNotesModal}
         onClose={() => setShowNotesModal(false)}
-        onSave={(newRating, newNotes) => {
+        onSave={(newRating) => {
           setRating(newRating);
-          setPrivateNotes(newNotes);
         }}
       />
 

@@ -408,8 +408,8 @@
     }
   },
   "notes_visits": {
-    "personal_notes_title": "Notas privadas y valoración",
-    "personal_notes_hint": "Solo tú puedes ver esta nota y puntuación.",
+    "personal_notes_title": "Valoración personal",
+    "personal_notes_hint": "Solo tú puedes ver esta puntuación.",
     "rating_label": "Puntuación (1 a 10)",
     "no_rating": "Sin nota",
     "visits_title": "Mis visitas registradas",
@@ -594,7 +594,11 @@
     "rating_prefix": "Valoración: {rating}/10",
     "you_badge": "TÚ",
     "public_note": "Nota pública",
-    "empty_private_notes": "Aún no tienes notas privadas en este sitio. Selecciona Nota privada arriba para añadir una."
+    "empty_private_notes": "Aún no tienes notas privadas en este sitio. Pulsa «Añadir comentario o nota» y elige Nota privada para crear una.",
+    "add_comment_btn": "Añadir comentario o nota",
+    "hide_form_btn": "Ocultar formulario",
+    "edit_private_note": "Editar nota privada",
+    "delete_private_note_confirm": "¿Eliminar tu nota privada?"
   },
   "pagination": {
     "showing": "Mostrando",

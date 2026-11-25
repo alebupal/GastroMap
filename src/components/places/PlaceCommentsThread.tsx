@@ -359,9 +359,13 @@ export function PlaceCommentsThread({
   const [filterTab, setFilterTab] = useState<"all" | "private" | "community">("all");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [submitting, setSubmitting] = useState(false);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [isEditingPrivateNote, setIsEditingPrivateNote] = useState(false);
+  const [editingPrivateNoteContent, setEditingPrivateNoteContent] = useState("");
+  const [savingPrivateNote, setSavingPrivateNote] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -369,6 +373,8 @@ export function PlaceCommentsThread({
 
   useEffect(() => {
     if (isOpen) {
+      setIsComposerOpen(false);
+      setIsEditingPrivateNote(false);
       setLoading(true);
       getPlaceCommentsAction(placeId)
         .then((data) => {
@@ -420,6 +426,7 @@ export function PlaceCommentsThread({
       if (!res?.error) {
         onPrivateNotesSaved?.(combined);
         setNewContent("");
+        setIsComposerOpen(false);
       }
       setSubmitting(false);
       return;
@@ -430,9 +437,33 @@ export function PlaceCommentsThread({
       const updated = [res.comment as CommentWithAuthor, ...comments];
       setComments(updated);
       setNewContent("");
+      setIsComposerOpen(false);
       onCommentsCountChange?.(updated.length);
     }
     setSubmitting(false);
+  }
+
+  async function handleSavePrivateNoteEdit() {
+    if (savingPrivateNote) return;
+    setSavingPrivateNote(true);
+    const trimmed = editingPrivateNoteContent.trim();
+    const res = await savePrivateNotesAction(placeId, trimmed);
+    if (!res?.error) {
+      onPrivateNotesSaved?.(trimmed || null);
+      setIsEditingPrivateNote(false);
+    }
+    setSavingPrivateNote(false);
+  }
+
+  async function handleDeletePrivateNote() {
+    if (!confirm(t("comments.delete_private_note_confirm"))) return;
+    setSavingPrivateNote(true);
+    const res = await savePrivateNotesAction(placeId, "");
+    if (!res?.error) {
+      onPrivateNotesSaved?.(null);
+      setIsEditingPrivateNote(false);
+    }
+    setSavingPrivateNote(false);
   }
 
   async function handleDeleteComment(commentId: string) {
@@ -463,37 +494,37 @@ export function PlaceCommentsThread({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 z-[1100] flex items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden gm-modal-in">
+      <div className="w-full h-full sm:h-auto sm:max-w-2xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200/80 dark:border-slate-800 flex flex-col sm:max-h-[90vh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo Stitch */}
-        <div className="px-5 sm:px-6 py-4 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-black text-base flex items-center justify-center shrink-0 border border-orange-200/60 dark:border-orange-900/50">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-black text-sm sm:text-base flex items-center justify-center shrink-0 border border-orange-200/60 dark:border-orange-900/50">
               {initials}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                <h3 className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-slate-100 tracking-tight truncate">
                   {t("ui.comments_and_notes", { name: placeName })}
                 </h3>
                 {placeCity && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-[10px] font-bold shrink-0">
+                  <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 text-[10px] font-bold shrink-0">
                     {placeCity}
                   </span>
                 )}
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap mt-0.5">
                 {placeAddress && (
-                  <span className="inline-flex items-center gap-0.5 truncate max-w-[260px]">
+                  <span className="hidden sm:inline-flex items-center gap-0.5 truncate max-w-[260px]">
                     <span className="material-symbols-outlined text-xs text-orange-600">location_on</span>
                     <span className="truncate">{placeAddress}</span>
                   </span>
                 )}
-                {placeAddress && <span className="text-slate-300 dark:text-slate-700">•</span>}
+                {placeAddress && <span className="hidden sm:inline text-slate-300 dark:text-slate-700">•</span>}
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   {totalNotesCount} {totalNotesCount === 1 ? "nota registrada" : "notas registradas"}
                 </span>
@@ -515,12 +546,12 @@ export function PlaceCommentsThread({
         <div className="h-[2px] w-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 opacity-80 shrink-0" />
 
         {/* Barra de filtros y orden */}
-        <div className="px-5 sm:px-6 py-3 bg-[#f8f9ff] dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 flex-wrap text-xs">
+        <div className="px-4 sm:px-6 py-2.5 bg-[#f8f9ff] dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 flex-wrap text-[11px] sm:text-xs">
             <button
               type="button"
               onClick={() => setFilterTab("all")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
                 filterTab === "all"
                   ? "bg-orange-600 text-white shadow-xs"
                   : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
@@ -532,7 +563,7 @@ export function PlaceCommentsThread({
             <button
               type="button"
               onClick={() => setFilterTab("private")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
                 filterTab === "private"
                   ? "bg-orange-600 text-white shadow-xs"
                   : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
@@ -544,7 +575,7 @@ export function PlaceCommentsThread({
             <button
               type="button"
               onClick={() => setFilterTab("community")}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
                 filterTab === "community"
                   ? "bg-orange-600 text-white shadow-xs"
                   : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
@@ -555,12 +586,12 @@ export function PlaceCommentsThread({
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-semibold">{t("ui.sort_label")}</span>
+          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+            <span className="hidden sm:inline font-semibold">{t("ui.sort_label")}</span>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
-              className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs cursor-pointer focus:outline-none"
+              className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] sm:text-xs cursor-pointer focus:outline-none"
             >
               <option value="newest">{t("ui.sort_newest")}</option>
               <option value="oldest">{t("ui.sort_oldest")}</option>
@@ -568,67 +599,14 @@ export function PlaceCommentsThread({
           </div>
         </div>
 
-        {/* Cuerpo scrollable */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5 bg-[#faf8ff] dark:bg-[#0b1120]/40">
-          {/* Caja para añadir reseña o nota privada */}
-          <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 shadow-xs space-y-3">
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="font-extrabold text-slate-800 dark:text-slate-100">
-                Añadir reseña o apunte personal
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium">
-                {composeMode === "private" ? "Solo visible para ti" : "Visible para tu comunidad"}
-              </span>
-            </div>
-
-            <RichTextarea
-              value={newContent}
-              onChange={setNewContent}
-              placeholder={
-                composeMode === "private"
-                  ? "Escribe tu nota privada: mesa favorita, plato a recordar, avisos..."
-                  : t("comments.placeholder")
-              }
-              onSubmit={handlePublish}
-              isSubmitting={submitting}
-              submitLabel={composeMode === "private" ? t("ui.save_private_note") : t("ui.publish_comment")}
-              leftFooterSlot={
-                <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800 p-0.5 rounded-full text-[11px] font-bold">
-                  <button
-                    type="button"
-                    onClick={() => setComposeMode("public")}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full transition cursor-pointer ${
-                      composeMode === "public"
-                        ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs"
-                        : "text-slate-500 dark:text-slate-400"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-xs leading-none">public</span>
-                    <span>{t("ui.public_mode")}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setComposeMode("private")}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full transition cursor-pointer ${
-                      composeMode === "private"
-                        ? "bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 shadow-xs"
-                        : "text-slate-500 dark:text-slate-400"
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-xs leading-none">lock</span>
-                    <span>{t("ui.private_note_mode")}</span>
-                  </button>
-                </div>
-              }
-            />
-          </div>
-
+        {/* Cuerpo scrollable: COMENTARIOS Y NOTAS ARRIBA */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-[#faf8ff] dark:bg-[#0b1120]/40">
           {/* Cabecera del feed */}
           <div className="flex items-center justify-between text-[11px] px-0.5">
             <span className="font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Feed de experiencias registradas ({totalNotesCount})
             </span>
-            <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Sincronizado en tiempo real
             </span>
@@ -636,13 +614,13 @@ export function PlaceCommentsThread({
 
           {/* Tarjeta de nota privada (si existe y el filtro la incluye) */}
           {(filterTab === "all" || filterTab === "private") && hasPrivateNote && (
-            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/50 border-l-4 border-l-amber-500 bg-amber-50/70 dark:bg-amber-950/20 p-4 space-y-2.5 shadow-xs">
+            <div className="rounded-2xl border border-amber-200/80 dark:border-amber-900/50 border-l-4 border-l-amber-500 bg-amber-50/70 dark:bg-amber-950/20 p-3.5 sm:p-4 space-y-2.5 shadow-xs">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0">
                     <span className="material-symbols-outlined text-base leading-none">lock</span>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
                         Tu apunte personal
@@ -657,24 +635,48 @@ export function PlaceCommentsThread({
                   </div>
                 </div>
 
-                {onOpenPrivateNotesModal && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenPrivateNotesModal();
-                    }}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer shrink-0"
-                  >
-                    <span className="material-symbols-outlined text-sm leading-none">edit</span>
-                    <span>Editar</span>
-                  </button>
+                {!isEditingPrivateNote && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingPrivateNoteContent(privateNotes || "");
+                        setIsEditingPrivateNote(true);
+                      }}
+                      className="p-1.5 rounded-lg text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition cursor-pointer"
+                      title={t("comments.edit_private_note")}
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">edit</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeletePrivateNote}
+                      disabled={savingPrivateNote}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
+                      title={t("common.delete")}
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">delete</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
-              <div className="p-3 rounded-xl bg-white/85 dark:bg-slate-900/70 text-xs text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
-                <FormattedCommentContent content={privateNotes || ""} />
-              </div>
+              {isEditingPrivateNote ? (
+                <RichTextarea
+                  value={editingPrivateNoteContent}
+                  onChange={setEditingPrivateNoteContent}
+                  placeholder={t("notes_visits.personal_notes_placeholder")}
+                  rows={3}
+                  onSubmit={handleSavePrivateNoteEdit}
+                  isSubmitting={savingPrivateNote}
+                  submitLabel={t("comments.save_btn")}
+                  onCancel={() => setIsEditingPrivateNote(false)}
+                />
+              ) : (
+                <div className="p-3 rounded-xl bg-white/85 dark:bg-slate-900/70 text-xs text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+                  <FormattedCommentContent content={privateNotes || ""} />
+                </div>
+              )}
             </div>
           )}
 
@@ -811,21 +813,93 @@ export function PlaceCommentsThread({
           )}
         </div>
 
-        {/* Pie del modal estilo Stitch */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
-          <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-sm text-emerald-600">shield</span>
-            <span className="hidden sm:inline">
-              {t("ui.private_notes_privacy")}
-            </span>
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
-          >
-            {t("common.close")}
-          </button>
+        {/* Zona inferior: formulario desplegable + acciones */}
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 shrink-0 space-y-3">
+          {isComposerOpen ? (
+            <div className="space-y-2.5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-extrabold text-slate-800 dark:text-slate-100">
+                  {t("comments.add_review_title")}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsComposerOpen(false)}
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm leading-none">expand_more</span>
+                  <span>{t("comments.hide_form_btn")}</span>
+                </button>
+              </div>
+
+              <RichTextarea
+                value={newContent}
+                onChange={setNewContent}
+                rows={3}
+                placeholder={
+                  composeMode === "private"
+                    ? t("notes_visits.personal_notes_placeholder")
+                    : t("comments.placeholder")
+                }
+                onSubmit={handlePublish}
+                onCancel={() => setIsComposerOpen(false)}
+                isSubmitting={submitting}
+                submitLabel={
+                  composeMode === "private" ? t("ui.save_private_note") : t("ui.publish_comment")
+                }
+                leftFooterSlot={
+                  <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800 p-0.5 rounded-full text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setComposeMode("public")}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full transition cursor-pointer ${
+                        composeMode === "public"
+                          ? "bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 shadow-xs"
+                          : "text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-xs leading-none">public</span>
+                      <span>{t("ui.public_mode")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setComposeMode("private")}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full transition cursor-pointer ${
+                        composeMode === "private"
+                          ? "bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-400 shadow-xs"
+                          : "text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-xs leading-none">lock</span>
+                      <span>{t("ui.private_note_mode")}</span>
+                    </button>
+                  </div>
+                }
+              />
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (filterTab === "private") setComposeMode("private");
+                  else if (filterTab === "community") setComposeMode("public");
+                  setIsComposerOpen(true);
+                }}
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base leading-none">add_comment</span>
+                <span>{t("comments.add_comment_btn")}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer shrink-0"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
