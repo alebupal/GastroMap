@@ -186,10 +186,14 @@ export function PlacesExplorer({
     | "untried_or_pending"
     | "pending_all"
     | "pending_any"
+    | "pending_any_even_visited"
     | "favorites_any"
     | "favorites_all"
+    | "favorite_for_new"
+    | "rated_high_any"
     | "discover_for_some"
     | "visited_all"
+    | "added_by_group"
   >("untried_or_pending");
   const [includeMeWithFriends, setIncludeMeWithFriends] = useState(true);
   const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
@@ -725,6 +729,7 @@ export function PlacesExplorer({
         const visited = p.visitedUserIds || [];
         const pending = p.pendingUserIds || [];
         const favorites = p.favoriteUserIds || [];
+        const highRated = p.highRatedUserIds || [];
         if (friendsFilterMode === "pending_all") {
           return targetUserIds.every((uid) => pending.includes(uid));
         }
@@ -734,11 +739,23 @@ export function PlacesExplorer({
             targetUserIds.every((uid) => !visited.includes(uid))
           );
         }
+        if (friendsFilterMode === "pending_any_even_visited") {
+          return targetUserIds.some((uid) => pending.includes(uid));
+        }
         if (friendsFilterMode === "favorites_any") {
           return targetUserIds.some((uid) => favorites.includes(uid));
         }
         if (friendsFilterMode === "favorites_all") {
           return targetUserIds.every((uid) => favorites.includes(uid));
+        }
+        if (friendsFilterMode === "favorite_for_new") {
+          return (
+            targetUserIds.some((uid) => favorites.includes(uid)) &&
+            targetUserIds.some((uid) => !visited.includes(uid))
+          );
+        }
+        if (friendsFilterMode === "rated_high_any") {
+          return targetUserIds.some((uid) => highRated.includes(uid));
         }
         if (friendsFilterMode === "discover_for_some") {
           return (
@@ -748,6 +765,9 @@ export function PlacesExplorer({
         }
         if (friendsFilterMode === "visited_all") {
           return targetUserIds.every((uid) => visited.includes(uid));
+        }
+        if (friendsFilterMode === "added_by_group") {
+          return targetUserIds.includes(p.createdById);
         }
         // "untried_or_pending": ninguno de los seleccionados lo ha visitado todavía
         return targetUserIds.every((uid) => !visited.includes(uid));
@@ -1877,6 +1897,11 @@ export function PlacesExplorer({
                         icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">hourglass_top</span>,
                       },
                       {
+                        value: "pending_any_even_visited",
+                        label: t("friends_filter.mode_pending_any_even_visited"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-600">bookmark</span>,
+                      },
+                      {
                         value: "favorites_any",
                         label: t("friends_filter.mode_favorites_any"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-rose-500">favorite</span>,
@@ -1887,6 +1912,16 @@ export function PlacesExplorer({
                         icon: <span className="material-symbols-outlined text-sm leading-none text-rose-600">volunteer_activism</span>,
                       },
                       {
+                        value: "favorite_for_new",
+                        label: t("friends_filter.mode_favorite_for_new"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-pink-500">redeem</span>,
+                      },
+                      {
+                        value: "rated_high_any",
+                        label: t("friends_filter.mode_rated_high_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-yellow-500">star</span>,
+                      },
+                      {
                         value: "discover_for_some",
                         label: t("friends_filter.mode_discover_for_some"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-indigo-500">explore</span>,
@@ -1895,6 +1930,11 @@ export function PlacesExplorer({
                         value: "visited_all",
                         label: t("friends_filter.mode_visited_all"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-emerald-600">check_circle</span>,
+                      },
+                      {
+                        value: "added_by_group",
+                        label: t("friends_filter.mode_added_by_group"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-sky-600">person_pin_circle</span>,
                       },
                     ]}
                   />

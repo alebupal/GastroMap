@@ -234,71 +234,55 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
   assert.equal(matches(dummyPlace, "sushi"), false, "No debe encontrar términos no presentes");
 });
 
-test("Filtro Plan con amigos: filtra sitios pendientes, favoritos o visitados para los usuarios elegidos", () => {
+test("Filtro Plan con amigos: filtra sitios pendientes, favoritos, bien valorados, visitados o añadidos por el grupo", () => {
   const samplePlaces = [
-    { id: "p1", visitedUserIds: [], pendingUserIds: ["u1", "u2"], favoriteUserIds: [] },
-    { id: "p2", visitedUserIds: ["u1"], pendingUserIds: ["u2"], favoriteUserIds: ["u1"] },
-    { id: "p3", visitedUserIds: [], pendingUserIds: ["u2"], favoriteUserIds: ["u1", "u2"] },
-    { id: "p4", visitedUserIds: ["u1", "u2"], pendingUserIds: [], favoriteUserIds: ["u1", "u2"] },
+    { id: "p1", createdById: "u1", visitedUserIds: [], pendingUserIds: ["u1", "u2"], favoriteUserIds: [], highRatedUserIds: [] },
+    { id: "p2", createdById: "u3", visitedUserIds: ["u1"], pendingUserIds: ["u2"], favoriteUserIds: ["u1"], highRatedUserIds: ["u1"] },
+    { id: "p3", createdById: "u2", visitedUserIds: [], pendingUserIds: ["u2"], favoriteUserIds: ["u1", "u2"], highRatedUserIds: [] },
+    { id: "p4", createdById: "u3", visitedUserIds: ["u1", "u2"], pendingUserIds: [], favoriteUserIds: ["u1", "u2"], highRatedUserIds: ["u2"] },
   ];
 
   const filterWithFriends = (places, targetIds, mode) =>
     places.filter((p) => {
-      if (mode === "pending_all") {
-        return targetIds.every((uid) => p.pendingUserIds.includes(uid));
-      }
+      if (mode === "pending_all") return targetIds.every((uid) => p.pendingUserIds.includes(uid));
       if (mode === "pending_any") {
         return (
           targetIds.some((uid) => p.pendingUserIds.includes(uid)) &&
           targetIds.every((uid) => !p.visitedUserIds.includes(uid))
         );
       }
-      if (mode === "favorites_any") {
-        return targetIds.some((uid) => p.favoriteUserIds.includes(uid));
+      if (mode === "pending_any_even_visited") return targetIds.some((uid) => p.pendingUserIds.includes(uid));
+      if (mode === "favorites_any") return targetIds.some((uid) => p.favoriteUserIds.includes(uid));
+      if (mode === "favorites_all") return targetIds.every((uid) => p.favoriteUserIds.includes(uid));
+      if (mode === "favorite_for_new") {
+        return (
+          targetIds.some((uid) => p.favoriteUserIds.includes(uid)) &&
+          targetIds.some((uid) => !p.visitedUserIds.includes(uid))
+        );
       }
-      if (mode === "favorites_all") {
-        return targetIds.every((uid) => p.favoriteUserIds.includes(uid));
-      }
+      if (mode === "rated_high_any") return targetIds.some((uid) => p.highRatedUserIds.includes(uid));
       if (mode === "discover_for_some") {
         return (
           targetIds.some((uid) => p.visitedUserIds.includes(uid)) &&
           targetIds.some((uid) => !p.visitedUserIds.includes(uid))
         );
       }
-      if (mode === "visited_all") {
-        return targetIds.every((uid) => p.visitedUserIds.includes(uid));
-      }
+      if (mode === "visited_all") return targetIds.every((uid) => p.visitedUserIds.includes(uid));
+      if (mode === "added_by_group") return targetIds.includes(p.createdById);
       return targetIds.every((uid) => !p.visitedUserIds.includes(uid));
     });
 
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "untried_or_pending").map((p) => p.id),
-    ["p1", "p3"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "pending_all").map((p) => p.id),
-    ["p1"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "pending_any").map((p) => p.id),
-    ["p1", "p3"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_any").map((p) => p.id),
-    ["p2", "p3", "p4"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_all").map((p) => p.id),
-    ["p3", "p4"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "discover_for_some").map((p) => p.id),
-    ["p2"]
-  );
-  assert.deepEqual(
-    filterWithFriends(samplePlaces, ["u1", "u2"], "visited_all").map((p) => p.id),
-    ["p4"]
-  );
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "untried_or_pending").map((p) => p.id), ["p1", "p3"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "pending_all").map((p) => p.id), ["p1"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "pending_any").map((p) => p.id), ["p1", "p3"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "pending_any_even_visited").map((p) => p.id), ["p1", "p2", "p3"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_any").map((p) => p.id), ["p2", "p3", "p4"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_all").map((p) => p.id), ["p3", "p4"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "favorite_for_new").map((p) => p.id), ["p2", "p3"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "rated_high_any").map((p) => p.id), ["p2", "p4"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "discover_for_some").map((p) => p.id), ["p2"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "visited_all").map((p) => p.id), ["p4"]);
+  assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "added_by_group").map((p) => p.id), ["p1", "p3"]);
 });
 
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {

@@ -53,6 +53,7 @@ export interface PlaceWithDetails extends Place {
   pendingUserIds?: string[];
   visitedUserIds?: string[];
   favoriteUserIds?: string[];
+  highRatedUserIds?: string[];
 }
 
 export interface CommunityUserSummary {
@@ -685,6 +686,7 @@ export async function getAllPlaces(
   const pendingUsersByPlace = new Map<string, string[]>();
   const visitedUsersByPlace = new Map<string, string[]>();
   const favoriteUsersByPlace = new Map<string, string[]>();
+  const highRatedUsersByPlace = new Map<string, string[]>();
 
   for (const row of allUserPlaceRows) {
     if (row.personalStatus === "pending") {
@@ -701,6 +703,11 @@ export async function getAllPlaces(
       const list = favoriteUsersByPlace.get(row.placeId) || [];
       list.push(row.userId);
       favoriteUsersByPlace.set(row.placeId, list);
+    }
+    if (row.rating !== null && row.rating >= 8) {
+      const list = highRatedUsersByPlace.get(row.placeId) || [];
+      list.push(row.userId);
+      highRatedUsersByPlace.set(row.placeId, list);
     }
   }
 
@@ -758,6 +765,7 @@ export async function getAllPlaces(
       const placeVisitedUserIds = visitedUsersByPlace.get(place.id) || [];
       const placePendingUserIds = pendingUsersByPlace.get(place.id) || [];
       const placeFavoriteUserIds = favoriteUsersByPlace.get(place.id) || [];
+      const placeHighRatedUserIds = highRatedUsersByPlace.get(place.id) || [];
       let experienceStatus: "visited_by_me" | "visited_by_others" | "untried" = "untried";
 
       if (personalStatus === "visited" || (rating !== null && rating > 0)) {
@@ -790,6 +798,7 @@ export async function getAllPlaces(
         pendingUserIds: placePendingUserIds,
         visitedUserIds: placeVisitedUserIds,
         favoriteUserIds: placeFavoriteUserIds,
+        highRatedUserIds: placeHighRatedUserIds,
       };
     })
   );

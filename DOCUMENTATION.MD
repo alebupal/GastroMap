@@ -108,7 +108,7 @@ When launching on a clean database:
   - `Countries (195+)` and `Cities`: Searchable dropdown selectors.
   - `Price Ranges`: Segmented pills for explicit brackets (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`).
   - `Minimum Rating`: Quick filter (`★ 7+`, `★ 8+`, `★ 9+`) inside the animated `+ Filters` panel, alongside categories and gastronomic tags (8 default plans customizable with emojis or **Material Symbols** icons in `/admin > Taxonomy`).
-  - `Dining with friends`: Pick which users you're going out with (in `+ Filters` or the Decision Assistant / Mobile Filters) to filter restaurants across 7 modes (*Pending or untried*, *Everyone wants to go*, *Someone wants to go & untried*, *Someone's favorite*, *Everyone's favorite*, *Tried by some, new for others*, or *Visited by everyone*). Works seamlessly with **🎲 Random Pick** and the map.
+  - `Dining with friends`: Pick which users you're going out with (in `+ Filters` or the Decision Assistant / Mobile Filters) and choose from 11 modes with live descriptions (*Pending or untried*, *Everyone wants to go*, *Someone wants to go & untried*, *Someone wants to go even if visited*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite & new for others*, *Highly rated by someone (8+)*, *Tried by some & new for others*, *Visited by everyone*, or *Added by the group*). Works seamlessly with **🎲 Random Pick** and the map.
   - **Actionable Empty State**: When a filter combination yields 0 results, clickable chips let you remove any single active filter without resetting the entire search.
 - **Stitch-styled Place Cards**:
   - Restaurant initials avatar, address with pin, emerald price badge, and interactive favorite heart (`favorite`).

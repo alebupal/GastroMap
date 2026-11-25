@@ -43,19 +43,27 @@ interface DecisionAssistantModalProps {
     | "untried_or_pending"
     | "pending_all"
     | "pending_any"
+    | "pending_any_even_visited"
     | "favorites_any"
     | "favorites_all"
+    | "favorite_for_new"
+    | "rated_high_any"
     | "discover_for_some"
-    | "visited_all";
+    | "visited_all"
+    | "added_by_group";
   onChangeFriendsFilterMode?: (
     mode:
       | "untried_or_pending"
       | "pending_all"
       | "pending_any"
+      | "pending_any_even_visited"
       | "favorites_any"
       | "favorites_all"
+      | "favorite_for_new"
+      | "rated_high_any"
       | "discover_for_some"
       | "visited_all"
+      | "added_by_group"
   ) => void;
   includeMeWithFriends?: boolean;
   onToggleIncludeMeWithFriends?: (val: boolean) => void;
@@ -599,6 +607,11 @@ export function DecisionAssistantModal({
                         icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">hourglass_top</span>,
                       },
                       {
+                        value: "pending_any_even_visited",
+                        label: t("friends_filter.mode_pending_any_even_visited"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-600">bookmark</span>,
+                      },
+                      {
                         value: "favorites_any",
                         label: t("friends_filter.mode_favorites_any"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-rose-500">favorite</span>,
@@ -609,6 +622,16 @@ export function DecisionAssistantModal({
                         icon: <span className="material-symbols-outlined text-sm leading-none text-rose-600">volunteer_activism</span>,
                       },
                       {
+                        value: "favorite_for_new",
+                        label: t("friends_filter.mode_favorite_for_new"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-pink-500">redeem</span>,
+                      },
+                      {
+                        value: "rated_high_any",
+                        label: t("friends_filter.mode_rated_high_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-yellow-500">star</span>,
+                      },
+                      {
                         value: "discover_for_some",
                         label: t("friends_filter.mode_discover_for_some"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-indigo-500">explore</span>,
@@ -617,6 +640,11 @@ export function DecisionAssistantModal({
                         value: "visited_all",
                         label: t("friends_filter.mode_visited_all"),
                         icon: <span className="material-symbols-outlined text-sm leading-none text-emerald-600">check_circle</span>,
+                      },
+                      {
+                        value: "added_by_group",
+                        label: t("friends_filter.mode_added_by_group"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-sky-600">person_pin_circle</span>,
                       },
                     ]}
                   />
