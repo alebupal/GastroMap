@@ -117,6 +117,12 @@ export default function MapView({
   const radiusCircleRef = useRef<L.Circle | null>(null);
   const hasInitializedBoundsRef = useRef(false);
   const lastCenteredIdRef = useRef<string | null>(null);
+  const lastBoundsKeyRef = useRef<string>("");
+  const onSelectPlaceRef = useRef(onSelectPlace);
+
+  useEffect(() => {
+    onSelectPlaceRef.current = onSelectPlace;
+  }, [onSelectPlace]);
 
   // 1. Inicialización única del mapa Leaflet
   useEffect(() => {
@@ -157,6 +163,12 @@ export default function MapView({
       .addTo(map);
 
     mapInstanceRef.current = map;
+
+    // Al pinchar en el fondo del mapa, quitar el foco del sitio seleccionado para moverse libremente
+    map.on("click", () => {
+      map.closePopup();
+      onSelectPlaceRef.current?.(null);
+    });
 
     // Observador para redimensionamientos del contenedor (ej. cambio pestaña móvil o resize)
     const resizeObserver = new ResizeObserver(() => {
@@ -359,10 +371,6 @@ export default function MapView({
         marker.setZIndexOffset(isSelected ? 500 : 100);
         marker.setPopupContent(popupHtml);
       }
-
-      if (isSelected) {
-        marker.openPopup();
-      }
     });
 
     // Pintar marcadores de clúster
@@ -401,13 +409,19 @@ export default function MapView({
     if (!container || container.offsetParent === null) return;
     map.invalidateSize();
 
-    // Si NO hay filtros activos, centrar en España por defecto
+    // Solo reencuadrar la cámara cuando cambian los filtros o el conjunto de sitios, nunca al quitar foco
+    const boundsKey = `${isFiltered ? "1" : "0"}|${userLocation ? `${userLocation.latitude},${userLocation.longitude}` : ""}|${places.map((p) => p.id).join(",")}`;
+    const shouldUpdateBounds = boundsKey !== lastBoundsKeyRef.current;
+
+    // Si NO hay filtros activos, centrar en España por defecto solo la primera vez
     if (!isFiltered) {
       if (!hasInitializedBoundsRef.current && !userLocation && !selectedPlaceId) {
         map.setView(SPAIN_CENTER, SPAIN_DEFAULT_ZOOM);
         hasInitializedBoundsRef.current = true;
       }
-    } else {
+      lastBoundsKeyRef.current = boundsKey;
+    } else if (shouldUpdateBounds && !selectedPlaceId) {
+      lastBoundsKeyRef.current = boundsKey;
       // Si hay filtros activos (búsqueda, país, ciudad, categorías...), ajustar límites a los resultados
       const bounds: [number, number][] = [];
       if (userLocation) {
@@ -428,7 +442,7 @@ export default function MapView({
         }
       });
 
-      if (bounds.length > 0 && !selectedPlaceId) {
+      if (bounds.length > 0) {
         if (bounds.length === 1) {
           map.setView(bounds[0], 15);
         } else {
