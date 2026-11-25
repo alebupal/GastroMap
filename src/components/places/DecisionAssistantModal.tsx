@@ -579,8 +579,8 @@ export function DecisionAssistantModal({
                     value={friendsFilterMode}
                     onChange={onChangeFriendsFilterMode}
                     align="left"
-                    className="w-full"
-                    buttonClassName="w-full justify-between px-3.5 py-2.5 text-xs"
+                    fullWidth
+                    buttonClassName="px-3.5 py-2.5 text-xs"
                     ariaLabel={t("friends_filter.title")}
                     options={[
                       {
