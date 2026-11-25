@@ -285,6 +285,35 @@ test("Filtro Plan con amigos: filtra sitios pendientes, favoritos, bien valorado
   assert.deepEqual(filterWithFriends(samplePlaces, ["u1", "u2"], "added_by_group").map((p) => p.id), ["p1", "p3"]);
 });
 
+test("Scraper: detecta direcciones/calles para no usarlas como nombre del local", () => {
+  const looksLikeStreetAddress = (text) => {
+    const t = text.trim();
+    if (!t) return false;
+    if (
+      /^(c\/|c\.|cl\.|calle|av\.|avda\.?|avenida|pl\.|plz\.?|plaza|pza\.?|p\.º|pº|paseo|camino|cno\.?|ctra\.?|carretera|ronda|traves[ií]a|glorieta|rambla|carrer|rua|rue|via|viale|corso|strada|boulevard|blvd\.?)\s+/i.test(
+        t
+      )
+    ) {
+      return true;
+    }
+    if (/^\d{1,5}\s+[a-záéíóúñ\s]+\b(st|street|ave|avenue|rd|road|blvd|ln|lane|dr|drive)\b/i.test(t)) {
+      return true;
+    }
+    if (/,\s*\d{5}\b/.test(t)) {
+      return true;
+    }
+    return false;
+  };
+
+  assert.equal(looksLikeStreetAddress("Calle Reyes Católicos, 12"), true);
+  assert.equal(looksLikeStreetAddress("C. de Alcalá, 45"), true);
+  assert.equal(looksLikeStreetAddress("Av. de la Constitución"), true);
+  assert.equal(looksLikeStreetAddress("Camino el Bollullo"), true);
+  assert.equal(looksLikeStreetAddress("Chiringuito Bollullo"), false);
+  assert.equal(looksLikeStreetAddress("Taberna La Plaza"), false);
+  assert.equal(looksLikeStreetAddress("Bar Calle 54"), false);
+});
+
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
   const root = path.join(__dirname, "..");
   const docs = [

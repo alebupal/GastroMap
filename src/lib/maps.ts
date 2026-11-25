@@ -36,6 +36,29 @@ function isGenericGoogleMapsDescription(text: string): boolean {
   );
 }
 
+/**
+ * Detecta si un texto parece una dirección o nombre de calle en lugar del nombre de un establecimiento
+ * (ej. "C. de Alcalá, 45", "Calle Reyes Católicos", "Av. de la Constitución, 12", "Camino el Bollullo").
+ */
+export function looksLikeStreetAddress(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  if (
+    /^(c\/|c\.|cl\.|calle|av\.|avda\.?|avenida|pl\.|plz\.?|plaza|pza\.?|p\.º|pº|paseo|camino|cno\.?|ctra\.?|carretera|ronda|traves[ií]a|glorieta|rambla|carrer|rua|rue|via|viale|corso|strada|boulevard|blvd\.?)\s+/i.test(
+      t
+    )
+  ) {
+    return true;
+  }
+  if (/^\d{1,5}\s+[a-záéíóúñ\s]+\b(st|street|ave|avenue|rd|road|blvd|ln|lane|dr|drive)\b/i.test(t)) {
+    return true;
+  }
+  if (/,\s*\d{5}\b/.test(t)) {
+    return true;
+  }
+  return false;
+}
+
 function inferPriceRangeFromText(text: string): "€" | "€€" | "€€€" | "€€€€" | undefined {
   // 1. Símbolos explícitos (€€€€, $$$, etc.)
   const symMatch = text.match(/(?:^|[\s·•(])([€$£]{1,4})(?:[\s·•)]|$)/);

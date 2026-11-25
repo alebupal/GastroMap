@@ -25,6 +25,7 @@ import {
   parseGoogleMapsUrl,
   fetchGooglePlacesDetails,
   suggestOccasionsFromMetadata,
+  looksLikeStreetAddress,
 } from "@/lib/maps";
 import { getSetting } from "@/lib/actions/settings";
 import {
@@ -106,6 +107,10 @@ export async function parseUrlAction(rawUrl: string) {
   let longitude = parsed.longitude ?? resolvedDetails.htmlLng;
   let name = parsed.name || resolvedDetails.ogName;
   let address = resolvedDetails.ogAddress;
+  if (name && looksLikeStreetAddress(name)) {
+    if (!address) address = name;
+    name = undefined;
+  }
   let priceRange = resolvedDetails.ogPriceRange;
   let description: string | undefined;
   let website: string | undefined;
@@ -124,7 +129,13 @@ export async function parseUrlAction(rawUrl: string) {
     });
     if (gp) {
       source = "google_places";
-      if (gp.name) name = gp.name;
+      const isAddressOnlyType =
+        gp.primaryType === "route" ||
+        gp.primaryType === "street_address" ||
+        gp.primaryType === "premise";
+      if (gp.name && !isAddressOnlyType && !looksLikeStreetAddress(gp.name)) {
+        name = gp.name;
+      }
       if (gp.address) address = gp.address;
       if (gp.latitude != null) latitude = gp.latitude;
       if (gp.longitude != null) longitude = gp.longitude;
@@ -179,9 +190,18 @@ export async function parseUrlAction(rawUrl: string) {
     amenity: locationDetails?.extratags?.amenity,
   });
 
+  // Evitar usar el nombre de la calle de Nominatim como nombre del restaurante
+  const safeLocationName =
+    locationDetails?.name &&
+    locationDetails.name.trim().toLowerCase() !== (locationDetails.road || "").trim().toLowerCase() &&
+    locationDetails.name.trim().toLowerCase() !== (locationDetails.city || "").trim().toLowerCase() &&
+    !looksLikeStreetAddress(locationDetails.name)
+      ? locationDetails.name
+      : undefined;
+
   return {
     ...parsed,
-    name: name || locationDetails?.name,
+    name: name || safeLocationName,
     address:
       address ||
       (locationDetails?.road
