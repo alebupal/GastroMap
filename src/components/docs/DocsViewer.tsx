@@ -14,35 +14,186 @@ interface DocsViewerProps {
 }
 
 /**
- * Formatea negrita (**texto**) y código inline (`codigo`) dentro de un párrafo o elemento de lista.
+ * Genera el mismo id slug que GitHub Markdown para que funcionen los enlaces internos (#seccion).
  */
-function InlineMarkdown({ text }: { text: string }) {
-  const tokens = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
-  return (
-    <>
-      {tokens.map((part, i) => {
-        if (!part) return null;
-        if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
-          return (
-            <strong key={i} className="text-slate-900 dark:text-slate-100 font-bold">
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
-          return (
-            <code
-              key={i}
-              className="px-1.5 py-0.5 rounded-md bg-[#f2f3ff] dark:bg-slate-800 text-orange-700 dark:text-orange-300 font-mono text-[11px] font-semibold"
-            >
-              {part.slice(1, -1)}
-            </code>
-          );
-        }
-        return <React.Fragment key={i}>{part}</React.Fragment>;
-      })}
-    </>
-  );
+function slugifyHeading(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[`*_~[\]()]/g, "")
+    .replace(/[^\p{L}\p{N}\s-]/gu, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+function isBadgeOnlyLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  return /^(?:\[!\[[^\]]*\]\([^)]+\)\]\([^)]+\)\s*)+$/.test(trimmed);
+}
+
+/**
+ * Renderizador inline completo de Markdown:
+ * badges enlazados, imágenes, enlaces, código inline, negrita+cursiva, negrita, cursiva y tachado.
+ */
+function InlineMarkdown({
+  text,
+  onSwitchLang,
+}: {
+  text: string;
+  onSwitchLang?: (nextLang: "es" | "en") => void;
+}) {
+  const tokenRegex =
+    /(\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)|!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`|\*\*\*([^*]+)\*\*\*|\*\*([^*]+)\*\*|\*([^*\n]+)\*|~~([^~]+)~~)/g;
+
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let keyIdx = 0;
+
+  while ((match = tokenRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(
+        <React.Fragment key={`t-${keyIdx++}`}>
+          {text.slice(lastIndex, match.index)}
+        </React.Fragment>
+      );
+    }
+
+    if (match[2] !== undefined && match[3] && match[4]) {
+      // Badge enlazado: [![alt](imgSrc)](href)
+      const alt = match[2];
+      const imgSrc = match[3];
+      const rawHref = match[4];
+      const href = /^https?:\/\//i.test(rawHref)
+        ? rawHref
+        : `https://github.com/alebupal/GastroMap/blob/main/${rawHref.replace(/^\.?\//, "")}`;
+      nodes.push(
+        <a
+          key={`badge-${keyIdx++}`}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center hover:opacity-85 transition"
+          title={alt}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={imgSrc} alt={alt} className="h-5 w-auto rounded-xs" loading="lazy" />
+        </a>
+      );
+    } else if (match[5] !== undefined && match[6]) {
+      // Imagen: ![alt](src)
+      nodes.push(
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={`img-${keyIdx++}`}
+          src={match[6]}
+          alt={match[5]}
+          className="max-w-full rounded-xl my-2 inline-block border border-slate-200/70 dark:border-slate-800"
+          loading="lazy"
+        />
+      );
+    } else if (match[7] && match[8]) {
+      // Enlace: [label](href)
+      const label = match[7];
+      const href = match[8].trim();
+      if (href.startsWith("#")) {
+        nodes.push(
+          <a
+            key={`anchor-${keyIdx++}`}
+            href={href}
+            className="text-orange-600 dark:text-orange-400 hover:underline font-semibold"
+          >
+            <InlineMarkdown text={label} onSwitchLang={onSwitchLang} />
+          </a>
+        );
+      } else if (/^README_ES\.MD$/i.test(href) && onSwitchLang) {
+        nodes.push(
+          <button
+            key={`lang-es-${keyIdx++}`}
+            type="button"
+            onClick={() => onSwitchLang("es")}
+            className="text-orange-600 dark:text-orange-400 hover:underline font-semibold cursor-pointer"
+          >
+            {label}
+          </button>
+        );
+      } else if (/^README\.MD$/i.test(href) && onSwitchLang) {
+        nodes.push(
+          <button
+            key={`lang-en-${keyIdx++}`}
+            type="button"
+            onClick={() => onSwitchLang("en")}
+            className="text-orange-600 dark:text-orange-400 hover:underline font-semibold cursor-pointer"
+          >
+            {label}
+          </button>
+        );
+      } else {
+        const resolvedHref = /^https?:\/\//i.test(href)
+          ? href
+          : `https://github.com/alebupal/GastroMap/blob/main/${href.replace(/^\.?\//, "")}`;
+        nodes.push(
+          <a
+            key={`link-${keyIdx++}`}
+            href={resolvedHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-orange-600 dark:text-orange-400 hover:underline font-semibold"
+          >
+            <InlineMarkdown text={label} onSwitchLang={onSwitchLang} />
+          </a>
+        );
+      }
+    } else if (match[9] !== undefined) {
+      // Código inline: `code`
+      nodes.push(
+        <code
+          key={`code-${keyIdx++}`}
+          className="px-1.5 py-0.5 rounded-md bg-[#f2f3ff] dark:bg-slate-800 text-orange-700 dark:text-orange-300 font-mono text-[11px] font-semibold"
+        >
+          {match[9]}
+        </code>
+      );
+    } else if (match[10] !== undefined) {
+      // Negrita + cursiva: ***text***
+      nodes.push(
+        <strong key={`bi-${keyIdx++}`} className="font-bold italic text-slate-900 dark:text-slate-100">
+          <InlineMarkdown text={match[10]} onSwitchLang={onSwitchLang} />
+        </strong>
+      );
+    } else if (match[11] !== undefined) {
+      // Negrita: **text**
+      nodes.push(
+        <strong key={`b-${keyIdx++}`} className="font-bold text-slate-900 dark:text-slate-100">
+          <InlineMarkdown text={match[11]} onSwitchLang={onSwitchLang} />
+        </strong>
+      );
+    } else if (match[12] !== undefined) {
+      // Cursiva: *text*
+      nodes.push(
+        <em key={`i-${keyIdx++}`} className="italic text-slate-700 dark:text-slate-200">
+          <InlineMarkdown text={match[12]} onSwitchLang={onSwitchLang} />
+        </em>
+      );
+    } else if (match[13] !== undefined) {
+      // Tachado: ~~text~~
+      nodes.push(
+        <del key={`s-${keyIdx++}`} className="line-through text-slate-400">
+          <InlineMarkdown text={match[13]} onSwitchLang={onSwitchLang} />
+        </del>
+      );
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(
+      <React.Fragment key={`t-${keyIdx++}`}>{text.slice(lastIndex)}</React.Fragment>
+    );
+  }
+
+  return <>{nodes}</>;
 }
 
 export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
@@ -58,7 +209,9 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/docs/${tab}?lang=${currentLang}`);
+      const res = await fetch(`/api/docs/${tab}?lang=${currentLang}`, {
+        cache: "no-store",
+      });
       if (!res.ok) {
         throw new Error(`No se pudo cargar la documentación (${res.statusText})`);
       }
@@ -77,58 +230,142 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
   }, [activeTab, lang]);
 
   const renderMarkdown = (text: string) => {
-    const lines = text.split("\n");
-    let inCodeBlock = false;
-    let codeBuffer: string[] = [];
-
+    const lines = text.split(/\r?\n/);
     const elements: React.ReactNode[] = [];
+    let i = 0;
 
-    lines.forEach((line, idx) => {
-      // Bloques de código ```
-      if (line.startsWith("```")) {
-        if (!inCodeBlock) {
-          inCodeBlock = true;
-          codeBuffer = [];
-        } else {
-          inCodeBlock = false;
-          elements.push(
-            <div
-              key={`code-${idx}`}
-              className="my-4 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-200 font-mono text-xs overflow-x-auto shadow-inner"
-            >
-              <pre>{codeBuffer.join("\n")}</pre>
-            </div>
-          );
+    while (i < lines.length) {
+      const line = lines[i];
+      const trimmed = line.trim();
+
+      // 1. Bloques de código ```lang
+      if (trimmed.startsWith("```")) {
+        const codeLang = trimmed.slice(3).trim();
+        const codeLines: string[] = [];
+        i++;
+        while (i < lines.length && !lines[i].trim().startsWith("```")) {
+          codeLines.push(lines[i]);
+          i++;
         }
-        return;
+        i++; // saltar cierre ```
+        elements.push(
+          <div
+            key={`code-${i}`}
+            className="my-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-200 overflow-hidden shadow-inner"
+          >
+            {codeLang && (
+              <div className="px-4 py-1.5 bg-slate-900/90 border-b border-slate-800 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                {codeLang}
+              </div>
+            )}
+            <pre className="p-4 font-mono text-xs overflow-x-auto leading-relaxed">
+              <code>{codeLines.join("\n")}</code>
+            </pre>
+          </div>
+        );
+        continue;
       }
 
-      if (inCodeBlock) {
-        codeBuffer.push(line);
-        return;
+      // 2. Grupo de badges consecutivos (shields.io)
+      if (isBadgeOnlyLine(line)) {
+        const badgeLines: string[] = [];
+        const startIdx = i;
+        while (i < lines.length && isBadgeOnlyLine(lines[i])) {
+          badgeLines.push(lines[i].trim());
+          i++;
+        }
+        elements.push(
+          <div key={`badges-${startIdx}`} className="flex flex-wrap items-center gap-2 my-3">
+            {badgeLines.map((bLine, bi) => (
+              <InlineMarkdown key={bi} text={bLine} onSwitchLang={setLang} />
+            ))}
+          </div>
+        );
+        continue;
       }
 
-      // H1
+      // 3. Tablas Markdown (| a | b |)
+      if (
+        trimmed.startsWith("|") &&
+        i + 1 < lines.length &&
+        /^\|?[\s:-]+\|[\s|:-]*$/.test(lines[i + 1].trim())
+      ) {
+        const startIdx = i;
+        const parseCells = (row: string) =>
+          row
+            .trim()
+            .replace(/^\|/, "")
+            .replace(/\|$/, "")
+            .split("|")
+            .map((c) => c.trim());
+
+        const headers = parseCells(lines[i]);
+        i += 2; // saltar cabecera y separador
+        const bodyRows: string[][] = [];
+        while (i < lines.length && lines[i].trim().startsWith("|")) {
+          bodyRows.push(parseCells(lines[i]));
+          i++;
+        }
+
+        elements.push(
+          <div
+            key={`table-${startIdx}`}
+            className="my-4 overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800"
+          >
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-[#f8f9ff] dark:bg-slate-800/70">
+                <tr>
+                  {headers.map((h, hi) => (
+                    <th
+                      key={hi}
+                      className="px-3.5 py-2.5 font-extrabold text-slate-800 dark:text-slate-100 border-b border-slate-200/80 dark:border-slate-700"
+                    >
+                      <InlineMarkdown text={h} onSwitchLang={setLang} />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {bodyRows.map((row, ri) => (
+                  <tr key={ri} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30">
+                    {row.map((cell, ci) => (
+                      <td key={ci} className="px-3.5 py-2 text-slate-600 dark:text-slate-300">
+                        <InlineMarkdown text={cell} onSwitchLang={setLang} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+        continue;
+      }
+
+      // 4. Encabezados H1 - H4 con id slugificado para enlaces internos
       if (line.startsWith("# ")) {
+        const title = line.slice(2).trim();
         elements.push(
           <h1
-            key={idx}
-            className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800 tracking-tight"
+            key={`h1-${i}`}
+            id={slugifyHeading(title)}
+            className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2 mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800 tracking-tight scroll-mt-20"
           >
-            {line.replace("# ", "")}
+            <InlineMarkdown text={title} onSwitchLang={setLang} />
           </h1>
         );
-        return;
+        i++;
+        continue;
       }
 
-      // H2
       if (line.startsWith("## ")) {
-        const title = line.replace("## ", "");
+        const title = line.slice(3).trim();
         const isVersion = title.includes("[") || title.toLowerCase().includes("version");
         elements.push(
           <div
-            key={idx}
-            className="mt-8 mb-3.5 pt-5 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center gap-2.5"
+            key={`h2-${i}`}
+            id={slugifyHeading(title)}
+            className="mt-8 mb-3.5 pt-5 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center gap-2.5 scroll-mt-20"
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-50 dark:bg-orange-950/60 border border-orange-200/60 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 shrink-0">
               <span className="material-symbols-outlined text-base leading-none">
@@ -136,86 +373,143 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               </span>
             </span>
             <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-              {title}
+              <InlineMarkdown text={title} onSwitchLang={setLang} />
             </h2>
           </div>
         );
-        return;
+        i++;
+        continue;
       }
 
-      // H3
       if (line.startsWith("### ")) {
-        const title = line.replace("### ", "");
+        const title = line.slice(4).trim();
         elements.push(
           <h3
-            key={idx}
-            className="text-sm sm:text-base font-extrabold text-orange-600 dark:text-orange-400 mt-5 mb-2 flex items-center gap-1.5"
+            key={`h3-${i}`}
+            id={slugifyHeading(title)}
+            className="text-sm sm:text-base font-extrabold text-orange-600 dark:text-orange-400 mt-5 mb-2 flex items-center gap-1.5 scroll-mt-20"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0" />
-            <span>{title}</span>
+            <span>
+              <InlineMarkdown text={title} onSwitchLang={setLang} />
+            </span>
           </h3>
         );
-        return;
+        i++;
+        continue;
       }
 
-      // Citas (> )
-      if (line.trim().startsWith("> ")) {
+      if (line.startsWith("#### ")) {
+        const title = line.slice(5).trim();
+        elements.push(
+          <h4
+            key={`h4-${i}`}
+            id={slugifyHeading(title)}
+            className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-200 mt-4 mb-1.5 scroll-mt-20"
+          >
+            <InlineMarkdown text={title} onSwitchLang={setLang} />
+          </h4>
+        );
+        i++;
+        continue;
+      }
+
+      // 5. Citas (> )
+      if (trimmed.startsWith("> ")) {
         elements.push(
           <blockquote
-            key={idx}
+            key={`bq-${i}`}
             className="my-3 pl-4 pr-3 py-2.5 rounded-r-2xl border-l-4 border-orange-500 bg-orange-50/70 dark:bg-orange-950/20 text-xs sm:text-sm text-slate-700 dark:text-slate-300"
           >
-            <InlineMarkdown text={line.trim().replace(/^>\s+/, "")} />
+            <InlineMarkdown text={trimmed.replace(/^>\s+/, "")} onSwitchLang={setLang} />
           </blockquote>
         );
-        return;
+        i++;
+        continue;
       }
 
-      // Elementos de lista
-      if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
-        const itemText = line.trim().replace(/^[-*]\s+/, "");
-        const isSubitem = line.startsWith("  ") || line.startsWith("\t");
+      // 6. Listas numeradas (1. ...)
+      const orderedMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/);
+      if (orderedMatch) {
+        const indent = orderedMatch[1].length;
+        const num = orderedMatch[2];
+        const itemText = orderedMatch[3];
         elements.push(
           <div
-            key={idx}
-            className={`flex items-start gap-2 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 ${isSubitem ? "pl-6 sm:pl-8 text-xs text-slate-500 dark:text-slate-400" : "pl-1 sm:pl-2"
-              }`}
+            key={`ol-${i}`}
+            className={`flex items-start gap-2.5 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 ${
+              indent >= 2 ? "pl-6 sm:pl-8" : "pl-1 sm:pl-2"
+            }`}
+          >
+            <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-extrabold text-[10px] shrink-0 mt-0.5">
+              {num}
+            </span>
+            <span className="leading-relaxed">
+              <InlineMarkdown text={itemText} onSwitchLang={setLang} />
+            </span>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // 7. Listas con viñetas (- o *)
+      const bulletMatch = line.match(/^(\s*)[-*]\s+(.*)$/);
+      if (bulletMatch) {
+        const indent = bulletMatch[1].length;
+        const itemText = bulletMatch[2];
+        const isDeep = indent >= 4;
+        const isSub = indent >= 2;
+        elements.push(
+          <div
+            key={`ul-${i}`}
+            className={`flex items-start gap-2 py-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 ${
+              isDeep
+                ? "pl-10 sm:pl-12 text-xs text-slate-500 dark:text-slate-400"
+                : isSub
+                ? "pl-6 sm:pl-8 text-xs text-slate-500 dark:text-slate-400"
+                : "pl-1 sm:pl-2"
+            }`}
           >
             <span className="text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-xs mt-0.5">
               ✓
             </span>
             <span className="leading-relaxed">
-              <InlineMarkdown text={itemText} />
+              <InlineMarkdown text={itemText} onSwitchLang={setLang} />
             </span>
           </div>
         );
-        return;
+        i++;
+        continue;
       }
 
-      // Separador horizontal
-      if (line.trim() === "---") {
+      // 8. Separador horizontal
+      if (trimmed === "---" || trimmed === "***") {
         elements.push(
-          <hr key={idx} className="my-6 border-slate-200/70 dark:border-slate-800" />
+          <hr key={`hr-${i}`} className="my-6 border-slate-200/70 dark:border-slate-800" />
         );
-        return;
+        i++;
+        continue;
       }
 
-      // Líneas vacías
-      if (!line.trim()) {
-        elements.push(<div key={idx} className="h-1.5" />);
-        return;
+      // 9. Líneas vacías
+      if (!trimmed) {
+        elements.push(<div key={`sp-${i}`} className="h-1.5" />);
+        i++;
+        continue;
       }
 
-      // Párrafo estándar
+      // 10. Párrafo estándar
       elements.push(
         <p
-          key={idx}
+          key={`p-${i}`}
           className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 py-0.5 leading-relaxed"
         >
-          <InlineMarkdown text={line} />
+          <InlineMarkdown text={line} onSwitchLang={setLang} />
         </p>
       );
-    });
+      i++;
+    }
 
     return elements;
   };
@@ -245,15 +539,22 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
           <div className="flex items-center gap-2 shrink-0">
             <ThemeToggle />
 
-            {/* Selector de idioma del documento */}
-            <div className="flex items-center gap-0.5 bg-[#f2f3ff] dark:bg-slate-800/80 p-1 rounded-full border border-slate-200/60 dark:border-slate-700/60">
+            {/* Selector de idioma del documento con píldora deslizante */}
+            <div className="relative grid grid-cols-2 bg-[#f2f3ff] dark:bg-slate-800/80 p-1 rounded-full border border-slate-200/60 dark:border-slate-700/60">
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-orange-600 shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  lang === "es" ? "translate-x-0" : "translate-x-full"
+                }`}
+              />
               <button
                 type="button"
                 onClick={() => setLang("es")}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${lang === "es"
-                    ? "bg-orange-600 text-white shadow-xs"
+                className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
+                  lang === "es"
+                    ? "text-white"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
+                }`}
               >
                 <span>🇪🇸</span>
                 <span className="hidden sm:inline">ES</span>
@@ -261,10 +562,11 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setLang("en")}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${lang === "en"
-                    ? "bg-orange-600 text-white shadow-xs"
+                className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
+                  lang === "en"
+                    ? "text-white"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                  }`}
+                }`}
               >
                 <span>🇬🇧</span>
                 <span className="hidden sm:inline">EN</span>
@@ -273,7 +575,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
           </div>
         </header>
 
-        {/* Tarjeta Hero + Pestañas segmentadas */}
+        {/* Tarjeta Hero + Pestañas segmentadas con píldora deslizante estilo StatsModal */}
         <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3.5">
@@ -300,16 +602,28 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
             )}
           </div>
 
-          {/* Pestañas segmentadas estilo DESIGN.md */}
+          {/* Pestañas segmentadas con píldora deslizante animada */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-            <div className="inline-grid grid-cols-3 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 w-full sm:w-auto">
+            <div className="relative inline-grid grid-cols-3 p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 w-full sm:w-auto sm:min-w-[380px]">
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-8px)/3)] rounded-full bg-orange-600 shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  activeTab === "docs"
+                    ? "translate-x-0"
+                    : activeTab === "changelog"
+                    ? "translate-x-full"
+                    : "translate-x-[200%]"
+                }`}
+              />
+
               <button
                 type="button"
                 onClick={() => setActiveTab("docs")}
-                className={`px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${activeTab === "docs"
-                    ? "bg-orange-600 text-white shadow-sm"
+                className={`relative z-10 px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${
+                  activeTab === "docs"
+                    ? "text-white"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                  }`}
+                }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">book</span>
                 <span className="truncate">{t("docs.user_guide")}</span>
@@ -318,10 +632,11 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("changelog")}
-                className={`px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${activeTab === "changelog"
-                    ? "bg-orange-600 text-white shadow-sm"
+                className={`relative z-10 px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${
+                  activeTab === "changelog"
+                    ? "text-white"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                  }`}
+                }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">history</span>
                 <span className="truncate">Changelog</span>
@@ -330,10 +645,11 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <button
                 type="button"
                 onClick={() => setActiveTab("readme")}
-                className={`px-4 py-2 rounded-full text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${activeTab === "readme"
-                    ? "bg-orange-600 text-white shadow-sm"
+                className={`relative z-10 px-2 sm:px-4 py-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 sm:gap-1.5 whitespace-nowrap ${
+                  activeTab === "readme"
+                    ? "text-white"
                     : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-                  }`}
+                }`}
               >
                 <span className="material-symbols-outlined text-sm leading-none">code</span>
                 <span>README</span>
@@ -345,7 +661,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               className="sm:hidden inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold"
             >
               <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-              <span>Volver al explorador</span>
+              <span>{t("docs.back_to_explorer")}</span>
             </Link>
           </div>
         </section>
@@ -357,7 +673,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <span className="material-symbols-outlined text-4xl text-orange-600 animate-spin inline-block">
                 progress_activity
               </span>
-              <div className="text-xs font-semibold">Cargando documentación...</div>
+              <div className="text-xs font-semibold">{t("common.loading")}</div>
             </div>
           ) : error ? (
             <div className="py-16 text-center space-y-3">
@@ -372,7 +688,12 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               </button>
             </div>
           ) : (
-            <div className="space-y-0.5">{renderMarkdown(content)}</div>
+            <div
+              key={`${activeTab}-${lang}`}
+              className="space-y-0.5 animate-in fade-in duration-200"
+            >
+              {renderMarkdown(content)}
+            </div>
           )}
         </article>
       </div>
@@ -392,7 +713,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
 
           <div className="flex items-center gap-4 font-semibold flex-wrap justify-center">
             <Link href="/" className="hover:text-orange-600 transition">
-              Explorador
+              {t("mobile_nav.explore")}
             </Link>
             <a
               href="https://github.com/alebupal/GastroMap"
@@ -411,7 +732,7 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               <span className="material-symbols-outlined text-sm leading-none group-hover:text-white">
                 favorite
               </span>
-              <span>Donar</span>
+              <span>{t("nav.donate")}</span>
             </a>
           </div>
         </div>
