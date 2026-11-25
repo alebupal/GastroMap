@@ -23,7 +23,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * **Filtros por experiencia segmentados (Fila 1) y Enlaces Compartibles**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), sincronización automática de filtros en la URL con botón **«Compartir vista»**, chip de filtro activo (`✕`) y botón `💾 Guardar`.
   * **Segmentación en dos niveles (Fila 2) y Plan con amigos**: Selectores desplegables de países (+195) y ciudades (búsqueda sin distinguir tildes), rangos de precio explícitos (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`), filtro rápido por **nota mínima** (`★ 7+`, `★ 8+`, `★ 9+`), filtro **«Plan con amigos»** para encontrar sitios pendientes o por descubrir para los usuarios con los que quedas, categorías destacadas con panel desplegable animado `+ Filtros` y estado vacío con chips para quitar filtros individuales.
   * **Tarjetas de locales estilo Stitch**: Avatar con iniciales, dirección con pin, badge de precio esmeralda, botón favorito, botones de colección (`Pendiente`, `Ya he ido`, `Mi nota`), **copiado rápido de datos del local** y pie completo con autor y acciones.
-  * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa e indicador de sincronización local `Cache First`, con modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll cómodamente sin quedar atrapado en el mapa.
+  * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa y modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll cómodamente sin quedar atrapado en el mapa.
 
 * **🗺️ Mapa interactivo Leaflet:**
   * Teselas ligeras de OpenStreetMap / CartoDB (sin coste ni cuotas de Google Maps API).
@@ -51,7 +51,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **📱 Experiencia Móvil (PWA), Caché Offline Integral y Modo Oscuro / Claro:**
   * Rediseño visual de alta gama con tipografía **Plus Jakarta Sans**, selector dual segmentado de tema, franja de estado PWA y tarjetas con avatares de iniciales gastronómicas.
-  * Interfaz móvil nativa estilo Stitch con buscador píldora + botón `Lista / Mapa`, chips horizontales rápidos, **Bottom Sheet** deslizable bajo el mapa («Lugares Destacados»), botón flotante **FAB «Añadir sitio»** y **barra de navegación inferior fija** (`Explorar`, `Añadir`, `Estadísticas`, `Menú`).
+  * Interfaz móvil nativa estilo Stitch con buscador píldora + botón `Lista / Mapa`, chips horizontales rápidos, **Bottom Sheet** deslizable bajo el mapa («Lugares Destacados»), todos los modales adaptados como **bottom-sheets con cierre deslizable hacia abajo (swipe-to-close)**, botón flotante **FAB «Añadir sitio»** y **barra de navegación inferior fija** (`Explorar`, `Añadir`, `Estadísticas`, `Menú`).
   * Botones de acciones rápidas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar / Exportar`, `📍 Cerca de mí`) justificados al 100% en cuadrícula adaptable para aprovechar todo el espacio útil en pantalla.
   * Botón flotante discreto «Subir arriba» con estética *glassmorphism* que aparece de forma no invasiva al hacer scroll.
   * Instalable en la pantalla de inicio de iOS y Android como Progressive Web App con **Service Worker, caché offline integral (`/sw.js`) y cola de escritura sin conexión**: puedes marcar favoritos, cambiar estados (`Quiero ir` / `Ya he ido`) y guardar notas privadas sin cobertura, y todo se sincroniza automáticamente al reconectar.
@@ -60,7 +60,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **🛡️ Seguridad, Auditoría y Copias de Seguridad:**
   * Rate limiting en memoria para mitigación de ataques de fuerza bruta en inicio de sesión y endpoints críticos.
   * Cabeceras de seguridad estrictas (CSP, X-Frame-Options, HSTS).
-  * Botón de descarga de copia de seguridad íntegra de la base de datos en JSON desde el panel de administración.
+  * Descarga y restauración completa de copias de seguridad íntegras de la base de datos en JSON desde el panel de administración (conservando la sesión activa).
 
 * **📚 Documentación y Registro de Cambios Integrado (`/docs`):**
   * Visor oficial de documentación y changelog integrado en la propia aplicación al estilo TVSPY.

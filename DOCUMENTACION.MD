@@ -114,16 +114,16 @@ Al acceder por primera vez a una instancia limpia:
   - Avatar con iniciales del establecimiento, dirección con pin, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
   - Botones horizontales de colección rápida (`Pendiente`, `Ya he ido`, `Mi nota`) con micro-interacciones táctiles.
   - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Comparar`, `Mapa`, `Google Maps`, **copiado rápido de datos del sitio**, `Editar`, `Eliminar`).
-- **Mapa Interactivo con Sincronización Local**:
+- **Mapa Interactivo Sincronizado**:
   - Insignia flotante superior derecha con recuento local en tiempo real y pulso radar en el pin seleccionado.
-  - Barra de estado inferior con indicador `Cache First` de base de datos sincronizada localmente y modo **«Deslizar lista»** activado por defecto en móvil.
+  - Modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll sin quedar atrapado dentro del mapa.
   - Ventanas emergentes (popups) de mapa traducidas y con diseño unificado con las tarjetas.
 - **Micro-interacciones, View Transitions y Paginación Moderna**:
   - Transición suave de tema Claro/Oscuro vía **View Transitions API**, píldora deslizante en selectores segmentados, contadores animados en KPIs, barras crecientes, skeletons *shimmer* y botones de paginación circulares con selectores desplegables personalizados (`CustomSelect`). Todo respetando `prefers-reduced-motion`.
 
 ### 📱 Experiencia Móvil Optimizada (Diseño Stitch)
 - **Cabecera Compacta + Barra Inferior Fija (`MobileBottomNav`)**: Navegación con el pulgar (`Explorar`, `Añadir`, `Estadísticas`, `Menú`), lupa rápida en cabecera para abrir la paleta de comandos y botón flotante **FAB `Añadir sitio`**.
-- **Mapa + Bottom Sheet Superpuesto**: Buscador píldora con icono de filtros y conmutador naranja `Lista / Mapa`, carrusel horizontal de chips con contadores y panel blanco redondeado («Lugares Destacados») integrado directamente bajo el mapa.
+- **Mapa + Bottom Sheet Superpuesto y Modales Deslizables**: Buscador píldora con icono de filtros y conmutador naranja `Lista / Mapa`, carrusel horizontal de chips con contadores, panel blanco redondeado («Lugares Destacados») integrado bajo el mapa y **todos los modales presentados como bottom-sheets con tirador superior y gesto de arrastre hacia abajo (swipe-to-close)**.
 - **Tarjeta Flotante Inferior y Salto Sincronizado**: Al pulsar cualquier chincheta en el mapa móvil, se despliega una tarjeta resumen inferior (*Bottom Card*) con nombre, rango de precio, botón de navegación directa en Google Maps (`🗺️ Cómo llegar`) y acceso a la ficha completa. Al pulsar *"Ver ficha completa →"*, la aplicación calcula automáticamente la página de paginación correcta, cambia a la lista y hace un scroll suave y centrado resaltando la tarjeta con un halo dorado.
 - **Botón Flotante «Subir Arriba»**: Botón circular sutil y minimalista con estética *glassmorphism* que aparece de forma no invasiva al desplazarse más de 300px hacia abajo para volver inmediatamente a la parte superior.
 - **Paginación Inteligente**: En modo lista los locales se muestran paginados con selector de tamaño configurable (10, 20, 50 o Todos) y selector de página para navegación ultra ágil.
@@ -132,10 +132,10 @@ Al acceder por primera vez a una instancia limpia:
 - **🎲 Al azar (Selector Aleatorio)**: Cuando el grupo no se pone de acuerdo, selecciona al azar entre los locales que cumplan los filtros activos, con opciones para ver en el mapa, abrir en Google Maps o navegar directamente al establecimiento seleccionado en el listado de resultados (`Ver en el listado`).
 - **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, país, ciudad, distancia máxima y estado de visita.
 
-### 💬 Comentarios Colaborativos y Ficha Enriquecida
-- **Editor WYSIWYG**: Editor de texto enriquecido con formato de negrita, cursiva, viñetas, citas destacadas y recomendaciones de platos.
-- **Notas y Puntuación Privada (1 al 10)**: Cada usuario puede anotar sus opiniones secretas, trucos o platos favoritos que nadie más puede ver.
-- **Acciones Rápidas con Etiquetas de Texto Explícitas**: Cada ficha cuenta en su parte inferior con botones legibles para interactuar: `💬 Comentarios`, `🗺️ Mapa`, `📍 Maps ↗`, `⚖️ Comparar`, `✏️ Editar` y `🗑️ Eliminar` (este último reservado estrictamente a administradores).
+### 💬 Comentarios Colaborativos, Valoración y Ficha Enriquecida
+- **Comentarios y Nota Privada Unificados**: El modal de comentarios agrupa las reseñas de la comunidad y tu nota privada (solo visible para ti) con pestañas animadas (`Todos`, `Privadas`, `Comunidad`), edición inline de tu nota privada y compositor desplegable optimizado para móvil.
+- **Valoración Privada (`Mi nota`, 1 al 10)**: Modal rápido dedicado para asignar tu puntuación personal del 1 al 10 a cualquier restaurante.
+- **Acciones Rápidas y Menú `⋮`**: Cada tarjeta cuenta con botones claros en su parte inferior (`Comentarios`, `Comparar`, `Mapa`, `Maps`, `Compartir`) y un menú `⋮` con **Guardar en lista**, `Editar` y `Eliminar` (este último reservado a administradores).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.
 
 ### 🔖 Listas / Colecciones Compartibles (Guías Personales)
@@ -196,7 +196,7 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 - **Backup por Lote de Sitios**: Desde la tabla de establecimientos, los administradores pueden seleccionar casillas de verificación de sitios específicos y descargar una copia de seguridad JSON exclusiva de los mismos.
 - **Borrado Selectivo de Datos Demo**: Permite limpiar los 50 establecimientos y usuarios predefinidos de la semilla de prueba sin alterar los sitios propios ni los grupos creados por el usuario.
 - **Zona de Peligro — Resetear Aplicación**: Herramienta irreversible para vaciar completamente la base de datos (sitios, comentarios, grupos, miembros e invitaciones) conservando únicamente la cuenta del administrador actual.
-- **Copia de Seguridad Integral**: En el Panel de Administración > Ajustes > Copia de Seguridad, descarga íntegra en JSON de todas las tablas relacionales.
+- **Copia de Seguridad y Restauración Integral**: En el Panel de Administración > Ajustes > Copia de Seguridad, puedes descargar un volcado íntegro en JSON de todas las tablas relacionales y **restaurarlo** en cualquier momento (incluso en una nueva instalación tras `/setup`, conservando automáticamente tu sesión activa y todas las referencias del backup).
 
 ---
 

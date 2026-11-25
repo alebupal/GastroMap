@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] - 2026-11-23
+## [0.1.0] - 2026-11-25
 
 ### Added
 - **«Dining with Friends» Filter & Accent-Insensitive Search**:
-  - New **«Dining with friends»** filter in `+ Filters` and the **Decision Assistant / Mobile Filters** (`DecisionAssistantModal`) featuring a `CustomSelect` dropdown, dynamic descriptions, and 11 modes (*Pending or untried*, *Everyone wants to go*, *Someone wants to go (untried)*, *Someone wants to go (even if visited)*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite, new for others*, *Highly rated by someone (8+)*, *Tried by some, new for others*, *Visited by everyone*, and *Added by the group*), with an *Include me too* toggle.
+  - New **«Dining with friends»** filter in `+ Filters` and the **Decision Assistant / Mobile Filters** (`DecisionAssistantModal`) featuring a `CustomSelect` dropdown with icons, dynamic descriptions, and 11 modes (*Pending or untried*, *Everyone wants to go*, *Someone wants to go (untried)*, *Someone wants to go (even if visited)*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite, new for others*, *Highly rated by someone (8+)*, *Tried by some, new for others*, *Visited by everyone*, and *Added by the group*), with an *Include me too* toggle.
   - Accent- and diacritic-insensitive search (`src/lib/search.ts`) across the explorer, Command Palette (`⌘K`), country/city searchable dropdowns, and admin tables.
 - **Shareable Lists & Collections (Personal Public Guides)**:
   - Added `place_lists` and `place_list_items` tables (`drizzle/0012_far_doctor_strange.sql`) to organize places into themed collections (e.g. *“Tapas tour in Granada”*, *“Lisbon trip”*, *“Special dinners”*) with custom icons, descriptions, and manual stop ordering.
@@ -18,7 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New unauthenticated public read-only guide page at `/guide/[slug]` with Open Graph preview metadata, interactive Leaflet map, numbered stop cards, and multi-stop **«Route in Google Maps»** button.
 - **Mobile Bottom-Sheet Modal Unification & Swipe-to-Close**:
   - Unified all mobile user modals as bottom-sheets with a top drag handle (`SheetHandle`) and native swipe-down dismissal (`useSwipeToClose`).
-  - Improved mobile place cards (`PlaceCard`) and comments/notes modal (`PlaceCommentsThread`) with stacked mobile tabs, circular floating comment badge, inline private note editing, and cleaner action spacing.
+  - Improved mobile place cards (`PlaceCard`) and comments/notes modal (`PlaceCommentsThread`) with stacked mobile tabs + sliding pill, circular floating comment badge, collapsible composer, inline private note editing, dedicated rating-only `My rating` modal, and cleaner action spacing.
+  - Full mobile UX/UI audit pass (compact pagination, bottom `safe-area` support, and elimination of FAB / bottom nav overlaps).
+
+### Changed & Fixed
+- **JSON Backup Restore (`/api/admin/backup`)**: Fixed `users_email_unique` / `users_username_unique` constraint conflicts when restoring a backup where the current administrator has a different UUID from the backup (atomic session reassignment without losing login) and added `place_lists` / `place_list_items` to the restore order.
+- **Decorative Indicator Cleanup & Improved `CustomSelect`**: Removed static *«Cache First»* bar under desktop map and *«Real-time synced»* label in comments; replaced legacy `🕒` emoji on *Want to go* with Material Symbols `schedule`; upgraded `CustomSelect` with portal rendering (`createPortal`), full-width option, and left-aligned icon + label.
+- **Complete i18n**: Synchronized 983 full translation keys across `es.json`, `en.json`, and `translations.csv`.
 - **Subtle Micro-Interactions, View Transitions, Unified Iconography & Explorer Upgrades**:
   - Unified all UI iconography under **Google Material Symbols Outlined** (dropdowns, toasts, cards, modals, admin tables, and invitations) while keeping language flags and food emojis, removing duplicate leading emojis from i18n strings.
   - Added a pure-CSS micro-interaction suite respecting `prefers-reduced-motion`: **View Transitions API** smooth Light/Dark switching, **sliding pill indicators** in `ThemeToggle`, `StatsModal`, and `ExportImportModal`, sun/moon icon animations, **animated KPI counters (`AnimatedNumber`)**, animated progress bars, **shimmer skeletons**, subtle staggered list entry, smooth filter panel unfold animations, and a radar pulse ring on the selected Leaflet map pin and active *Near me* badge.

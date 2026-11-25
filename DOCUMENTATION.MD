@@ -114,16 +114,16 @@ When launching on a clean database:
   - Restaurant initials avatar, address with pin, emerald price badge, and interactive favorite heart (`favorite`).
   - Horizontal collection action buttons (`Want to go`, `Visited`, `My note`) with tactile micro-interactions.
   - Card footer with author badge and complete actions (`Comments`, `Compare`, `Map`, `Google Maps`, **one-tap copy/share place info**, `Edit`, `Delete`).
-- **Interactive Map with Local Synchronization**:
+- **Synced Interactive Map**:
   - Floating top-right badge displaying live count and a subtle radar pulse ring on the selected pin.
-  - Bottom local database sync bar (`Cache First`) and default **«Scroll list»** mode on mobile for smooth scrolling.
+  - Default **«Scroll list»** mode on mobile for smooth scrolling without getting trapped inside the map.
   - Fully localized map popups matching the place card aesthetic.
 - **Micro-Interactions, View Transitions & Modern Pagination**:
   - Smooth Light/Dark switching via the **View Transitions API**, sliding pill indicators on segmented controls, animated KPI counters, growing progress bars, shimmer skeletons, and circular pagination with custom dropdown selectors (`CustomSelect`), all respecting `prefers-reduced-motion`.
 
 ### 📱 Optimized Mobile Experience (Stitch Design)
 - **Compact Header + Fixed Bottom Navigation (`MobileBottomNav`)**: Thumb-friendly navigation (`Explore`, `Add`, `Stats`, `Menu`), top search trigger for the command palette, and floating **`Add place` FAB**.
-- **Map + Overlapping Bottom Sheet**: Pill search bar with inline filter toggle and orange `List / Map` switch, horizontal quick chips with counts, and a rounded white sheet («Featured Places») directly beneath the map.
+- **Map + Overlapping Bottom Sheet & Swipe-to-Close Modals**: Pill search bar with inline filter toggle and orange `List / Map` switch, horizontal quick chips with counts, a rounded white sheet («Featured Places») directly beneath the map, and **all user modals unified as bottom-sheets with a top drag handle and native swipe-down dismissal**.
 - **Bottom Floating Card & Synchronized Jump**: Tapping any pin on the mobile map pops up a floating summary card with price, name, direct Google Maps directions (`🗺️ Directions`), and full details trigger. Tapping *"Full details →"* automatically navigates to the exact pagination page, switches views, and scrolls smoothly to the target card with a golden highlight ring.
 - **Floating «Back to Top» Button**: Subtle, non-intrusive circular button with glassmorphism styling that appears smoothly when scrolling past 300px for instant one-tap scroll to header.
 - **Smart Pagination**: Place listings feature a configurable page size selector (10, 20, 50, or All) and page buttons for ultra-responsive navigation.
@@ -132,10 +132,10 @@ When launching on a clean database:
 - **🎲 Random Pick (Random Selector)**: Automatically picks a restaurant among currently filtered results when friends cannot agree, with options to view on the interactive map, open in Google Maps, or jump directly to its place card in the catalog list (`View in list`).
 - **Decision Wizard**: Step-by-step guidance defining budget, mood, country, city, distance radius, and visit state.
 
-### 💬 Collaborative Comments & Detail Modals
-- **WYSIWYG Rich Editor**: Support for bold, italics, lists, blockquotes, and dish highlights.
-- **Private Notes & Rating (1 to 10)**: Personal notes invisible to all other users.
-- **Action Buttons with Explicit Text Labels**: Each card displays clear, named buttons at the bottom: `💬 Comments`, `🗺️ Map`, `📍 Maps ↗`, `⚖️ Compare`, `✏️ Edit`, and `🗑️ Delete` (strictly restricted to administrators).
+### 💬 Collaborative Comments, Ratings & Detail Modals
+- **Unified Comments & Private Note**: The comments modal brings together community reviews and your private note (visible only to you) with animated tabs (`All`, `Private`, `Community`), inline editing of your private note, and a mobile-friendly collapsible composer.
+- **Private Rating (`My rating`, 1 to 10)**: Dedicated quick modal to score any restaurant from 1 to 10.
+- **Quick Actions & `⋮` Menu**: Each card displays clear footer actions (`Comments`, `Compare`, `Map`, `Maps`, `Share`) plus a `⋮` menu with **Save to list**, `Edit`, and `Delete` (strictly restricted to administrators).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.
 
 ### 🔖 Shareable Lists & Collections (Personal Guides)
@@ -193,7 +193,7 @@ In the **Import / Export** modal (`📦`):
 - **Bulk Places Backup**: Checkbox selection in admin table to export JSON backups of selected places.
 - **Selective Demo Cleanup**: Button to wipe only the 50 demo places and demo community users without affecting custom places.
 - **Danger Zone — Reset Application**: Administrative wipe clearing all places, comments, groups, invitations, and collaborator accounts while preserving the current administrator account.
-- **Full Database Backup**: One-click full JSON database export from **Admin Dashboard > Settings > Backup** with audit logging.
+- **Full Database Backup & Restore**: One-click full JSON database export and restore from **Admin Dashboard > Settings > Backup** with audit logging (works seamlessly even on fresh `/setup` installs while preserving your active admin session and all relational IDs).
 
 ---
 

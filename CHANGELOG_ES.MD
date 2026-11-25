@@ -5,11 +5,11 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
-## [0.1.0] - 2026-11-23
+## [0.1.0] - 2026-11-25
 
 ### Añadido
 - **Filtro «Plan con amigos» y Búsqueda Insensible a Tildes**:
-  - Nuevo filtro **«Plan con amigos»** disponible en `+ Filtros` y en el **Asistente / Filtros móvil** (`DecisionAssistantModal`) con desplegable `CustomSelect`, descripción dinámica y 11 modos (*Pendiente o por descubrir*, *Todos quieren ir*, *Alguno quiere ir sin probar*, *Alguno quiere ir aunque otro ya fue*, *Favorito de alguno*, *Favorito de todos*, *Favorito de alguno, nuevo para otros*, *Bien valorado por alguno (8+)*, *Probado por alguno, nuevo para otros*, *Visitado por todos* y *Añadidos por el grupo*), con opción *Incluirme a mí también*.
+  - Nuevo filtro **«Plan con amigos»** disponible en `+ Filtros` y en el **Asistente / Filtros móvil** (`DecisionAssistantModal`) con desplegable `CustomSelect` con iconos, descripción dinámica y 11 modos (*Pendiente o por descubrir*, *Todos quieren ir*, *Alguno quiere ir sin probar*, *Alguno quiere ir aunque otro ya fue*, *Favorito de alguno*, *Favorito de todos*, *Favorito de alguno, nuevo para otros*, *Bien valorado por alguno (8+)*, *Probado por alguno, nuevo para otros*, *Visitado por todos* y *Añadidos por el grupo*), con opción *Incluirme a mí también*.
   - Búsqueda normalizada insensible a tildes y diacríticos (`src/lib/search.ts`) en explorador, paleta de comandos (`⌘K`), selectores de ciudades/países y panel de administración.
 - **Listas / Colecciones Compartibles (Guías Personales Públicas)**:
   - Nuevas tablas `place_lists` y `place_list_items` (`drizzle/0012_far_doctor_strange.sql`) para crear listas temáticas personalizadas (ej. *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»*, *«Cenas especiales»*) con icono, descripción y orden manual de paradas.
@@ -18,7 +18,13 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
   - Nueva página pública de solo lectura `/guide/[slug]` accesible **sin registro ni inicio de sesión**, con metadatos Open Graph, mapa interactivo Leaflet, tarjetas numeradas de paradas y botón **«Ruta en Google Maps»** multi-parada.
 - **Unificación de Modales Móviles como Bottom-Sheets con Cierre Deslizable (Swipe-to-Close)**:
   - Todos los modales de usuario en móvil emergen desde la parte inferior como *bottom-sheets* con tirador superior (`SheetHandle`) y gesto de arrastre hacia abajo (`useSwipeToClose`) para cerrarlos con tacto nativo.
-  - Rediseño móvil de tarjetas (`PlaceCard`) y modal de comentarios/notas (`PlaceCommentsThread`) con tabs apilados, badge circular flotante, edición inline de notas privadas y mejor separación de acciones.
+  - Rediseño móvil de tarjetas (`PlaceCard`) y modal de comentarios/notas (`PlaceCommentsThread`) con tabs apilados con píldora deslizante, badge circular flotante, compositor desplegable, edición inline de notas privadas, separación clara de valoración (`Mi nota`) y mejor espaciado de acciones.
+  - Auditoría completa de UX/UI móvil (paginación compacta, respeto de `safe-area` inferior, eliminación de solapamientos con el FAB y navegación inferior).
+
+### Cambiado y Corregido
+- **Restauración de Backups JSON (`/api/admin/backup`)**: Corregido conflicto `users_email_unique` / `users_username_unique` al restaurar copias de seguridad cuando el administrador actual tiene un UUID diferente al del backup (reasignación atómica de sesión sin perder acceso) e inclusión de `place_lists` y `place_list_items` en el orden de restauración.
+- **Limpieza de Indicadores Decorativos y `CustomSelect` Mejorado**: Eliminadas las etiquetas estáticas *«Cache First»* bajo el mapa de escritorio y *«Sincronizado en tiempo real»* en comentarios; sustituido el emoji `🕒` en *Quiero ir* por Material Symbols `schedule`; mejorado `CustomSelect` con portal inteligente (`createPortal`), ancho completo opcional y alineación de icono + texto.
+- **i18n Completo**: Sincronizadas 983 claves completas en `es.json`, `en.json` y `translations.csv`.
 - **Micro-interacciones Sutiles, View Transitions, Iconografía Unificada y Mejoras de Explorador**:
   - Unificada toda la iconografía de interfaz en **Google Material Symbols Outlined** (selectores, toasts, tarjetas, modales, administración e invitaciones), conservando banderas y emojis gastronómicos, y limpiando iconos duplicados en las traducciones.
   - Nuevo pack de micro-interacciones CSS respetuoso con `prefers-reduced-motion`: **View Transitions API** al cambiar Claro/Oscuro, **píldora deslizante** en `ThemeToggle`, `StatsModal` y `ExportImportModal`, animación de giro/balanceo del sol y la luna, **contadores animados (`AnimatedNumber`)** en KPIs, barras de progreso crecientes, **skeletons shimmer**, entrada escalonada en el listado, despliegue fluido al abrir paneles de filtros y pulso radar en el pin seleccionado del mapa y en *Cerca de mí*.

@@ -25,7 +25,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * **Segmented experience filters (Row 1) & Shareable Views**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), live URL query param sync with a **«Share view»** button, active filter chip (`✕`), and `💾 Save` button.
   * **Two-tier segmentation (Row 2) & Dining with friends**: Searchable dropdowns for countries (+195) and cities (accent-insensitive search), explicit price range chips (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`), quick **minimum rating filter** (`★ 7+`, `★ 8+`, `★ 9+`), **«Dining with friends»** filter to find places pending or untried for the friends you're meeting, featured tags with animated `+ Filters` panel, and actionable empty state with removable active-filter chips.
   * **Stitch-styled place cards**: Initials avatar, address with pin, emerald price badge, favorite button, collection buttons (`Want to go`, `Visited`, `My note`), **one-tap copy/share place info**, and author footer with actions.
-  * **Modern pagination & synced map**: Circular pill buttons, live map floating count, and `Cache First` local sync status bar, defaulting to **«Scroll list»** mode on mobile for effortless scrolling without getting trapped inside the map.
+  * **Modern pagination & synced map**: Circular pill buttons, live map floating count, and default **«Scroll list»** mode on mobile for effortless scrolling without getting trapped inside the map.
 
 * **🗺️ Interactive Leaflet Map:**
   * Free, lightweight OpenStreetMap / CartoDB tiles (zero Google Maps API billing or quotas).
@@ -53,7 +53,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **📱 Mobile Experience (PWA), Full Offline Cache & Dark/Light Mode:**
   * High-end visual redesign featuring **Plus Jakarta Sans** typography, segmented dual theme switcher, PWA status strip, and place cards with culinary initials avatars.
-  * Native-feeling Stitch mobile UI featuring a pill search bar with `List / Map` toggle, horizontal quick chips, an overlapping **Bottom Sheet** below the map («Featured Places»), a floating **«Add place» FAB**, and a fixed **bottom navigation bar** (`Explore`, `Add`, `Stats`, `Menu`).
+  * Native-feeling Stitch mobile UI featuring a pill search bar with `List / Map` toggle, horizontal quick chips, an overlapping **Bottom Sheet** below the map («Featured Places»), **bottom-sheet modals with native swipe-to-close gesture**, a floating **«Add place» FAB**, and a fixed **bottom navigation bar** (`Explore`, `Add`, `Stats`, `Menu`).
   * Quick action buttons (`🎯 Assistant`, `🎲 Random`, `📦 Import / Export`, `📍 Near me`) 100% justified in an adaptive grid to maximize full screen width.
   * Discreet floating «Back to Top» button with glassmorphism styling appearing smoothly after scrolling.
   * Installable on iOS and Android home screens as a Progressive Web App with **full Service Worker offline caching (`/sw.js`) and an offline write queue**: toggle favorites, update personal statuses (`Want to go` / `Visited`), and save private notes without connectivity, with automatic synchronization once back online.
@@ -62,7 +62,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **🛡️ Security, Auditing & Backups:**
   * In-memory rate limiting against brute force attacks on authentication and tokens.
   * Strict security headers (CSP, X-Frame-Options, HSTS).
-  * One-click full database backup in JSON from the admin dashboard with audit trail.
+  * One-click full JSON database backup and restore from the admin dashboard (preserving the active admin session) with audit trail.
 
 * **📚 In-App Documentation & Changelog (`/docs`):**
   * Official repository documentation and version changelog viewer directly within the app.
