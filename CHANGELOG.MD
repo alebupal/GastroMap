@@ -7,367 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-11-25
 
-### Added
-- **Automatic New-Version Notification (TVSpy Style)**:
-  - Background check against GitHub Releases (`/api/version`, 30-min server cache) displaying an animated amber pill in the header (`UserHeader`, plus inside the mobile dropdown) whenever a newer release is available.
-  - New **«Version & Updates»** card in `/admin > Settings` (`SettingsManager`) with live version status and a **«Check now»** (`?force=true`) button with toast feedback.
-- **Admin «Log in as User» (Secure Impersonation)**:
-  - New **«Log in as»** button in `/admin > Users` (`UsersManager`) allowing administrators to browse the entire app temporarily as any active user (without modifying their `lastLoginAt` or requiring their password).
-  - Global sticky **Top Alert** banner (`ImpersonationBanner`) showing which account you are viewing and a **«Log out»** button that revokes the temporary session and restores your admin session back to `/admin`, with both start and end logged in `audit_logs`.
-- **Comprehensive Audit Trail, Old-Record Cleanup & Admin Comment Moderation**:
-  - New maintenance buttons in `/admin > Audit Log` (`Clean > 30d`, `Clean > 90d`, and `Clear all`) with confirmation and toast feedback (`purgeAuditLogsAction`), plus human-readable labels for every action and accent-insensitive search.
-  - Expanded `audit_logs` coverage: place creation (`place_created`), bulk deletions, comments (create, edit, delete), user lifecycle (create, register, role change, password reset, delete), invitations, system settings, lists, and audit purges are now all logged.
-  - Administrators can now **edit any user's comment** (in addition to deleting) to fix typos or moderate content, with the action tracked in the audit log (`editedByAdmin`).
-- **«Dining with Friends» Filter & Accent-Insensitive Search**:
-  - New **«Dining with friends»** filter in `+ Filters` and the **Decision Assistant / Mobile Filters** (`DecisionAssistantModal`) featuring a `CustomSelect` dropdown with icons, dynamic descriptions, and 11 modes (*Pending or untried*, *Everyone wants to go*, *Someone wants to go (untried)*, *Someone wants to go (even if visited)*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite, new for others*, *Highly rated by someone (8+)*, *Tried by some, new for others*, *Visited by everyone*, and *Added by the group*), with an *Include me too* toggle.
-  - Accent- and diacritic-insensitive search (`src/lib/search.ts`) across the explorer, Command Palette (`⌘K`), country/city searchable dropdowns, and admin tables.
-- **Shareable Lists & Collections (Personal Public Guides)**:
-  - Added `place_lists` and `place_list_items` tables (`drizzle/0012_far_doctor_strange.sql`) to organize places into themed collections (e.g. *“Tapas tour in Granada”*, *“Lisbon trip”*, *“Special dinners”*) with custom icons, descriptions, and manual stop ordering.
-  - New **«My lists & guides»** manager modal in the user menu to create, edit, reorder (`↑`/`↓`), and delete lists, plus toggle a read-only public link with one-tap copy and WhatsApp sharing.
-  - New **«Save to list»** action in every place card's `⋮` menu (available to all signed-in users) with inline quick list creation.
-  - New unauthenticated public read-only guide page at `/guide/[slug]` with Open Graph preview metadata, interactive Leaflet map, numbered stop cards, and multi-stop **«Route in Google Maps»** button.
-- **Mobile Bottom-Sheet Modal Unification & Swipe-to-Close**:
-  - Unified all mobile user modals as bottom-sheets with a top drag handle (`SheetHandle`) and native swipe-down dismissal (`useSwipeToClose`).
-  - Improved mobile place cards (`PlaceCard`) and comments/notes modal (`PlaceCommentsThread`) with stacked mobile tabs + sliding pill, circular floating comment badge, collapsible composer, inline private note editing, dedicated rating-only `My rating` modal, and cleaner action spacing.
-  - Full mobile UX/UI audit pass (compact pagination, bottom `safe-area` support, and elimination of FAB / bottom nav overlaps).
+Initial full release of **GastroMap**, a private, self-hosted web application to save, organize, discover, and decide where to eat, have tapas, or grab drinks.
 
-### Changed & Fixed
-- **Smarter Google Maps / OpenStreetMap Scraper**: No longer populates descriptions with generic category labels (`"Bar"`, `"Restaurant"`) when no real `editorialSummary` exists, and detects street addresses (`looksLikeStreetAddress`) so they are never used as the place name.
-- **Smoother Interactive Map**: Clicking the map background immediately clears focus and closes the popup so you can pan freely without forced re-centering on zoom or after editing a place.
-- **Expanded Universal Search & Sliding Experience Pill**: Universal search now matches **comment authors** as well as real names, `username`, and `@username` interchangeably; the experience filter bar (`All`, `Favorites`, `Want to go`, `Visited`, `To discover`) now features a smooth sliding pill and uniform height.
-- **JSON Backup Restore (`/api/admin/backup`)**: Fixed `users_email_unique` / `users_username_unique` constraint conflicts when restoring a backup where the current administrator has a different UUID from the backup (atomic session reassignment without losing login) and added `place_lists` / `place_list_items` to the restore order.
-- **Decorative Indicator Cleanup & Improved `CustomSelect`**: Removed static *«Cache First»* bar under desktop map and *«Real-time synced»* label in comments; replaced legacy `🕒` emoji on *Want to go* with Material Symbols `schedule`; upgraded `CustomSelect` with portal rendering (`createPortal`), full-width option, and left-aligned icon + label.
-- **Complete i18n**: Synchronized 993 full translation keys across `es.json`, `en.json`, and `translations.csv`.
-- **Subtle Micro-Interactions, View Transitions, Unified Iconography & Explorer Upgrades**:
-  - Unified all UI iconography under **Google Material Symbols Outlined** (dropdowns, toasts, cards, modals, admin tables, and invitations) while keeping language flags and food emojis, removing duplicate leading emojis from i18n strings.
-  - Added a pure-CSS micro-interaction suite respecting `prefers-reduced-motion`: **View Transitions API** smooth Light/Dark switching, **sliding pill indicators** in `ThemeToggle`, `StatsModal`, and `ExportImportModal`, sun/moon icon animations, **animated KPI counters (`AnimatedNumber`)**, animated progress bars, **shimmer skeletons**, subtle staggered list entry, smooth filter panel unfold animations, and a radar pulse ring on the selected Leaflet map pin and active *Near me* badge.
-  - Added explorer quality-of-life upgrades: **one-tap copy/share place** button on every card (`content_copy → check` + toast), **minimum rating filter** (`★ 7+`, `★ 8+`, `★ 9+`) inside *More filters*, **actionable empty state** with removable active-filter chips, and advanced search filters in the **Audit Log** (`/admin`).
-  - Completed all remaining missing translations across `es.json`, `en.json`, and `translations.csv` (882 keys) and replaced native sort/page-size selects with `CustomSelect`.
-- **Engineering Hardening, `places.country` Column, Idempotent Offline Queue & Modularization**:
-  - Added native `country` column to `places` (`drizzle/0011_little_phantom_reporter.sql`), widened `occasions.icon` to `varchar(50)` for long Material Symbol identifiers, and migrated the local database (countries and 8 default categories) via `scripts/migrate-country-and-occasions.mjs`.
-  - Made offline favorite mutations idempotent (`set_favorite` + `setFavoriteAction`) so retries never invert user state.
-  - Replaced hardcoded map coordinates with live map center coordinates, translated all remaining hardcoded UI strings across explorer, map popups, comparator, `/new`, and `/docs`, and removed `userScalable: false` / `maximumScale: 1` for mobile accessibility.
-  - Custom scalable language dropdown (`LanguageSelector`) aligned with `DESIGN.md` across header, `EditProfileModal`, and `UsersManager`, default **«Scroll list»** mode on mobile map, country & city filters in the Decision Assistant, structured mobile filter panel, and global CSS fix preventing underline on Material Symbols icons.
-  - Extracted `MobileFilterBar.tsx` from `PlacesExplorer.tsx`, added engineering regression tests (`tests/engineering-quality.test.mjs`), and added a Playwright responsive audit script (`scripts/responsive-audit.mjs`).
-- **Full Stitch Mobile Redesign (Map + Bottom Sheet + Fixed Bottom Navigation)**:
-  - Streamlined mobile `UserHeader` featuring the official logo, circular quick-search trigger (`CommandPalette`), and orange circular profile avatar (moving theme and language switchers cleanly into the mobile dropdown).
-  - New mobile search & filter bar in `PlacesExplorer` with pill search input + inline `tune` filter button (with active badge), orange `List / Map` toggle pill, and horizontal quick chips (`All`, `To discover`, `Favorites`, and categories with counts).
-  - New mobile layout pairing the top map (`44vh`) with an overlapping rounded **Bottom Sheet** (`Featured Places` + sort dropdown + place cards), a floating **`Add place` FAB**, and a fixed **Bottom Navigation Bar** (`MobileBottomNav`: `Explore`, `Add`, `Stats`, `Menu`).
-- **Revamped Default Categories (8 Plans) & Rich Icon Picker (Emojis + Material Symbols)**:
-  - Updated initial categories in `src/lib/actions/taxonomy.ts` and `src/data/occasions.ts` to 8 clear, non-overlapping plans: `🥐 Desayuno / Brunch`, `🍢 Tapear / Cañas`, `🍽️ Comer / Cenar`, `🍔 Informal / Rápido`, `☕ Café / Merienda`, `🍸 Copas / Cócteles`, `🕯️ Cita / Especial`, and `👥 Grupos / Celebración`.
-  - New `OccasionIcon` renderer and `OccasionIconPicker` in `/admin > Taxonomy` (for both creating and editing categories) offering 60+ food emojis, custom emoji input, and 50+ searchable **Material Symbols Outlined** icons supported across cards, filters, comparator, stats, and map pins.
-  - Migrated all 146 places in `lugares/lugares_import.json` and the demo seeder (`src/lib/actions/seed.ts`) to the 8 new categories (preserving `terraza`, `postureo`, and `dulce` as tags).
-- **Offline Write Queue (IndexedDB) & Automatic Synchronization**:
-  - New `src/lib/offlineQueue.ts` utility that queues personal changes locally in `IndexedDB` when offline or on network failure: toggling favorites, changing personal status (`Want to go` / `Visited`), and saving personal ratings or private notes.
-  - New `OfflineSyncBanner` component displaying offline status or pending items, automatically flushing the queue in FIFO order upon reconnect, with a manual `Sync now` button.
-- **Quick Command Palette (`Ctrl+K` / `⌘+K`) & URL Filter Synchronization**:
-  - New `CommandPalette` modal accessible anywhere in the explorer via `Ctrl+K` / `⌘+K` (or the inline `⌘K` search bar shortcut) with full keyboard navigation (`↑`/`↓`, `Enter`, `Esc`) to jump straight to any place (in list or on map) or trigger quick actions (`Add place`, `Random`, `Assistant`, `Import / Export`, `Documentation`, `Admin`).
-  - Two-way sync between active explorer filters (`q`, `city`, `country`, `price`, `exp`, `occ`, `tag`) and browser URL query params via `history.replaceState`, plus a `Share view` button to copy the filtered link directly.
-- **«Clear Cache» Button (Service Worker & Offline Tiles)**:
-  - Added client utility (`src/lib/cache.ts`) to purge all PWA caches (`window.caches`), unregister the Service Worker, and perform a clean reload.
-  - Available to every user in the profile dropdown menu (`Clear cache`) and in `/admin > Settings` alongside the live storage usage estimate in MB.
-- **Final Full App Alignment with `DESIGN.md` & Material Symbols Iconography**:
-  - Replaced filter bar emojis (`Favorites`, `Want to go`, `Visited`, `To discover`, `Groups`, `Cities`, `Countries`, `Saved filters`) with **Material Symbols Outlined** (`star`, `schedule`, `check_circle`, `auto_awesome`, `group`, `location_city`, `public`, `bookmark`), adding `ReactNode` icon support in `SearchableSelect`.
-  - Redesigned `EditProfileModal` (`z-[1100]`, `Escape` dismiss, `manage_accounts` header), `EditPlaceModal`, and auth/invite pages (`/setup`, `/invite/[token]`, `/groups/join/[token]`) with `<GastroMapLogo />`, `ThemeToggle`, and smooth entrance animation.
-- **Redesign of «My Private Groups» & «Import / Export» Modals Following `DESIGN.md`**:
-  - `GroupsModal`: elevated `z-[1100]` over map, soft orange icon header & circular close button, group initials avatars, Material Symbols Outlined icons, and `Escape` / backdrop dismissal.
-  - `ExportImportModal`: segmented pill tabs in official orange, 6 export format cards with Material Symbols, revamped dropzone, pill sample templates, and rounded CTA buttons.
-- **Animated Split-Screen Login Screen (`/login`)**:
-  - Animated left brand showcase in official orange gradient featuring a pulsing gastronomic radar (matching the Radar & Plate logo) and floating glassmorphism cards.
-  - Revamped login form following `DESIGN.md` with input icons, password visibility toggle, floating theme switcher, and pill submit button with hover micro-interaction.
-- **Complete Removal of Establishment Status (`places.status`)**:
-  - Dropped the `status` column from `places` in the Drizzle schema (`src/db/schema.ts`), generated the official SQL migration in `drizzle/`, and cleaned all references across server actions, stats, demo seed, JSON export, and UI.
-- **Stitch Redesign of «Add Place» Screen (`/new`)**:
-  - Unified header (`UserHeader`), back button with `NEW` badge, and consistent minimalist footer.
-  - Modular `rounded-3xl` card form: *Google Maps Quick Assistant*, *Name with duplicate detection*, *Location & Coordinates*, *Occasions* with selected count, segmented *Budget* with explicit price labels, *Tags*, *Notes*, selectable *Visibility cards (Community / Private)*, and rounded pill action buttons.
-- **Documentation Screen (`/docs`) Redesign Following `DESIGN.md`**:
-  - Unified header with official `<GastroMapLogo />`, `Back to explorer` pill, `ThemeToggle`, segmented `ES / EN` switcher, and `Donate` pill.
-  - Hero card with segmented tabs (`User Guide`, `Changelog`, `README`), refined Markdown renderer with inline code & blockquote styling in official `#ea580c` orange, and consistent minimalist footer.
-- **Stitch Redesign of Place Comparison Modal**:
-  - Header featuring the official logo, selected places counter (max 3), and `Clear comparison` button.
-  - Side-by-side cards with initials avatars, distance/city & price metric boxes, status/occasion pills, specialty tags, and notes/comments box.
-  - Dynamic **GastroMap Quick Verdict** summary (top activity, most budget-friendly, and closest/untried) plus `Start food tour` multi-stop Google Maps route button.
-- **Stitch Redesign of Random Picker Modal («Indecision Mode»)**:
-  - Revamped modal with `🎲 Indecision Mode` badge, *Decision Universe* chips, *Recommended Destination* card featuring orange initials avatar, highlighted notes, and 3 quick action pills (`View on map`, `View in list`, `Maps`).
-  - Interactive bottom switch to **exclude already visited places** (`"To discover" only`) with instant re-spin.
-- **Stitch-styled Place Comments & Notes Modal**:
-  - Converted the inline comments thread into a dedicated centered modal featuring place initials badge, address, total notes counter, filter pills (`All`, `My private notes`, `Community`), and sorting (`Newest` / `Oldest`).
-  - Unified rich composer with `Public` / `Private note` toggle, distinct amber-accented cards for private notes, and community review cards with `YOU` / `Public note` badges.
-- **Stitch Redesign of Personal Statistics & Annual Wrapped Modal**:
-  - Segmented pill tabs (`Overview` and `Wrapped {year}`), 4 large KPI cards, secondary summary bar, and 2x2 distribution charts highlighting the top item plus predominant price range badge.
-  - New official orange gradient Wrapped card with 4 translucent stat tiles, 3 crisp white highlight cards (*Star City*, *Favorite Plan*, *Specialty*), direct PNG image export (`Download card`), and `Share summary` button.
-- **Unified Color Palette Across the Entire App**:
-  - Added brand CSS tokens in `globals.css` and unified all primary buttons, active tabs, filter pills, modals, auth forms, documentation viewer, and `/admin` views to the official logo orange (`#ea580c` / `orange-600`, hover `orange-700` with white text), reserving amber for pending/favorites and emerald for prices/visited states.
-- **Dedicated Admin Panel Route (`/admin`) with Stitch UI/UX Design**:
-  - New protected `/admin` route accessible exclusively to administrators (linked from `Admin Panel` in the header and mobile menu), keeping the main `/` explorer uncluttered.
-  - Persistent sidebar navigation (with mobile drawer) featuring the official `GastroMap Admin` logo, quick links for **Statistics**, **Places Table** (with live count), **Users**, **Taxonomy**, **Invitations**, **Audit Log**, **Settings**, **Demo Places**, `View Explorer` shortcut, and pinned bottom user profile card with logout.
-  - Unified top bar showing live PWA status, theme switcher, language selector, and `ADMIN` badge.
-  - Complete Stitch redesign of **Global Analytics** (6 KPI cards, 30-day pulse banner, Top Contributors, Popular Places grid, and distribution bars), **System Settings** (maps, JSON backups, danger zone, and status cards), and **Demo Data**.
-- **Official «Radar & Plate» Brand Logo**:
-  - Integrated the official GastroMap icon (orange rounded square with concentric radar/plate rings and center dot) alongside the `GastroMap` wordmark across the header, footer, login screen, and PWA / favicon asset (`public/icon.svg`).
-- **Faithful 1:1 Visual Replication of the Stitch UI/UX Design (Main Explorer & Map)**:
-  - Exact match of the Stitch interface incorporating Google Material Symbols Outlined and customized tokens:
-    - Unified top header featuring connectivity state (`🟢 Online • PWA Sync v0.1.0 Ready`), `📲 Install PWA App` prompt, brand logo with prominent `Explore Map` badge, segmented theme switcher (`light_mode` / `dark_mode`), locale picker, donate pill, and user profile avatar with `ADMIN` badge.
-    - Floating search and tools card with inline action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
-    - Two-tier taxonomy and filters card: top row with segmented personal status buttons (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), active filter chips with instant clear, and save filter shortcut; bottom row with city, country, price tiers (`<15€`, `15-30€`, `30-50€`, `>50€`), category tags, and an expandable `🎛️ + Filters` toggle.
-    - Place cards visually identical to Stitch: initials badge in warm terracotta, location pin, emerald price chip, Material Symbol favorite heart, status badges, horizontal collection action buttons (`🕒 Pending`, `✅ Visited`, `📝 My note`), and author footer with quick tools.
-    - Interactive map featuring a floating summary badge (`Granada Centro: X places`), a bottom `Cache First` local database sync indicator with real-time latitude/longitude coordinates, and popups matching the card aesthetic.
-    - Modern pill-based pagination navigation and official GastroMap PWA footer.
-- **Complete Visual Redesign Inspired by Stitch UI/UX**:
-  - Integrated modern **Plus Jakarta Sans** typography with optimized weights across the entire application.
-  - New segmented dual theme switcher (`☀️ Light` / `🌙 Dark`) in the header with smooth micro-interactions.
-  - Persistent top PWA status bar (`🟢 Online • PWA Sync v0.1.0 Ready`) and direct quick-action link to the admin panel.
-  - Revamped place cards featuring gastronomic initials avatar badges, emerald price chips, and justified personal collection action bars.
-- **Full Offline PWA Caching**:
-  - Enhanced Service Worker featuring core application precaching, map tile caching (`gastromap-tiles-v1`), immutable asset caching, and HTML page fallbacks, enabling complete offline functionality when installed on mobile devices.
-- **Mandatory Coordinates with Geocoding and Manual Fallback**:
-  - Latitude and longitude are now strictly required when creating or editing a place.
-  - Entering a street address triggers automatic geocoding via OpenStreetMap/Nominatim; if no coordinates are found, manual numeric input fields are presented so users can enter them directly.
-- **Responsive Redesign & Dual Light/Dark Mode in Admin Places Table**:
-  - Touch-friendly mobile card layout for screens under `md`, horizontal scroll container, and refreshed contrast styling for seamless light and dark mode experiences.
-- **Revamped GastroMap Wrapped and Activity Overview**:
-  - Removed outdated visit date counts in favor of places tried, saved favorites, catalog contributions, and reviews posted during the year.
-- **Z-Index Layering Fix for Map Controls**:
-  - Fixed floating «🖐️ Move map» button incorrectly overlaying the statistics modal and other full-screen dialogs.
-- **100% Justified Quick Actions Grid & Label on «Save filter»**:
-  - Action buttons below «Add place» arranged in a responsive grid (`grid-cols-2 sm:grid-cols-4`) filling 100% of the available width without unused gaps, plus visible text label on «💾 Save filter».
-- **Spinning Dice Animation & Modal Action Redesign in «Random»**:
-  - Continuous rotating animation on the header dice (`animate-spin`) while picking a random place.
-  - Balanced 2-column grid layout for «View in list» and «View on map» eliminating awkward text breaks and removing duplicated emojis.
-- **Renamed to «🎲 Random» (`Al azar`)**:
-  - Replaced «Roulette» terminology with «Random» across catalog action buttons, modals, and animation labels for a more intuitive and direct experience.
-- **Complete Sample Templates per Import Format**:
-  - Direct 1-click download section for realistic, fully structured example files across all 5 supported import formats: `JSON`, `CSV`, `GeoJSON`, `KML`, and `GPX`.
-- **«View in list» Option in Random Picker Modal**:
-  - New action in `RandomPickerModal.tsx` that navigates directly to the picked place card in the catalog, adjusting pagination page and smoothly scrolling into view.
-- **Simplified Experience Filters & «✨ To discover»**:
-  - Removed «👥 Friends» filter for a cleaner, more intuitive workflow.
-  - Renamed and enhanced «Unexplored» to «✨ To discover», dynamically displaying all establishments the current user has not visited yet.
-- **Robust Cleanup for Empty Categories and Tags**:
-  - Enhanced `deleteEmptyOccasionsAction` and `getOccasions()` to scrub orphaned references and join against active places, preventing deleted empty categories from resurrecting upon page refresh.
-- **Responsive Layout Fix for Place Card Action Buttons**:
-  - Fixed visual truncation of bottom action buttons (`PlaceCard.tsx`) such as `🗑️ Delete`, wrapping fluidly across narrow viewports and split-screen map layouts.
-- **Price Range Normalization and Google Maps Links in PDF Export**:
-  - Fixed price text in exported PDFs avoiding artifacts like `[EUREUREUR]`, outputting clean `€€€ (30 - 50 €)` format alongside direct Google Maps links.
-- **Universal Multi-field Search (Comments, Private Notes, Occasions & Authors)**:
-  - The live search input across the places catalog (`PlacesExplorer.tsx`) and admin table (`PlacesTableManager.tsx`) now indexes all available place fields: name, city, address, public notes, user private notes, tags, occasions/categories, author/creator, and full collaborative comments text, with intelligent multi-token matching.
-- **Auto-creation & Synchronization of Occasions upon Import**:
-  - When importing places from JSON (`importPlacesAction`) or batch scripts (`scripts/import-user-places.mjs`), all assigned categories/occasions are automatically registered in the global `occasions` catalog if not already present.
-  - Automatic synchronization in `getOccasions()` to discover and populate any orphaned occasions referenced in `place_occasions`.
-- **Automatic URL Detection & Linkification (LinkifiedText)**:
-  - New `LinkifiedText.tsx` component that parses and renders external URLs as secure clickable links (`target="_blank"`, `rel="noopener noreferrer"`) across notes and collaborative comments in cards, map sheets, assistant, and compare modals.
-- **Flexible Page Size Selector (10 / 20 / 50 / All)**:
-  - User-configurable pagination control (`PaginationBar.tsx` and `PlacesExplorer.tsx`) allowing users to choose between 10, 20, 50, or all items in place listings, categories, tags, and users.
-- **Enriched PDF Export**:
-  - Direct clickable Google Maps link (`[View on Google Maps]`) on every establishment entry in the generated PDF catalog and price range formatting cleanup without redundant currency symbols.
-- **Native PDF Document Export (PDF 1.4 Standard)**:
-  - Dependency-free client-side PDF generator (`src/lib/pdf.ts`) creating formatted, printable A4 catalogs with Helvetica vector typography, running headers, dynamic pagination, and WinAnsi encoding for special and accented characters.
-  - Quick export button added to the Import/Export modal dialog (`ExportImportModal.tsx`).
-- **Bulk Places Backup from Admin Table**:
-  - Ability to download a JSON backup file containing only specifically selected places using checkboxes in the administration table (`PlacesTableManager.tsx`).
-- **Selective Demo Data Cleanup**:
-  - Administrative action to delete only the 50 demo places, demo users, and demo comments, leaving all manually created places and groups intact.
-- **Danger Zone: Complete Application Reset**:
-  - Administrative tool in settings (`SettingsManager.tsx`) to wipe all places, comments, groups, invitations, and collaborator accounts while strictly preserving the current administrator account.
-- **Explicit Text Labels on Place Card Action Buttons**:
-  - Clear labels on all bottom card actions (`💬 Comments`, `🗺️ Map`, `📍 Maps ↗`, `⚖️ Compare`, `✏️ Edit`, `🗑️ Delete`).
-- **Visible Mobile Title for Import / Export**:
-  - Label text visible on mobile screens matching Roulette and Assistant buttons.
+### ✨ Explorer, Search & Smart Filters
+- **Accent-Insensitive Universal Search**: Instantly searches across place name, city, address, description, private notes, tags, plans/occasions, comments, shared groups, and authors (matching real name, `username`, and `@username` for both place creators and commenters).
+- **Command Palette (`Ctrl+K` / `⌘+K`)**: Full keyboard navigation (`↑`/`↓`, `Enter`, `Esc`) to jump directly to any place (list or map) or trigger quick actions.
+- **Segmented Experience Bar with Sliding Pill**: Filter by `All`, `Favorites`, `Want to go`, `Visited`, and `To discover`, with two-way URL query sync and a **«Share view»** button.
+- **Advanced Filters, Minimum Rating & «Dining with Friends»**:
+  - Searchable dropdowns for countries (195+) and cities, explicit price brackets (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`, `???`), minimum rating (`★ 7+`, `★ 8+`, `★ 9+`), 8 customizable default plans/occasions, and tags.
+  - **«Dining with friends» Filter**: Pick which users you're meeting and filter places across **11 modes** (with icons and live descriptions): *Pending or untried*, *Everyone wants to go*, *Someone wants to go (untried)*, *Someone wants to go (even if visited)*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite, new for others*, *Highly rated by someone (8+)*, *Tried by some, new for others*, *Visited by everyone*, and *Added by the group*.
+  - **Saved filters (`💾`)**, actionable empty state with removable chips, step-by-step **Decision Assistant**, **Indecision Mode (`🎲 Random`)**, and **Side-by-Side Comparator (`⚖️`)** for up to 3 places with multi-stop Google Maps routing.
 
-### Changed and Fixed
-- **Collapsed by Default for Taxonomy Sections in Administration**:
-  - In `TaxonomyManager.tsx`, `defaultOpen` defaults to `false` so «Plans & Occasions» and «Global Tags» start collapsed (`Manage`), keeping the taxonomy tab clean and uncluttered.
-- **Fixed Empty Category Deletion and Unexpected Re-seeding**:
-  - Removed auto-seeding logic in `getOccasions()` that re-inserted default categories when the table became empty. Added reactive local state in `TaxonomyManager.tsx` for immediate visual updates on single, bulk, and empty deletions.
-- **100% Comprehensive Translation (i18n es / en)**:
-  - Localized all administrative confirmation, deletion, and merge dialogs, empty search hints in the explorer, with 691 keys synchronized in `translations.csv`.
-- **Admin-Only Place Deletion Restriction**:
-  - Non-admin users cannot delete places even if they created them; deletion is strictly restricted to administrator accounts in both UI and server action (`deletePlaceAction`).
-- **Scroll-to-Top Button Overlap Fix**:
-  - Fixed CSS class collision in `ScrollToTop.tsx` (`flex` vs `hidden`) so the floating button is never rendered on mobile while viewing the map or interacting with the bottom sheet.
-- **Cleaned Up Phone, Website, and Visit Log**:
-  - Removed phone and website fields from forms, place cards, and demo seed data.
-  - Removed individual visits modal and log from place cards.
+### 🗺️ Interactive Map, Geolocation & Link Scraper
+- **Leaflet Map with OpenStreetMap / PostGIS**: Dynamic spatial clustering, personal status pins, **«Near me»** distance calculation (configurable radius), instant focus release when clicking the map background, and default **«Scroll list»** mode on mobile.
+- **Ultra-Fast Place Creation (`/new`) & Web Share Target**: Share links directly from Google Maps, Instagram, or TikTok; follows short redirects (`maps.app.goo.gl`, `g.co/kgs`, `share.google`), extracts coordinates, auto-suggests plans, ignores generic category descriptions (`"Bar"`, `"Restaurant"`), and detects street addresses so they are never used as the place name.
+- **Optional Google Places API Enrichment**: Configurable API key in `/admin > Settings` with built-in setup guide and live test button, keeping OpenStreetMap / Nominatim as a free fallback.
 
-## [0.1.0] - 2026-11-19
+### 🔖 Personal Collection, Shareable Lists & Comments
+- **Per-User Private Collection**: Favorites, personal status (`Want to go` / `Visited`), dedicated private rating (`My rating`, 1 to 10), and inline-editable private notes visible only to their author.
+- **Collaborative Comments**: Rich text reviews with auto-linkification, animated tabs (`All`, `Private`, `Community`), and mobile collapsible composer. Administrators can edit or delete any comment for moderation.
+- **Shareable Lists & Personal Guides**: Organize places into themed collections (*“Tapas tour in Granada”*, *“Lisbon trip”*), reorder stops (`↑`/`↓`), and toggle a **read-only public link (`/guide/[slug]`)** accessible without signup featuring an interactive map, numbered stops, Open Graph metadata, and a multi-stop **«Route in Google Maps»** button.
 
-### Added
-- **Default Map Centering on Spain & Smart Bounds Framing**:
-  - The map initializes and remains focused on Spain by default (`[40.4168, -3.7038]`, zoom 6), avoiding the world-wide zoom out caused by international demo places when no filters are set. When filters are applied (country, city, tags), it automatically frames the filtered results.
-- **Bidirectional Pin-to-Card Synchronization on Desktop**:
-  - Clicking any pin on the desktop map automatically resolves the target pagination page, switches page if necessary, smoothly scrolls to the card, and activates its golden highlight ring.
-- **Fixed `flyTo NaN` Crash upon Toggling Favorites**:
-  - Robust guards in `MapView.tsx` preventing `flyTo` execution when the map container is hidden (`display: none` in mobile list view) or when the selected place ID hasn't changed, resolving the `Invalid LatLng object: (NaN, NaN)` exception on data revalidation.
-- **Floating «Back to Top» Button (Scroll to Top)**:
-  - Discreet and lightweight floating button (`ScrollToTop.tsx`) with glassmorphism styling that smoothly appears when scrolling past 300px, triggering a smooth scroll back to the header.
-- **Synchronized «Full Details» Navigation from Map**:
-  - Direct navigation jump from the mobile map bottom sheet to the place's full details card in the list view: automatic destination pagination page calculation, instant view switch, smooth centered scrolling (`scrollIntoView`), and golden highlight ring (`ring-2 ring-amber-500/50`) on the target place card.
-- **Streamlined Mobile Tabs & Zero Duplication**:
-  - Reorganized mobile header with exclusive view tabs (`[🗺️ Map] | [📋 List]`), removing redundant intermediate floating pills and jump buttons to maximize visible map and card space.
-- **Robust Dropdown Positioning via Portal (`createPortal`)**:
-  - Integrated `createPortal` in `SearchableSelect.tsx` and the private groups popover mounting directly into `document.body`, eliminating positioning offsets caused by parent containers using `backdrop-blur` or `overflow-hidden` (such as the admin panel).
-- **Worldwide Country & City Selector with Integrated Search**:
-  - Comprehensive list of 195+ world countries with emoji flags, localized names in English and Spanish, and instant text filtering (`CountrySelect.tsx`).
-  - Searchable dropdown select (`SearchableSelect.tsx`) with fixed-position popover preventing vertical clipping inside horizontal scrolling containers.
-  - Country and city filter controls integrated in both the main places explorer and the admin places table.
-  - User language preference persistence stored in the database (`users.locale`) and editable in the user profile modal.
-- **Enriched Demo Data & Seed Expansion**:
-  - Full realistic websites, phone numbers, and operational statuses (such as seasonal temporary closure for El Campero) across all 50 demo places.
-  - Pre-seeded private sharing group ("Tapeo & Amigos") and demo saved filters ("Tapas en Granada" and "Alta Cocina Internacional").
-- **Multi-language System & Internationalization (TVSpy-style i18n)**:
-  - Extensible translation engine based on JSON dictionaries (`src/locales/es.json`, `src/locales/en.json`) synchronized with a centralized spreadsheet (`translations.csv`).
-  - Dynamic language selector in header persisted via cookies (`gastromap_lang`).
-  - Automated CLI scripts: `npm run i18n:export` (export to CSV), `npm run i18n:import` (regenerate JSON from CSV) and `npm run i18n:check` (audit missing keys).
-- **Mobile Floating Bottom Card & Map Scroll UX**:
-  - Interactive bottom floating card displayed upon tapping any place pin on mobile map view with quick actions (`🗺️ Get Directions` and `Full details →`).
-  - Fast jump button `↓ Jump to list ({count})` avoiding getting trapped by mobile touch gestures on map.
-  - Floating map touch switch to toggle between map navigation and fluid page scrolling.
-  - Dedicated independent rows for Private Groups and Numeric Price Range filters in mobile viewport.
-- **Database Backup (Admin)**:
-  - Full database export button and secure endpoint (`/api/admin/backup`) to download all tables in JSON format with audit logging.
-- **GPX and KML Export/Import**:
-  - Full bidirectional support for GPX tracks and waypoints (XML export and parser import) alongside KML.
-- **Private Group Invitations via Unique Links**:
-  - Replaced system user selection with unique invite link generation (`/groups/join/[token]`) for joining private groups.
-  - Active invite management in groups modal with one-click clipboard copy and revocation.
-  - Support for max usage count (`maxUses`) and never-expiring links (`neverExpires`) on private group invitations.
-- **Rate Limiting & Security Headers**:
-  - In-memory rate limiter (`rate-limit.ts`) guarding authentication, registration and token redemption.
-  - Strict HTTP security headers in Next.js config (`X-Frame-Options`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`).
-- **Universal Clipboard Copy**:
-  - Robust clipboard helper with automatic `document.execCommand('copy')` fallback for non-SSL/HTTP environments and local IP access.
-- **Animated Skeletons & Toast System**:
-  - Animated skeleton loaders (`Skeleton.tsx`) for comment threads and place cards.
-  - Reactive Toast notification system with action/undo capability.
-- **Automated Test Suite**:
-  - Native unit test suite (`npm test`) asserting translation integrity, Haversine spatial calculations, coordinate safety and GPX output.
-- **Private Groups Filter & Numeric Price Ranges**:
-  - Quick top-bar filter for exploring places shared via one or multiple private groups.
-  - Replaced price icons (`€`, `€€`, `€€€`, `€€€€`) with explicit numerical ranges (`< 15 €`, `15 - 30 €`, `30 - 50 €`, `> 50 €`) across cards, filters, modales and map popups.
-- **WYSIWYG Rich Comment Editor**:
-  - Replaced plain input with a WYSIWYG rich text editor with toolbar (bold, italics, bullets, blockquotes, dish highlights) and live preview tab.
-  - Formatted rich rendering for recommendations and comments.
-- **Mobile Map Scroll Optimization & List Pagination**:
-  - In mobile map view, vertical page scrolling is preserved with the places list rendered below the map and a toggle button to pan map or scroll page.
-  - Dynamic pagination for places in list view (10 places per page with previous, next and direct page jumps).
-- **Visibility Control in Place Creation & Editing**:
-  - Private group selector is now strictly shown when «Private» visibility is selected, hiding when «Community» is chosen.
-- **Base Architecture & Docker (Phase 0)**:
-  - Next.js 15 (App Router, Server Actions, TypeScript, Tailwind CSS).
-  - Multi-stage standalone build in `Dockerfile` and `docker-compose.yml`.
-  - Database container with PostgreSQL 16 and PostGIS 3.4 (`postgis/postgis:16-3.4-alpine`).
-  - Drizzle ORM configured with initial schema (`users`, `sessions`, `invitations`) and migrations applied.
-  - Health check endpoint at `/api/health` verifying PostgreSQL and PostGIS connectivity.
-- **CI/CD & Version Service (aligned with TVSPY)**:
-  - Multi-arch Docker Hub GitHub Actions workflows (`linux/amd64`, `linux/arm64`) for branches and releases.
-  - Built-in version check service (`versionService.ts`) and `/api/version` endpoint comparing against GitHub Releases.
-  - Standardized changelogs in `CHANGELOG.MD` and `CHANGELOG_ES.MD`.
-- **Authentication & Invite System (Phase 1)**:
-  - Initial setup wizard (`/setup`) to initialize the database and create the first administrator.
-  - Persistent database sessions (`sessions`) with secure Argon2id password hashing and HTTP-only cookies.
-  - Private invitation-only registration system with cryptographic tokens and expiration (`/invite/[token]`).
-  - Admin dashboard for invite generation and revocation (`InviteManager`).
-- **Gastronomic Catalog & Taxonomy Management (Phase 2)**:
-  - Relational Drizzle schema for establishments (`places`), occasions (`occasions`), tags (`tags`), and link tables.
-  - Fast ingestion form (`/new`) with budget selection (€ to €€€€), personal ratings, and notes.
-  - Interactive chip-based selector for multiple occasions and tags without comma-separated text fields.
-  - Comprehensive taxonomy admin manager (`TaxonomyManager`) with live place count, duplicate merger, and safe deletion.
-- **Geolocation & Interactive Map (Phase 3)**:
-  - Interactive map powered by Leaflet and OpenStreetMap / CartoDB tiles (`MapView.tsx` & `MapContainerWrapper.tsx`).
-  - Themed SVG pin markers with occasion colors, central emojis, and drop shadows (`createPlaceMarkerIcon`).
-  - Rich popups with establishment details and direct GPS directions ("Get directions ↗").
-  - "Near me" mode with browser geolocation and dynamic radius selector (1, 2, 5, 10 km or unrestricted).
-  - Spatial PostGIS queries calculating real distances (`ST_Distance`) and radius filtering (`ST_DWithin`).
-  - Distance badge on cards and popups (`📍 350 m`, `📍 1.4 km`).
-  - Unified explorer with live search and bidirectional map/list sync.
-  - Closed location hierarchy picker for Spanish regions (`spanishLocations.ts`) and OpenStreetMap/Nominatim smart address geocoding (`geocoding.ts`).
-- **Personal Collection & User Statuses (Phase 4)**:
-  - Favorites system (⭐ / 🤍) persisted per user in `user_places`.
-  - Independent personal statuses: "Want to go (Pending 🕒)" and "Been there (Visited ✅)".
-  - 0-10 personal ratings with decimal precision and visual badges on cards.
-  - Private notes («🔒 My note») with dedicated interactive modal, visible only to their author.
-- **Decision Assistant & Random Picker (Phase 4)**:
-  - Guided assistant «🎯 Find a place» (`DecisionAssistantModal`) covering Occasion, Price Range, Location/Radius, and Group Experience.
-  - Interactive random picker with **«🎲 Pick at random»** button and spinning roulette modal (`RandomPickerModal`).
-  - Dynamic Experience filtering: "Visited by me", "Tried by friends", and "✨ Untried".
-- **Collaborative Comments & Sharing Groups (Phase 5)**:
-  - Recommendations and comments thread on each establishment card (`PlaceCommentsThread`).
-  - Real-time commenting with timestamp, author (`@username`), and deletion controls.
-  - Visibility scopes: quick toggle between `🌍 Community (All)` and `🔒 Private (Only me)` with server-side authorization.
-  - Relational schema for sharing groups (`sharing_groups`, `sharing_group_members`).
-- **PWA & Web Share Target**:
-  - Installable PWA support on mobile and desktop (`manifest.json` and web app metadata).
-  - Web Share Target receiving links directly from Google Maps or social media to the `/new` ingestion form.
-- **Admin Dashboard Tools & Places Management**:
-  - Direct manual user creation (`UsersManager`) with name, @username, email, password, role, real-time search, and **batch/multiple deletion via checkboxes** with self-account protection.
-  - Places table view (`PlacesTableManager`) with real-time filters and multi-select bulk delete.
-  - Worldwide 50-place demo dataset with 8 community contributors, multi-user comments thread, statuses, ratings, and private notes.
-- **Adaptive UX & Navigation**:
-  - Horizontal mouse scroll (`HorizontalScroll`) across occasions, status filters, and popular tags.
-  - Responsive grid/row toggle for occasions.
-  - Searchable expandable tags panel for large taxonomies.
-- **Dark Mode & Refined Light Mode**:
-  - Interactive ☀️ / 🌙 theme toggle in header with `localStorage` persistence and automatic system preference detection.
-  - Zero-flicker (anti-FOUC) rendering via inline script in `<head>` and adaptive Tailwind `dark:` classes.
-  - Full UI theme consistency across places cards, explorer view, interactive maps, admin tables, and modals.
-  - Redesigned light mode tag and category color palette: clean white chip styling eliminating dark patches, with warm amber active states and high-contrast typography (`text-amber-900 font-bold`).
-  - Restored deep gradient and inner shadow styling for the search hub in dark mode.
-- **Strict Referential Integrity & Cascade Deletion**:
-  - Guaranteed atomic cascade deletion for establishments: purges comments (`placeComments`), user collection records (`userPlaces`), occasions (`placeOccasions`), and associated tags (`placeTags`).
-  - Total atomic purge when deleting users (individually or in batch): deletes author comments, user collections, sessions, invites, and all places created by the user along with their complete relational dependencies, ensuring zero orphaned records in the database.
-- **Advanced Taxonomy Management & Bulk Cleanup**:
-  - Multi-selection and bulk deletion of categories and tags via checkboxes.
-  - «🧹 Delete empty» action for occasions and tags without linked places, including a detailed pre-confirmation modal listing target items.
-- **Mobile Experience & Map Markers Optimization**:
-  - Compact header (`UserHeader`) tailored for small mobile viewports (320px–360px): tap-friendly profile pill with quick settings ⚙️, responsive logout button (`🚪` on mobile, text on desktop), and layout stabilization without horizontal overflow.
-  - Refined Leaflet map markers combining clean SVG pin teardrops with native HTML emoji layers for universal cross-platform rendering (Android, iOS, desktop).
-  - Mobile split-view with fluid switching between «🗺️ Map» and «📋 List», touch-friendly scroll carousels, and responsive map layout recalculations with `ResizeObserver`.
-- **Mobile Header Overhaul & Tappable Dropdown Menu**:
-  - Redesigned top navigation bar on mobile viewports (320px–390px): eliminates button cramming and horizontal overflow by consolidating profile, private groups, personal statistics, documentation, PayPal donation, and secure logout into an animated floating dropdown menu (`[ (A) ▾ ]`).
-  - Desktop viewports (`md:` and above) retain full direct navigation buttons with expanded labels for streamlined workflow.
-- **PayPal Support & TVSpy-style Ecosystem Links**:
-  - Subtle PayPal donation button (`paypal.me/alebupal`), GitHub repository, and Docker Hub links.
-- **Place Editing, Status, Duplicate Detection & Admin Merging**:
-  - Full establishment editing modal (`EditPlaceModal`) with operational status (`active`, `temporarily_closed`, `permanently_closed`, `unverified`), visibility scope, and sharing groups.
-  - Real-time duplicate detection during place creation (`/new`) based on name similarity and proximity, plus administrative place merging (`mergePlacesAction`) consolidating comments, visits, user collections, and taxonomies.
-  - Inline editing of own comments (`PlaceCommentsThread`) and multi-criteria list sorting (Recent, Distance, Personal rating, A-Z, Price).
-- **Dynamic Map Clustering, Personal Badges & Scalable Taxonomy Filters**:
-  - Native viewport-aware marker clustering in Leaflet (`MapView.tsx`) with personal status badges (favorite, visited, pending) on pins.
-  - Live search, frequency-based ordering, and progressive «Show more» loading for categories and tags across explorer and forms (`TagInput`, `OccasionPicker`, `PlacesExplorer`).
-  - Reusable pagination (`PaginationBar`) across admin tables (`PlacesTableManager`, `UsersManager`, `TaxonomyManager`) and dedicated expanded sections for Categories and Tags inside the Taxonomy tab.
-- **Saved Filters, Sharing Groups, User Lifecycle & Audit Log**:
-  - Saved filter presets (`saved_filters`) per user for one-click access to favorite search combinations.
-  - Private sharing groups (`GroupsModal`, `place_group_access`) with cumulative server-side permissions and protection against privatizing/deleting places with activity from other users.
-  - User account activation/deactivation (`status`, `last_login_at`) and centralized administrative audit log (`audit_logs`, `AuditLogViewer`).
-- **Visit History, User & Admin Statistics + Annual Wrapped**:
-  - Detailed visit history log per establishment (`place_visits`, `PlaceVisitsModal`) with date, optional note, and rating.
-  - Personal statistics modal (`StatsModal`) with overview KPIs, distributions, and an interactive annual **«Wrapped»** summary with year selector.
-  - Complete platform-wide Admin Statistics panel (`AdminStatsPanel`) with global KPIs, 30-day activity pulse, top contributors, most popular places, and catalog breakdowns.
-- **Import / Export, Side-by-Side Comparator & Offline PWA Cache**:
-  - Multi-format export (JSON, CSV, GeoJSON, KML) and import with preview (JSON, GeoJSON, Google Takeout, CSV) via `ExportImportModal`.
-  - Side-by-side establishment comparator (`ComparePlacesModal`) for up to 3 places with floating selection bar.
-  - Service Worker (`/sw.js`) with Network-First caching and offline mode banner for consulting cached favorites and pending places without connectivity.
-- **TVSPY-Style Documentation & In-App Changelog Viewer**:
-  - Dedicated `/docs` section with tabs for official repository README and version Changelog.
-  - Interactive language switcher (Spanish 🇪🇸 / English 🇬🇧) reading local repository markdown or GitHub Raw fallback.
-  - Rich Markdown renderer with version tags (`🏷️`), styled checkboxes (`✓`), code blocks, and support banner.
-  - Direct access links added to the user header (`📚 Docs`) and footer.
-- **Admin User Editing & Complete Invitation Management**:
-  - Comprehensive user editing modal for administrators (`updateUserByAdminAction`, `UsersManager`) allowing direct modification of name, @username, email, role, status, and new password.
-  - Full invitation registry view in `InviteManager` listing all issued tokens with status badges (Active 🟢, Used ✓, Expired ⏳), recipient info, creation date, and expiration tracking.
-  - Ability to copy active invite links on demand and revoke/delete invitations before their expiration date.
+### 👥 Private Groups, Invitations & Privacy
+- **Invitation-Only Access**: Initial `/setup` wizard for the first administrator and private invitation tokens (`/invite/[token]`) with configurable expiry and early revocation.
+- **Private Sharing Groups**: Create closed groups with join links (`/groups/join/[token]`), usage limits, configurable expiration, and cumulative server-side permission checks.
 
-### Changed
-- **Unified Two-Row Filter Layout (Mobile & PC)**:
-  - Reorganized filters into two cohesive horizontal rows: Row 1 for collections/experience (`All`, `Favorites`, `Want to go`, `Visited`, `From friends`, `Unexplored`), and Row 2 for scope, location, and budget (`Groups`, `Countries`, `Cities`, price ranges).
-  - Integrated the private groups button inside the same horizontal scroll bar, eliminating the isolated orphan row on mobile viewports.
-  - Added subtle amber highlight badge on country and city selectors when an active filter is engaged.
+### 📱 Mobile Experience (PWA), Offline Mode & Micro-Interactions
+- **Mobile-First Stitch Design**: Compact header, pill search bar with `List / Map` toggle, top map + overlapping *Bottom Sheet*, floating **«Add place» FAB**, fixed bottom navigation (`Explore`, `Add`, `Stats`, `Menu`), and all user modals unified as **bottom-sheets with a top drag handle and native swipe-to-close gesture**.
+- **PWA with Offline Cache & Write Queue (IndexedDB)**: Installable on iOS/Android with Service Worker (`/sw.js`), idempotent offline write queue for favorites, statuses, and ratings with automatic sync on reconnect, and a **«Clear cache»** button.
+- **Dark / Light Mode & Micro-Interactions**: Theme switching via the **View Transitions API**, **Plus Jakarta Sans** typography, unified **Google Material Symbols Outlined** iconography, sliding pills, animated KPI counters, and full `prefers-reduced-motion` support.
 
-### Fixed
-- **Eliminated Unwanted Orange Focus Rings**:
-  - Replaced Tailwind's `focus:ring-amber-500` outline across all inputs, dropdown triggers, and select controls with clean, subtle neutral borders (`focus:border-slate-400 dark:focus:border-slate-500`).
-- **Dark Mode Leaflet Map Container Background & Zoom Limits**:
-  - Set Leaflet map container background to dark navy (`#090d16`) in dark mode to prevent light gray voids below polar coordinates when zooming out.
-  - Added `minZoom: 2` and `worldCopyJump: true` to prevent map letterbox gaps on tall viewport displays.
-- **Cross-Language Tooltip & Accessibility Translations**:
-  - Fully localized remaining hardcoded strings in place card action buttons (favorite toggle, notes, visits, website, phone call, edit, and delete).
+### 📊 Personal Statistics, Annual «Wrapped» & Import / Export
+- **Stats Dashboard & Annual «Wrapped»**: Personal KPIs, top cities, specialties, and downloadable/shareable yearly summary card.
+- **Multi-Format Import & Export**: Export to **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with duplicate detection, preview, and downloadable sample templates.
+
+### 🛠️ Admin Panel (`/admin`), Audit Log & Backups
+- **Dedicated `/admin` Dashboard**: Real-time global analytics, paginated places table (edit, duplicate merge, bulk delete, selective JSON backup), full user management, taxonomy manager (categories with emoji + Material Symbols picker, tags, merging, and empty cleanup), invitations, and selective demo data seeder/cleaner.
+- **Log in as User (Secure Impersonation)**: **«Log in as»** button in `/admin > Users` with a sticky global **Top Alert** banner showing the active account and one-click return to your admin session.
+- **Comprehensive Audit Log & Cleanup**: Full trail of critical actions (places, comments, users, invitations, groups, lists, settings, backups, and impersonations) with advanced search, readable labels, and purge buttons (`Clean > 30d`, `Clean > 90d`, `Clear all`).
+- **Full JSON Backup & Restore (`/api/admin/backup`)**: One-click full database export and restore preserving the active administrator session (even across fresh installations with different UUIDs), plus a Danger Zone app reset tool.
+
+### 🌐 Internationalization (i18n), Documentation & Versioning
+- **Extensible Multi-Language System (Spanish / English)**: Over 1,000 keys synchronized across `es.json`, `en.json`, and `translations.csv` (`npm run i18n:export`, `i18n:import`, `i18n:check`) with a scalable `LanguageSelector`.
+- **In-App Documentation Center (`/docs`)**: Full Markdown reader (badges, tables, links, heading anchors, syntax-labeled code blocks, and sliding-pill tabs) for *User Guide*, *Changelog*, and *README* in Spanish and English.
+- **Automatic New-Version Alerts**: Background check against GitHub Releases (`/api/version`) with an animated header pill and a **«Version & Updates»** card with manual **«Check now»** button in `/admin > Settings`.
+
+### 🛡️ Security & Architecture
+- **Modern Stack**: Next.js 15 (App Router), TypeScript, Drizzle ORM, PostgreSQL + PostGIS (Docker), and Tailwind CSS.
+- **Hardened Security**: **Argon2id** password hashing, `HttpOnly` session cookies, in-memory rate limiting on auth endpoints, and strict HTTP security headers (CSP, HSTS, X-Frame-Options).
