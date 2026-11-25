@@ -476,24 +476,24 @@ export function PlaceCard({
           </span>
         </div>
 
-        <div className="grid grid-flow-col auto-cols-fr sm:flex sm:items-center gap-1 sm:gap-2 sm:flex-wrap sm:justify-end">
+        <div className="grid grid-flow-col auto-cols-fr sm:flex sm:items-center gap-0.5 sm:gap-2 sm:flex-wrap sm:justify-end">
           {/* Botón de comentarios */}
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
             aria-label={`${t("cards.comments")} (${commentsCount})`}
-            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent transition cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap"
+            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent transition cursor-pointer py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
             title={t("cards.comments")}
           >
-            <span className="relative inline-flex">
+            <span className="relative inline-flex items-center justify-center">
               <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">chat_bubble_outline</span>
               {commentsCount > 0 && (
-                <span className="sm:hidden -mt-1.5 -mr-1.5 px-1 rounded-full bg-orange-600 text-white text-[9px] font-extrabold leading-tight">
+                <span className="sm:hidden absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 rounded-full bg-orange-600 text-white text-[9px] font-extrabold flex items-center justify-center leading-none shadow-xs">
                   {commentsCount}
                 </span>
               )}
             </span>
-            <span className="text-[10px] sm:text-[11px] leading-tight">
+            <span className="text-[9.5px] sm:text-[11px] leading-tight">
               <span className="sm:hidden">{t("cards.comments")}</span>
               <span className="hidden sm:inline">
                 {commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}
@@ -508,14 +508,14 @@ export function PlaceCard({
               aria-pressed={isCompared}
               aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
               title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
-              className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer whitespace-nowrap rounded-xl py-1.5 sm:py-0.5 px-1 ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer whitespace-nowrap rounded-xl py-1.5 sm:py-0.5 px-0.5 sm:px-1 ${
                 isCompared
                   ? "sm:px-2 sm:rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-bold"
                   : "hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent"
               }`}
             >
               <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">compare_arrows</span>
-              <span className="text-[10px] sm:text-[11px] leading-tight">{t("cards.compare")}</span>
+              <span className="text-[9.5px] sm:text-[11px] leading-tight">{t("cards.compare")}</span>
             </button>
           )}
 
@@ -524,11 +524,11 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="group flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/40 sm:hover:bg-transparent font-bold cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap transition"
+              className="group flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/40 sm:hover:bg-transparent font-bold cursor-pointer py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap transition"
               title="Centrar en mapa"
             >
               <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none no-underline">explore</span>
-              <span className="text-[10px] sm:text-[11px] leading-tight group-hover:underline underline-offset-2">{t("places.view_map")}</span>
+              <span className="text-[9.5px] sm:text-[11px] leading-tight group-hover:underline underline-offset-2">{t("places.view_map")}</span>
             </button>
           )}
 
@@ -538,11 +538,11 @@ export function PlaceCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Maps: ${place.name}`}
-              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap"
+              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
               title="Abrir en Google Maps"
             >
               <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
-              <span className="text-[10px] sm:text-[11px] leading-tight">
+              <span className="text-[9.5px] sm:text-[11px] leading-tight">
                 <span className="sm:hidden">Maps</span>
                 <span className="hidden sm:inline">Google Maps</span>
               </span>
@@ -556,7 +556,7 @@ export function PlaceCard({
               aria-label={t("cards.copy_place_tooltip")}
               aria-expanded={showShareMenu}
               title={t("cards.copy_place_tooltip")}
-              className={`w-full sm:w-auto flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl active:scale-95 ${
+              className={`w-full sm:w-auto flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl active:scale-95 ${
                 copiedPlace
                   ? "text-emerald-600 dark:text-emerald-400 font-bold"
                   : showShareMenu
@@ -570,7 +570,7 @@ export function PlaceCard({
               >
                 {copiedPlace ? "check" : "share"}
               </span>
-              <span className="text-[10px] sm:text-[11px] leading-tight">{t("cards.copy_place")}</span>
+              <span className="text-[9.5px] sm:text-[11px] leading-tight">{t("cards.copy_place")}</span>
             </button>
 
             {showShareMenu && (
