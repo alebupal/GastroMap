@@ -159,6 +159,8 @@ export async function POST(request: NextRequest) {
     "invitations",
     "sharing_groups",
     "places",
+    "place_lists",
+    "place_list_items",
     "group_invitations",
     "sharing_group_members",
     "place_occasions",
@@ -172,6 +174,13 @@ export async function POST(request: NextRequest) {
     "audit_logs",
   ];
 
+  // Incluir también cualquier tabla presente en el esquema actual que no esté en el backup
+  // para asegurar que se vacíe antes de restaurar (evitando FKs colgantes)
+  for (const tName of Object.keys(tableMap)) {
+    if (!INSERT_ORDER.includes(tName) && !EXCLUDED.has(tName)) {
+      INSERT_ORDER.push(tName);
+    }
+  }
   for (const tName of Object.keys(payload.tables)) {
     if (!INSERT_ORDER.includes(tName) && !EXCLUDED.has(tName)) {
       INSERT_ORDER.push(tName);
@@ -179,6 +188,7 @@ export async function POST(request: NextRequest) {
   }
 
   const restoredCounts: Record<string, number> = {};
+  let finalActorUserId = user.id;
 
   try {
     await db.transaction(async (tx) => {
@@ -186,7 +196,7 @@ export async function POST(request: NextRequest) {
       const deleteOrder = [...INSERT_ORDER].reverse();
       for (const tableName of deleteOrder) {
         if (tableName === "users") {
-          // Mantener la cuenta del administrador actual para no invalidar la sesión en curso
+          // Mantener temporalmente la cuenta del administrador actual para no invalidar la sesión en curso
           await tx.delete(schema.users).where(ne(schema.users.id, user.id));
         } else if (tableMap[tableName]) {
           await tx.delete(tableMap[tableName]);
@@ -201,14 +211,57 @@ export async function POST(request: NextRequest) {
           let rowsToInsert = rows.map((r) => sanitizeRow(r as Record<string, unknown>));
 
           if (tableName === "users") {
-            const currentAdminInBackup = rowsToInsert.find((r) => r.id === user.id);
-            if (currentAdminInBackup) {
+            const currentAdminById = rowsToInsert.find((r) => r.id === user.id);
+            const normalizedCurrentEmail = user.email.trim().toLowerCase();
+            const normalizedCurrentUsername = user.username?.trim().toLowerCase() || null;
+
+            const conflictingBackupUser = !currentAdminById
+              ? rowsToInsert.find((r) => {
+                  const rowEmail = typeof r.email === "string" ? r.email.trim().toLowerCase() : "";
+                  const rowUsername =
+                    typeof r.username === "string" ? r.username.trim().toLowerCase() : null;
+                  return (
+                    rowEmail === normalizedCurrentEmail ||
+                    (normalizedCurrentUsername && rowUsername === normalizedCurrentUsername)
+                  );
+                })
+              : null;
+
+            if (currentAdminById) {
+              // Mismo UUID: actualizamos la fila del admin actual con los datos del backup
               await tx
                 .update(schema.users)
-                .set(currentAdminInBackup)
+                .set(currentAdminById)
                 .where(eq(schema.users.id, user.id));
+              rowsToInsert = rowsToInsert.filter((r) => r.id !== user.id);
+            } else if (conflictingBackupUser && typeof conflictingBackupUser.id === "string") {
+              // El mismo email/username existe en el backup con un UUID distinto (ej. tras reinstalar o /setup):
+              // 1) Liberamos temporalmente las constraints únicas del admin actual
+              await tx
+                .update(schema.users)
+                .set({
+                  email: `__restore_tmp_${user.id}@local.invalid`,
+                  username: `__rtmp_${user.id.replace(/-/g, "").slice(0, 16)}`,
+                })
+                .where(eq(schema.users.id, user.id));
+
+              // 2) Insertamos todos los usuarios del backup con sus UUIDs originales intactos
+              const chunkSize = 100;
+              for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+                const chunk = rowsToInsert.slice(i, i + chunkSize);
+                await tx.insert(table).values(chunk as any);
+              }
+
+              // 3) Reasignamos las sesiones activas al UUID restaurado y eliminamos la cuenta temporal
+              const restoredAdminId = conflictingBackupUser.id;
+              await tx
+                .update(schema.sessions)
+                .set({ userId: restoredAdminId })
+                .where(eq(schema.sessions.userId, user.id));
+              await tx.delete(schema.users).where(eq(schema.users.id, user.id));
+              finalActorUserId = restoredAdminId;
+              rowsToInsert = [];
             }
-            rowsToInsert = rowsToInsert.filter((r) => r.id !== user.id);
           }
 
           if (rowsToInsert.length > 0) {
@@ -224,9 +277,9 @@ export async function POST(request: NextRequest) {
     });
 
     await logAudit({
-      actorUserId: user.id,
+      actorUserId: finalActorUserId,
       entityType: "system",
-      entityId: user.id,
+      entityId: finalActorUserId,
       action: "backup_restored",
       metadata: restoredCounts,
     });
