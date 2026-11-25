@@ -545,22 +545,32 @@ export function PlaceCommentsThread({
         {/* Línea degradada sutil */}
         <div className="h-[2px] w-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 opacity-80 shrink-0" />
 
-        {/* Barra de filtros estilo segmented control (1 sola fila en móvil) */}
+        {/* Barra de filtros estilo segmented control con píldora deslizante */}
         <div className="px-4 sm:px-6 py-2.5 bg-[#f8f9ff] dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between gap-2.5 shrink-0">
-          <div className="grid grid-cols-3 sm:inline-flex flex-1 sm:flex-initial items-center p-1 rounded-2xl bg-[#eceeff] dark:bg-slate-800/90 gap-1">
+          <div className="relative grid grid-cols-3 flex-1 sm:flex-initial sm:min-w-[360px] p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
+            <span
+              aria-hidden="true"
+              className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc((100%-8px)/3)] rounded-full bg-orange-600 shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                filterTab === "all"
+                  ? "translate-x-0"
+                  : filterTab === "private"
+                  ? "translate-x-full"
+                  : "translate-x-[200%]"
+              }`}
+            />
             <button
               type="button"
               onClick={() => setFilterTab("all")}
-              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
+              className={`relative z-10 inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer min-w-0 ${
                 filterTab === "all"
-                  ? "bg-orange-600 text-white shadow-xs"
+                  ? "text-white"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span className="material-symbols-outlined text-[14px] leading-none shrink-0 hidden sm:inline">forum</span>
               <span className="truncate">{t("places.all")}</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 transition-colors duration-200 ${
                   filterTab === "all"
                     ? "bg-white/20 text-white"
                     : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
@@ -573,9 +583,9 @@ export function PlaceCommentsThread({
             <button
               type="button"
               onClick={() => setFilterTab("private")}
-              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
+              className={`relative z-10 inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer min-w-0 ${
                 filterTab === "private"
-                  ? "bg-orange-600 text-white shadow-xs"
+                  ? "text-white"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
@@ -583,7 +593,7 @@ export function PlaceCommentsThread({
               <span className="truncate sm:hidden">{t("ui.private_short")}</span>
               <span className="truncate hidden sm:inline">{t("ui.my_private_notes")}</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 transition-colors duration-200 ${
                   filterTab === "private"
                     ? "bg-white/20 text-white"
                     : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
@@ -596,16 +606,16 @@ export function PlaceCommentsThread({
             <button
               type="button"
               onClick={() => setFilterTab("community")}
-              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
+              className={`relative z-10 inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer min-w-0 ${
                 filterTab === "community"
-                  ? "bg-orange-600 text-white shadow-xs"
+                  ? "text-white"
                   : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span className="material-symbols-outlined text-[14px] leading-none shrink-0 hidden sm:inline">public</span>
               <span className="truncate">{t("ui.community")}</span>
               <span
-                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 transition-colors duration-200 ${
                   filterTab === "community"
                     ? "bg-white/20 text-white"
                     : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
@@ -620,7 +630,7 @@ export function PlaceCommentsThread({
             type="button"
             onClick={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
             title={t("ui.sort_label")}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-300 dark:hover:border-orange-700 font-bold text-xs cursor-pointer transition shrink-0"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-300 dark:hover:border-orange-700 font-bold text-xs cursor-pointer transition shrink-0"
           >
             <span className="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400 leading-none">
               swap_vert
@@ -651,6 +661,8 @@ export function PlaceCommentsThread({
               Sincronizado en tiempo real
             </span>
           </div>
+
+          <div key={filterTab} className="space-y-4 animate-in fade-in duration-200">
 
           {/* Tarjeta de nota privada (si existe y el filtro la incluye) */}
           {(filterTab === "all" || filterTab === "private") && hasPrivateNote && (
@@ -851,6 +863,7 @@ export function PlaceCommentsThread({
               </p>
             </div>
           )}
+          </div>
         </div>
 
         {/* Zona inferior: formulario desplegable + acciones */}
