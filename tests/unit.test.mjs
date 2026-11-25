@@ -234,12 +234,12 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
   assert.equal(matches(dummyPlace, "sushi"), false, "No debe encontrar términos no presentes");
 });
 
-test("Filtro Plan con amigos: filtra sitios pendientes o por descubrir para los usuarios elegidos", () => {
+test("Filtro Plan con amigos: filtra sitios pendientes, favoritos o visitados para los usuarios elegidos", () => {
   const samplePlaces = [
-    { id: "p1", visitedUserIds: [], pendingUserIds: ["u1", "u2"] }, // ambos quieren ir
-    { id: "p2", visitedUserIds: ["u1"], pendingUserIds: ["u2"] }, // u1 ya fue
-    { id: "p3", visitedUserIds: [], pendingUserIds: ["u2"] }, // solo u2 quiere ir, nadie fue
-    { id: "p4", visitedUserIds: [], pendingUserIds: [] }, // por descubrir para ambos
+    { id: "p1", visitedUserIds: [], pendingUserIds: ["u1", "u2"], favoriteUserIds: [] },
+    { id: "p2", visitedUserIds: ["u1"], pendingUserIds: ["u2"], favoriteUserIds: ["u1"] },
+    { id: "p3", visitedUserIds: [], pendingUserIds: ["u2"], favoriteUserIds: ["u1", "u2"] },
+    { id: "p4", visitedUserIds: ["u1", "u2"], pendingUserIds: [], favoriteUserIds: ["u1", "u2"] },
   ];
 
   const filterWithFriends = (places, targetIds, mode) =>
@@ -253,12 +253,27 @@ test("Filtro Plan con amigos: filtra sitios pendientes o por descubrir para los 
           targetIds.every((uid) => !p.visitedUserIds.includes(uid))
         );
       }
+      if (mode === "favorites_any") {
+        return targetIds.some((uid) => p.favoriteUserIds.includes(uid));
+      }
+      if (mode === "favorites_all") {
+        return targetIds.every((uid) => p.favoriteUserIds.includes(uid));
+      }
+      if (mode === "discover_for_some") {
+        return (
+          targetIds.some((uid) => p.visitedUserIds.includes(uid)) &&
+          targetIds.some((uid) => !p.visitedUserIds.includes(uid))
+        );
+      }
+      if (mode === "visited_all") {
+        return targetIds.every((uid) => p.visitedUserIds.includes(uid));
+      }
       return targetIds.every((uid) => !p.visitedUserIds.includes(uid));
     });
 
   assert.deepEqual(
     filterWithFriends(samplePlaces, ["u1", "u2"], "untried_or_pending").map((p) => p.id),
-    ["p1", "p3", "p4"]
+    ["p1", "p3"]
   );
   assert.deepEqual(
     filterWithFriends(samplePlaces, ["u1", "u2"], "pending_all").map((p) => p.id),
@@ -267,6 +282,22 @@ test("Filtro Plan con amigos: filtra sitios pendientes o por descubrir para los 
   assert.deepEqual(
     filterWithFriends(samplePlaces, ["u1", "u2"], "pending_any").map((p) => p.id),
     ["p1", "p3"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_any").map((p) => p.id),
+    ["p2", "p3", "p4"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "favorites_all").map((p) => p.id),
+    ["p3", "p4"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "discover_for_some").map((p) => p.id),
+    ["p2"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "visited_all").map((p) => p.id),
+    ["p4"]
   );
 });
 

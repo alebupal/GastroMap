@@ -9,7 +9,7 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 
 ### Añadido
 - **Filtro «Plan con amigos» y Búsqueda Insensible a Tildes**:
-  - Nuevo filtro **«Plan con amigos»** disponible en `+ Filtros` y en el **Asistente / Filtros móvil** (`DecisionAssistantModal`) para seleccionar con qué usuarios vas y filtrar restaurantes según tres modos: *Pendiente o por descubrir* (ninguno lo ha visitado), *Todos quieren ir* (match perfecto de pendientes) o *Alguno quiere ir (sin probar)*, con opción *Incluirme a mí también*.
+  - Nuevo filtro **«Plan con amigos»** disponible en `+ Filtros` y en el **Asistente / Filtros móvil** (`DecisionAssistantModal`) para seleccionar con qué usuarios vas y filtrar restaurantes según 7 modos: *Pendiente o por descubrir*, *Todos quieren ir*, *Alguno quiere ir (sin probar)*, *Favorito de alguno*, *Favorito de todos*, *Probado por alguno, nuevo para otros* y *Visitado por todos*, con opción *Incluirme a mí también*.
   - Búsqueda normalizada insensible a tildes y diacríticos (`src/lib/search.ts`) en explorador, paleta de comandos (`⌘K`), selectores de ciudades/países y panel de administración.
 - **Listas / Colecciones Compartibles (Guías Personales Públicas)**:
   - Nuevas tablas `place_lists` y `place_list_items` (`drizzle/0012_far_doctor_strange.sql`) para crear listas temáticas personalizadas (ej. *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»*, *«Cenas especiales»*) con icono, descripción y orden manual de paradas.

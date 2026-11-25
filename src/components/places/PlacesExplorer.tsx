@@ -180,10 +180,16 @@ export function PlacesExplorer({
     "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
   const [minRating, setMinRating] = useState<number | null>(null);
-  // Filtro «Plan con amigos» (usuarios con los que vas + modo pendiente/por descubrir)
+  // Filtro «Plan con amigos» (usuarios con los que vas + modo de coincidencia)
   const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
   const [friendsFilterMode, setFriendsFilterMode] = useState<
-    "untried_or_pending" | "pending_all" | "pending_any"
+    | "untried_or_pending"
+    | "pending_all"
+    | "pending_any"
+    | "favorites_any"
+    | "favorites_all"
+    | "discover_for_some"
+    | "visited_all"
   >("untried_or_pending");
   const [includeMeWithFriends, setIncludeMeWithFriends] = useState(true);
   const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
@@ -718,6 +724,7 @@ export function PlacesExplorer({
       result = result.filter((p) => {
         const visited = p.visitedUserIds || [];
         const pending = p.pendingUserIds || [];
+        const favorites = p.favoriteUserIds || [];
         if (friendsFilterMode === "pending_all") {
           return targetUserIds.every((uid) => pending.includes(uid));
         }
@@ -726,6 +733,21 @@ export function PlacesExplorer({
             targetUserIds.some((uid) => pending.includes(uid)) &&
             targetUserIds.every((uid) => !visited.includes(uid))
           );
+        }
+        if (friendsFilterMode === "favorites_any") {
+          return targetUserIds.some((uid) => favorites.includes(uid));
+        }
+        if (friendsFilterMode === "favorites_all") {
+          return targetUserIds.every((uid) => favorites.includes(uid));
+        }
+        if (friendsFilterMode === "discover_for_some") {
+          return (
+            targetUserIds.some((uid) => visited.includes(uid)) &&
+            targetUserIds.some((uid) => !visited.includes(uid))
+          );
+        }
+        if (friendsFilterMode === "visited_all") {
+          return targetUserIds.every((uid) => visited.includes(uid));
         }
         // "untried_or_pending": ninguno de los seleccionados lo ha visitado todavía
         return targetUserIds.every((uid) => !visited.includes(uid));
@@ -1838,6 +1860,10 @@ export function PlacesExplorer({
                         { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
                         { id: "pending_all", label: t("friends_filter.mode_pending_all") },
                         { id: "pending_any", label: t("friends_filter.mode_pending_any") },
+                        { id: "favorites_any", label: t("friends_filter.mode_favorites_any") },
+                        { id: "favorites_all", label: t("friends_filter.mode_favorites_all") },
+                        { id: "discover_for_some", label: t("friends_filter.mode_discover_for_some") },
+                        { id: "visited_all", label: t("friends_filter.mode_visited_all") },
                       ] as const
                     ).map((mode) => {
                       const active = friendsFilterMode === mode.id;

@@ -52,6 +52,7 @@ export interface PlaceWithDetails extends Place {
   sharedGroupNames?: string[];
   pendingUserIds?: string[];
   visitedUserIds?: string[];
+  favoriteUserIds?: string[];
 }
 
 export interface CommunityUserSummary {
@@ -665,7 +666,7 @@ export async function getAllPlaces(
     hasCoords ? sql`distance_meters ASC NULLS LAST` : desc(places.createdAt)
   );
 
-  // Cargar en bloque las interacciones (pendiente/visitado) de todos los sitios visibles
+  // Cargar en bloque las interacciones (pendiente/visitado/favorito) de todos los sitios visibles
   const placeIds = rows.map((r) => r.place.id);
   const allUserPlaceRows =
     placeIds.length > 0
@@ -675,6 +676,7 @@ export async function getAllPlaces(
             userId: userPlaces.userId,
             personalStatus: userPlaces.personalStatus,
             rating: userPlaces.rating,
+            favorite: userPlaces.favorite,
           })
           .from(userPlaces)
           .where(inArray(userPlaces.placeId, placeIds))
@@ -682,6 +684,7 @@ export async function getAllPlaces(
 
   const pendingUsersByPlace = new Map<string, string[]>();
   const visitedUsersByPlace = new Map<string, string[]>();
+  const favoriteUsersByPlace = new Map<string, string[]>();
 
   for (const row of allUserPlaceRows) {
     if (row.personalStatus === "pending") {
@@ -693,6 +696,11 @@ export async function getAllPlaces(
       const list = visitedUsersByPlace.get(row.placeId) || [];
       list.push(row.userId);
       visitedUsersByPlace.set(row.placeId, list);
+    }
+    if (row.favorite) {
+      const list = favoriteUsersByPlace.get(row.placeId) || [];
+      list.push(row.userId);
+      favoriteUsersByPlace.set(row.placeId, list);
     }
   }
 
@@ -749,6 +757,7 @@ export async function getAllPlaces(
       // Cálculo de experiencia: 'visited_by_me' | 'visited_by_others' | 'untried'
       const placeVisitedUserIds = visitedUsersByPlace.get(place.id) || [];
       const placePendingUserIds = pendingUsersByPlace.get(place.id) || [];
+      const placeFavoriteUserIds = favoriteUsersByPlace.get(place.id) || [];
       let experienceStatus: "visited_by_me" | "visited_by_others" | "untried" = "untried";
 
       if (personalStatus === "visited" || (rating !== null && rating > 0)) {
@@ -780,6 +789,7 @@ export async function getAllPlaces(
         sharedGroupNames: groupLinks.map((g) => g.groupName),
         pendingUserIds: placePendingUserIds,
         visitedUserIds: placeVisitedUserIds,
+        favoriteUserIds: placeFavoriteUserIds,
       };
     })
   );

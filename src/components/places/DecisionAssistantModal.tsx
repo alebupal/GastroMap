@@ -38,8 +38,24 @@ interface DecisionAssistantModalProps {
   friendOptions?: MultiSelectOption[];
   selectedFriendIds?: string[];
   onSelectFriends?: (ids: string[]) => void;
-  friendsFilterMode?: "untried_or_pending" | "pending_all" | "pending_any";
-  onChangeFriendsFilterMode?: (mode: "untried_or_pending" | "pending_all" | "pending_any") => void;
+  friendsFilterMode?:
+    | "untried_or_pending"
+    | "pending_all"
+    | "pending_any"
+    | "favorites_any"
+    | "favorites_all"
+    | "discover_for_some"
+    | "visited_all";
+  onChangeFriendsFilterMode?: (
+    mode:
+      | "untried_or_pending"
+      | "pending_all"
+      | "pending_any"
+      | "favorites_any"
+      | "favorites_all"
+      | "discover_for_some"
+      | "visited_all"
+  ) => void;
   includeMeWithFriends?: boolean;
   onToggleIncludeMeWithFriends?: (val: boolean) => void;
   groups?: Array<{ id: string; name: string }>;
@@ -564,6 +580,10 @@ export function DecisionAssistantModal({
                         { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
                         { id: "pending_all", label: t("friends_filter.mode_pending_all") },
                         { id: "pending_any", label: t("friends_filter.mode_pending_any") },
+                        { id: "favorites_any", label: t("friends_filter.mode_favorites_any") },
+                        { id: "favorites_all", label: t("friends_filter.mode_favorites_all") },
+                        { id: "discover_for_some", label: t("friends_filter.mode_discover_for_some") },
+                        { id: "visited_all", label: t("friends_filter.mode_visited_all") },
                       ] as const
                     ).map((mode) => {
                       const active = friendsFilterMode === mode.id;
