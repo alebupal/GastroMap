@@ -192,23 +192,26 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
     commentsTexts: ["El postre ponche segoviano es imprescindible"],
   };
 
+  const normalizeSearch = (text) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
   const matches = (place, query) => {
-    const q = query.toLowerCase().trim();
+    const q = normalizeSearch(query);
     const tokens = q.split(/\s+/).filter(Boolean);
-    const searchableText = [
-      place.name,
-      place.city || "",
-      place.address || "",
-      place.notes || "",
-      place.privateNotes || "",
-      place.createdByName || "",
-      place.createdByUsername || "",
-      ...place.tags,
-      ...place.occasions,
-      ...(place.commentsTexts || []),
-    ]
-      .join(" ")
-      .toLowerCase();
+    const searchableText = normalizeSearch(
+      [
+        place.name,
+        place.city || "",
+        place.address || "",
+        place.notes || "",
+        place.privateNotes || "",
+        place.createdByName || "",
+        place.createdByUsername || "",
+        ...place.tags,
+        ...place.occasions,
+        ...(place.commentsTexts || []),
+      ].join(" ")
+    );
 
     return (
       searchableText.includes(q) ||
@@ -217,6 +220,9 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
   };
 
   assert.ok(matches(dummyPlace, "cándido"), "Debe encontrar por nombre");
+  assert.ok(matches(dummyPlace, "candido"), "Debe encontrar sin tildes (candido -> Cándido)");
+  assert.ok(matches(dummyPlace, "meson"), "Debe encontrar sin tildes (meson -> Mesón)");
+  assert.ok(matches({ ...dummyPlace, name: "La Alegría" }, "alegria"), "Debe encontrar alegría buscando alegria");
   assert.ok(matches(dummyPlace, "segovia"), "Debe encontrar por ciudad");
   assert.ok(matches(dummyPlace, "azoguejo"), "Debe encontrar por dirección");
   assert.ok(matches(dummyPlace, "cochinillo"), "Debe encontrar por nota y tag");

@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { MultiSearchableSelect, type MultiSelectOption } from "@/components/ui/MultiSearchableSelect";
+import { normalizeSearchText } from "@/lib/search";
 
 interface DecisionAssistantModalProps {
   isOpen: boolean;
@@ -90,8 +91,8 @@ export function DecisionAssistantModal({
   }, [isOpen, onClose]);
 
   const visibleTags = useMemo(() => {
-    const q = tagQuery.trim().toLowerCase();
-    const list = q ? tags.filter((tg) => tg.name.toLowerCase().includes(q)) : tags;
+    const q = normalizeSearchText(tagQuery);
+    const list = q ? tags.filter((tg) => normalizeSearchText(tg.name).includes(q)) : tags;
     return q || showAllTags ? list : list.slice(0, 14);
   }, [tags, tagQuery, showAllTags]);
 

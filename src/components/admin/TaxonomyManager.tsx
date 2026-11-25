@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { normalizeSearchText } from "@/lib/search";
 import {
   createOccasionAction,
   renameOccasionAction,
@@ -117,19 +118,21 @@ export function TaxonomyManager({
 
   // Lista filtrada de ocasiones
   const filteredOccasions = useMemo(() => {
-    const q = occasionSearch.toLowerCase().trim();
+    const q = normalizeSearchText(occasionSearch);
     if (!q) return occasionsList;
     return occasionsList.filter(
-      (occ) => occ.name.toLowerCase().includes(q) || occ.id.toLowerCase().includes(q)
+      (occ) =>
+        normalizeSearchText(occ.name).includes(q) || normalizeSearchText(occ.id).includes(q)
     );
   }, [occasionsList, occasionSearch]);
 
   // Lista filtrada de tags
   const filteredTags = useMemo(() => {
-    const q = tagSearch.toLowerCase().trim();
+    const q = normalizeSearchText(tagSearch);
     if (!q) return tagsList;
     return tagsList.filter(
-      (tag) => tag.name.toLowerCase().includes(q) || tag.id.toLowerCase().includes(q)
+      (tag) =>
+        normalizeSearchText(tag.name).includes(q) || normalizeSearchText(tag.id).includes(q)
     );
   }, [tagsList, tagSearch]);
 

@@ -12,6 +12,7 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
 import { parseCityCountry, findCountry } from "@/lib/location";
+import { normalizeSearchText } from "@/lib/search";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface PlacesTableManagerProps {
@@ -86,7 +87,7 @@ export function PlacesTableManager({
   }, [availableCities]);
   // Sitios filtrados en la tabla
   const filteredPlaces = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = normalizeSearchText(searchQuery);
     return placesList.filter((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
@@ -100,20 +101,20 @@ export function PlacesTableManager({
 
       if (!q) return true;
       const tokens = q.split(/\s+/).filter(Boolean);
-      const searchableText = [
-        p.name,
-        p.city || "",
-        p.address || "",
-        p.notes || "",
-        p.privateNotes || "",
-        p.createdByName || "",
-        p.createdByUsername || "",
-        ...p.tags,
-        ...p.occasions,
-        ...(p.commentsTexts || []),
-      ]
-        .join(" ")
-        .toLowerCase();
+      const searchableText = normalizeSearchText(
+        [
+          p.name,
+          p.city || "",
+          p.address || "",
+          p.notes || "",
+          p.privateNotes || "",
+          p.createdByName || "",
+          p.createdByUsername || "",
+          ...p.tags,
+          ...p.occasions,
+          ...(p.commentsTexts || []),
+        ].join(" ")
+      );
 
       return (
         searchableText.includes(q) ||
@@ -259,14 +260,14 @@ export function PlacesTableManager({
 
   const mergeCandidates = useMemo(() => {
     if (!mergeSource) return [];
-    const q = mergeSearch.toLowerCase().trim();
+    const q = normalizeSearchText(mergeSearch);
     return placesList.filter((p) => {
       if (p.id === mergeSource.id) return false;
       if (!q) return true;
       return (
-        p.name.toLowerCase().includes(q) ||
-        (p.city && p.city.toLowerCase().includes(q)) ||
-        (p.address && p.address.toLowerCase().includes(q))
+        normalizeSearchText(p.name).includes(q) ||
+        (p.city && normalizeSearchText(p.city).includes(q)) ||
+        (p.address && normalizeSearchText(p.address).includes(q))
       );
     });
   }, [placesList, mergeSource, mergeSearch]);

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { useT } from "@/lib/i18n/client";
+import { normalizeSearchText } from "@/lib/search";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -127,24 +128,26 @@ export function CommandPalette({
   }, [t, isAdmin, onClose, router, onOpenRandom, onOpenAssistant, onOpenExportImport]);
 
   const filteredPlaces = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearchText(query);
     if (!q) return places.slice(0, 6);
     return places
       .filter(
         (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.city && p.city.toLowerCase().includes(q)) ||
-          (p.address && p.address.toLowerCase().includes(q)) ||
-          p.tags.some((tg) => tg.toLowerCase().includes(q))
+          normalizeSearchText(p.name).includes(q) ||
+          (p.city && normalizeSearchText(p.city).includes(q)) ||
+          (p.address && normalizeSearchText(p.address).includes(q)) ||
+          p.tags.some((tg) => normalizeSearchText(tg).includes(q))
       )
       .slice(0, 8);
   }, [places, query]);
 
   const filteredActions = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearchText(query);
     if (!q) return actions;
     return actions.filter(
-      (a) => a.label.toLowerCase().includes(q) || a.subtitle.toLowerCase().includes(q)
+      (a) =>
+        normalizeSearchText(a.label).includes(q) ||
+        normalizeSearchText(a.subtitle).includes(q)
     );
   }, [actions, query]);
 

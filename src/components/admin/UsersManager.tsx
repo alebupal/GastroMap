@@ -13,6 +13,7 @@ import {
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
@@ -119,16 +120,16 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     loadUsers();
   }, []);
 
-  // Filtrar lista de usuarios reactivamente por nombre, email o username
+  // Filtrar lista de usuarios reactivamente por nombre, email o username (sin distinguir tildes)
   const filteredUsers = useMemo(() => {
-    const q = filterQuery.toLowerCase().trim();
+    const q = normalizeSearchText(filterQuery);
     if (!q) return usersList;
     return usersList.filter(
       (u) =>
-        u.name.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q) ||
-        (u.username && u.username.toLowerCase().includes(q)) ||
-        u.role.toLowerCase().includes(q)
+        normalizeSearchText(u.name).includes(q) ||
+        normalizeSearchText(u.email).includes(q) ||
+        (u.username && normalizeSearchText(u.username).includes(q)) ||
+        normalizeSearchText(u.role).includes(q)
     );
   }, [usersList, filterQuery]);
 

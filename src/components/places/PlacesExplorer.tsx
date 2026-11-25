@@ -10,6 +10,7 @@ import { ExportImportModal } from "./ExportImportModal";
 import { ComparePlacesModal } from "./ComparePlacesModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
+import { normalizeSearchText } from "@/lib/search";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import {
   createSavedFilterAction,
@@ -590,26 +591,26 @@ export function PlacesExplorer({
       };
     });
 
-    // 0. Búsqueda por texto libre universal (nombre, ciudad, dirección, notas, notas privadas, tags, ocasiones, autor y comentarios)
+    // 0. Búsqueda por texto libre universal (insensible a mayúsculas y tildes: nombre, ciudad, dirección, notas, notas privadas, tags, ocasiones, autor y comentarios)
     if (textSearch.trim().length > 0) {
-      const q = textSearch.toLowerCase().trim();
+      const q = normalizeSearchText(textSearch);
       const tokens = q.split(/\s+/).filter(Boolean);
       result = result.filter((p) => {
-        const searchableText = [
-          p.name,
-          p.city || "",
-          p.address || "",
-          p.notes || "",
-          p.privateNotes || "",
-          p.createdByName || "",
-          p.createdByUsername || "",
-          ...p.tags,
-          ...p.occasions,
-          ...(p.commentsTexts || []),
-          ...(p.sharedGroupNames || []),
-        ]
-          .join(" ")
-          .toLowerCase();
+        const searchableText = normalizeSearchText(
+          [
+            p.name,
+            p.city || "",
+            p.address || "",
+            p.notes || "",
+            p.privateNotes || "",
+            p.createdByName || "",
+            p.createdByUsername || "",
+            ...p.tags,
+            ...p.occasions,
+            ...(p.commentsTexts || []),
+            ...(p.sharedGroupNames || []),
+          ].join(" ")
+        );
 
         return (
           searchableText.includes(q) ||
@@ -888,10 +889,11 @@ export function PlacesExplorer({
 
   // Filtrado de categorías por texto de búsqueda
   const filteredOccasions = useMemo(() => {
-    const q = occasionSearchQuery.toLowerCase().trim();
+    const q = normalizeSearchText(occasionSearchQuery);
     if (!q) return sortedOccasions;
     return sortedOccasions.filter(
-      (occ) => occ.name.toLowerCase().includes(q) || occ.id.toLowerCase().includes(q)
+      (occ) =>
+        normalizeSearchText(occ.name).includes(q) || normalizeSearchText(occ.id).includes(q)
     );
   }, [sortedOccasions, occasionSearchQuery]);
 
@@ -904,9 +906,9 @@ export function PlacesExplorer({
 
   // Filtrado de etiquetas por texto de búsqueda
   const filteredTags = useMemo(() => {
-    const q = tagSearchQuery.toLowerCase().trim();
+    const q = normalizeSearchText(tagSearchQuery);
     if (!q) return sortedTags;
-    return sortedTags.filter((t) => t.name.toLowerCase().includes(q));
+    return sortedTags.filter((t) => normalizeSearchText(t.name).includes(q));
   }, [sortedTags, tagSearchQuery]);
 
   // Etiquetas mostradas por defecto (las más usadas, priorizando las que tienen locales)

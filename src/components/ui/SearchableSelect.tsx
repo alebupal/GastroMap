@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { normalizeSearchText } from "@/lib/search";
 
 export interface SearchableSelectOption {
   value: string;
@@ -62,15 +63,15 @@ export function SearchableSelect({
   const displayLabel = selectedOption ? selectedOption.label : placeholder;
   const displayIcon = selectedOption ? selectedOption.icon : undefined;
 
-  // Filtrar las opciones según el query de búsqueda
+  // Filtrar las opciones según el query de búsqueda (sin distinguir tildes)
   const filteredOptions = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearchText(query);
     if (!q) return options;
     return options.filter(
       (opt) =>
-        opt.label.toLowerCase().includes(q) ||
-        opt.value.toLowerCase().includes(q) ||
-        (opt.subtitle && opt.subtitle.toLowerCase().includes(q))
+        normalizeSearchText(opt.label).includes(q) ||
+        normalizeSearchText(opt.value).includes(q) ||
+        (opt.subtitle && normalizeSearchText(opt.subtitle).includes(q))
     );
   }, [options, query]);
 
@@ -218,7 +219,7 @@ export function SearchableSelect({
             {/* Lista de opciones scrolleable */}
             <div className="overflow-y-auto space-y-0.5 pr-0.5 flex-1 max-h-56">
               {/* Opción "Todos" si existe */}
-              {allOption && (!query.trim() || allOption.label.toLowerCase().includes(query.toLowerCase())) && (
+              {allOption && (!query.trim() || normalizeSearchText(allOption.label).includes(normalizeSearchText(query))) && (
                 <button
                   type="button"
                   onClick={() => handleSelect(allOption.value)}
@@ -237,7 +238,7 @@ export function SearchableSelect({
                 </button>
               )}
 
-              {filteredOptions.length === 0 && (!allOption || (query.trim() && !allOption.label.toLowerCase().includes(query.toLowerCase()))) ? (
+              {filteredOptions.length === 0 && (!allOption || (query.trim() && !normalizeSearchText(allOption.label).includes(normalizeSearchText(query)))) ? (
                 <div className="p-3 text-center text-xs text-slate-400">
                   {noResultsText}
                 </div>

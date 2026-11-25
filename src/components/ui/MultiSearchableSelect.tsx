@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { normalizeSearchText } from "@/lib/search";
 
 export interface MultiSelectOption {
   value: string;
@@ -101,12 +102,12 @@ export function MultiSearchableSelect({
   }, [isOpen]);
 
   const filteredOptions = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearchText(query);
     if (!q) return options;
     return options.filter(
       (opt) =>
-        opt.label.toLowerCase().includes(q) ||
-        (opt.subtitle && opt.subtitle.toLowerCase().includes(q))
+        normalizeSearchText(opt.label).includes(q) ||
+        (opt.subtitle && normalizeSearchText(opt.subtitle).includes(q))
     );
   }, [options, query]);
 

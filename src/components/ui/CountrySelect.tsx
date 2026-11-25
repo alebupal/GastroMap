@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { WORLD_COUNTRIES, type Country } from "@/data/worldCountries";
 import { useT } from "@/lib/i18n/client";
+import { normalizeSearchText } from "@/lib/search";
 
 interface CountrySelectProps {
   value: string;
@@ -33,14 +34,14 @@ export function CountrySelect({ value, onChange, className = "" }: CountrySelect
     );
   }, [value]);
 
-  // Filtrar países según búsqueda
+  // Filtrar países según búsqueda (insensible a tildes)
   const filteredCountries = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearchText(query);
     if (!q) return WORLD_COUNTRIES;
     return WORLD_COUNTRIES.filter(
       (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.nameEn.toLowerCase().includes(q) ||
+        normalizeSearchText(c.name).includes(q) ||
+        normalizeSearchText(c.nameEn).includes(q) ||
         c.code.toLowerCase() === q
     );
   }, [query]);
