@@ -138,21 +138,9 @@ export function RandomPickerModal({
           </button>
         </div>
 
-        {/* Universo de decisión */}
-        <div className="relative space-y-2">
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {t("ui.decision_universe")}
-            </span>
-            <button
-              type="button"
-              onClick={onClose}
-              className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer text-[11px]"
-            >
-              {t("ui.modify_filters")}
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
+        {/* Resumen compacto de filtros */}
+        <div className="relative flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200">
               <span className="material-symbols-outlined text-xs text-orange-600">location_on</span>
               <span>{t("random.available_places", { count: eligiblePlaces.length })}</span>
@@ -164,20 +152,21 @@ export function RandomPickerModal({
               </span>
             )}
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="font-bold text-orange-600 dark:text-orange-400 hover:underline cursor-pointer text-[11px] shrink-0"
+          >
+            {t("ui.modify_filters")}
+          </button>
         </div>
 
-        {/* Tarjeta del destino recomendado */}
+        {/* Tarjeta del destino seleccionado */}
         {selectedPlace ? (
-          <div className="relative pt-3">
-            {/* Insignia flotante superior derecha */}
-            <div className="absolute top-0 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
-              <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
-              <span>{t("ui.recommended_dest")}</span>
-            </div>
-
+          <div className="relative">
             <div
               key={isSpinning ? "spinning" : `winner-${selectedPlace.id}`}
-              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 pt-6 sm:p-5 sm:pt-5 space-y-3.5 transition-all duration-150 ${isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
+              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 sm:p-5 space-y-3.5 transition-all duration-150 ${isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
                 }`}
             >
               <div className="flex items-start gap-3">
