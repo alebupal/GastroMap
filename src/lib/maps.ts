@@ -335,8 +335,7 @@ export async function fetchGooglePlacesDetails(params: {
       latitude: typeof place.location?.latitude === "number" ? place.location.latitude : undefined,
       longitude: typeof place.location?.longitude === "number" ? place.location.longitude : undefined,
       priceRange: mapGooglePriceLevel(place.priceLevel) || mapGooglePriceRange(place.priceRange),
-      description:
-        place.editorialSummary?.text || place.primaryTypeDisplayName?.text || undefined,
+      description: place.editorialSummary?.text || undefined,
       primaryType: place.primaryType || undefined,
       types: Array.isArray(place.types) ? place.types : undefined,
       website: place.websiteUri || undefined,

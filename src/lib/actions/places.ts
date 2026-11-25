@@ -162,8 +162,6 @@ export async function parseUrlAction(rawUrl: string) {
           .filter(Boolean)
           .join(", ");
         if (cleanCuisine) description = `Cocina: ${cleanCuisine}`;
-      } else if (resolvedDetails.ogCategoryHint) {
-        description = resolvedDetails.ogCategoryHint;
       }
     }
     if (!website && locationDetails.extratags?.website) {
@@ -172,8 +170,6 @@ export async function parseUrlAction(rawUrl: string) {
     if (!phone && locationDetails.extratags?.phone) {
       phone = locationDetails.extratags.phone;
     }
-  } else if (!description && resolvedDetails.ogCategoryHint) {
-    description = resolvedDetails.ogCategoryHint;
   }
 
   const suggestedOccasions = suggestOccasionsFromMetadata({
