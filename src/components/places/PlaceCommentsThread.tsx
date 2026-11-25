@@ -545,68 +545,108 @@ export function PlaceCommentsThread({
         {/* Línea degradada sutil */}
         <div className="h-[2px] w-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 opacity-80 shrink-0" />
 
-        {/* Barra de filtros y orden */}
-        <div className="px-4 sm:px-6 py-2.5 bg-[#f8f9ff] dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 flex-wrap text-[11px] sm:text-xs">
+        {/* Barra de filtros estilo segmented control (1 sola fila en móvil) */}
+        <div className="px-4 sm:px-6 py-2.5 bg-[#f8f9ff] dark:bg-slate-900/80 border-b border-slate-200/60 dark:border-slate-800 flex items-center justify-between gap-2.5 shrink-0">
+          <div className="grid grid-cols-3 sm:inline-flex flex-1 sm:flex-initial items-center p-1 rounded-2xl bg-[#eceeff] dark:bg-slate-800/90 gap-1">
             <button
               type="button"
               onClick={() => setFilterTab("all")}
-              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
                 filterTab === "all"
                   ? "bg-orange-600 text-white shadow-xs"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">forum</span>
-              <span>{t("places.all")} ({totalNotesCount})</span>
+              <span className="material-symbols-outlined text-[14px] leading-none shrink-0 hidden sm:inline">forum</span>
+              <span className="truncate">{t("places.all")}</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                  filterTab === "all"
+                    ? "bg-white/20 text-white"
+                    : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
+                }`}
+              >
+                {totalNotesCount}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => setFilterTab("private")}
-              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
                 filterTab === "private"
                   ? "bg-orange-600 text-white shadow-xs"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">lock</span>
-              <span>{t("ui.my_private_notes")} ({hasPrivateNote ? 1 : 0})</span>
+              <span className="material-symbols-outlined text-[14px] leading-none shrink-0">lock</span>
+              <span className="truncate sm:hidden">{t("ui.private_short")}</span>
+              <span className="truncate hidden sm:inline">{t("ui.my_private_notes")}</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                  filterTab === "private"
+                    ? "bg-white/20 text-white"
+                    : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
+                }`}
+              >
+                {hasPrivateNote ? 1 : 0}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => setFilterTab("community")}
-              className={`inline-flex items-center gap-1 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-bold transition cursor-pointer ${
+              className={`inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer min-w-0 ${
                 filterTab === "community"
                   ? "bg-orange-600 text-white shadow-xs"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200/70 dark:border-slate-700"
+                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">public</span>
-              <span>{t("ui.community")} ({comments.length})</span>
+              <span className="material-symbols-outlined text-[14px] leading-none shrink-0 hidden sm:inline">public</span>
+              <span className="truncate">{t("ui.community")}</span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold leading-tight shrink-0 ${
+                  filterTab === "community"
+                    ? "bg-white/20 text-white"
+                    : "bg-white/80 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400"
+                }`}
+              >
+                {comments.length}
+              </span>
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-            <span className="hidden sm:inline font-semibold">{t("ui.sort_label")}</span>
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as "newest" | "oldest")}
-              className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] sm:text-xs cursor-pointer focus:outline-none"
-            >
-              <option value="newest">{t("ui.sort_newest")}</option>
-              <option value="oldest">{t("ui.sort_oldest")}</option>
-            </select>
-          </div>
+          <button
+            type="button"
+            onClick={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
+            title={t("ui.sort_label")}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-300 dark:hover:border-orange-700 font-bold text-xs cursor-pointer transition shrink-0"
+          >
+            <span className="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400 leading-none">
+              swap_vert
+            </span>
+            <span>{sortOrder === "newest" ? t("ui.sort_newest") : t("ui.sort_oldest")}</span>
+          </button>
         </div>
 
         {/* Cuerpo scrollable: COMENTARIOS Y NOTAS ARRIBA */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-[#faf8ff] dark:bg-[#0b1120]/40">
           {/* Cabecera del feed */}
-          <div className="flex items-center justify-between text-[11px] px-0.5">
-            <span className="font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Feed de experiencias registradas ({totalNotesCount})
+          <div className="flex items-center justify-between gap-2 text-[11px] px-0.5">
+            <span className="font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+              Feed de experiencias ({totalNotesCount})
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400">
+            <button
+              type="button"
+              onClick={() => setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"))}
+              className="sm:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-[11px] cursor-pointer shrink-0 active:scale-95 transition"
+            >
+              <span className="material-symbols-outlined text-sm text-orange-600 dark:text-orange-400 leading-none">
+                swap_vert
+              </span>
+              <span>{sortOrder === "newest" ? t("ui.sort_newest") : t("ui.sort_oldest")}</span>
+            </button>
+            <span className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Sincronizado en tiempo real
             </span>

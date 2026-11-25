@@ -932,6 +932,7 @@
     "start_food_route": "Start food route",
     "comments_and_notes": "Comments & Notes: {name}",
     "my_private_notes": "My private notes",
+    "private_short": "Private",
     "community": "Community",
     "sort_label": "Sort:",
     "sort_newest": "Newest",

@@ -892,6 +892,7 @@
 "ui.private_note_badge","Nota privada solo para ti","Private note only for you"
 "ui.private_note_mode","Nota privada","Private note"
 "ui.private_notes_privacy","Tus notas privadas solo son accesibles desde tu perfil.","Your private notes are only accessible from your profile."
+"ui.private_short","Privadas","Private"
 "ui.public_mode","Público","Public"
 "ui.public_note_badge","Nota pública","Public note"
 "ui.publish_comment","Publicar comentario","Post comment"
