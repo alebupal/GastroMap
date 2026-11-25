@@ -10,6 +10,7 @@ import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
 import { formatCityCountry } from "@/lib/location";
+import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 
 const PRICE_OPTIONS = [
   { id: "???", label: "???" },
@@ -36,6 +37,7 @@ export function EditPlaceModal({
 }: EditPlaceModalProps) {
   const { t } = useT();
   const { toast } = useToast();
+  const sheet = useSwipeToClose(onClose);
   const [name, setName] = useState(place.name);
   const [googleMapsUrl, setGoogleMapsUrl] = useState(place.googleMapsUrl || "");
   const [city, setCity] = useState(place.city || "");
@@ -180,12 +182,19 @@ export function EditPlaceModal({
 
   const modalContent = (
     <div
+      style={sheet.backdropStyle}
       className="fixed inset-0 !mt-0 z-[1200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-h-[95dvh] sm:max-h-[92dvh] sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden gm-modal-in">
+      <div
+        ref={sheet.sheetRef}
+        style={sheet.sheetStyle}
+        {...sheet.sheetHandlers}
+        className="w-full max-h-[95dvh] sm:max-h-[92dvh] sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden gm-modal-in"
+      >
+        <SheetHandle {...sheet.handleHandlers} />
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3 min-w-0">

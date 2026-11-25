@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import { useT } from "@/lib/i18n/client";
+import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
@@ -55,6 +56,7 @@ export function ComparePlacesModal({
   onClearAll,
 }: ComparePlacesModalProps) {
   const { t } = useT();
+  const sheet = useSwipeToClose(onClose);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -111,12 +113,19 @@ export function ComparePlacesModal({
 
   return (
     <div
+      style={sheet.backdropStyle}
       className="fixed inset-0 !mt-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
+      <div
+        ref={sheet.sheetRef}
+        style={sheet.sheetStyle}
+        {...sheet.sheetHandlers}
+        className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in"
+      >
+        <SheetHandle {...sheet.handleHandlers} />
         {/* Cabecera estilo Stitch */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2.5 shrink-0">
           <div className="flex items-center gap-3 min-w-0">

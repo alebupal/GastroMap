@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getUserStatsAction, type UserStatsData, type CountItem } from "@/lib/actions/stats";
 import { useT } from "@/lib/i18n/client";
+import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
@@ -101,6 +102,7 @@ function MiniBarList({
 
 export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   const { t } = useT();
+  const sheet = useSwipeToClose(onClose);
   const [activeTab, setActiveTab] = useState<"overview" | "wrapped">("overview");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [stats, setStats] = useState<UserStatsData | null>(null);
@@ -261,12 +263,19 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
   return (
     <div
+      style={sheet.backdropStyle}
       className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
+      <div
+        ref={sheet.sheetRef}
+        style={sheet.sheetStyle}
+        {...sheet.sheetHandlers}
+        className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in"
+      >
+        <SheetHandle {...sheet.handleHandlers} />
         {/* Cabecera estilo Stitch */}
         <div className="px-5 sm:px-6 pt-5 pb-3 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3">
