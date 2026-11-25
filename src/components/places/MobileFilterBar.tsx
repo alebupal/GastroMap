@@ -57,7 +57,7 @@ export function MobileFilterBar({
 
   return (
     <section className="lg:hidden space-y-2.5">
-      {/* Fila 1: Buscador píldora con icono filtros + Botón naranja Lista/Mapa */}
+      {/* Fila 1: Buscador píldora + Botón naranja Lista/Mapa */}
       <div className="flex items-center gap-2">
         <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-full px-3.5 py-2 shadow-xs focus-within:ring-2 focus-within:ring-orange-500/40 transition">
           <span className="material-symbols-outlined text-orange-600 text-[18px] mr-2 shrink-0 leading-none">
@@ -68,42 +68,24 @@ export function MobileFilterBar({
             value={textSearch}
             onChange={(e) => onTextSearchChange(e.target.value)}
             placeholder={t("mobile_nav.search_placeholder")}
-            className="w-full min-w-0 bg-transparent text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+            className="w-full min-w-0 bg-transparent text-base sm:text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
           />
           {textSearch && (
             <button
               type="button"
               onClick={() => onTextSearchChange("")}
-              className="p-0.5 text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
+              className="p-1 text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
               aria-label={t("places.clear_filter")}
             >
               <span className="material-symbols-outlined text-sm leading-none">close</span>
             </button>
           )}
-          <button
-            type="button"
-            onClick={onToggleExtraFilters}
-            aria-expanded={showExtraFilters}
-            aria-label={t("places.more_filters")}
-            className={`ml-1.5 relative p-1 rounded-full transition cursor-pointer shrink-0 ${
-              showExtraFilters || activeFiltersCount > 0
-                ? "text-orange-600 bg-orange-50 dark:bg-orange-950/50"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-800"
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px] leading-none block">tune</span>
-            {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center leading-none">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
         </div>
 
         <button
           type="button"
           onClick={onToggleMobileView}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shadow-orange-600/25 active:scale-95 transition shrink-0 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-extrabold shadow-sm shadow-orange-600/25 active:scale-95 transition shrink-0 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[17px] leading-none">
             {activeMobileView === "map" ? "format_list_bulleted" : "map"}

@@ -284,9 +284,9 @@ export function PlacesTableManager({
   return (
     <div className="w-full space-y-4 text-left">
       {/* Barra de control y búsqueda */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex items-center gap-2.5 flex-1 flex-wrap sm:flex-nowrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 flex-1">
+          <div className="relative w-full sm:flex-1 sm:max-w-sm">
             <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
               search
             </span>
@@ -298,10 +298,11 @@ export function PlacesTableManager({
                 setCurrentPage(1);
               }}
               placeholder={t("admin_places.search_placeholder").replace(/^🔍\s*/, "")}
-              className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="w-full pl-9 pr-3 py-2 rounded-full text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
           {allCountries.length > 0 && (
             <SearchableSelect
               value={countryFilter}
@@ -321,8 +322,8 @@ export function PlacesTableManager({
                 ),
               }}
               searchPlaceholder={t("location.country_placeholder")}
-              className="shrink-0"
-              buttonClassName="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
+              className="w-full sm:w-auto sm:shrink-0"
+              buttonClassName="w-full sm:w-auto bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
             />
           )}
 
@@ -344,10 +345,11 @@ export function PlacesTableManager({
                 ),
               }}
               searchPlaceholder={t("location.city_placeholder")}
-              className="shrink-0"
-              buttonClassName="bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
+              className="w-full sm:w-auto sm:shrink-0"
+              buttonClassName="w-full sm:w-auto bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
             />
           )}
+          </div>
         </div>
 
         {/* Acciones por lote */}
@@ -478,17 +480,17 @@ export function PlacesTableManager({
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-slate-400">
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="text-[11px] text-slate-400 truncate min-w-0">
                     @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
                   </span>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {place.googleMapsUrl && (
                       <a
                         href={place.googleMapsUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-500 hover:text-blue-500 text-xs font-semibold flex items-center gap-0.5"
+                        className="px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-blue-500 text-xs font-semibold flex items-center gap-0.5"
                       >
                         Maps ↗
                       </a>
@@ -497,7 +499,7 @@ export function PlacesTableManager({
                       type="button"
                       onClick={() => setEditingPlace(place)}
                       disabled={loading}
-                      className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-orange-600 text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-orange-600 text-xs font-semibold cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm leading-none">edit</span>
                       <span>{t("common.edit")}</span>
@@ -510,7 +512,7 @@ export function PlacesTableManager({
                         setMergeSearch("");
                       }}
                       disabled={loading || placesList.length < 2}
-                      className="inline-flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-amber-600 text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-amber-600 text-xs font-semibold cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-sm leading-none">merge</span>
                       <span>{t("admin_places.merge_btn")}</span>
@@ -520,7 +522,7 @@ export function PlacesTableManager({
                       onClick={() => handleDeleteSingle(place)}
                       disabled={loading}
                       aria-label={t("admin_places.delete_title")}
-                      className="inline-flex items-center text-slate-500 hover:text-red-500 text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center justify-center p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 text-xs font-semibold cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-base leading-none">delete</span>
                     </button>

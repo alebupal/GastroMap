@@ -214,7 +214,7 @@ export function AdminDashboard({
             className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto">
+          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
             {sidebarContent}
           </aside>
         </div>
@@ -223,15 +223,15 @@ export function AdminDashboard({
       {/* Columna principal */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         {/* Cabecera superior estilo Stitch */}
-        <header className="sticky top-0 z-30 bg-[#faf8ff]/90 dark:bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <header className="sticky top-0 z-30 bg-[#faf8ff]/90 dark:bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/80 px-3 sm:px-6 lg:px-8 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] pb-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+              className="lg:hidden p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer shrink-0"
               aria-label="Abrir navegación de administración"
             >
-              <span className="material-symbols-outlined text-lg leading-none">menu</span>
+              <span className="material-symbols-outlined text-lg leading-none block">menu</span>
             </button>
 
             <div className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
@@ -334,7 +334,7 @@ export function AdminDashboard({
         {/* Contenido activo */}
         <main
           key={activeTab}
-          className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 gm-tab-in"
+          className="flex-1 w-full max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] space-y-6 gm-tab-in"
         >
           {activeTab === "stats" && <AdminStatsPanel />}
 

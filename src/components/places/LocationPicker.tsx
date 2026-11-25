@@ -284,7 +284,7 @@ export function LocationPicker({
   }
 
   return (
-    <div className="space-y-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+    <div className="space-y-3 p-2.5 sm:p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
       {/* 1. Buscador inteligente de direcciones con OpenStreetMap / Nominatim */}
       <div className="relative">
         <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
@@ -297,7 +297,7 @@ export function LocationPicker({
             onChange={(e) => handleSearchInput(e.target.value)}
             onFocus={() => searchResults.length > 0 && setShowResults(true)}
             placeholder={t("location.search_placeholder")}
-            className="w-full px-3 py-2 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-full px-3 py-2 pl-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
           <span className="material-symbols-outlined text-base text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
             location_on
@@ -366,7 +366,7 @@ export function LocationPicker({
                   setSelectedMunicipality(prov.municipalities[0]);
                 }
               }}
-              className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+              className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
             >
               {SPANISH_PROVINCES.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -383,7 +383,7 @@ export function LocationPicker({
             <select
               value={selectedMunicipality}
               onChange={(e) => setSelectedMunicipality(e.target.value)}
-              className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+              className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
             >
               {currentProvince.municipalities.map((m) => (
                 <option key={m} value={m}>
@@ -404,7 +404,7 @@ export function LocationPicker({
             value={manualCity}
             onChange={(e) => setManualCity(e.target.value)}
             placeholder={t("location.city_placeholder")}
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
+            className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium"
           />
         </div>
       )}
@@ -435,7 +435,7 @@ export function LocationPicker({
               }
             }}
             placeholder={t("location.address_placeholder")}
-            className="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            className="w-full sm:flex-1 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-500"
           />
           <button
             type="button"
@@ -465,7 +465,7 @@ export function LocationPicker({
           <button
             type="button"
             onClick={() => setGeocodeMessage(null)}
-            className="text-xs opacity-60 hover:opacity-100 cursor-pointer ml-2"
+            className="text-xs opacity-60 hover:opacity-100 cursor-pointer p-1.5 -mr-1 ml-2 shrink-0 leading-none"
           >
             ✕
           </button>
@@ -475,7 +475,7 @@ export function LocationPicker({
       {/* Coordenadas obligatorias: visores y campos manuales */}
       {!lat || !lng || showManualCoords ? (
         <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
               <span className="material-symbols-outlined text-sm leading-none">location_on</span>
               <span>{t("location.manual_coords_title")}</span>
@@ -484,13 +484,13 @@ export function LocationPicker({
               <button
                 type="button"
                 onClick={() => setShowManualCoords(false)}
-                className="text-[11px] text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
+                className="text-[11px] text-slate-500 dark:text-slate-400 hover:underline cursor-pointer shrink-0"
               >
                 ✕ {t("location.hide_coords")}
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
               <label className="block text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-0.5">
                 {t("location.lat_label")} *
@@ -502,7 +502,7 @@ export function LocationPicker({
                 onChange={(e) => setLat(e.target.value)}
                 placeholder="ej. 37.1773"
                 required
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
             <div>
@@ -516,7 +516,7 @@ export function LocationPicker({
                 onChange={(e) => setLng(e.target.value)}
                 placeholder="ej. -3.5986"
                 required
-                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-base sm:text-xs text-slate-900 dark:text-slate-100 font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
               />
             </div>
           </div>
@@ -527,10 +527,10 @@ export function LocationPicker({
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-between text-xs px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
-          <p className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 font-mono">
-            <span className="material-symbols-outlined text-sm text-orange-600 leading-none">public</span>
-            <span>
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800">
+          <p className="text-[11px] text-slate-700 dark:text-slate-300 flex items-center gap-1.5 font-mono min-w-0">
+            <span className="material-symbols-outlined text-sm text-orange-600 leading-none shrink-0">public</span>
+            <span className="truncate">
               {t("location.coords_label", {
                 lat: parseFloat(lat).toFixed(4),
                 lng: parseFloat(lng).toFixed(4),
@@ -540,7 +540,7 @@ export function LocationPicker({
           <button
             type="button"
             onClick={() => setShowManualCoords(true)}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer shrink-0"
           >
             <span className="material-symbols-outlined text-xs leading-none">edit</span>
             <span>{t("location.edit_coords")}</span>

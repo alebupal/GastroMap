@@ -751,21 +751,21 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
       {/* Modal interactivo para edición completa de usuario por el Admin */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
           <form
             onSubmit={handleSaveEdit}
-            className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left space-y-4"
+            className="w-full max-w-md max-h-[94dvh] sm:max-h-[90dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col text-left overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-3">
+            <div className="px-5 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
                   <span className="material-symbols-outlined text-xl leading-none">manage_accounts</span>
                 </div>
-                <div>
-                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
                     {t("admin_users.edit_title")}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                     {t("admin_users.edit_subtitle")}
                   </p>
                 </div>
@@ -773,13 +773,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold p-1"
+                className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center shrink-0 cursor-pointer"
+                aria-label={t("common.close")}
               >
-                ✕
+                <span className="material-symbols-outlined text-lg leading-none">close</span>
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="p-5 sm:p-6 space-y-3 overflow-y-auto flex-1 min-h-0">
               <div>
                 <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
                   {t("admin_users.full_name")}
@@ -790,7 +791,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder={t("admin_users.full_name_placeholder")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
               </div>
 
@@ -799,14 +800,14 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   {t("admin_users.username")}
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2 text-xs text-slate-400 font-bold">@</span>
+                  <span className="absolute left-3 top-2.5 sm:top-2 text-xs text-slate-400 font-bold">@</span>
                   <input
                     type="text"
                     required
                     value={editUsername}
                     onChange={(e) => setEditUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))}
                     placeholder={t("admin_users.username_placeholder")}
-                    className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="w-full pl-7 pr-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -821,7 +822,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value.toLowerCase())}
                   placeholder={t("admin_users.email_placeholder")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
               </div>
 
@@ -834,7 +835,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value as "user" | "admin")}
                     disabled={editingUser.id === currentUserId}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="user">{t("admin_users.role_user_option")}</option>
                     <option value="admin">{t("admin_users.role_admin_option")}</option>
@@ -849,7 +850,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     value={editStatus}
                     onChange={(e) => setEditStatus(e.target.value as "active" | "disabled")}
                     disabled={editingUser.id === currentUserId}
-                    className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="active">{t("admin_users.status_active_option")}</option>
                     <option value="disabled">{t("admin_users.status_disabled_option")}</option>
@@ -877,7 +878,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
                   placeholder={t("admin_users.new_password_leave_blank")}
-                  className="w-full px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
                 />
                 <span className="text-[10px] text-slate-400">
                   {t("admin_users.new_password_hint")}
@@ -885,18 +886,18 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="px-5 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 flex gap-2 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
               <button
                 type="button"
                 onClick={() => setEditingUser(null)}
-                className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
+                className="flex-1 py-2.5 sm:py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer"
               >
                 {t("common.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={savingEdit}
-                className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50 shadow-xs"
+                className="flex-1 py-2.5 sm:py-2 px-3 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50 shadow-xs"
               >
                 {savingEdit ? t("common.saving") : t("admin_users.save_changes_btn")}
               </button>

@@ -562,13 +562,13 @@ export function TaxonomyManager({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   {/* Botón eliminar vacías */}
                   <button
                     type="button"
                     onClick={() => handleOpenDeleteEmpty("occasions")}
                     disabled={emptyOccasions.length === 0}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    className={`flex-1 sm:flex-none justify-center px-3 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                       emptyOccasions.length > 0
                         ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 cursor-pointer"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
@@ -583,7 +583,7 @@ export function TaxonomyManager({
                     <button
                       type="button"
                       onClick={() => handleOpenBulkDelete("occasions")}
-                      className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none justify-center px-3 py-2 sm:py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span className="material-symbols-outlined text-sm leading-none">delete</span>
                       <span>{t("admin_taxonomy.delete_selected", { count: String(selectedOccasionIds.size) })}</span>
@@ -789,13 +789,13 @@ export function TaxonomyManager({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   {/* Botón eliminar vacías */}
                   <button
                     type="button"
                     onClick={() => handleOpenDeleteEmpty("tags")}
                     disabled={emptyTags.length === 0}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    className={`flex-1 sm:flex-none justify-center px-3 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
                       emptyTags.length > 0
                         ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200 cursor-pointer"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-50 cursor-not-allowed"
@@ -810,7 +810,7 @@ export function TaxonomyManager({
                     <button
                       type="button"
                       onClick={() => handleOpenBulkDelete("tags")}
-                      className="px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none justify-center px-3 py-2 sm:py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span className="material-symbols-outlined text-sm leading-none">delete</span>
                       <span>{t("admin_taxonomy.delete_selected", { count: String(selectedTagIds.size) })}</span>
@@ -1086,7 +1086,7 @@ export function TaxonomyManager({
       {/* ==================== MODAL 1: ELIMINACIÓN INDIVIDUAL CON REASIGNACIÓN ==================== */}
       {itemToDelete && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t(
                 itemToDelete.type === "occasion"
@@ -1200,7 +1200,7 @@ export function TaxonomyManager({
       {/* ==================== MODAL 2: COMBINAR / FUSIONAR ==================== */}
       {itemToMerge && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t("admin_taxonomy.merge_modal_title", { name: itemToMerge.name })}
             </h4>
@@ -1260,7 +1260,7 @@ export function TaxonomyManager({
       {/* ==================== MODAL 3: RENOMBRAR ==================== */}
       {editingItem && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t(
                 editingItem.type === "occasion"

@@ -67,7 +67,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="fixed z-[2000] bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm flex flex-col gap-2 pointer-events-none"
+        className="fixed z-[2000] top-[calc(0.75rem+env(safe-area-inset-top,0px))] lg:top-auto lg:bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm flex flex-col gap-2 pointer-events-none"
         role="status"
         aria-live="polite"
       >
@@ -99,7 +99,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => dismiss(t.id)}
               aria-label="Cerrar"
-              className="opacity-70 hover:opacity-100 cursor-pointer"
+              className="p-1.5 -mr-1 opacity-75 hover:opacity-100 cursor-pointer shrink-0 leading-none"
             >
               ✕
             </button>

@@ -114,12 +114,12 @@ export function DecisionAssistantModal({
 
   return (
     <div
-      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 !mt-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo DESIGN.md */}
         <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -380,21 +380,21 @@ export function DecisionAssistantModal({
               <button
                 type="button"
                 onClick={onToggleNearMe}
-                className={`flex-1 py-2.5 px-4 rounded-full text-xs font-bold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                className={`flex-1 min-w-0 py-2.5 px-3.5 sm:px-4 rounded-full text-xs font-bold border flex items-center justify-center gap-1.5 transition cursor-pointer ${
                   nearMeActive
                     ? "bg-orange-600 border-orange-600 text-white shadow-xs"
                     : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-orange-300"
                 }`}
               >
-                <span className="material-symbols-outlined text-base leading-none">near_me</span>
-                <span>{nearMeActive ? t("assistant.step3_active") : t("assistant.step3_inactive")}</span>
+                <span className="material-symbols-outlined text-base leading-none shrink-0">near_me</span>
+                <span className="truncate">{nearMeActive ? t("assistant.step3_active") : t("assistant.step3_inactive")}</span>
               </button>
 
               {nearMeActive && (
                 <select
                   value={radiusKm}
                   onChange={(e) => onChangeRadius(Number(e.target.value))}
-                  className="py-2.5 px-3.5 rounded-full text-xs font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 cursor-pointer"
+                  className="py-2.5 px-3 rounded-full text-xs font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 cursor-pointer shrink-0"
                 >
                   <option value={1}>1 km</option>
                   <option value={5}>5 km</option>
@@ -472,7 +472,7 @@ export function DecisionAssistantModal({
                 <span className="material-symbols-outlined text-sm text-amber-500 leading-none">star</span>
                 <span>{t("places.min_rating_label")}</span>
               </label>
-              <div className="grid grid-cols-4 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {[
                   { val: null as number | null, label: t("places.min_rating_any") },
                   { val: 7, label: "★ 7+" },
@@ -485,7 +485,7 @@ export function DecisionAssistantModal({
                       key={String(opt.val)}
                       type="button"
                       onClick={() => onSelectMinRating(opt.val)}
-                      className={`py-2 px-2 rounded-full text-xs font-bold transition active:scale-95 cursor-pointer border ${
+                      className={`py-2 px-2 rounded-full text-xs font-bold transition active:scale-95 cursor-pointer border truncate ${
                         active
                           ? "bg-amber-500 border-amber-500 text-white shadow-xs"
                           : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
@@ -531,7 +531,7 @@ export function DecisionAssistantModal({
         </div>
 
         {/* Pie del modal */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <button
             type="button"
             onClick={onReset}

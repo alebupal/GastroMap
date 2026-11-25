@@ -184,12 +184,12 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden">
         {/* Cabecera estilo DESIGN.md */}
         <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -243,9 +243,9 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
           )}
 
           {/* Formulario nuevo grupo */}
-          <form onSubmit={handleCreateGroup} className="flex gap-2">
-            <div className="relative flex-1">
-              <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-2.5 pointer-events-none">
+          <form onSubmit={handleCreateGroup} className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1 min-w-0">
+              <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
                 group_add
               </span>
               <input
@@ -253,13 +253,13 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder={`${t("groups.name")}...`}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
               />
             </div>
             <button
               type="submit"
               disabled={creating || !newGroupName.trim()}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
             >
               <span className="material-symbols-outlined text-sm leading-none">add</span>
               <span>{creating ? t("common.loading") : t("groups.create")}</span>
@@ -310,25 +310,25 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                         </div>
 
                         {renamingGroupId === g.id ? (
-                          <div className="flex items-center gap-1.5 flex-1">
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
                             <input
                               type="text"
                               value={renameValue}
                               onChange={(e) => setRenameValue(e.target.value)}
                               autoFocus
-                              className="px-3 py-1.5 text-xs rounded-full bg-white dark:bg-slate-900 border border-orange-500 text-slate-900 dark:text-slate-100 flex-1 focus:outline-none"
+                              className="min-w-0 px-3 py-1.5 text-base sm:text-xs rounded-full bg-white dark:bg-slate-900 border border-orange-500 text-slate-900 dark:text-slate-100 flex-1 focus:outline-none"
                             />
                             <button
                               type="button"
                               onClick={() => handleRename(g.id)}
-                              className="px-3 py-1.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-[11px] cursor-pointer"
+                              className="px-3 py-1.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs cursor-pointer shrink-0"
                             >
                               ✓
                             </button>
                             <button
                               type="button"
                               onClick={() => setRenamingGroupId(null)}
-                              className="w-7 h-7 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-xs text-slate-500 flex items-center justify-center cursor-pointer"
+                              className="w-8 h-8 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-xs text-slate-500 flex items-center justify-center cursor-pointer shrink-0"
                             >
                               ✕
                             </button>
@@ -347,6 +347,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                         )}
                       </div>
 
+                      {renamingGroupId !== g.id && (
                       <div className="flex items-center gap-1 shrink-0">
                         {g.isOwner ? (
                           <>
@@ -389,6 +390,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                           </button>
                         )}
                       </div>
+                      )}
                     </div>
 
                     {/* Miembros del grupo */}
@@ -431,7 +433,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                     {/* Sección Enlaces de Invitación (Solo propietario) */}
                     {g.isOwner && (
                       <div className="pt-2.5 border-t border-slate-200/70 dark:border-slate-700/60">
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <button
                             type="button"
                             onClick={() => toggleInvitesSection(g.id)}
@@ -509,7 +511,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                       <button
                                         type="button"
                                         onClick={() => handleRevokeInvite(g.id, inv.id)}
-                                        className="w-6 h-6 rounded-full hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer"
+                                        className="w-8 h-8 rounded-full hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer"
                                         title={t("groups.revoke_link")}
                                       >
                                         <span className="material-symbols-outlined text-sm leading-none">
@@ -533,7 +535,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
         </div>
 
         {/* Pie del modal */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end shrink-0">
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end shrink-0">
           <button
             type="button"
             onClick={onClose}

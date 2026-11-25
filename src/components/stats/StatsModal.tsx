@@ -261,12 +261,12 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo Stitch */}
         <div className="px-5 sm:px-6 pt-5 pb-3 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3">
@@ -314,32 +314,32 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
             <button
               type="button"
               onClick={() => setActiveTab("overview")}
-              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 px-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 min-w-0 ${
                 activeTab === "overview"
                   ? "text-slate-900 dark:text-slate-100"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">bar_chart</span>
-              <span>{t("stats.overview_tab").replace(/^[^\p{L}\p{N}]+/u, "")}</span>
+              <span className="material-symbols-outlined text-sm leading-none shrink-0">bar_chart</span>
+              <span className="truncate">{t("stats.overview_tab").replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab("wrapped")}
-              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 px-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 min-w-0 ${
                 activeTab === "wrapped"
                   ? "text-white"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">featured_seasonal_and_gifts</span>
-              <span>{t("stats.wrapped_tab", { year: selectedYear }).replace(/^[^\p{L}\p{N}]+/u, "")}</span>
+              <span className="material-symbols-outlined text-sm leading-none shrink-0">featured_seasonal_and_gifts</span>
+              <span className="truncate">{t("stats.wrapped_tab", { year: selectedYear }).replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
           </div>
         </div>
 
         {/* Contenido */}
-        <div className="px-5 sm:px-6 pb-6 pt-1 overflow-y-auto flex-1 space-y-4">
+        <div className="px-4 sm:px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:pb-6 pt-1 overflow-y-auto flex-1 space-y-4">
           {loading || !stats ? (
             <div className="space-y-4 py-2" aria-label={t("common.loading")}>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -619,7 +619,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   )}
 
                   {stats.wrapped.topRatedPlace && (
-                    <div className="sm:col-span-3 p-3.5 rounded-2xl bg-white/95 text-slate-900 shadow-sm flex items-center justify-between gap-3">
+                    <div className="sm:col-span-3 p-3.5 rounded-2xl bg-white/95 text-slate-900 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3">
                       <div className="min-w-0">
                         <div className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-orange-600">
                           <span className="material-symbols-outlined text-xs leading-none">emoji_events</span>
@@ -630,7 +630,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                         </div>
                       </div>
                       <div className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 shrink-0">
-                        <span>{stats.wrapped.topRatedPlace.city || "—"} •</span>
+                        <span className="truncate">{stats.wrapped.topRatedPlace.city || "—"} •</span>
                         <span className="material-symbols-outlined text-xs text-amber-500 leading-none">star</span>
                         <span>{stats.wrapped.topRatedPlace.rating}/10</span>
                       </div>
@@ -657,22 +657,22 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto shrink-0">
                     <button
                       type="button"
                       onClick={handleDownloadCard}
-                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-[11px] sm:text-xs transition cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-base leading-none">download</span>
-                      <span>{t("ui.download_card")}</span>
+                      <span className="material-symbols-outlined text-base leading-none shrink-0">download</span>
+                      <span className="truncate">{t("ui.download_card")}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleShareWrapped}
-                      className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition cursor-pointer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-[11px] sm:text-xs shadow-sm transition cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-base leading-none">share</span>
-                      <span>{t("ui.share_summary")}</span>
+                      <span className="material-symbols-outlined text-base leading-none shrink-0">share</span>
+                      <span className="truncate">{t("ui.share_summary")}</span>
                     </button>
                 </div>
               </div>

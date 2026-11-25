@@ -76,10 +76,15 @@ export function PlaceVisitsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden gm-modal-in">
+    <div
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden gm-modal-in">
         {/* Cabecera */}
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+        <div className="px-4 sm:px-5 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
           <div className="min-w-0">
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <span className="material-symbols-outlined text-lg text-orange-600 leading-none">calendar_today</span>
@@ -93,13 +98,14 @@ export function PlaceVisitsModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer text-sm font-bold"
+            className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center cursor-pointer shrink-0 transition"
+            aria-label={t("common.close")}
           >
-            ✕
+            <span className="material-symbols-outlined text-lg leading-none">close</span>
           </button>
         </div>
 
-        <div className="p-5 space-y-4 overflow-y-auto flex-1">
+        <div className="p-4 sm:p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs flex items-center gap-1.5">
               <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
@@ -116,8 +122,8 @@ export function PlaceVisitsModal({
               <span className="material-symbols-outlined text-sm text-orange-600 leading-none">add_circle</span>
               <span>{t("notes_visits.register_visit")}</span>
             </h4>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="min-w-0">
                 <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                   {t("notes_visits.visit_date")}
                 </label>
@@ -126,10 +132,10 @@ export function PlaceVisitsModal({
                   required
                   value={visitedAt}
                   onChange={(e) => setVisitedAt(e.target.value)}
-                  className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="w-full min-w-0 px-2.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">
                   {t("notes_visits.rating_label")}
                 </label>
@@ -141,7 +147,7 @@ export function PlaceVisitsModal({
                   value={rating}
                   onChange={(e) => setRating(e.target.value)}
                   placeholder="Ej. 8.5"
-                  className="w-full px-2.5 py-1.5 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                  className="w-full min-w-0 px-2.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 />
               </div>
             </div>
@@ -150,7 +156,7 @@ export function PlaceVisitsModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder={t("notes_visits.visit_notes_placeholder")}
-              className="w-full px-3 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             <button
               type="submit"
@@ -203,7 +209,7 @@ export function PlaceVisitsModal({
                     <button
                       type="button"
                       onClick={() => handleDelete(v.id)}
-                      className="text-slate-400 hover:text-red-500 text-xs cursor-pointer"
+                      className="p-1.5 -mr-1 text-slate-400 hover:text-red-500 text-xs cursor-pointer leading-none shrink-0"
                       title={t("notes_visits.delete_visit_title")}
                     >
                       ✕

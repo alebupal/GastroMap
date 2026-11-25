@@ -65,12 +65,13 @@ export function PaginationBar({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-center flex-wrap gap-1.5">
           <button
             type="button"
             onClick={() => onPageChange(1)}
             disabled={safePage <= 1}
-            className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
+            aria-label="Primera página"
+            className="hidden sm:inline-flex items-center justify-center min-h-[34px] px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
             title="«"
           >
             «
@@ -79,12 +80,14 @@ export function PaginationBar({
             type="button"
             onClick={() => onPageChange(safePage - 1)}
             disabled={safePage <= 1}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
+            aria-label={t("places.previous")}
+            className="inline-flex items-center justify-center gap-1 min-h-[36px] sm:min-h-[34px] px-3 sm:px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
           >
-            ← {t("places.previous")}
+            <span>←</span>
+            <span className="hidden sm:inline">{t("places.previous")}</span>
           </button>
 
-          <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[11px] font-bold">
+          <span className="inline-flex items-center justify-center min-h-[36px] sm:min-h-[34px] px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-[11px] font-bold whitespace-nowrap">
             {safePage} / {totalPages}
           </span>
 
@@ -92,15 +95,18 @@ export function PaginationBar({
             type="button"
             onClick={() => onPageChange(safePage + 1)}
             disabled={safePage >= totalPages}
-            className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
+            aria-label={t("places.next")}
+            className="inline-flex items-center justify-center gap-1 min-h-[36px] sm:min-h-[34px] px-3 sm:px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
           >
-            {t("places.next")} →
+            <span className="hidden sm:inline">{t("places.next")}</span>
+            <span>→</span>
           </button>
           <button
             type="button"
             onClick={() => onPageChange(totalPages)}
             disabled={safePage >= totalPages}
-            className="px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
+            aria-label="Última página"
+            className="hidden sm:inline-flex items-center justify-center min-h-[34px] px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-[11px] font-bold"
             title="»"
           >
             »

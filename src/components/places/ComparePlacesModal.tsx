@@ -111,14 +111,14 @@ export function ComparePlacesModal({
 
   return (
     <div
-      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 !mt-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[92vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo Stitch */}
-        <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2.5 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <GastroMapIcon className="w-9 h-9 rounded-[28%] shrink-0 shadow-xs" />
             <div className="min-w-0">
@@ -139,15 +139,17 @@ export function ComparePlacesModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {onClearAll && (
               <button
                 type="button"
                 onClick={onClearAll}
-                className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
+                title={t("ui.clear_compare")}
+                aria-label={t("ui.clear_compare")}
+                className="inline-flex items-center justify-center gap-1 p-2 sm:px-3 sm:py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
               >
-                <span className="material-symbols-outlined text-sm leading-none">delete_sweep</span>
-                <span>{t("ui.clear_compare")}</span>
+                <span className="material-symbols-outlined text-base sm:text-sm leading-none">delete_sweep</span>
+                <span className="hidden sm:inline">{t("ui.clear_compare")}</span>
               </button>
             )}
             <button
@@ -162,7 +164,7 @@ export function ComparePlacesModal({
         </div>
 
         {/* Contenido scrollable */}
-        <div className="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5">
+        <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-5">
           {/* Columnas comparadas */}
           <div
             className={`grid gap-4 ${
@@ -218,10 +220,10 @@ export function ComparePlacesModal({
                       <button
                         type="button"
                         onClick={() => onRemovePlace(p.id)}
-                        className="w-7 h-7 rounded-full hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer shrink-0"
+                        className="w-9 h-9 sm:w-7 sm:h-7 rounded-full hover:bg-rose-100 dark:hover:bg-rose-950/60 text-slate-400 hover:text-rose-600 flex items-center justify-center transition cursor-pointer shrink-0"
                         title={t("compare.remove_title")}
                       >
-                        <span className="material-symbols-outlined text-sm leading-none">close</span>
+                        <span className="material-symbols-outlined text-base sm:text-sm leading-none">close</span>
                       </button>
                     </div>
 
@@ -448,7 +450,7 @@ export function ComparePlacesModal({
         </div>
 
         {/* Pie del modal estilo Stitch */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-200/70 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
             <span className="material-symbols-outlined text-base text-emerald-600 leading-none">
               check_circle
@@ -460,11 +462,11 @@ export function ComparePlacesModal({
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+              className="px-4 py-2.5 sm:py-2 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer shrink-0"
             >
               {t("common.close")}
             </button>
@@ -473,10 +475,10 @@ export function ComparePlacesModal({
                 href={routeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition"
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-sm transition"
               >
-                <span className="material-symbols-outlined text-base leading-none">alt_route</span>
-                <span>{t("ui.start_food_route")}</span>
+                <span className="material-symbols-outlined text-base leading-none shrink-0">alt_route</span>
+                <span className="truncate">{t("ui.start_food_route")}</span>
               </a>
             )}
           </div>

@@ -192,7 +192,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                   {displayUsername.charAt(0).toUpperCase()}
                 </div>
                 {currentUser.role === "admin" && (
-                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-slate-900 dark:bg-orange-600 sm:bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                  <span className="absolute -bottom-1 right-0 px-1 rounded-full bg-slate-900 dark:bg-orange-600 sm:bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
                     Admin
                   </span>
                 )}
@@ -204,7 +204,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
             {/* Menú Desplegable Flotante */}
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl z-50 p-2 space-y-1 gm-popover-in">
+              <div className="absolute right-0 top-full mt-2 w-56 sm:w-64 max-h-[calc(100dvh-6.5rem-env(safe-area-inset-bottom,0px))] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl dark:shadow-2xl z-50 p-2 space-y-1 gm-popover-in">
                 {/* Cabecera con datos del usuario */}
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center justify-between gap-1">

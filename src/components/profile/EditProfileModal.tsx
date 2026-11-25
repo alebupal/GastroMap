@@ -70,12 +70,12 @@ export function EditProfileModal({
 
   return (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150 text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden">
         {/* Cabecera estilo DESIGN.md */}
         <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export function EditProfileModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+        <form id="edit-profile-form" onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
               <span className="material-symbols-outlined text-base shrink-0">error</span>
@@ -140,7 +140,7 @@ export function EditProfileModal({
                   )
                 }
                 placeholder="tu_usuario"
-                className="w-full pl-8 pr-4 py-2.5 rounded-2xl text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 font-extrabold text-orange-700 dark:text-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                className="w-full pl-8 pr-4 py-2.5 rounded-2xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 font-extrabold text-orange-700 dark:text-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
               />
             </div>
             <p className="text-[10px] text-slate-400">{t("profile.username_hint")}</p>
@@ -158,7 +158,7 @@ export function EditProfileModal({
               minLength={2}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-semibold transition"
+              className="w-full px-4 py-2.5 rounded-2xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-semibold transition"
             />
           </div>
 
@@ -173,7 +173,7 @@ export function EditProfileModal({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-2xl text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-medium transition"
+              className="w-full px-4 py-2.5 rounded-2xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-medium transition"
             />
           </div>
 
@@ -218,7 +218,7 @@ export function EditProfileModal({
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder={t("profile.current_password")}
-                    className="w-full px-3.5 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                    className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
                   />
                 </div>
                 <div>
@@ -232,7 +232,7 @@ export function EditProfileModal({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder={t("profile.new_password_hint")}
-                    className="w-full px-3.5 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                    className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
                   />
                 </div>
                 <div>
@@ -246,31 +246,32 @@ export function EditProfileModal({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t("profile.confirm_password")}
-                    className="w-full px-3.5 py-2 rounded-xl text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                    className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
                   />
                 </div>
               </div>
             )}
           </div>
-
-          <div className="pt-3 flex items-center justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-full text-xs font-bold bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition cursor-pointer"
-            >
-              {t("common.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-extrabold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-sm leading-none">save</span>
-              <span>{saving ? t("common.loading") : t("form.save_changes")}</span>
-            </button>
-          </div>
         </form>
+
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2.5 rounded-full text-xs font-bold bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition cursor-pointer"
+          >
+            {t("common.cancel")}
+          </button>
+          <button
+            type="submit"
+            form="edit-profile-form"
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-xs font-extrabold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer disabled:opacity-50 shadow-sm"
+          >
+            <span className="material-symbols-outlined text-sm leading-none">save</span>
+            <span>{saving ? t("common.loading") : t("form.save_changes")}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

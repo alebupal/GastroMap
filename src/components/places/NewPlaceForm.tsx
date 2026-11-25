@@ -188,7 +188,7 @@ export function NewPlaceForm({
       )}
 
       {/* 1. Tarjeta: Autocompletar pegando enlace de Google Maps */}
-      <section className="rounded-3xl bg-gradient-to-br from-orange-50/80 via-white to-white dark:from-orange-950/25 dark:via-slate-900 dark:to-slate-900 border border-orange-200/70 dark:border-orange-900/40 p-5 shadow-xs space-y-3">
+      <section className="rounded-3xl bg-gradient-to-br from-orange-50/80 via-white to-white dark:from-orange-950/25 dark:via-slate-900 dark:to-slate-900 border border-orange-200/70 dark:border-orange-900/40 p-3.5 sm:p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <label className="text-xs sm:text-sm font-extrabold text-orange-800 dark:text-orange-300 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-base text-orange-600 leading-none">
@@ -219,7 +219,7 @@ export function NewPlaceForm({
                 }
               }}
               placeholder={t("form.import_placeholder")}
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 text-base sm:text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
             />
           </div>
           <button
@@ -242,7 +242,7 @@ export function NewPlaceForm({
       </section>
 
       {/* 2. Tarjeta: Nombre del sitio */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-2.5">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-2.5">
         <div className="flex items-center justify-between gap-2">
           <label className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-slate-100">
             {t("form.name_label")}
@@ -259,7 +259,7 @@ export function NewPlaceForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t("form.name_placeholder")}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-bold transition"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-base sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-bold transition"
         />
 
         {/* Aviso no bloqueante de posibles duplicados */}
@@ -317,7 +317,7 @@ export function NewPlaceForm({
       </section>
 
       {/* 3. Tarjeta: Ubicación y Coordenadas */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-3">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
             <span className="material-symbols-outlined text-lg text-orange-600 leading-none">
@@ -345,7 +345,7 @@ export function NewPlaceForm({
       </section>
 
       {/* 4. Tarjeta: ¿Para qué plan es? */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-3">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
@@ -372,8 +372,8 @@ export function NewPlaceForm({
       </section>
 
       {/* 5. Tarjeta: Presupuesto aproximado */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-3">
-        <div className="flex items-center justify-between gap-2">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
             {t("form.price_label")}
           </h2>
@@ -382,7 +382,7 @@ export function NewPlaceForm({
           </span>
         </div>
 
-        <div className="p-1.5 rounded-2xl bg-[#f2f3ff] dark:bg-slate-800/80 grid grid-cols-5 gap-1">
+        <div className="p-1.5 rounded-2xl bg-[#f2f3ff] dark:bg-slate-800/80 grid grid-cols-3 sm:grid-cols-5 gap-1.5">
           {PRICE_OPTIONS.map((p) => {
             const isSelected = priceRange === p.id;
             return (
@@ -390,39 +390,35 @@ export function NewPlaceForm({
                 type="button"
                 key={p.id}
                 onClick={() => setPriceRange(p.id)}
-                className={`py-2 rounded-xl text-xs font-extrabold transition cursor-pointer ${
+                className={`py-2 px-1.5 rounded-xl transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
                   isSelected
                     ? "bg-slate-900 dark:bg-orange-600 text-white shadow-xs"
                     : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-700/60"
                 }`}
               >
-                {p.id}
+                <span className="text-xs font-extrabold leading-tight">{p.id}</span>
+                <span
+                  className={`text-[10px] leading-tight whitespace-nowrap ${
+                    isSelected ? "text-white/85 font-semibold" : "text-slate-400 font-medium"
+                  }`}
+                >
+                  {p.hint}
+                </span>
               </button>
             );
           })}
-        </div>
-
-        <div className="grid grid-cols-5 gap-1 text-center text-[10px] text-slate-400 font-medium">
-          {PRICE_OPTIONS.map((p) => (
-            <span
-              key={p.id}
-              className={priceRange === p.id ? "text-slate-800 dark:text-slate-200 font-bold" : ""}
-            >
-              {p.hint}
-            </span>
-          ))}
         </div>
         <input type="hidden" name="priceRange" value={priceRange} />
       </section>
 
       {/* 6. Tarjeta: Etiquetas y especialidades */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs">
         <TagInput availableTags={popularTags} />
       </section>
 
       {/* 7. Tarjeta: Notas y Recomendación */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-1.5">
           <label className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
             {t("form.notes_label")}
           </label>
@@ -436,12 +432,12 @@ export function NewPlaceForm({
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder={t("form.notes_placeholder")}
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 resize-y transition"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-base sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 resize-y transition"
         />
       </section>
 
       {/* 8. Tarjeta: Visibilidad de la ficha */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-5 shadow-xs space-y-3">
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
         <div>
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
             {t("form.visibility_label")}
@@ -570,17 +566,17 @@ export function NewPlaceForm({
       </section>
 
       {/* Botones finales */}
-      <div className="pt-2 flex items-center justify-end gap-3">
+      <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
         <Link
           href="/"
-          className="px-6 py-3 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm transition"
+          className="w-full sm:w-auto text-center px-6 py-3 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm transition"
         >
           {t("common.cancel")}
         </Link>
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-orange-600/25 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-orange-600/25 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
         >
           <span className="material-symbols-outlined text-base leading-none">add_location_alt</span>
           <span>{submitting ? t("form.saving_button") : t("form.save_button")}</span>

@@ -95,17 +95,19 @@ export function RandomPickerModal({
 
   return (
     <div
-      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 !mt-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 overflow-hidden space-y-5 gm-modal-in">
+      <div className="relative w-full max-w-lg max-h-[94dvh] sm:max-h-[92dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden gm-modal-in">
         {/* Brillo cálido decorativo superior derecho */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-orange-200/40 dark:bg-orange-900/20 blur-3xl"
         />
+
+        <div className="relative overflow-y-auto flex-1 p-4 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-4 sm:space-y-5">
 
         {/* Cabecera estilo Stitch */}
         <div className="relative flex items-start justify-between gap-3">
@@ -166,30 +168,30 @@ export function RandomPickerModal({
 
         {/* Tarjeta del destino recomendado */}
         {selectedPlace ? (
-          <div className="relative pt-2">
+          <div className="relative pt-3">
             {/* Insignia flotante superior derecha */}
-            <div className="absolute -top-0.5 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
+            <div className="absolute top-0 right-4 z-10 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
               <span className="material-symbols-outlined text-xs leading-none">auto_awesome</span>
               <span>{t("ui.recommended_dest")}</span>
             </div>
 
             <div
               key={isSpinning ? "spinning" : `winner-${selectedPlace.id}`}
-              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 sm:p-5 space-y-3.5 transition-all duration-150 ${isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
+              className={`rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 p-4 pt-6 sm:p-5 sm:pt-5 space-y-3.5 transition-all duration-150 ${isSpinning ? "scale-[0.98] opacity-75 blur-[0.5px]" : "gm-winner-reveal"
                 }`}
             >
-              <div className="flex items-start gap-3.5">
+              <div className="flex items-start gap-3">
                 {/* Avatar de iniciales naranja oficial con insignia de cubiertos */}
-                <div className="relative w-16 h-16 rounded-2xl bg-orange-600 text-white font-black text-2xl flex items-center justify-center shrink-0 shadow-md shadow-orange-600/20">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-orange-600 text-white font-black text-lg sm:text-2xl flex items-center justify-center shrink-0 shadow-md shadow-orange-600/20">
                   {initials}
-                  <span className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-orange-600 flex items-center justify-center shadow-xs">
-                    <span className="material-symbols-outlined text-xs leading-none">restaurant</span>
+                  <span className="absolute -bottom-1.5 -right-1.5 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-orange-600 flex items-center justify-center shadow-xs">
+                    <span className="material-symbols-outlined text-[11px] sm:text-xs leading-none">restaurant</span>
                   </span>
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-100 leading-tight truncate">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100 leading-tight line-clamp-2">
                       {selectedPlace.name}
                     </h3>
                     {selectedPlace.rating !== null && selectedPlace.rating !== undefined && (
@@ -303,7 +305,7 @@ export function RandomPickerModal({
 
           {/* 3 botones secundarios estilo Stitch */}
           {selectedPlace && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {onSelectOnMap && (
                 <button
                   type="button"
@@ -337,7 +339,7 @@ export function RandomPickerModal({
                   href={selectedPlace.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-2.5 px-2.5 rounded-2xl font-bold text-xs bg-[#f2f3ff] hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="col-span-2 sm:col-span-1 py-2.5 px-2.5 rounded-2xl font-bold text-xs bg-[#f2f3ff] hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
                   <span className="material-symbols-outlined text-sm text-emerald-600 leading-none">open_in_new</span>
                   <span className="truncate">Maps</span>
@@ -346,7 +348,7 @@ export function RandomPickerModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="py-2.5 px-2.5 rounded-2xl font-bold text-xs bg-[#f2f3ff] hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="col-span-2 sm:col-span-1 py-2.5 px-2.5 rounded-2xl font-bold text-xs bg-[#f2f3ff] hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 transition cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
                   <span>{t("common.close")}</span>
                 </button>
@@ -375,6 +377,7 @@ export function RandomPickerModal({
                 }`}
             />
           </button>
+        </div>
         </div>
       </div>
     </div>

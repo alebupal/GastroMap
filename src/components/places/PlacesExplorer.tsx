@@ -2173,8 +2173,8 @@ export function PlacesExplorer({
         <div
           id="places-list-top"
           className={`space-y-3.5 lg:col-span-5 xl:col-span-5 lg:order-1 order-2 w-full ${activeMobileView === "map"
-            ? "-mt-5 relative z-[450] rounded-t-[28px] bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] px-3 pt-3 pb-24 lg:mt-0 lg:z-auto lg:rounded-none lg:bg-transparent lg:dark:bg-transparent lg:border-0 lg:shadow-none lg:p-0"
-            : "pb-24 lg:pb-0"
+            ? "-mt-5 relative z-[450] rounded-t-[28px] bg-white dark:bg-slate-950 border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-10px_28px_rgba(15,23,42,0.10)] px-3 pt-3 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] lg:mt-0 lg:z-auto lg:rounded-none lg:bg-transparent lg:dark:bg-transparent lg:border-0 lg:shadow-none lg:p-0"
+            : "pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0"
             }`}
         >
           {/* Tirador superior y cabecera Stitch del Bottom Sheet en móvil */}
@@ -2198,7 +2198,7 @@ export function PlacesExplorer({
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                    className="bg-transparent focus:outline-none cursor-pointer font-bold"
+                    className="bg-transparent focus:outline-none cursor-pointer font-bold max-w-[130px] truncate"
                     aria-label={t("places.sort_by")}
                   >
                     <option value="recent">{t("places.sort_recent")}</option>
@@ -2488,18 +2488,23 @@ export function PlacesExplorer({
 
               {/* Barra de Paginación Moderna estilo Stitch */}
               {(totalPages > 1 || filteredPlaces.length > 10) && (
-                <nav className="flex items-center justify-between bg-white dark:bg-slate-900 px-3.5 py-2 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70 mt-2">
+                <nav className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 px-3 sm:px-3.5 py-2 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70 mt-2">
                   <button
                     type="button"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                    aria-label={t("places.previous")}
+                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer shrink-0"
                   >
                     <span className="material-symbols-outlined text-sm leading-none">chevron_left</span>
-                    <span>{t("places.previous")}</span>
+                    <span className="hidden sm:inline">{t("places.previous")}</span>
                   </button>
 
-                  <div className="flex items-center gap-1 font-semibold text-xs">
+                  <span className="sm:hidden px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-extrabold whitespace-nowrap">
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <div className="hidden sm:flex items-center gap-1 font-semibold text-xs">
                     {Array.from({ length: totalPages }, (_, idx) => idx + 1)
                       .filter(
                         (p) =>
@@ -2534,9 +2539,10 @@ export function PlacesExplorer({
                     type="button"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-900 dark:text-orange-200 text-xs font-bold hover:bg-orange-200 dark:hover:bg-orange-900/60 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                    aria-label={t("places.next")}
+                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-900 dark:text-orange-200 text-xs font-bold hover:bg-orange-200 dark:hover:bg-orange-900/60 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer shrink-0"
                   >
-                    <span>{t("places.next")}</span>
+                    <span className="hidden sm:inline">{t("places.next")}</span>
                     <span className="material-symbols-outlined text-sm leading-none">chevron_right</span>
                   </button>
                 </nav>
@@ -2549,25 +2555,25 @@ export function PlacesExplorer({
       </div>
 
       {/* Barra flotante del Comparador de Establecimientos (hasta 3 sitios) */}
-      {compareIds.length > 0 && (
+      {compareIds.length > 0 && !(selectedPlace && activeMobileView === "map") && (
         <div className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-5 left-1/2 -translate-x-1/2 z-[955] max-w-[calc(100vw-1.5rem)]">
-          <div className="gm-slide-up inline-flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
-            <span className="text-xs font-bold flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-base text-orange-400 leading-none">compare_arrows</span>
-              <span>{t("places.compare_counter", { count: compareIds.length })}</span>
+          <div className="gm-slide-up inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-2.5 rounded-full bg-slate-900/95 dark:bg-slate-900 text-white border border-amber-500/40 shadow-2xl backdrop-blur-md">
+            <span className="text-xs font-bold flex items-center gap-1.5 whitespace-nowrap min-w-0">
+              <span className="material-symbols-outlined text-base text-orange-400 leading-none shrink-0">compare_arrows</span>
+              <span className="truncate">{t("places.compare_counter", { count: compareIds.length })}</span>
             </span>
             <button
               type="button"
               onClick={() => setIsCompareOpen(true)}
               disabled={compareIds.length < 2}
-              className="px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-black text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-black text-xs transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap shrink-0"
             >
               {t("places.open_compare")}
             </button>
             <button
               type="button"
               onClick={() => setCompareIds([])}
-              className="text-xs text-slate-400 hover:text-red-400 font-bold px-1 cursor-pointer"
+              className="text-xs text-slate-400 hover:text-red-400 font-bold p-1 cursor-pointer shrink-0 leading-none"
               title={t("places.clear_compare_tooltip")}
             >
               ✕
@@ -2749,8 +2755,8 @@ export function PlacesExplorer({
         </div>
       )}
 
-      {/* FAB flotante «Añadir sitio» estilo Stitch en móvil (oculto si hay tarjeta seleccionada o filtros abiertos) */}
-      {!selectedPlace && !showExtraFilters && (
+      {/* FAB flotante «Añadir sitio» estilo Stitch en móvil (oculto si hay tarjeta seleccionada, comparador o filtros abiertos) */}
+      {!selectedPlace && !showExtraFilters && !isAssistantOpen && compareIds.length === 0 && (
         <a
           href="/new"
           className="lg:hidden fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] z-[950] inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-lg shadow-orange-600/35 active:scale-95 transition"
@@ -2765,7 +2771,7 @@ export function PlacesExplorer({
 
       {/* Botón flotante para subir arriba: en móvil solo en vista lista y si no hay tarjeta abierta */}
       <ScrollToTop
-        className={activeMobileView === "map" || Boolean(selectedPlace) ? "hidden lg:flex" : "hidden lg:flex"}
+        className={activeMobileView === "map" || Boolean(selectedPlace) ? "hidden lg:flex" : "flex"}
       />
     </div>
   );

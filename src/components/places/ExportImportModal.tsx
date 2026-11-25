@@ -558,12 +558,12 @@ ${wpts}
 
   return (
     <div
-      className="fixed inset-0 !mt-0 z-[1100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 !mt-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[95dvh] sm:max-h-[92dvh] overflow-hidden gm-modal-in">
         {/* Cabecera estilo DESIGN.md */}
         <div className="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -602,28 +602,28 @@ ${wpts}
             <button
               type="button"
               onClick={() => setTab("export")}
-              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 px-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 min-w-0 ${
                 tab === "export"
                   ? "text-white"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
-              <span className="material-symbols-outlined text-base leading-none">download</span>
-              <span>
+              <span className="material-symbols-outlined text-base leading-none shrink-0">download</span>
+              <span className="truncate">
                 {t("export_import.tab_export")} ({places.length})
               </span>
             </button>
             <button
               type="button"
               onClick={() => setTab("import")}
-              className={`relative z-10 py-2 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`relative z-10 py-2 px-2 rounded-full text-[11px] sm:text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1.5 min-w-0 ${
                 tab === "import"
                   ? "text-white"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
               }`}
             >
-              <span className="material-symbols-outlined text-base leading-none">upload</span>
-              <span>{t("export_import.tab_import")}</span>
+              <span className="material-symbols-outlined text-base leading-none shrink-0">upload</span>
+              <span className="truncate">{t("export_import.tab_import")}</span>
             </button>
           </div>
         </div>
@@ -728,7 +728,7 @@ ${wpts}
                 <div className="w-12 h-12 mx-auto mb-2.5 rounded-2xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <span className="material-symbols-outlined text-2xl">upload_file</span>
                 </div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-slate-100">
+                <div className="text-xs font-extrabold text-slate-800 dark:text-slate-100 break-all line-clamp-2">
                   {fileName || t("export_import.select_file")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-1">
@@ -837,7 +837,7 @@ ${wpts}
         </div>
 
         {/* Pie del modal */}
-        <div className="px-5 sm:px-6 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end shrink-0">
+        <div className="px-4 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end shrink-0">
           <button
             type="button"
             onClick={onClose}

@@ -23,7 +23,7 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
   return (
     <nav
       aria-label={t("mobile_nav.aria_label")}
-      className="lg:hidden fixed bottom-0 inset-x-0 z-[960] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_20px_rgba(15,23,42,0.06)] pb-[env(safe-area-inset-bottom)]"
+      className="lg:hidden fixed bottom-0 inset-x-0 z-[960] bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 shadow-[0_-4px_20px_rgba(15,23,42,0.06)] pb-[env(safe-area-inset-bottom,0px)]"
     >
       <div className="grid grid-cols-4 h-16 max-w-lg mx-auto px-2">
         {/* 1. Explorar */}
@@ -36,7 +36,7 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
                 window.scrollTo({ top: 0, behavior: "smooth" });
               }
             }}
-            className="flex flex-col items-center justify-center gap-0.5 text-orange-600 dark:text-orange-400 font-extrabold cursor-pointer active:scale-95 transition"
+            className="flex flex-col items-center justify-center gap-0.5 text-orange-600 dark:text-orange-400 font-extrabold cursor-pointer active:scale-95 transition min-w-0"
           >
             <span
               className="material-symbols-outlined text-[22px] leading-none"
@@ -44,22 +44,22 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
             >
               explore
             </span>
-            <span className="text-[10px] leading-tight">{t("mobile_nav.explore")}</span>
+            <span className="text-[10px] leading-tight truncate max-w-full whitespace-nowrap px-1">{t("mobile_nav.explore")}</span>
           </button>
         ) : (
           <Link
             href="/"
-            className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold transition"
+            className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold transition min-w-0"
           >
             <span className="material-symbols-outlined text-[22px] leading-none">explore</span>
-            <span className="text-[10px] leading-tight">{t("mobile_nav.explore")}</span>
+            <span className="text-[10px] leading-tight truncate max-w-full whitespace-nowrap px-1">{t("mobile_nav.explore")}</span>
           </Link>
         )}
 
         {/* 2. Añadir */}
         <Link
           href="/new"
-          className={`flex flex-col items-center justify-center gap-0.5 transition active:scale-95 ${
+          className={`flex flex-col items-center justify-center gap-0.5 transition active:scale-95 min-w-0 ${
             isNew
               ? "text-orange-600 dark:text-orange-400 font-extrabold"
               : "text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold"
@@ -71,7 +71,7 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
           >
             add_circle
           </span>
-          <span className="text-[10px] leading-tight">{t("mobile_nav.add")}</span>
+          <span className="text-[10px] leading-tight truncate max-w-full whitespace-nowrap px-1">{t("mobile_nav.add")}</span>
         </Link>
 
         {/* 3. Estadísticas */}
@@ -82,10 +82,10 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
               window.dispatchEvent(new Event(MOBILE_NAV_EVENTS.OPEN_STATS));
             }
           }}
-          className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold cursor-pointer active:scale-95 transition"
+          className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold cursor-pointer active:scale-95 transition min-w-0"
         >
           <span className="material-symbols-outlined text-[22px] leading-none">bar_chart</span>
-          <span className="text-[10px] leading-tight">{t("mobile_nav.stats")}</span>
+          <span className="text-[10px] leading-tight truncate max-w-full whitespace-nowrap px-1">{t("mobile_nav.stats")}</span>
         </button>
 
         {/* 4. Menú */}
@@ -96,10 +96,10 @@ export function MobileBottomNav({ onExploreClick }: MobileBottomNavProps) {
               window.dispatchEvent(new Event(MOBILE_NAV_EVENTS.OPEN_MENU));
             }
           }}
-          className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold cursor-pointer active:scale-95 transition"
+          className="flex flex-col items-center justify-center gap-0.5 text-slate-500 dark:text-slate-400 hover:text-orange-600 font-semibold cursor-pointer active:scale-95 transition min-w-0"
         >
           <span className="material-symbols-outlined text-[22px] leading-none">tune</span>
-          <span className="text-[10px] leading-tight">{t("mobile_nav.menu")}</span>
+          <span className="text-[10px] leading-tight truncate max-w-full whitespace-nowrap px-1">{t("mobile_nav.menu")}</span>
         </button>
       </div>
     </nav>
