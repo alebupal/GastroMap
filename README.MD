@@ -67,7 +67,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **📚 In-App Documentation & Changelog (`/docs`):**
   * Official repository documentation and version changelog viewer directly within the app.
   * Real-time bilingual switcher (Spanish 🇪🇸 / English 🇬🇧) reading local files with GitHub Raw fallback.
-  * Rich Markdown renderer styled with version badges (`🏷️`), checklist items (`✓`), code blocks, and support options.
+  * **Automatic update alerts**: Checks GitHub Releases in the background and displays an interactive header pill whenever a newer version is published, plus a manual check button in `/admin > Settings`.
 
 * **🛠️ Admin Dashboard & Database Integrity:**
   * Complete user management: create users directly, edit profile fields (name, @username, email, role, status), perform instant password resets, and use **«Log in as user»** (with a persistent top alert banner and one-click return to admin).

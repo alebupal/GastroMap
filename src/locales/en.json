@@ -1071,5 +1071,16 @@
     "btn_login_as": "Log in as",
     "banner_text": "You are browsing with {user}'s account",
     "stop_btn": "Log out"
+  },
+  "version": {
+    "update_available_title": "A new release is available on GitHub",
+    "new_version_available": "New version: v{version}",
+    "card_title": "Version & Updates",
+    "card_subtitle": "Automatically checks GitHub Releases to notify you whenever a newer version is published.",
+    "up_to_date": "Up to date",
+    "up_to_date_toast": "✓ GastroMap v{version} is up to date.",
+    "check_now_btn": "Check now",
+    "checking": "Checking...",
+    "check_error_toast": "Could not reach GitHub right now."
   }
 }

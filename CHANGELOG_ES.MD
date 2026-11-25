@@ -8,6 +8,9 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-25
 
 ### Añadido
+- **Aviso Automático de Nueva Versión (estilo TVSpy)**:
+  - Comprobación automática en segundo plano contra GitHub Releases (`/api/version`, caché de 30 min en servidor) con píldora ámbar animada en la cabecera (`UserHeader`, y dentro del menú en móvil) cuando existe una versión más reciente publicada.
+  - Nueva tarjeta **«Versión y Actualizaciones»** en `/admin > Configuración` (`SettingsManager`) con estado en vivo y botón **«Comprobar ahora»** (`?force=true`) con notificación toast.
 - **Iniciar Sesión como Usuario (Suplantación Segura para Administradores)**:
   - Nuevo botón **«Entrar como»** en `/admin > Usuarios` (`UsersManager`) que permite a un administrador navegar temporalmente por toda la aplicación con la sesión exacta de cualquier usuario activo (sin alterar su `lastLoginAt` ni pedir su contraseña).
   - Nueva barra fija superior (**Top Alert** `ImpersonationBanner`) visible en toda la app indicando con qué cuenta estás navegando y un botón **«Cerrar sesión»** que invalida la sesión temporal y restaura automáticamente tu sesión de administrador en `/admin`, registrando inicio y fin en `audit_logs`.

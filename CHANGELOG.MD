@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-25
 
 ### Added
+- **Automatic New-Version Notification (TVSpy Style)**:
+  - Background check against GitHub Releases (`/api/version`, 30-min server cache) displaying an animated amber pill in the header (`UserHeader`, plus inside the mobile dropdown) whenever a newer release is available.
+  - New **«Version & Updates»** card in `/admin > Settings` (`SettingsManager`) with live version status and a **«Check now»** (`?force=true`) button with toast feedback.
 - **Admin «Log in as User» (Secure Impersonation)**:
   - New **«Log in as»** button in `/admin > Users` (`UsersManager`) allowing administrators to browse the entire app temporarily as any active user (without modifying their `lastLoginAt` or requiring their password).
   - Global sticky **Top Alert** banner (`ImpersonationBanner`) showing which account you are viewing and a **«Log out»** button that revokes the temporary session and restores your admin session back to `/admin`, with both start and end logged in `audit_logs`.

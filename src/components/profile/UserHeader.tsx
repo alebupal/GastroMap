@@ -39,7 +39,34 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [updateInfo, setUpdateInfo] = useState<{
+    hasUpdate: boolean;
+    latestVersion: string;
+    releaseUrl: string;
+  } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Comprobar si hay nueva versión publicada en GitHub (caché de 30 min en servidor)
+  useEffect(() => {
+    let active = true;
+    fetch("/api/version")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.hasUpdate && data?.latestVersion) {
+          setUpdateInfo({
+            hasUpdate: true,
+            latestVersion: data.latestVersion,
+            releaseUrl: data.releaseUrl || "https://github.com/alebupal/GastroMap/releases",
+          });
+        }
+      })
+      .catch(() => {
+        // Silencioso si no hay conexión
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const displayUsername = currentUser.username || currentUser.name.toLowerCase().replace(/\s+/g, "");
 
@@ -162,6 +189,22 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
             <span className="material-symbols-outlined text-[20px] leading-none">search</span>
           </button>
 
+          {/* Aviso de nueva versión disponible estilo TVSpy */}
+          {updateInfo?.hasUpdate && (
+            <a
+              href={updateInfo.releaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-bold hover:bg-amber-500/25 transition shadow-xs animate-pulse"
+              title={t("version.update_available_title")}
+            >
+              <span className="material-symbols-outlined text-sm leading-none">new_releases</span>
+              <span>
+                {t("version.new_version_available", { version: updateInfo.latestVersion })}
+              </span>
+            </a>
+          )}
+
           {/* Selector de modo claro / modo oscuro (visible en cabecera en sm+, en móvil dentro del menú) */}
           <div className="hidden sm:flex items-center gap-1.5 sm:gap-2.5">
             <ThemeToggle />
@@ -232,6 +275,24 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
 
                 {/* Opciones del menú */}
                 <div className="pt-1 space-y-0.5 text-xs">
+                  {/* Aviso de nueva versión en móvil dentro del menú */}
+                  {updateInfo?.hasUpdate && (
+                    <a
+                      href={updateInfo.releaseUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="md:hidden w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200/80 dark:border-amber-800/60 text-amber-800 dark:text-amber-200 font-bold transition text-left"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-amber-600">
+                        new_releases
+                      </span>
+                      <span className="truncate">
+                        {t("version.new_version_available", { version: updateInfo.latestVersion })}
+                      </span>
+                    </a>
+                  )}
+
                   {/* Panel Admin (accesible en móvil dentro del menú) */}
                   {currentUser.role === "admin" && (
                     <Link

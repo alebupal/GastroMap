@@ -1071,5 +1071,16 @@
     "btn_login_as": "Entrar como",
     "banner_text": "Estás navegando con la cuenta de {user}",
     "stop_btn": "Cerrar sesión"
+  },
+  "version": {
+    "update_available_title": "Hay una nueva versión disponible en GitHub",
+    "new_version_available": "Nueva versión: v{version}",
+    "card_title": "Versión y Actualizaciones",
+    "card_subtitle": "Comprueba automáticamente GitHub Releases para avisarte cuando haya una versión más reciente.",
+    "up_to_date": "Tienes la última versión",
+    "up_to_date_toast": "✓ GastroMap v{version} está al día.",
+    "check_now_btn": "Comprobar ahora",
+    "checking": "Comprobando...",
+    "check_error_toast": "No se pudo consultar GitHub en este momento."
   }
 }

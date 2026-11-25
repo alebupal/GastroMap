@@ -65,7 +65,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **📚 Documentación y Registro de Cambios Integrado (`/docs`):**
   * Visor oficial de documentación y changelog integrado en la propia aplicación al estilo TVSPY.
   * Selector interactivo de idioma (Español 🇪🇸 / Inglés 🇬🇧) con carga local y fallback a GitHub Raw.
-  * Renderizado Markdown enriquecido con badges de versiones (`🏷️`), viñetas estilizadas (`✓`), bloques de código y banner de agradecimiento.
+  * **Aviso automático de actualizaciones**: Comprueba GitHub Releases en segundo plano y muestra una píldora interactiva en la cabecera cuando hay una nueva versión disponible, además de botón de comprobación manual en `/admin > Configuración`.
 
 * **🛠️ Panel de Administración y Limpieza:**
   * Gestión completa de usuarios: alta directa manual, edición exhaustiva de perfiles (nombre, @username, email, rol, estado), restablecimiento instantáneo de contraseñas y modo **«Entrar como usuario»** (con alerta superior y retorno en un clic al panel admin).

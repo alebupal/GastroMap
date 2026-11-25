@@ -8,5 +8,7 @@ export async function GET(request: Request) {
   const force = searchParams.get("force") === "true";
 
   const versionData = await versionService.checkUpdate(force);
-  return NextResponse.json(versionData);
+  return NextResponse.json(versionData, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }

@@ -7,7 +7,9 @@ import {
   testGooglePlacesApiKeyAction,
 } from "@/lib/actions/settings";
 import { clearAppOfflineCache, getBrowserCacheEstimate } from "@/lib/cache";
+import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
 
 interface SettingsManagerProps {
   initialGooglePlacesApiKey?: string | null;
@@ -19,6 +21,7 @@ export function SettingsManager({
   totalPlacesCount = 0,
 }: SettingsManagerProps) {
   const { t } = useT();
+  const { toast } = useToast();
   const [googlePlacesApiKey, setGooglePlacesApiKey] = useState(initialGooglePlacesApiKey || "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,11 +40,47 @@ export function SettingsManager({
     cacheCount: 0,
   });
   const [clearingCache, setClearingCache] = useState(false);
+  const [versionInfo, setVersionInfo] = useState<{
+    currentVersion: string;
+    latestVersion: string;
+    hasUpdate: boolean;
+    releaseUrl: string;
+  } | null>(null);
+  const [checkingVersion, setCheckingVersion] = useState(false);
+
+  async function fetchVersionStatus(force = false) {
+    setCheckingVersion(true);
+    try {
+      const res = await fetch(`/api/version${force ? "?force=true" : ""}`);
+      if (res.ok) {
+        const data = await res.json();
+        setVersionInfo(data);
+        if (force) {
+          if (data.hasUpdate) {
+            toast(
+              t("version.new_version_available", { version: data.latestVersion }),
+              { kind: "info" }
+            );
+          } else {
+            toast(t("version.up_to_date_toast", { version: data.currentVersion }), {
+              kind: "success",
+            });
+          }
+        }
+      }
+    } catch {
+      if (force) toast(t("version.check_error_toast"), { kind: "error" });
+    } finally {
+      setCheckingVersion(false);
+    }
+  }
 
   useEffect(() => {
     getBrowserCacheEstimate().then((info) => {
       setCacheInfo({ usageMB: info.usageMB, cacheCount: info.cacheCount });
     });
+    fetchVersionStatus(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleClearCache() {
@@ -480,6 +519,72 @@ export function SettingsManager({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Tarjeta de Versión y Comprobación de Actualizaciones (estilo TVSpy) */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+              versionInfo?.hasUpdate
+                ? "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400"
+                : "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400"
+            }`}
+          >
+            <span className="material-symbols-outlined text-xl">
+              {versionInfo?.hasUpdate ? "new_releases" : "system_update"}
+            </span>
+          </div>
+          <div className="min-w-0 space-y-0.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              {t("version.card_title")}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                v{versionInfo?.currentVersion || APP_VERSION}
+              </span>
+              {versionInfo?.hasUpdate ? (
+                <a
+                  href={versionInfo.releaseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-[11px] font-bold hover:bg-amber-500/25 transition"
+                >
+                  <span>
+                    {t("version.new_version_available", { version: versionInfo.latestVersion })}
+                  </span>
+                  <span className="material-symbols-outlined text-xs leading-none">open_in_new</span>
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
+                  <span className="material-symbols-outlined text-xs leading-none">check_circle</span>
+                  <span>{t("version.up_to_date")}</span>
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {t("version.card_subtitle")}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          disabled={checkingVersion}
+          onClick={() => fetchVersionStatus(true)}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-[#f2f3ff] hover:bg-orange-600 hover:text-white dark:bg-slate-800 dark:hover:bg-orange-600 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer shrink-0 disabled:opacity-50"
+        >
+          <span
+            className={`material-symbols-outlined text-sm leading-none ${
+              checkingVersion ? "animate-spin" : ""
+            }`}
+          >
+            refresh
+          </span>
+          <span>
+            {checkingVersion ? t("version.checking") : t("version.check_now_btn")}
+          </span>
+        </button>
       </div>
     </div>
   );
