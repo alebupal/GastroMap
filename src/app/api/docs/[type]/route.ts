@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ type: string }> }
@@ -37,7 +39,10 @@ export async function GET(
 
     if (filePath) {
       const content = fs.readFileSync(filePath, "utf-8");
-      return NextResponse.json({ filename, content });
+      return NextResponse.json(
+        { filename, content },
+        { headers: { "Cache-Control": "no-store" } }
+      );
     }
 
     // Fallback a GitHub Raw si no está en disco local

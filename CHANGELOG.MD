@@ -29,9 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full mobile UX/UI audit pass (compact pagination, bottom `safe-area` support, and elimination of FAB / bottom nav overlaps).
 
 ### Changed & Fixed
+- **Smarter Google Maps / OpenStreetMap Scraper**: No longer populates descriptions with generic category labels (`"Bar"`, `"Restaurant"`) when no real `editorialSummary` exists, and detects street addresses (`looksLikeStreetAddress`) so they are never used as the place name.
+- **Smoother Interactive Map**: Clicking the map background immediately clears focus and closes the popup so you can pan freely without forced re-centering on zoom or after editing a place.
+- **Expanded Universal Search & Sliding Experience Pill**: Universal search now matches **comment authors** as well as real names, `username`, and `@username` interchangeably; the experience filter bar (`All`, `Favorites`, `Want to go`, `Visited`, `To discover`) now features a smooth sliding pill and uniform height.
 - **JSON Backup Restore (`/api/admin/backup`)**: Fixed `users_email_unique` / `users_username_unique` constraint conflicts when restoring a backup where the current administrator has a different UUID from the backup (atomic session reassignment without losing login) and added `place_lists` / `place_list_items` to the restore order.
 - **Decorative Indicator Cleanup & Improved `CustomSelect`**: Removed static *«Cache First»* bar under desktop map and *«Real-time synced»* label in comments; replaced legacy `🕒` emoji on *Want to go* with Material Symbols `schedule`; upgraded `CustomSelect` with portal rendering (`createPortal`), full-width option, and left-aligned icon + label.
-- **Complete i18n**: Synchronized 983 full translation keys across `es.json`, `en.json`, and `translations.csv`.
+- **Complete i18n**: Synchronized 993 full translation keys across `es.json`, `en.json`, and `translations.csv`.
 - **Subtle Micro-Interactions, View Transitions, Unified Iconography & Explorer Upgrades**:
   - Unified all UI iconography under **Google Material Symbols Outlined** (dropdowns, toasts, cards, modals, admin tables, and invitations) while keeping language flags and food emojis, removing duplicate leading emojis from i18n strings.
   - Added a pure-CSS micro-interaction suite respecting `prefers-reduced-motion`: **View Transitions API** smooth Light/Dark switching, **sliding pill indicators** in `ThemeToggle`, `StatsModal`, and `ExportImportModal`, sun/moon icon animations, **animated KPI counters (`AnimatedNumber`)**, animated progress bars, **shimmer skeletons**, subtle staggered list entry, smooth filter panel unfold animations, and a radar pulse ring on the selected Leaflet map pin and active *Near me* badge.
