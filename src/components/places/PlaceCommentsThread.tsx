@@ -494,12 +494,12 @@ export function PlaceCommentsThread({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[1100] flex items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full h-full sm:h-auto sm:max-w-2xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200/80 dark:border-slate-800 flex flex-col sm:max-h-[90vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-h-[95dvh] sm:max-h-[90dvh] sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden gm-modal-in">
         {/* Cabecera estilo Stitch */}
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2.5 shrink-0">
           <div className="flex items-center gap-3 min-w-0">

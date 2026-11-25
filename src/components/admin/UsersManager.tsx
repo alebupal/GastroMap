@@ -707,10 +707,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
       {/* Modal para resetear contraseña */}
       {passwordUserId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
           <form
             onSubmit={handleResetPassword}
-            className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col text-left"
+            className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-6 flex flex-col text-left gm-modal-in"
           >
             <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 mb-2">
               {t("admin_users.reset_password_title")}
@@ -751,10 +751,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
       {/* Modal interactivo para edición completa de usuario por el Admin */}
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
           <form
             onSubmit={handleSaveEdit}
-            className="w-full max-w-md max-h-[94dvh] sm:max-h-[90dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col text-left overflow-hidden"
+            className="w-full max-w-md max-h-[94dvh] sm:max-h-[90dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col text-left overflow-hidden gm-modal-in"
           >
             <div className="px-5 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
               <div className="flex items-center gap-3 min-w-0">

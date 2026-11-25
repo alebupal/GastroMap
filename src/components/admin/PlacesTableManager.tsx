@@ -700,8 +700,8 @@ export function PlacesTableManager({
 
       {/* Modal de fusión administrativa de duplicados */}
       {mergeSource && (
-        <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-4 text-left max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 space-y-4 text-left max-h-[94dvh] sm:max-h-[90dvh] flex flex-col gm-modal-in">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h4 className="font-bold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">

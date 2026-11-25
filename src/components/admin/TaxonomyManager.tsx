@@ -947,8 +947,8 @@ export function TaxonomyManager({
 
       {/* ==================== MODAL: CONFIRMAR ELIMINACIÓN DE ELEMENTOS VACÍOS ==================== */}
       {emptyConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 gm-backdrop-in">
+          <div className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl space-y-4 gm-modal-in">
             <div className="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
               <span className="material-symbols-outlined text-2xl leading-none">cleaning_services</span>
               <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -1015,8 +1015,8 @@ export function TaxonomyManager({
 
       {/* ==================== MODAL: CONFIRMAR ELIMINACIÓN MÚLTIPLE POR SELECCIÓN ==================== */}
       {bulkDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 gm-backdrop-in">
+          <div className="w-full max-w-md max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-2xl space-y-4 gm-modal-in">
             <div className="flex items-center gap-2.5 text-red-600 dark:text-red-400">
               <span className="material-symbols-outlined text-2xl leading-none">delete</span>
               <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -1085,8 +1085,8 @@ export function TaxonomyManager({
 
       {/* ==================== MODAL 1: ELIMINACIÓN INDIVIDUAL CON REASIGNACIÓN ==================== */}
       {itemToDelete && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 gm-backdrop-in">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-xl space-y-4 gm-modal-in">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t(
                 itemToDelete.type === "occasion"
@@ -1199,8 +1199,8 @@ export function TaxonomyManager({
 
       {/* ==================== MODAL 2: COMBINAR / FUSIONAR ==================== */}
       {itemToMerge && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 gm-backdrop-in">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-xl space-y-4 gm-modal-in">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t("admin_taxonomy.merge_modal_title", { name: itemToMerge.name })}
             </h4>
@@ -1259,8 +1259,8 @@ export function TaxonomyManager({
 
       {/* ==================== MODAL 3: RENOMBRAR ==================== */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 gm-backdrop-in">
+          <div className="w-full max-w-sm max-h-[90dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-5 shadow-xl space-y-4 gm-modal-in">
             <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
               {t(
                 editingItem.type === "occasion"

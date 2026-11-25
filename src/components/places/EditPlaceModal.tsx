@@ -180,12 +180,12 @@ export function EditPlaceModal({
 
   const modalContent = (
     <div
-      className="fixed inset-0 !mt-0 z-[1200] flex items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
+      className="fixed inset-0 !mt-0 z-[1200] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/75 backdrop-blur-sm gm-backdrop-in text-left"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full h-full sm:h-auto sm:max-w-2xl bg-white dark:bg-slate-900 rounded-none sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800 flex flex-col sm:max-h-[92vh] overflow-hidden gm-modal-in">
+      <div className="w-full max-h-[95dvh] sm:max-h-[92dvh] sm:max-w-2xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden gm-modal-in">
         {/* Cabecera */}
         <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
@@ -403,7 +403,7 @@ export function EditPlaceModal({
           </div>
 
           {/* Acciones */}
-          <div className="pt-3 flex items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-slate-900 pb-1 border-t border-slate-100 dark:border-slate-800">
+          <div className="pt-3 flex items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-slate-900 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] sm:pb-1 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
