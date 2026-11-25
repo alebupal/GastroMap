@@ -695,10 +695,6 @@ export function PlaceCommentsThread({
               </span>
               <span>{sortOrder === "newest" ? t("ui.sort_newest") : t("ui.sort_oldest")}</span>
             </button>
-            <span className="hidden sm:inline-flex items-center gap-1.5 font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Sincronizado en tiempo real
-            </span>
           </div>
 
           <div key={filterTab} className="space-y-4 animate-in fade-in duration-200">
