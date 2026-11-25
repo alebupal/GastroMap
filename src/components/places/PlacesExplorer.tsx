@@ -1228,7 +1228,7 @@ export function PlacesExplorer({
       <section className="hidden lg:flex flex-col gap-2.5 bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70">
         {/* Fila 1: Píldoras de Experiencia / Colección + Filtros Guardados */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
-          <div className="flex items-center gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-0.5 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
+          <div className="flex items-stretch gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-1 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
             {[
               { key: "all", icon: null, iconClass: "", label: `${t("places.all")} (${initialPlaces.length})` },
               { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `${t("places.favorites")} (${initialPlaces.filter(p => p.isFavorite).length})` },
@@ -1246,7 +1246,7 @@ export function PlacesExplorer({
                     setExperienceFilter(active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter));
                     setCurrentPage(1);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full whitespace-nowrap transition cursor-pointer ${active
+                  className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap transition cursor-pointer ${active
                     ? isUntried
                       ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
                       : "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs"
