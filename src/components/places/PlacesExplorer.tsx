@@ -179,6 +179,19 @@ export function PlacesExplorer({
   const [experienceFilter, setExperienceFilter] = useState<
     "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
+  const expTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [expIndicator, setExpIndicator] = useState<{ left: number; width: number } | null>(null);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const btn = expTabRefs.current[experienceFilter];
+      if (!btn || btn.offsetWidth === 0) return;
+      setExpIndicator({ left: btn.offsetLeft, width: btn.offsetWidth });
+    };
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
+  }, [experienceFilter, initialPlaces.length, locale]);
   const [minRating, setMinRating] = useState<number | null>(null);
   // Filtro «Plan con amigos» (usuarios con los que vas + modo de coincidencia)
   const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
@@ -1228,7 +1241,21 @@ export function PlacesExplorer({
       <section className="hidden lg:flex flex-col gap-2.5 bg-white dark:bg-slate-900 px-3.5 py-2.5 rounded-2xl shadow-sm border border-slate-200/70 dark:border-slate-800/70">
         {/* Fila 1: Píldoras de Experiencia / Colección + Filtros Guardados */}
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/60 pb-2">
-          <div className="flex items-stretch gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-1 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
+          <div className="relative flex items-stretch gap-1 bg-[#f2f3ff] dark:bg-slate-800/70 p-1 rounded-full overflow-x-auto scrollbar-none text-xs font-semibold">
+            {expIndicator && (
+              <span
+                aria-hidden="true"
+                style={{
+                  transform: `translateX(${expIndicator.left}px)`,
+                  width: `${expIndicator.width}px`,
+                }}
+                className={`pointer-events-none absolute top-1 bottom-1 left-0 rounded-full shadow-xs transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  experienceFilter === "untried"
+                    ? "bg-[#ffddb8]"
+                    : "bg-slate-900 dark:bg-white"
+                }`}
+              />
+            )}
             {[
               { key: "all", icon: null, iconClass: "", label: `${t("places.all")} (${initialPlaces.length})` },
               { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `${t("places.favorites")} (${initialPlaces.filter(p => p.isFavorite).length})` },
@@ -1241,18 +1268,21 @@ export function PlacesExplorer({
               return (
                 <button
                   key={item.key}
+                  ref={(el) => {
+                    expTabRefs.current[item.key] = el;
+                  }}
                   type="button"
                   onClick={() => {
                     setExperienceFilter(active && item.key !== "all" ? "all" : (item.key as typeof experienceFilter));
                     setCurrentPage(1);
                   }}
-                  className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap transition cursor-pointer ${active
+                  className={`relative z-10 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap transition-colors duration-200 cursor-pointer ${active
                     ? isUntried
-                      ? "bg-[#ffddb8] text-[#684000] font-black shadow-xs"
-                      : "bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs"
+                      ? `${!expIndicator ? "bg-[#ffddb8] shadow-xs " : ""}text-[#684000] font-black`
+                      : `${!expIndicator ? "bg-slate-900 dark:bg-white shadow-xs " : ""}text-white dark:text-slate-900 font-bold`
                     : isUntried
                       ? "text-amber-800 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/40 hover:bg-amber-200/60 font-semibold"
-                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 font-semibold"
                     }`}
                 >
                   {item.icon && (
