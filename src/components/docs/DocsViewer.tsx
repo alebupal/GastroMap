@@ -11,6 +11,7 @@ type DocTab = "docs" | "changelog" | "readme";
 
 interface DocsViewerProps {
   initialTab?: DocTab;
+  hasGlobalHeader?: boolean;
 }
 
 /**
@@ -196,7 +197,10 @@ function InlineMarkdown({
   return <>{nodes}</>;
 }
 
-export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
+export default function DocsViewer({
+  initialTab = "docs",
+  hasGlobalHeader = false,
+}: DocsViewerProps) {
   const { t } = useT();
   const [activeTab, setActiveTab] = useState<DocTab>(initialTab);
   const [lang, setLang] = useState<"es" | "en">("es");
@@ -514,66 +518,70 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
     return elements;
   };
 
+  const langSwitcher = (
+    <div className="relative grid grid-cols-2 bg-[#f2f3ff] dark:bg-slate-800/80 p-1 rounded-full border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+      <span
+        aria-hidden="true"
+        className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-orange-600 shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          lang === "es" ? "translate-x-0" : "translate-x-full"
+        }`}
+      />
+      <button
+        type="button"
+        onClick={() => setLang("es")}
+        className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
+          lang === "es"
+            ? "text-white"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+        }`}
+      >
+        <span>🇪🇸</span>
+        <span className="hidden sm:inline">ES</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => setLang("en")}
+        className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
+          lang === "en"
+            ? "text-white"
+            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+        }`}
+      >
+        <span>🇬🇧</span>
+        <span className="hidden sm:inline">EN</span>
+      </button>
+    </div>
+  );
+
   return (
     <>
       <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex-1 flex flex-col gap-5">
-        {/* Cabecera superior unificada estilo DESIGN.md */}
-        <header className="w-full flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/" className="flex items-center group shrink-0">
-              <GastroMapLogo
-                iconClassName="w-8 h-8 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform"
-                textClassName="text-lg sm:text-xl"
-              />
-            </Link>
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shrink-0"
-              aria-label={t("docs.back_to_explorer")}
-            >
-              <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
-              <span className="hidden sm:inline">{t("docs.back_to_explorer")}</span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-
-            {/* Selector de idioma del documento con píldora deslizante */}
-            <div className="relative grid grid-cols-2 bg-[#f2f3ff] dark:bg-slate-800/80 p-1 rounded-full border border-slate-200/60 dark:border-slate-700/60">
-              <span
-                aria-hidden="true"
-                className={`pointer-events-none absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-full bg-orange-600 shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  lang === "es" ? "translate-x-0" : "translate-x-full"
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setLang("es")}
-                className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
-                  lang === "es"
-                    ? "text-white"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
+        {/* Cabecera pública solo si no se muestra el UserHeader global */}
+        {!hasGlobalHeader && (
+          <header className="w-full flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link href="/" className="flex items-center group shrink-0">
+                <GastroMapLogo
+                  iconClassName="w-8 h-8 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform"
+                  textClassName="text-lg sm:text-xl"
+                />
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shrink-0"
+                aria-label={t("docs.back_to_explorer")}
               >
-                <span>🇪🇸</span>
-                <span className="hidden sm:inline">ES</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setLang("en")}
-                className={`relative z-10 px-2.5 py-1 rounded-full text-xs font-bold transition-colors duration-200 cursor-pointer flex items-center justify-center gap-1 ${
-                  lang === "en"
-                    ? "text-white"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-                }`}
-              >
-                <span>🇬🇧</span>
-                <span className="hidden sm:inline">EN</span>
-              </button>
+                <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
+                <span className="hidden sm:inline">{t("docs.back_to_explorer")}</span>
+              </Link>
             </div>
-          </div>
-        </header>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
+              {langSwitcher}
+            </div>
+          </header>
+        )}
 
         {/* Tarjeta Hero + Pestañas segmentadas con píldora deslizante estilo StatsModal */}
         <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-4">
@@ -592,14 +600,26 @@ export default function DocsViewer({ initialTab = "docs" }: DocsViewerProps) {
               </div>
             </div>
 
-            {filename && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-mono font-semibold self-start sm:self-center shrink-0">
-                <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
-                  description
+            <div className="flex items-center gap-2 flex-wrap self-start sm:self-center shrink-0">
+              {hasGlobalHeader && (
+                <Link
+                  href="/"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition"
+                >
+                  <span className="material-symbols-outlined text-sm leading-none">arrow_back</span>
+                  <span>{t("docs.back_to_explorer")}</span>
+                </Link>
+              )}
+              {hasGlobalHeader && langSwitcher}
+              {filename && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-mono font-semibold">
+                  <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                    description
+                  </span>
+                  <span>{filename}</span>
                 </span>
-                <span>{filename}</span>
-              </span>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Pestañas segmentadas con píldora deslizante animada */}
