@@ -108,6 +108,7 @@ Al acceder por primera vez a una instancia limpia:
   - `Países (+195)` y `Ciudades`: Selectores desplegables con buscador integrado.
   - `Rangos de Precio Numéricos`: Botones píldora para rangos explícitos (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`).
   - `Nota mínima`: Filtro rápido (`★ 7+`, `★ 8+`, `★ 9+`) dentro del panel animado `+ Filtros`, junto a ocasiones y etiquetas gastronómicas (8 planes por defecto personalizables con emojis o iconos **Material Symbols** desde `/admin > Taxonomía`).
+  - `Plan con amigos`: Selecciona con qué usuarios vas a salir (en `+ Filtros` o en el Asistente/Filtros móvil) y filtra locales **pendientes o por descubrir** para todo el grupo (*Pendiente o por descubrir*, *Todos quieren ir* o *Alguno quiere ir sin probar*). Combina a la perfección con **🎲 Al azar** y el mapa.
   - **Estado vacío accionable**: Si una combinación de filtros no devuelve resultados, aparecen chips clicables para retirar un filtro individual sin reiniciar toda la búsqueda.
 - **Tarjetas de Locales Estilo Stitch**:
   - Avatar con iniciales del establecimiento, dirección con pin, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).

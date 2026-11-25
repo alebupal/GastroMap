@@ -50,6 +50,34 @@ export interface PlaceWithDetails extends Place {
   experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
   sharedGroupIds?: string[];
   sharedGroupNames?: string[];
+  pendingUserIds?: string[];
+  visitedUserIds?: string[];
+}
+
+export interface CommunityUserSummary {
+  id: string;
+  name: string;
+  username: string | null;
+}
+
+/**
+ * Devuelve los usuarios activos de la comunidad (solo datos públicos: id, nombre y @username)
+ * para el filtro «Plan con amigos» en el explorador.
+ */
+export async function getCommunityUsers(): Promise<CommunityUserSummary[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+    })
+    .from(users)
+    .where(eq(users.status, "active"));
+
+  return rows.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export interface UserCoordinates {
@@ -637,6 +665,37 @@ export async function getAllPlaces(
     hasCoords ? sql`distance_meters ASC NULLS LAST` : desc(places.createdAt)
   );
 
+  // Cargar en bloque las interacciones (pendiente/visitado) de todos los sitios visibles
+  const placeIds = rows.map((r) => r.place.id);
+  const allUserPlaceRows =
+    placeIds.length > 0
+      ? await db
+          .select({
+            placeId: userPlaces.placeId,
+            userId: userPlaces.userId,
+            personalStatus: userPlaces.personalStatus,
+            rating: userPlaces.rating,
+          })
+          .from(userPlaces)
+          .where(inArray(userPlaces.placeId, placeIds))
+      : [];
+
+  const pendingUsersByPlace = new Map<string, string[]>();
+  const visitedUsersByPlace = new Map<string, string[]>();
+
+  for (const row of allUserPlaceRows) {
+    if (row.personalStatus === "pending") {
+      const list = pendingUsersByPlace.get(row.placeId) || [];
+      list.push(row.userId);
+      pendingUsersByPlace.set(row.placeId, list);
+    }
+    if (row.personalStatus === "visited" || (row.rating !== null && row.rating > 0)) {
+      const list = visitedUsersByPlace.get(row.placeId) || [];
+      list.push(row.userId);
+      visitedUsersByPlace.set(row.placeId, list);
+    }
+  }
+
   // Para cada lugar, recuperar ocasiones, etiquetas, interacciones personales y comentarios
   const placesWithDetails = await Promise.all(
     rows.map(async ({ place, createdByName, createdByUsername, distanceMeters }) => {
@@ -688,26 +747,14 @@ export async function getAllPlaces(
       }
 
       // Cálculo de experiencia: 'visited_by_me' | 'visited_by_others' | 'untried'
+      const placeVisitedUserIds = visitedUsersByPlace.get(place.id) || [];
+      const placePendingUserIds = pendingUsersByPlace.get(place.id) || [];
       let experienceStatus: "visited_by_me" | "visited_by_others" | "untried" = "untried";
 
       if (personalStatus === "visited" || (rating !== null && rating > 0)) {
         experienceStatus = "visited_by_me";
-      } else {
-        // Verificar si algún otro usuario lo ha visitado
-        const otherVisits = await db
-          .select({ id: userPlaces.id })
-          .from(userPlaces)
-          .where(
-            and(
-              eq(userPlaces.placeId, place.id),
-              sql`(${userPlaces.personalStatus} = 'visited' OR ${userPlaces.rating} IS NOT NULL)`
-            )
-          )
-          .limit(1);
-
-        if (otherVisits.length > 0) {
-          experienceStatus = "visited_by_others";
-        }
+      } else if (placeVisitedUserIds.length > 0) {
+        experienceStatus = "visited_by_others";
       }
 
       return {
@@ -731,6 +778,8 @@ export async function getAllPlaces(
         experienceStatus,
         sharedGroupIds: groupLinks.map((g) => g.groupId),
         sharedGroupNames: groupLinks.map((g) => g.groupName),
+        pendingUserIds: placePendingUserIds,
+        visitedUserIds: placeVisitedUserIds,
       };
     })
   );

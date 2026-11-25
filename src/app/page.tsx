@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { countUsers, getCurrentUser } from "@/lib/auth";
-import { getAllPlaces } from "@/lib/actions/places";
+import { getAllPlaces, getCommunityUsers } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getSavedFiltersAction } from "@/lib/actions/saved-filters";
 import { versionService } from "@/services/versionService";
@@ -24,11 +24,12 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, savedFiltersList, t] = await Promise.all([
+  const [places, occasionsList, tagsList, savedFiltersList, communityUsers, t] = await Promise.all([
     getAllPlaces(),
     getOccasions(),
     getTagsWithCount(),
     getSavedFiltersAction(),
+    getCommunityUsers(),
     getT(),
   ]);
 
@@ -58,6 +59,7 @@ export default async function Home() {
             isAdmin={currentUser.role === "admin"}
             occasionMap={occasionMap}
             initialSavedFilters={savedFiltersList}
+            communityUsers={communityUsers}
           />
         </section>
       </div>

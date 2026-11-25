@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **«Dining with Friends» Filter & Accent-Insensitive Search**:
+  - New **«Dining with friends»** filter in `+ Filters` and the **Decision Assistant / Mobile Filters** (`DecisionAssistantModal`) to pick which users you're going out with and filter places by three modes: *Pending or untried* (nobody has visited it yet), *Everyone wants to go* (all selected have it marked pending), or *Someone wants to go (untried)*, with an *Include me too* toggle.
+  - Accent- and diacritic-insensitive search (`src/lib/search.ts`) across the explorer, Command Palette (`⌘K`), country/city searchable dropdowns, and admin tables.
 - **Shareable Lists & Collections (Personal Public Guides)**:
   - Added `place_lists` and `place_list_items` tables (`drizzle/0012_far_doctor_strange.sql`) to organize places into themed collections (e.g. *“Tapas tour in Granada”*, *“Lisbon trip”*, *“Special dinners”*) with custom icons, descriptions, and manual stop ordering.
   - New **«My lists & guides»** manager modal in the user menu to create, edit, reorder (`↑`/`↓`), and delete lists, plus toggle a read-only public link with one-tap copy and WhatsApp sharing.

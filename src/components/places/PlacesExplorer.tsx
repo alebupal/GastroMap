@@ -11,7 +11,7 @@ import { ComparePlacesModal } from "./ComparePlacesModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
 import { normalizeSearchText } from "@/lib/search";
-import type { PlaceWithDetails } from "@/lib/actions/places";
+import type { PlaceWithDetails, CommunityUserSummary } from "@/lib/actions/places";
 import {
   createSavedFilterAction,
   deleteSavedFilterAction,
@@ -38,6 +38,7 @@ interface PlacesExplorerProps {
   isAdmin: boolean;
   occasionMap: Record<string, { name: string; icon: string }>;
   initialSavedFilters?: SavedFilterItem[];
+  communityUsers?: CommunityUserSummary[];
 }
 
 /**
@@ -71,6 +72,7 @@ export function PlacesExplorer({
   isAdmin,
   occasionMap,
   initialSavedFilters = [],
+  communityUsers = [],
 }: PlacesExplorerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
@@ -178,6 +180,12 @@ export function PlacesExplorer({
     "all" | "visited_by_me" | "untried" | "favorite" | "pending"
   >("all");
   const [minRating, setMinRating] = useState<number | null>(null);
+  // Filtro «Plan con amigos» (usuarios con los que vas + modo pendiente/por descubrir)
+  const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
+  const [friendsFilterMode, setFriendsFilterMode] = useState<
+    "untried_or_pending" | "pending_all" | "pending_any"
+  >("untried_or_pending");
+  const [includeMeWithFriends, setIncludeMeWithFriends] = useState(true);
   const [selectedTowns, setSelectedTowns] = useState<string[]>([]);
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
   const urlHydratedRef = useRef(false);
@@ -474,6 +482,9 @@ export function PlacesExplorer({
     setSelectedTowns([]);
     setExperienceFilter("all");
     setMinRating(null);
+    setSelectedFriendIds([]);
+    setFriendsFilterMode("untried_or_pending");
+    setIncludeMeWithFriends(true);
     setTextSearch("");
     setUserLocation(null);
     setRadiusKm(null);
@@ -698,6 +709,29 @@ export function PlacesExplorer({
       result = result.filter((p) => p.rating !== null && p.rating !== undefined && p.rating >= minRating);
     }
 
+    // 10. Filtro «Plan con amigos» (pendientes o por descubrir para el grupo elegido)
+    if (selectedFriendIds.length > 0) {
+      const targetUserIds = includeMeWithFriends
+        ? Array.from(new Set([currentUserId, ...selectedFriendIds]))
+        : selectedFriendIds;
+
+      result = result.filter((p) => {
+        const visited = p.visitedUserIds || [];
+        const pending = p.pendingUserIds || [];
+        if (friendsFilterMode === "pending_all") {
+          return targetUserIds.every((uid) => pending.includes(uid));
+        }
+        if (friendsFilterMode === "pending_any") {
+          return (
+            targetUserIds.some((uid) => pending.includes(uid)) &&
+            targetUserIds.every((uid) => !visited.includes(uid))
+          );
+        }
+        // "untried_or_pending": ninguno de los seleccionados lo ha visitado todavía
+        return targetUserIds.every((uid) => !visited.includes(uid));
+      });
+    }
+
     // Ordenación configurable por el usuario
     const priceOrder: Record<string, number> = {
       "€": 1,
@@ -750,6 +784,10 @@ export function PlacesExplorer({
     selectedGroupFilterIds,
     experienceFilter,
     minRating,
+    selectedFriendIds,
+    friendsFilterMode,
+    includeMeWithFriends,
+    currentUserId,
     userLocation,
     radiusKm,
     sortBy,
@@ -769,6 +807,9 @@ export function PlacesExplorer({
     selectedGroupFilterIds,
     experienceFilter,
     minRating,
+    selectedFriendIds,
+    friendsFilterMode,
+    includeMeWithFriends,
     radiusKm,
     sortBy,
   ]);
@@ -933,8 +974,24 @@ export function PlacesExplorer({
     selectedTowns.length +
     (experienceFilter !== "all" ? 1 : 0) +
     (minRating !== null ? 1 : 0) +
+    (selectedFriendIds.length > 0 ? 1 : 0) +
     (userLocation ? 1 : 0) +
     (textSearch.trim() ? 1 : 0);
+
+  const otherCommunityUsers = useMemo(
+    () => communityUsers.filter((u) => u.id !== currentUserId),
+    [communityUsers, currentUserId]
+  );
+
+  const friendSelectOptions = useMemo(
+    () =>
+      otherCommunityUsers.map((u) => ({
+        value: u.id,
+        label: u.username ? `@${u.username}` : u.name,
+        subtitle: u.username ? u.name : undefined,
+      })),
+    [otherCommunityUsers]
+  );
 
   const isFiltered = activeFiltersCount > 0 || selectedGroupFilterIds.length > 0 || radiusKm != null;
 
@@ -1740,6 +1797,80 @@ export function PlacesExplorer({
             </div>
           </div>
 
+          {/* Filtro «Plan con amigos»: sitios pendientes o por descubrir para los usuarios elegidos */}
+          {friendSelectOptions.length > 0 && (
+            <div className="space-y-2 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                    diversity_3
+                  </span>
+                  <span>{t("friends_filter.title")}</span>
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <MultiSearchableSelect
+                    values={selectedFriendIds}
+                    onChange={setSelectedFriendIds}
+                    options={friendSelectOptions}
+                    placeholder={t("friends_filter.select_placeholder")}
+                    clearLabel={t("friends_filter.clear")}
+                    searchPlaceholder={t("friends_filter.search_placeholder")}
+                    emptyText={t("places.no_results")}
+                    icon={<span className="material-symbols-outlined text-[15px] leading-none">person_add</span>}
+                  />
+                  {selectedFriendIds.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFriendIds([])}
+                      className="text-[11px] text-rose-500 hover:underline font-bold cursor-pointer"
+                    >
+                      {t("friends_filter.clear")}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {selectedFriendIds.length > 0 && (
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {(
+                      [
+                        { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
+                        { id: "pending_all", label: t("friends_filter.mode_pending_all") },
+                        { id: "pending_any", label: t("friends_filter.mode_pending_any") },
+                      ] as const
+                    ).map((mode) => {
+                      const active = friendsFilterMode === mode.id;
+                      return (
+                        <button
+                          key={mode.id}
+                          type="button"
+                          onClick={() => setFriendsFilterMode(mode.id)}
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-150 active:scale-95 cursor-pointer ${
+                            active
+                              ? "bg-orange-600 text-white shadow-xs"
+                              : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          }`}
+                        >
+                          {mode.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={includeMeWithFriends}
+                      onChange={(e) => setIncludeMeWithFriends(e.target.checked)}
+                      className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                    />
+                    <span>{t("friends_filter.include_me")}</span>
+                  </label>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Filtros por Planes / Ocasiones (acumulables, con buscador y conmutador entre fila y cuadrícula) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] px-0.5">
@@ -2298,6 +2429,19 @@ export function PlacesExplorer({
                         <span className="material-symbols-outlined text-xs leading-none">close</span>
                       </button>
                     )}
+                    {selectedFriendIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedFriendIds([])}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/80 dark:border-orange-800/60 text-[11px] font-bold hover:bg-orange-100 transition active:scale-95 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-xs leading-none">diversity_3</span>
+                        <span>
+                          {t("friends_filter.chip_label", { count: selectedFriendIds.length })}
+                        </span>
+                        <span className="material-symbols-outlined text-xs leading-none">close</span>
+                      </button>
+                    )}
                     {selectedPrices.map((pr) => (
                       <button
                         key={pr}
@@ -2625,6 +2769,13 @@ export function PlacesExplorer({
         onSelectTowns={(vals) => setSelectedTowns(vals)}
         minRating={minRating}
         onSelectMinRating={(val) => setMinRating(val)}
+        friendOptions={friendSelectOptions}
+        selectedFriendIds={selectedFriendIds}
+        onSelectFriends={setSelectedFriendIds}
+        friendsFilterMode={friendsFilterMode}
+        onChangeFriendsFilterMode={setFriendsFilterMode}
+        includeMeWithFriends={includeMeWithFriends}
+        onToggleIncludeMeWithFriends={setIncludeMeWithFriends}
         groups={myGroups}
         selectedGroupIds={selectedGroupFilterIds}
         onToggleGroup={(gid) =>

@@ -35,6 +35,13 @@ interface DecisionAssistantModalProps {
   onSelectTowns?: (towns: string[]) => void;
   minRating?: number | null;
   onSelectMinRating?: (rating: number | null) => void;
+  friendOptions?: MultiSelectOption[];
+  selectedFriendIds?: string[];
+  onSelectFriends?: (ids: string[]) => void;
+  friendsFilterMode?: "untried_or_pending" | "pending_all" | "pending_any";
+  onChangeFriendsFilterMode?: (mode: "untried_or_pending" | "pending_all" | "pending_any") => void;
+  includeMeWithFriends?: boolean;
+  onToggleIncludeMeWithFriends?: (val: boolean) => void;
   groups?: Array<{ id: string; name: string }>;
   selectedGroupIds?: string[];
   onToggleGroup?: (groupId: string) => void;
@@ -70,6 +77,13 @@ export function DecisionAssistantModal({
   onSelectTowns,
   minRating = null,
   onSelectMinRating,
+  friendOptions = [],
+  selectedFriendIds = [],
+  onSelectFriends,
+  friendsFilterMode = "untried_or_pending",
+  onChangeFriendsFilterMode,
+  includeMeWithFriends = true,
+  onToggleIncludeMeWithFriends,
   groups = [],
   selectedGroupIds = [],
   onToggleGroup,
@@ -509,7 +523,84 @@ export function DecisionAssistantModal({
             </div>
           )}
 
-          {/* 7. Grupos privados (solo si el usuario pertenece a grupos) */}
+          {/* 7. Plan con amigos (pendientes o por descubrir para los usuarios elegidos) */}
+          {friendOptions.length > 0 && onSelectFriends && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm text-orange-600 leading-none">
+                    diversity_3
+                  </span>
+                  <span>{t("friends_filter.title")}</span>
+                </label>
+                {selectedFriendIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectFriends([])}
+                    className="text-[11px] font-bold text-rose-500 hover:underline cursor-pointer"
+                  >
+                    {t("friends_filter.clear")}
+                  </button>
+                )}
+              </div>
+
+              <MultiSearchableSelect
+                values={selectedFriendIds}
+                onChange={onSelectFriends}
+                options={friendOptions}
+                placeholder={t("friends_filter.select_placeholder")}
+                clearLabel={t("friends_filter.clear")}
+                searchPlaceholder={t("friends_filter.search_placeholder")}
+                emptyText={t("places.no_results")}
+                icon={<span className="material-symbols-outlined text-[15px] leading-none">person_add</span>}
+                fullWidth
+              />
+
+              {selectedFriendIds.length > 0 && onChangeFriendsFilterMode && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex flex-wrap gap-1.5">
+                    {(
+                      [
+                        { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
+                        { id: "pending_all", label: t("friends_filter.mode_pending_all") },
+                        { id: "pending_any", label: t("friends_filter.mode_pending_any") },
+                      ] as const
+                    ).map((mode) => {
+                      const active = friendsFilterMode === mode.id;
+                      return (
+                        <button
+                          key={mode.id}
+                          type="button"
+                          onClick={() => onChangeFriendsFilterMode(mode.id)}
+                          className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
+                            active
+                              ? "bg-orange-600 border-orange-600 text-white shadow-xs"
+                              : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          {mode.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {onToggleIncludeMeWithFriends && (
+                    <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={includeMeWithFriends}
+                        onChange={(e) => onToggleIncludeMeWithFriends(e.target.checked)}
+                        className="rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                      />
+                      <span>{t("friends_filter.include_me")}</span>
+                    </label>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 8. Grupos privados (solo si el usuario pertenece a grupos) */}
           {groups.length > 0 && onToggleGroup && (
             <div>
               <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-2">

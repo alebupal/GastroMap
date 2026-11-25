@@ -234,6 +234,42 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
   assert.equal(matches(dummyPlace, "sushi"), false, "No debe encontrar términos no presentes");
 });
 
+test("Filtro Plan con amigos: filtra sitios pendientes o por descubrir para los usuarios elegidos", () => {
+  const samplePlaces = [
+    { id: "p1", visitedUserIds: [], pendingUserIds: ["u1", "u2"] }, // ambos quieren ir
+    { id: "p2", visitedUserIds: ["u1"], pendingUserIds: ["u2"] }, // u1 ya fue
+    { id: "p3", visitedUserIds: [], pendingUserIds: ["u2"] }, // solo u2 quiere ir, nadie fue
+    { id: "p4", visitedUserIds: [], pendingUserIds: [] }, // por descubrir para ambos
+  ];
+
+  const filterWithFriends = (places, targetIds, mode) =>
+    places.filter((p) => {
+      if (mode === "pending_all") {
+        return targetIds.every((uid) => p.pendingUserIds.includes(uid));
+      }
+      if (mode === "pending_any") {
+        return (
+          targetIds.some((uid) => p.pendingUserIds.includes(uid)) &&
+          targetIds.every((uid) => !p.visitedUserIds.includes(uid))
+        );
+      }
+      return targetIds.every((uid) => !p.visitedUserIds.includes(uid));
+    });
+
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "untried_or_pending").map((p) => p.id),
+    ["p1", "p3", "p4"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "pending_all").map((p) => p.id),
+    ["p1"]
+  );
+  assert.deepEqual(
+    filterWithFriends(samplePlaces, ["u1", "u2"], "pending_any").map((p) => p.id),
+    ["p1", "p3"]
+  );
+});
+
 test("Documentación: los 6 archivos oficiales existen y tienen contenido válido", () => {
   const root = path.join(__dirname, "..");
   const docs = [

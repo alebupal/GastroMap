@@ -1028,5 +1028,17 @@
     "not_found_title": "Esta guía no está disponible",
     "not_found_desc": "El enlace puede haber caducado o su autor ha vuelto a poner la lista en modo privado.",
     "back_to_gastromap": "Ir a GastroMap"
+  },
+  "friends_filter": {
+    "title": "Plan con amigos",
+    "select_placeholder": "Elegir amigos...",
+    "search_placeholder": "Buscar usuario...",
+    "selected_plural": "amigos",
+    "clear": "Quitar",
+    "mode_untried_or_pending": "Pendiente o por descubrir",
+    "mode_pending_all": "Todos quieren ir",
+    "mode_pending_any": "Alguno quiere ir (sin probar)",
+    "include_me": "Incluirme a mí también",
+    "chip_label": "Con amigos ({count})"
   }
 }
