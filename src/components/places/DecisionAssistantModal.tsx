@@ -483,7 +483,7 @@ export function DecisionAssistantModal({
                     : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/70 dark:border-slate-800 text-slate-700 dark:text-slate-300"
                 }`}
               >
-                <span>🕒</span>
+                <span className="material-symbols-outlined text-base leading-none">schedule</span>
                 <span>{t("places.want_to_go")}</span>
               </button>
             </div>
