@@ -1042,6 +1042,13 @@
     "mode_favorites_all": "Favorito de todos",
     "mode_discover_for_some": "Probado por alguno, nuevo para otros",
     "mode_visited_all": "Visitado por todos",
+    "desc_untried_or_pending": "Sitios a los que ninguno de los elegidos ha ido todavía.",
+    "desc_pending_all": "Solo sitios que todos los elegidos tienen marcados en «Quiero ir».",
+    "desc_pending_any": "Al menos uno lo tiene en «Quiero ir» y ninguno lo ha visitado aún.",
+    "desc_favorites_any": "Sitios marcados como favorito por al menos una persona del grupo.",
+    "desc_favorites_all": "Clásicos que todos los elegidos tenéis marcados como favoritos.",
+    "desc_discover_for_some": "Al menos uno ya lo conoce, pero sigue siendo nuevo para otro del grupo.",
+    "desc_visited_all": "Sitios en los que ya habéis estado todos los elegidos.",
     "include_me": "Incluirme a mí también",
     "chip_label": "Con amigos ({count})"
   }

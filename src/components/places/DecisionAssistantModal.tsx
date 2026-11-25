@@ -621,6 +621,10 @@ export function DecisionAssistantModal({
                     ]}
                   />
 
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug px-1">
+                    {t(`friends_filter.desc_${friendsFilterMode}`)}
+                  </p>
+
                   {onToggleIncludeMeWithFriends && (
                     <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
                       <input

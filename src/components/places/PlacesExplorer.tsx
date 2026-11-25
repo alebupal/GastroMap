@@ -1907,6 +1907,9 @@ export function PlacesExplorer({
                     />
                     <span>{t("friends_filter.include_me")}</span>
                   </label>
+                  <p className="w-full text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    {t(`friends_filter.desc_${friendsFilterMode}`)}
+                  </p>
                 </div>
               )}
             </div>

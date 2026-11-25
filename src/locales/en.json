@@ -1042,6 +1042,13 @@
     "mode_favorites_all": "Everyone's favorite",
     "mode_discover_for_some": "Tried by some, new for others",
     "mode_visited_all": "Visited by everyone",
+    "desc_untried_or_pending": "Places that none of the selected people have visited yet.",
+    "desc_pending_all": "Only places that everyone selected has marked as «Want to go».",
+    "desc_pending_any": "At least one person wants to go and nobody has visited it yet.",
+    "desc_favorites_any": "Places marked as favorite by at least one person in the group.",
+    "desc_favorites_all": "Classics that everyone selected has marked as a favorite.",
+    "desc_discover_for_some": "At least one person has tried it, while it's still new for someone else.",
+    "desc_visited_all": "Places that everyone selected has already visited.",
     "include_me": "Include me too",
     "chip_label": "With friends ({count})"
   }
