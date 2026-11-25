@@ -476,7 +476,7 @@ export function PlaceCard({
           </span>
         </div>
 
-        <div className="grid grid-flow-col auto-cols-fr sm:flex sm:items-center gap-0.5 sm:gap-2 sm:flex-wrap sm:justify-end">
+        <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 sm:flex-wrap w-full sm:w-auto">
           {/* Botón de comentarios */}
           <button
             type="button"
@@ -549,14 +549,14 @@ export function PlaceCard({
             </a>
           )}
 
-          <div className="relative flex justify-center">
+          <div className="relative">
             <button
               type="button"
               onClick={() => setShowShareMenu((prev) => !prev)}
               aria-label={t("cards.copy_place_tooltip")}
               aria-expanded={showShareMenu}
               title={t("cards.copy_place_tooltip")}
-              className={`w-full sm:w-auto flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl active:scale-95 ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl active:scale-95 ${
                 copiedPlace
                   ? "text-emerald-600 dark:text-emerald-400 font-bold"
                   : showShareMenu
