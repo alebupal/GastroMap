@@ -136,7 +136,12 @@ export function CommandPalette({
           normalizeSearchText(p.name).includes(q) ||
           (p.city && normalizeSearchText(p.city).includes(q)) ||
           (p.address && normalizeSearchText(p.address).includes(q)) ||
-          p.tags.some((tg) => normalizeSearchText(tg).includes(q))
+          (p.createdByName && normalizeSearchText(p.createdByName).includes(q)) ||
+          (p.createdByUsername &&
+            (normalizeSearchText(p.createdByUsername).includes(q) ||
+              normalizeSearchText(`@${p.createdByUsername}`).includes(q))) ||
+          p.tags.some((tg) => normalizeSearchText(tg).includes(q)) ||
+          (p.commentAuthors || []).some((a) => normalizeSearchText(a).includes(q))
       )
       .slice(0, 8);
   }, [places, query]);

@@ -110,9 +110,11 @@ export function PlacesTableManager({
           p.privateNotes || "",
           p.createdByName || "",
           p.createdByUsername || "",
+          p.createdByUsername ? `@${p.createdByUsername}` : "",
           ...p.tags,
           ...p.occasions,
           ...(p.commentsTexts || []),
+          ...(p.commentAuthors || []),
         ].join(" ")
       );
 

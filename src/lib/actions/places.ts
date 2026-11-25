@@ -48,6 +48,7 @@ export interface PlaceWithDetails extends Place {
   privateNotes?: string | null;
   commentsCount?: number;
   commentsTexts?: string[];
+  commentAuthors?: string[];
   experienceStatus?: "visited_by_me" | "visited_by_others" | "untried";
   sharedGroupIds?: string[];
   sharedGroupNames?: string[];
@@ -755,11 +756,17 @@ export async function getAllPlaces(
         .from(placeTags)
         .where(eq(placeTags.placeId, place.id));
 
-      // Comentarios y grupos con acceso
+      // Comentarios (con autor) y grupos con acceso
       const [comments, groupLinks] = await Promise.all([
         db
-          .select({ id: placeComments.id, content: placeComments.content })
+          .select({
+            id: placeComments.id,
+            content: placeComments.content,
+            authorName: users.name,
+            authorUsername: users.username,
+          })
           .from(placeComments)
+          .leftJoin(users, eq(placeComments.userId, users.id))
           .where(eq(placeComments.placeId, place.id)),
         db
           .select({
@@ -823,6 +830,17 @@ export async function getAllPlaces(
         privateNotes,
         commentsCount: comments.length,
         commentsTexts: comments.map((c) => c.content).filter(Boolean),
+        commentAuthors: Array.from(
+          new Set(
+            comments
+              .flatMap((c) => [
+                c.authorName || "",
+                c.authorUsername || "",
+                c.authorUsername ? `@${c.authorUsername}` : "",
+              ])
+              .filter(Boolean)
+          )
+        ),
         experienceStatus,
         sharedGroupIds: groupLinks.map((g) => g.groupId),
         sharedGroupNames: groupLinks.map((g) => g.groupName),

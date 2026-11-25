@@ -190,6 +190,7 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
     tags: ["cochinillo", "asador", "tradicional"],
     occasions: ["comer", "familiar"],
     commentsTexts: ["El postre ponche segoviano es imprescindible"],
+    commentAuthors: ["Cristina García", "cristinagv28", "@cristinagv28"],
   };
 
   const normalizeSearch = (text) =>
@@ -207,9 +208,11 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
         place.privateNotes || "",
         place.createdByName || "",
         place.createdByUsername || "",
+        place.createdByUsername ? `@${place.createdByUsername}` : "",
         ...place.tags,
         ...place.occasions,
         ...(place.commentsTexts || []),
+        ...(place.commentAuthors || []),
       ].join(" ")
     );
 
@@ -228,7 +231,11 @@ test("Búsqueda universal: busca por nombre, ciudad, dirección, notas, tags, oc
   assert.ok(matches(dummyPlace, "cochinillo"), "Debe encontrar por nota y tag");
   assert.ok(matches(dummyPlace, "ventana"), "Debe encontrar por notas privadas");
   assert.ok(matches(dummyPlace, "familiar"), "Debe encontrar por ocasión");
-  assert.ok(matches(dummyPlace, "alebupal"), "Debe encontrar por autor");
+  assert.ok(matches(dummyPlace, "alebupal"), "Debe encontrar por username del autor");
+  assert.ok(matches(dummyPlace, "@alebupal"), "Debe encontrar por @username del autor");
+  assert.ok(matches(dummyPlace, "alejandro"), "Debe encontrar por nombre real del autor");
+  assert.ok(matches(dummyPlace, "cristina"), "Debe encontrar por nombre del autor de un comentario");
+  assert.ok(matches(dummyPlace, "cristinagv28"), "Debe encontrar por username del autor de un comentario");
   assert.ok(matches(dummyPlace, "ponche segoviano"), "Debe encontrar por texto de comentario");
   assert.ok(matches(dummyPlace, "segovia ponche"), "Debe encontrar combinación de ciudad y comentario");
   assert.equal(matches(dummyPlace, "sushi"), false, "No debe encontrar términos no presentes");
