@@ -786,7 +786,7 @@ export function PlaceCommentsThread({
                 <div className="space-y-3">
                   {sortedComments.map((c) => {
                     const isOwn = c.userId === currentUserId;
-                    const canEdit = isOwn;
+                    const canEdit = isOwn || isAdmin;
                     const canDelete = isOwn || isAdmin;
                     const isEditing = editingCommentId === c.id;
                     const authorInitials = (c.authorName || "U")

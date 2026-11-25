@@ -12,6 +12,7 @@ import {
   type PlaceComment,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export interface CommentWithAuthor {
   id: string;
@@ -235,6 +236,14 @@ export async function addCommentAction(placeId: string, content: string) {
     })
     .returning();
 
+  await logAudit({
+    actorUserId: user.id,
+    entityType: "comment",
+    entityId: created.id,
+    action: "comment_created",
+    metadata: { placeId, preview: trimmed.slice(0, 80) },
+  });
+
   revalidatePath("/");
   return {
     success: true,
@@ -269,12 +278,22 @@ export async function deleteCommentAction(commentId: string) {
   }
 
   await db.delete(placeComments).where(eq(placeComments.id, commentId));
+  await logAudit({
+    actorUserId: user.id,
+    entityType: "comment",
+    entityId: commentId,
+    action: "comment_deleted",
+    metadata: {
+      placeId: comment.placeId,
+      deletedByAdmin: comment.userId !== user.id,
+    },
+  });
   revalidatePath("/");
   return { success: true };
 }
 
 /**
- * Edita el contenido de un comentario propio (solo el autor)
+ * Edita el contenido de un comentario (el autor o un administrador)
  */
 export async function updateCommentAction(commentId: string, content: string) {
   const user = await getCurrentUser();
@@ -290,8 +309,8 @@ export async function updateCommentAction(commentId: string, content: string) {
     .limit(1);
 
   if (!comment) return { error: "Comentario no encontrado." };
-  if (comment.userId !== user.id) {
-    return { error: "Solo el autor puede editar su propio comentario." };
+  if (comment.userId !== user.id && user.role !== "admin") {
+    return { error: "No tienes permiso para editar este comentario." };
   }
 
   await db
@@ -301,6 +320,18 @@ export async function updateCommentAction(commentId: string, content: string) {
       updatedAt: new Date(),
     })
     .where(eq(placeComments.id, commentId));
+
+  await logAudit({
+    actorUserId: user.id,
+    entityType: "comment",
+    entityId: commentId,
+    action: "comment_updated",
+    metadata: {
+      placeId: comment.placeId,
+      editedByAdmin: comment.userId !== user.id,
+      preview: trimmed.slice(0, 80),
+    },
+  });
 
   revalidatePath("/");
   return { success: true, content: trimmed };

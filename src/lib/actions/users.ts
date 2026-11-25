@@ -130,6 +130,14 @@ export async function updateUserRoleAction(userId: string, newRole: "admin" | "u
     .set({ role: newRole, updatedAt: new Date() })
     .where(eq(users.id, userId));
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: userId,
+    action: "user_role_changed",
+    metadata: { newRole },
+  });
+
   revalidatePath("/");
   return { success: true };
 }
@@ -268,6 +276,13 @@ export async function resetUserPasswordAction(userId: string, newPassword: strin
     .set({ passwordHash, updatedAt: new Date() })
     .where(eq(users.id, userId));
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: userId,
+    action: "user_password_reset",
+  });
+
   revalidatePath("/");
   return { success: true };
 }
@@ -308,6 +323,13 @@ export async function deleteUserAction(userId: string) {
 
   // 3. Eliminar usuario de forma segura
   await db.delete(users).where(eq(users.id, userId));
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: userId,
+    action: "user_deleted",
+    metadata: { deletedPlacesCount: placeIds.length },
+  });
   revalidatePath("/");
   return { success: true };
 }
@@ -479,6 +501,14 @@ export async function createUserDirectlyAction(formData: FormData) {
     updatedAt: new Date(),
   });
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: id,
+    action: "user_created",
+    metadata: { username, role },
+  });
+
   revalidatePath("/");
   return { success: true };
 }
@@ -522,6 +552,13 @@ export async function deleteMultipleUsersAction(userIds: string[]) {
 
   // 3. Eliminar los usuarios seleccionados
   await db.delete(users).where(inArray(users.id, validIds));
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "user",
+    entityId: "bulk",
+    action: "users_bulk_deleted",
+    metadata: { count: validIds.length },
+  });
   revalidatePath("/");
   return { success: true, count: validIds.length };
 }

@@ -192,6 +192,14 @@ export async function createInvitationAction(formData: FormData): Promise<Action
     })
     .returning();
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "invitation",
+    entityId: invitation.id,
+    action: "invitation_created",
+    metadata: { role, email: invitedEmail },
+  });
+
   return {
     success: true,
     url: `/invite/${invitation.token}`,
@@ -284,6 +292,14 @@ export async function registerWithInvitationAction(
     .update(invitations)
     .set({ usedAt: new Date() })
     .where(eq(invitations.id, invitation.id));
+
+  await logAudit({
+    actorUserId: newUser.id,
+    entityType: "user",
+    entityId: newUser.id,
+    action: "user_registered",
+    metadata: { username, role: invitation.role },
+  });
 
   // Iniciar sesión automáticamente
   const session = await createSession(newUser.id);

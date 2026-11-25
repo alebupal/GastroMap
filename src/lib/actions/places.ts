@@ -333,6 +333,14 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
       .onConflictDoNothing();
   }
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: newPlace.id,
+    action: "place_created",
+    metadata: { name, city, communityPublished },
+  });
+
   revalidatePath("/");
   redirect(`/?focus=${encodeURIComponent(newPlace.id)}`);
 }
@@ -569,6 +577,13 @@ export async function bulkDeletePlacesAction(placeIds: string[]) {
   await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
   await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
   await db.delete(places).where(inArray(places.id, placeIds));
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: "bulk",
+    action: "place_bulk_deleted",
+    metadata: { count: placeIds.length },
+  });
   revalidatePath("/");
   return { success: true, count: placeIds.length };
 }

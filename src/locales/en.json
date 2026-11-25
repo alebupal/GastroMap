@@ -832,7 +832,14 @@
     "date_all": "Any date",
     "date_today": "Today",
     "date_7d": "Last 7 days",
-    "date_30d": "Last 30 days"
+    "date_30d": "Last 30 days",
+    "purge_30d_btn": "Clean > 30d",
+    "purge_90d_btn": "Clean > 90d",
+    "purge_all_btn": "Clear all",
+    "purge_days_confirm": "Permanently delete all audit log entries older than {days} days?",
+    "purge_all_confirm": "Clear the entire audit log history? This action cannot be undone.",
+    "purge_success_toast": "✓ Deleted {count} audit log entries.",
+    "purge_none_toast": "No old audit records to clean."
   },
   "admin_demo": {
     "title": "Demo Data Generator",

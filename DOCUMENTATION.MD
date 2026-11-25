@@ -133,7 +133,7 @@ When launching on a clean database:
 - **Decision Wizard**: Step-by-step guidance defining budget, mood, country, city, distance radius, and visit state.
 
 ### 💬 Collaborative Comments, Ratings & Detail Modals
-- **Unified Comments & Private Note**: The comments modal brings together community reviews and your private note (visible only to you) with animated tabs (`All`, `Private`, `Community`), inline editing of your private note, and a mobile-friendly collapsible composer.
+- **Unified Comments & Private Note**: The comments modal brings together community reviews and your private note (visible only to you) with animated tabs (`All`, `Private`, `Community`), inline editing of your private note, and a mobile-friendly collapsible composer. Administrators can edit or delete any comment for moderation or fixes (tracked in the audit log).
 - **Private Rating (`My rating`, 1 to 10)**: Dedicated quick modal to score any restaurant from 1 to 10.
 - **Quick Actions & `⋮` Menu**: Each card displays clear footer actions (`Comments`, `Compare`, `Map`, `Maps`, `Share`) plus a `⋮` menu with **Save to list**, `Edit`, and `Delete` (strictly restricted to administrators).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.

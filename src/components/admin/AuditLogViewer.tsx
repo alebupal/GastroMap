@@ -1,24 +1,51 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getAuditLogsAction, type AuditLogRow } from "@/lib/actions/audit";
+import { getAuditLogsAction, purgeAuditLogsAction, type AuditLogRow } from "@/lib/actions/audit";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
+import { useToast } from "@/components/ui/Toast";
+import { normalizeSearchText } from "@/lib/search";
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
-  place_updated: { label: "Sitio editado", color: "bg-blue-500/15 text-blue-500 border-blue-500/30" },
-  place_deleted: { label: "Sitio eliminado", color: "bg-red-500/15 text-red-500 border-red-500/30" },
-  place_merged: { label: "Sitios fusionados", color: "bg-amber-500/15 text-amber-500 border-amber-500/30" },
-  user_disabled: { label: "Usuario desactivado", color: "bg-red-500/15 text-red-500 border-red-500/30" },
-  user_enabled: { label: "Usuario reactivado", color: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30" },
+  place_created: { label: "Sitio creado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  place_updated: { label: "Sitio editado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  place_deleted: { label: "Sitio eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  place_bulk_deleted: { label: "Sitios eliminados (lote)", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  place_merged: { label: "Sitios fusionados", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  places_imported: { label: "Sitios importados", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  comment_created: { label: "Comentario publicado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  comment_updated: { label: "Comentario editado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  comment_deleted: { label: "Comentario eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  user_created: { label: "Usuario creado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  user_registered: { label: "Usuario registrado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  user_updated_by_admin: { label: "Usuario editado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  user_role_changed: { label: "Rol cambiado", color: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30" },
+  user_password_reset: { label: "Contraseña reseteada", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  user_disabled: { label: "Usuario desactivado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  user_enabled: { label: "Usuario reactivado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  user_deleted: { label: "Usuario eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  users_bulk_deleted: { label: "Usuarios eliminados (lote)", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  invitation_created: { label: "Invitación creada", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  invitation_deleted: { label: "Invitación eliminada", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  setting_updated: { label: "Ajuste actualizado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  backup_downloaded: { label: "Backup descargado", color: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30" },
+  backup_restored: { label: "Backup restaurado", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  audit_purged: { label: "Auditoría purgada", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  app_reset: { label: "App reseteada", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  create: { label: "Lista creada", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  list_updated: { label: "Lista editada", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  delete: { label: "Lista eliminada", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
 };
 
 type DateRangeFilter = "all" | "today" | "7d" | "30d";
 
 export function AuditLogViewer() {
   const { t, locale } = useT();
+  const { toast } = useToast();
   const [logs, setLogs] = useState<AuditLogRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [purging, setPurging] = useState<string | null>(null);
 
   // Filtros de búsqueda avanzados
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,6 +64,31 @@ export function AuditLogViewer() {
       setLogs(data);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePurge(scope: 30 | 90 | "all") {
+    const confirmMsg =
+      scope === "all"
+        ? t("admin_audit.purge_all_confirm")
+        : t("admin_audit.purge_days_confirm", { days: scope });
+    if (!confirm(confirmMsg)) return;
+
+    setPurging(String(scope));
+    try {
+      const res = await purgeAuditLogsAction(scope);
+      if (res.error) {
+        toast(res.error, { kind: "error" });
+      } else if ((res.deletedCount || 0) === 0) {
+        toast(t("admin_audit.purge_none_toast"), { kind: "info" });
+      } else {
+        toast(t("admin_audit.purge_success_toast", { count: res.deletedCount || 0 }), {
+          kind: "success",
+        });
+        await loadLogs();
+      }
+    } finally {
+      setPurging(null);
     }
   }
 
@@ -85,7 +137,7 @@ export function AuditLogViewer() {
   }
 
   const filtered = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
+    const q = normalizeSearchText(searchQuery);
     const now = Date.now();
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -106,17 +158,17 @@ export function AuditLogViewer() {
 
       if (q) {
         const actionLabel = ACTION_LABELS[l.action]?.label || l.action;
-        const haystack = [
-          actorKey,
-          l.actorName || "",
-          l.action,
-          actionLabel,
-          l.entityType,
-          l.entityId,
-          l.metadata ? JSON.stringify(l.metadata) : "",
-        ]
-          .join(" ")
-          .toLowerCase();
+        const haystack = normalizeSearchText(
+          [
+            actorKey,
+            l.actorName || "",
+            l.action,
+            actionLabel,
+            l.entityType,
+            l.entityId,
+            l.metadata ? JSON.stringify(l.metadata) : "",
+          ].join(" ")
+        );
         if (!haystack.includes(q)) return false;
       }
 
@@ -150,7 +202,7 @@ export function AuditLogViewer() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 flex-wrap shrink-0">
             {hasActiveFilters && (
               <button
                 type="button"
@@ -161,6 +213,36 @@ export function AuditLogViewer() {
                 <span>{t("places.clear_filter")}</span>
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => handlePurge(30)}
+              disabled={purging !== null || logs.length === 0}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition cursor-pointer disabled:opacity-40"
+              title={t("admin_audit.purge_30d_btn")}
+            >
+              <span className="material-symbols-outlined text-sm leading-none">auto_delete</span>
+              <span>{t("admin_audit.purge_30d_btn")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePurge(90)}
+              disabled={purging !== null || logs.length === 0}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/50 transition cursor-pointer disabled:opacity-40"
+              title={t("admin_audit.purge_90d_btn")}
+            >
+              <span className="material-symbols-outlined text-sm leading-none">auto_delete</span>
+              <span>{t("admin_audit.purge_90d_btn")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePurge("all")}
+              disabled={purging !== null || logs.length === 0}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200/70 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition cursor-pointer disabled:opacity-40"
+              title={t("admin_audit.purge_all_btn")}
+            >
+              <span className="material-symbols-outlined text-sm leading-none">delete_sweep</span>
+              <span>{t("admin_audit.purge_all_btn")}</span>
+            </button>
             <button
               type="button"
               onClick={loadLogs}

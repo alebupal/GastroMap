@@ -25,6 +25,7 @@ import {
   placeListItems,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function getSetting(key: string): Promise<string | null> {
   try {
@@ -61,6 +62,14 @@ export async function saveSettingAction(key: string, value: string) {
         updatedAt: new Date(),
       },
     });
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "setting",
+    entityId: key,
+    action: "setting_updated",
+    metadata: { key, configured: Boolean(cleanValue) },
+  });
 
   revalidatePath("/");
   return { success: true };
@@ -163,6 +172,14 @@ export async function resetApplicationAction() {
   // 4. Limpieza de sesiones y usuarios excepto el usuario actual
   await db.delete(sessions).where(ne(sessions.userId, currentUser.id));
   await db.delete(users).where(ne(users.id, currentUser.id));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "system",
+    entityId: "app_reset",
+    action: "app_reset",
+    metadata: { resetBy: currentUser.username || currentUser.name },
+  });
 
   revalidatePath("/");
   return { success: true };

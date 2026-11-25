@@ -133,7 +133,7 @@ Al acceder por primera vez a una instancia limpia:
 - **Asistente de Decisión**: Guía paso a paso para definir presupuesto, tipo de plan, país, ciudad, distancia máxima y estado de visita.
 
 ### 💬 Comentarios Colaborativos, Valoración y Ficha Enriquecida
-- **Comentarios y Nota Privada Unificados**: El modal de comentarios agrupa las reseñas de la comunidad y tu nota privada (solo visible para ti) con pestañas animadas (`Todos`, `Privadas`, `Comunidad`), edición inline de tu nota privada y compositor desplegable optimizado para móvil.
+- **Comentarios y Nota Privada Unificados**: El modal de comentarios agrupa las reseñas de la comunidad y tu nota privada (solo visible para ti) con pestañas animadas (`Todos`, `Privadas`, `Comunidad`), edición inline de tu nota privada y compositor desplegable optimizado para móvil. Los administradores pueden editar o eliminar cualquier comentario para moderar o corregir erratas (con registro en auditoría).
 - **Valoración Privada (`Mi nota`, 1 al 10)**: Modal rápido dedicado para asignar tu puntuación personal del 1 al 10 a cualquier restaurante.
 - **Acciones Rápidas y Menú `⋮`**: Cada tarjeta cuenta con botones claros en su parte inferior (`Comentarios`, `Comparar`, `Mapa`, `Maps`, `Compartir`) y un menú `⋮` con **Guardar en lista**, `Editar` y `Eliminar` (este último reservado a administradores).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.

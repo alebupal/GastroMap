@@ -8,6 +8,10 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-25
 
 ### Añadido
+- **Auditoría Completa, Limpieza de Registros Antiguos y Moderación de Comentarios por Admin**:
+  - Nuevos botones en `/admin > Auditoría` (`Limpiar > 30d`, `Limpiar > 90d` y `Vaciar todo`) con confirmación y toast para mantener ligero el historial (`purgeAuditLogsAction`), junto a etiquetas legibles para todas las acciones y búsqueda insensible a tildes.
+  - Cobertura ampliada de `audit_logs`: ahora también se registran altas de sitios (`place_created`), borrados en lote, comentarios (publicar, editar y eliminar), usuarios (crear, registrar, cambiar rol, resetear contraseña y eliminar), invitaciones, ajustes del sistema, listas y purgas de auditoría.
+  - Los administradores ahora pueden **editar comentarios de cualquier usuario** (además de eliminarlos) para corregir errores o moderar contenido, quedando la edición registrada en auditoría (`editedByAdmin`).
 - **Filtro «Plan con amigos» y Búsqueda Insensible a Tildes**:
   - Nuevo filtro **«Plan con amigos»** disponible en `+ Filtros` y en el **Asistente / Filtros móvil** (`DecisionAssistantModal`) con desplegable `CustomSelect` con iconos, descripción dinámica y 11 modos (*Pendiente o por descubrir*, *Todos quieren ir*, *Alguno quiere ir sin probar*, *Alguno quiere ir aunque otro ya fue*, *Favorito de alguno*, *Favorito de todos*, *Favorito de alguno, nuevo para otros*, *Bien valorado por alguno (8+)*, *Probado por alguno, nuevo para otros*, *Visitado por todos* y *Añadidos por el grupo*), con opción *Incluirme a mí también*.
   - Búsqueda normalizada insensible a tildes y diacríticos (`src/lib/search.ts`) en explorador, paleta de comandos (`⌘K`), selectores de ciudades/países y panel de administración.

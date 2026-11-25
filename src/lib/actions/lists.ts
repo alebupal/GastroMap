@@ -296,6 +296,14 @@ export async function updateListAction(
     .where(eq(placeLists.id, listId))
     .returning();
 
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place_list",
+    entityId: listId,
+    action: "list_updated",
+    metadata: { name: nextName, isPublic: nextPublic },
+  });
+
   if (existing.shareSlug) revalidatePath(`/guide/${existing.shareSlug}`);
   if (updated.shareSlug) revalidatePath(`/guide/${updated.shareSlug}`);
   revalidatePath("/");
@@ -324,6 +332,14 @@ export async function regenerateListSlugAction(listId: string) {
     })
     .where(eq(placeLists.id, listId))
     .returning();
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place_list",
+    entityId: listId,
+    action: "list_updated",
+    metadata: { name: existing.name, regeneratedSlug: true },
+  });
 
   if (existing.shareSlug) revalidatePath(`/guide/${existing.shareSlug}`);
   revalidatePath(`/guide/${newSlug}`);

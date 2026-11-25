@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-25
 
 ### Added
+- **Comprehensive Audit Trail, Old-Record Cleanup & Admin Comment Moderation**:
+  - New maintenance buttons in `/admin > Audit Log` (`Clean > 30d`, `Clean > 90d`, and `Clear all`) with confirmation and toast feedback (`purgeAuditLogsAction`), plus human-readable labels for every action and accent-insensitive search.
+  - Expanded `audit_logs` coverage: place creation (`place_created`), bulk deletions, comments (create, edit, delete), user lifecycle (create, register, role change, password reset, delete), invitations, system settings, lists, and audit purges are now all logged.
+  - Administrators can now **edit any user's comment** (in addition to deleting) to fix typos or moderate content, with the action tracked in the audit log (`editedByAdmin`).
 - **«Dining with Friends» Filter & Accent-Insensitive Search**:
   - New **«Dining with friends»** filter in `+ Filters` and the **Decision Assistant / Mobile Filters** (`DecisionAssistantModal`) featuring a `CustomSelect` dropdown with icons, dynamic descriptions, and 11 modes (*Pending or untried*, *Everyone wants to go*, *Someone wants to go (untried)*, *Someone wants to go (even if visited)*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite, new for others*, *Highly rated by someone (8+)*, *Tried by some, new for others*, *Visited by everyone*, and *Added by the group*), with an *Include me too* toggle.
   - Accent- and diacritic-insensitive search (`src/lib/search.ts`) across the explorer, Command Palette (`⌘K`), country/city searchable dropdowns, and admin tables.
