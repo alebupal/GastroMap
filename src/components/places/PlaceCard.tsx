@@ -201,9 +201,9 @@ export function PlaceCard({
       }`}
     >
       <div>
-        {/* Cabecera de Tarjeta: Avatar iniciales + Nombre + Dirección a la izquierda | Precio + Favorito a la derecha */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-2.5 min-w-0 flex-1">
+        {/* Cabecera de Tarjeta: Avatar iniciales + Nombre a la izquierda | Precio + Favorito + Menú a la derecha */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-orange-200/60 dark:border-orange-800/60">
               {place.name
                 .split(/\s+/)
@@ -214,8 +214,8 @@ export function PlaceCard({
                 .toUpperCase() || "🍴"}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base leading-snug">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-[15px] sm:text-base leading-snug break-words">
                   {place.name}
                 </h3>
                 {typeof place.distanceMeters === "number" && (
@@ -229,16 +229,10 @@ export function PlaceCard({
                   </span>
                 )}
               </div>
-              {(place.city || place.address) && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
-                  <span className="material-symbols-outlined text-xs text-orange-600 leading-none">location_on</span>
-                  <span>{place.city ? `${place.city}` : ""}{place.city && place.address ? " • " : ""}{place.address || ""}</span>
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className="px-2 py-0.5 rounded-full bg-[#6ffbbe] text-[#005236] font-bold text-[11px] shadow-xs">
               {PRICE_RANGE_LABELS[place.priceRange] || place.priceRange}
             </span>
@@ -317,6 +311,18 @@ export function PlaceCard({
           </div>
         </div>
 
+        {/* Ubicación a ancho completo para que nunca se corte en móvil */}
+        {(place.city || place.address) && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 min-w-0">
+            <span className="material-symbols-outlined text-sm text-orange-600 leading-none shrink-0">location_on</span>
+            <span className="truncate">
+              {place.city ? `${place.city}` : ""}
+              {place.city && place.address ? " • " : ""}
+              {place.address || ""}
+            </span>
+          </p>
+        )}
+
         {/* Fila de Insignia de Estado Personal + Ocasiones / Categorías + Etiquetas */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
           {personalStatus === "visited" ? (
@@ -390,12 +396,12 @@ export function PlaceCard({
         )}
 
         {/* Barra de Colección Personal (Quiero ir, Ya he ido, Mi nota) */}
-        <div className="mt-3 flex items-center gap-1.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
+        <div className="mt-3 grid grid-cols-3 gap-1.5 pt-2.5 border-t border-slate-100 dark:border-slate-800/60">
           <button
             type="button"
             onClick={() => handleStatusChange("pending")}
             aria-label={personalStatus === "pending" ? t("places.remove_pending") : t("places.add_pending")}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 min-w-0 ${
+            className={`py-2 sm:py-1.5 px-1.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 active:scale-95 min-w-0 ${
               personalStatus === "pending"
                 ? "bg-[#fea619] text-[#2a1700] shadow-xs"
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
@@ -403,20 +409,20 @@ export function PlaceCard({
           >
             <span
               key={personalStatus === "pending" ? "pend-on" : "pend-off"}
-              className={`material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0 ${
+              className={`material-symbols-outlined text-[16px] leading-none shrink-0 ${
                 personalStatus === "pending" ? "gm-pop" : ""
               }`}
             >
               schedule
             </span>
-            <span className="truncate">{t("cards.pending")}</span>
+            <span className="leading-tight whitespace-nowrap">{t("cards.pending")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleStatusChange("visited")}
             aria-label={personalStatus === "visited" ? t("places.remove_visited") : t("places.mark_visited")}
-            className={`flex-1 py-1.5 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1 active:scale-95 min-w-0 ${
+            className={`py-2 sm:py-1.5 px-1.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-bold transition cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 active:scale-95 min-w-0 ${
               personalStatus === "visited"
                 ? "bg-orange-600 text-white shadow-xs"
                 : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-semibold"
@@ -424,7 +430,7 @@ export function PlaceCard({
           >
             <span
               key={personalStatus === "visited" ? "vis-on" : "vis-off"}
-              className={`material-symbols-outlined text-[15px] sm:text-base leading-none shrink-0 ${
+              className={`material-symbols-outlined text-[16px] leading-none shrink-0 ${
                 personalStatus === "visited"
                   ? "text-white gm-pop"
                   : "text-emerald-600 dark:text-emerald-400"
@@ -432,26 +438,37 @@ export function PlaceCard({
             >
               check_circle
             </span>
-            <span className="truncate">{t("cards.visited")}</span>
+            <span className="leading-tight whitespace-nowrap">{t("cards.visited")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowNotesModal(true)}
             aria-label={t("cards.add_note_tooltip")}
-            className="py-1.5 px-2.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center justify-center gap-1 shrink-0 active:scale-95"
+            className={`py-2 sm:py-1.5 px-1.5 sm:px-3 rounded-xl text-[11px] sm:text-xs font-semibold transition cursor-pointer flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 active:scale-95 min-w-0 ${
+              rating !== null
+                ? "bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 font-bold"
+                : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+            }`}
             title={t("cards.add_note_tooltip")}
           >
-            <span className="material-symbols-outlined text-sm leading-none text-amber-500">star</span>
-            <span>{rating !== null ? `${rating}★` : t("cards.private_note")}</span>
+            <span
+              className="material-symbols-outlined text-[16px] leading-none text-amber-500 shrink-0"
+              style={rating !== null ? { fontVariationSettings: "'FILL' 1" } : undefined}
+            >
+              star
+            </span>
+            <span className="leading-tight whitespace-nowrap">
+              {rating !== null ? `${rating} / 10` : t("cards.private_note")}
+            </span>
           </button>
         </div>
       </div>
 
-      {/* Pie de tarjeta: Autor con avatar, comentarios, Maps y Acciones */}
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-900 font-bold text-[9px] flex items-center justify-center border border-orange-200">
+      {/* Pie de tarjeta: en móvil barra uniforme de acciones + autor abajo; en desktop 1 fila horizontal */}
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
+        <div className="flex items-center gap-1.5 shrink-0 pt-1 sm:pt-0 border-t border-slate-100/80 dark:border-slate-800/50 sm:border-t-0">
+          <span className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[9px] flex items-center justify-center border border-orange-200/70 dark:border-orange-800/60">
             {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
           </span>
           <span className="font-bold text-slate-700 dark:text-slate-300">
@@ -459,17 +476,29 @@ export function PlaceCard({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div className="grid grid-flow-col auto-cols-fr sm:flex sm:items-center gap-1 sm:gap-2 sm:flex-wrap sm:justify-end">
           {/* Botón de comentarios */}
           <button
             type="button"
             onClick={() => setShowComments(!showComments)}
             aria-label={`${t("cards.comments")} (${commentsCount})`}
-            className="inline-flex items-center gap-1 hover:text-orange-600 transition cursor-pointer px-1 py-0.5 whitespace-nowrap"
+            className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent transition cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap"
             title={t("cards.comments")}
           >
-            <span className="material-symbols-outlined text-sm leading-none">chat_bubble_outline</span>
-            <span>{commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}</span>
+            <span className="relative inline-flex">
+              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">chat_bubble_outline</span>
+              {commentsCount > 0 && (
+                <span className="sm:hidden -mt-1.5 -mr-1.5 px-1 rounded-full bg-orange-600 text-white text-[9px] font-extrabold leading-tight">
+                  {commentsCount}
+                </span>
+              )}
+            </span>
+            <span className="text-[10px] sm:text-[11px] leading-tight">
+              <span className="sm:hidden">{t("cards.comments")}</span>
+              <span className="hidden sm:inline">
+                {commentsCount > 0 ? `${t("cards.comments")} (${commentsCount})` : t("cards.comments")}
+              </span>
+            </span>
           </button>
 
           {onToggleCompare && (
@@ -479,14 +508,14 @@ export function PlaceCard({
               aria-pressed={isCompared}
               aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
               title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
-              className={`inline-flex items-center gap-1 transition cursor-pointer whitespace-nowrap ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer whitespace-nowrap rounded-xl py-1.5 sm:py-0.5 px-1 ${
                 isCompared
-                  ? "px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-bold"
-                  : "px-1 py-0.5 hover:text-orange-600"
+                  ? "sm:px-2 sm:rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800/60 font-bold"
+                  : "hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent"
               }`}
             >
-              <span className="material-symbols-outlined text-sm leading-none">compare_arrows</span>
-              <span>{t("cards.compare")}</span>
+              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">compare_arrows</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight">{t("cards.compare")}</span>
             </button>
           )}
 
@@ -495,11 +524,11 @@ export function PlaceCard({
               onClick={onSelectOnMap}
               type="button"
               aria-label={t("places.view_map")}
-              className="group inline-flex items-center gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-bold cursor-pointer px-1 py-0.5 whitespace-nowrap transition"
+              className="group flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/40 sm:hover:bg-transparent font-bold cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap transition"
               title="Centrar en mapa"
             >
-              <span className="material-symbols-outlined text-sm leading-none no-underline">explore</span>
-              <span className="group-hover:underline underline-offset-2">{t("places.view_map")}</span>
+              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none no-underline">explore</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight group-hover:underline underline-offset-2">{t("places.view_map")}</span>
             </button>
           )}
 
@@ -509,36 +538,39 @@ export function PlaceCard({
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Maps: ${place.name}`}
-              className="inline-flex items-center gap-1 hover:text-orange-600 font-medium transition px-1 py-0.5 whitespace-nowrap"
+              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-1 rounded-xl whitespace-nowrap"
               title="Abrir en Google Maps"
             >
-              <span className="material-symbols-outlined text-sm leading-none">open_in_new</span>
-              <span>Google Maps</span>
+              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight">
+                <span className="sm:hidden">Maps</span>
+                <span className="hidden sm:inline">Google Maps</span>
+              </span>
             </a>
           )}
 
-          <div className="relative">
+          <div className="relative flex justify-center">
             <button
               type="button"
               onClick={() => setShowShareMenu((prev) => !prev)}
               aria-label={t("cards.copy_place_tooltip")}
               aria-expanded={showShareMenu}
               title={t("cards.copy_place_tooltip")}
-              className={`inline-flex items-center gap-1 transition cursor-pointer px-1 py-0.5 active:scale-95 ${
+              className={`w-full sm:w-auto flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 transition cursor-pointer py-1.5 sm:py-0.5 px-1 rounded-xl active:scale-95 ${
                 copiedPlace
                   ? "text-emerald-600 dark:text-emerald-400 font-bold"
                   : showShareMenu
-                  ? "text-orange-600 dark:text-orange-400 font-bold"
-                  : "hover:text-orange-600"
+                  ? "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40 sm:bg-transparent font-bold"
+                  : "hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent"
               }`}
             >
               <span
                 key={copiedPlace ? "copy-ok" : "copy-idle"}
-                className={`material-symbols-outlined text-sm leading-none ${copiedPlace ? "gm-pop" : ""}`}
+                className={`material-symbols-outlined text-[16px] sm:text-sm leading-none ${copiedPlace ? "gm-pop" : ""}`}
               >
                 {copiedPlace ? "check" : "share"}
               </span>
-              <span className="hidden sm:inline">{t("cards.copy_place")}</span>
+              <span className="text-[10px] sm:text-[11px] leading-tight">{t("cards.copy_place")}</span>
             </button>
 
             {showShareMenu && (
