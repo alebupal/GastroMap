@@ -1853,36 +1853,51 @@ export function PlacesExplorer({
               </div>
 
               {selectedFriendIds.length > 0 && (
-                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {(
-                      [
-                        { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
-                        { id: "pending_all", label: t("friends_filter.mode_pending_all") },
-                        { id: "pending_any", label: t("friends_filter.mode_pending_any") },
-                        { id: "favorites_any", label: t("friends_filter.mode_favorites_any") },
-                        { id: "favorites_all", label: t("friends_filter.mode_favorites_all") },
-                        { id: "discover_for_some", label: t("friends_filter.mode_discover_for_some") },
-                        { id: "visited_all", label: t("friends_filter.mode_visited_all") },
-                      ] as const
-                    ).map((mode) => {
-                      const active = friendsFilterMode === mode.id;
-                      return (
-                        <button
-                          key={mode.id}
-                          type="button"
-                          onClick={() => setFriendsFilterMode(mode.id)}
-                          className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-150 active:scale-95 cursor-pointer ${
-                            active
-                              ? "bg-orange-600 text-white shadow-xs"
-                              : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                          }`}
-                        >
-                          {mode.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="flex items-center justify-between gap-2.5 flex-wrap pt-1">
+                  <CustomSelect
+                    value={friendsFilterMode}
+                    onChange={setFriendsFilterMode}
+                    align="left"
+                    buttonClassName="px-3 py-1.5 text-[11px]"
+                    ariaLabel={t("friends_filter.title")}
+                    options={[
+                      {
+                        value: "untried_or_pending",
+                        label: t("friends_filter.mode_untried_or_pending"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-orange-600">auto_awesome</span>,
+                      },
+                      {
+                        value: "pending_all",
+                        label: t("friends_filter.mode_pending_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">schedule</span>,
+                      },
+                      {
+                        value: "pending_any",
+                        label: t("friends_filter.mode_pending_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">hourglass_top</span>,
+                      },
+                      {
+                        value: "favorites_any",
+                        label: t("friends_filter.mode_favorites_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-rose-500">favorite</span>,
+                      },
+                      {
+                        value: "favorites_all",
+                        label: t("friends_filter.mode_favorites_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-rose-600">volunteer_activism</span>,
+                      },
+                      {
+                        value: "discover_for_some",
+                        label: t("friends_filter.mode_discover_for_some"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-indigo-500">explore</span>,
+                      },
+                      {
+                        value: "visited_all",
+                        label: t("friends_filter.mode_visited_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-emerald-600">check_circle</span>,
+                      },
+                    ]}
+                  />
                   <label className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
                     <input
                       type="checkbox"

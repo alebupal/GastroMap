@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { MultiSearchableSelect, type MultiSelectOption } from "@/components/ui/MultiSearchableSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { normalizeSearchText } from "@/lib/search";
 
 interface DecisionAssistantModalProps {
@@ -573,36 +574,52 @@ export function DecisionAssistantModal({
               />
 
               {selectedFriendIds.length > 0 && onChangeFriendsFilterMode && (
-                <div className="space-y-2 pt-1">
-                  <div className="flex flex-wrap gap-1.5">
-                    {(
-                      [
-                        { id: "untried_or_pending", label: t("friends_filter.mode_untried_or_pending") },
-                        { id: "pending_all", label: t("friends_filter.mode_pending_all") },
-                        { id: "pending_any", label: t("friends_filter.mode_pending_any") },
-                        { id: "favorites_any", label: t("friends_filter.mode_favorites_any") },
-                        { id: "favorites_all", label: t("friends_filter.mode_favorites_all") },
-                        { id: "discover_for_some", label: t("friends_filter.mode_discover_for_some") },
-                        { id: "visited_all", label: t("friends_filter.mode_visited_all") },
-                      ] as const
-                    ).map((mode) => {
-                      const active = friendsFilterMode === mode.id;
-                      return (
-                        <button
-                          key={mode.id}
-                          type="button"
-                          onClick={() => onChangeFriendsFilterMode(mode.id)}
-                          className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition active:scale-95 cursor-pointer border ${
-                            active
-                              ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                              : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          {mode.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="space-y-2.5 pt-1">
+                  <CustomSelect
+                    value={friendsFilterMode}
+                    onChange={onChangeFriendsFilterMode}
+                    align="left"
+                    className="w-full"
+                    buttonClassName="w-full justify-between px-3.5 py-2.5 text-xs"
+                    ariaLabel={t("friends_filter.title")}
+                    options={[
+                      {
+                        value: "untried_or_pending",
+                        label: t("friends_filter.mode_untried_or_pending"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-orange-600">auto_awesome</span>,
+                      },
+                      {
+                        value: "pending_all",
+                        label: t("friends_filter.mode_pending_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">schedule</span>,
+                      },
+                      {
+                        value: "pending_any",
+                        label: t("friends_filter.mode_pending_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-amber-500">hourglass_top</span>,
+                      },
+                      {
+                        value: "favorites_any",
+                        label: t("friends_filter.mode_favorites_any"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-rose-500">favorite</span>,
+                      },
+                      {
+                        value: "favorites_all",
+                        label: t("friends_filter.mode_favorites_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-rose-600">volunteer_activism</span>,
+                      },
+                      {
+                        value: "discover_for_some",
+                        label: t("friends_filter.mode_discover_for_some"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-indigo-500">explore</span>,
+                      },
+                      {
+                        value: "visited_all",
+                        label: t("friends_filter.mode_visited_all"),
+                        icon: <span className="material-symbols-outlined text-sm leading-none text-emerald-600">check_circle</span>,
+                      },
+                    ]}
+                  />
 
                   {onToggleIncludeMeWithFriends && (
                     <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
