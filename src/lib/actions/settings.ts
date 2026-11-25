@@ -21,6 +21,8 @@ import {
   invitations,
   sessions,
   users,
+  placeLists,
+  placeListItems,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -137,6 +139,8 @@ export async function resetApplicationAction() {
   }
 
   // 1. Limpieza de tablas dependientes de establecimientos
+  await db.delete(placeListItems);
+  await db.delete(placeLists);
   await db.delete(placeVisits);
   await db.delete(placeComments);
   await db.delete(placeOccasions);

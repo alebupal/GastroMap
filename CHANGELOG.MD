@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-23
 
 ### Added
+- **Shareable Lists & Collections (Personal Public Guides)**:
+  - Added `place_lists` and `place_list_items` tables (`drizzle/0012_far_doctor_strange.sql`) to organize places into themed collections (e.g. *“Tapas tour in Granada”*, *“Lisbon trip”*, *“Special dinners”*) with custom icons, descriptions, and manual stop ordering.
+  - New **«My lists & guides»** manager modal in the user menu to create, edit, reorder (`↑`/`↓`), and delete lists, plus toggle a read-only public link with one-tap copy and WhatsApp sharing.
+  - New **«Save to list»** action in every place card's `⋮` menu (available to all signed-in users) with inline quick list creation.
+  - New unauthenticated public read-only guide page at `/guide/[slug]` with Open Graph preview metadata, interactive Leaflet map, numbered stop cards, and multi-stop **«Route in Google Maps»** button.
+- **Mobile Bottom-Sheet Modal Unification & Swipe-to-Close**:
+  - Unified all mobile user modals as bottom-sheets with a top drag handle (`SheetHandle`) and native swipe-down dismissal (`useSwipeToClose`).
+  - Improved mobile place cards (`PlaceCard`) and comments/notes modal (`PlaceCommentsThread`) with stacked mobile tabs, circular floating comment badge, inline private note editing, and cleaner action spacing.
 - **Subtle Micro-Interactions, View Transitions, Unified Iconography & Explorer Upgrades**:
   - Unified all UI iconography under **Google Material Symbols Outlined** (dropdowns, toasts, cards, modals, admin tables, and invitations) while keeping language flags and food emojis, removing duplicate leading emojis from i18n strings.
   - Added a pure-CSS micro-interaction suite respecting `prefers-reduced-motion`: **View Transitions API** smooth Light/Dark switching, **sliding pill indicators** in `ThemeToggle`, `StatsModal`, and `ExportImportModal`, sun/moon icon animations, **animated KPI counters (`AnimatedNumber`)**, animated progress bars, **shimmer skeletons**, subtle staggered list entry, smooth filter panel unfold animations, and a radar pulse ring on the selected Leaflet map pin and active *Near me* badge.

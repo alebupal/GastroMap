@@ -31,9 +31,10 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Free, lightweight OpenStreetMap / CartoDB tiles (zero Google Maps API billing or quotas).
   * Dynamic marker clustering and color-coded status badges.
 
-* **🔒 Privacy & Community:**
+* **🔒 Privacy, Community & Shareable Guides:**
   * Self-hosted on your own infrastructure (Docker).
   * Invitation-only access for your inner circle and **private sharing groups** (`👥 Groups`) with cumulative server-side permissions.
+  * **Shareable Lists & Personal Guides**: Curate themed collections (trips, tapas routes, special dinners), reorder stops manually, and toggle a **read-only public link** (`/guide/[slug]`) with an interactive map and Google Maps route that friends can browse without signing up.
   * Private personal notes and collaborative comments on each place. Deletion is restricted to administrators.
 
 * **📊 Personal Statistics, Annual «Wrapped» & Dedicated Admin Panel (`/admin`):**

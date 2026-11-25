@@ -8,6 +8,14 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 ## [0.1.0] - 2026-11-23
 
 ### Añadido
+- **Listas / Colecciones Compartibles (Guías Personales Públicas)**:
+  - Nuevas tablas `place_lists` y `place_list_items` (`drizzle/0012_far_doctor_strange.sql`) para crear listas temáticas personalizadas (ej. *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»*, *«Cenas especiales»*) con icono, descripción y orden manual de paradas.
+  - Nuevo modal **«Mis listas y guías»** en el menú de usuario para crear, editar, reordenar (`↑`/`↓`), eliminar listas y activar o desactivar un enlace público de solo lectura con copiado rápido y envío por WhatsApp.
+  - Nueva acción **«Guardar en lista»** en el menú `⋮` de cada tarjeta de establecimiento (disponible para todos los usuarios) con creación rápida de lista desde el mismo diálogo.
+  - Nueva página pública de solo lectura `/guide/[slug]` accesible **sin registro ni inicio de sesión**, con metadatos Open Graph, mapa interactivo Leaflet, tarjetas numeradas de paradas y botón **«Ruta en Google Maps»** multi-parada.
+- **Unificación de Modales Móviles como Bottom-Sheets con Cierre Deslizable (Swipe-to-Close)**:
+  - Todos los modales de usuario en móvil emergen desde la parte inferior como *bottom-sheets* con tirador superior (`SheetHandle`) y gesto de arrastre hacia abajo (`useSwipeToClose`) para cerrarlos con tacto nativo.
+  - Rediseño móvil de tarjetas (`PlaceCard`) y modal de comentarios/notas (`PlaceCommentsThread`) con tabs apilados, badge circular flotante, edición inline de notas privadas y mejor separación de acciones.
 - **Micro-interacciones Sutiles, View Transitions, Iconografía Unificada y Mejoras de Explorador**:
   - Unificada toda la iconografía de interfaz en **Google Material Symbols Outlined** (selectores, toasts, tarjetas, modales, administración e invitaciones), conservando banderas y emojis gastronómicos, y limpiando iconos duplicados en las traducciones.
   - Nuevo pack de micro-interacciones CSS respetuoso con `prefers-reduced-motion`: **View Transitions API** al cambiar Claro/Oscuro, **píldora deslizante** en `ThemeToggle`, `StatsModal` y `ExportImportModal`, animación de giro/balanceo del sol y la luna, **contadores animados (`AnimatedNumber`)** en KPIs, barras de progreso crecientes, **skeletons shimmer**, entrada escalonada en el listado, despliegue fluido al abrir paneles de filtros y pulso radar en el pin seleccionado del mapa y en *Cerca de mí*.

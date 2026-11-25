@@ -137,6 +137,11 @@ Al acceder por primera vez a una instancia limpia:
 - **Acciones Rápidas con Etiquetas de Texto Explícitas**: Cada ficha cuenta en su parte inferior con botones legibles para interactuar: `💬 Comentarios`, `🗺️ Mapa`, `📍 Maps ↗`, `⚖️ Comparar`, `✏️ Editar` y `🗑️ Eliminar` (este último reservado estrictamente a administradores).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.
 
+### 🔖 Listas / Colecciones Compartibles (Guías Personales)
+- **Organización Temática**: Desde el menú de usuario (*Mis listas y guías*) o pulsando `⋮ > Guardar en lista` en cualquier establecimiento, puedes crear colecciones temáticas como *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»* o *«Cenas especiales»*.
+- **Orden de Paradas Personalizable**: Expande cualquier lista en *Mis listas y guías* para reordenar las paradas (`↑`/`↓`) o retirar locales sin eliminarlos del catálogo general.
+- **Enlace Público de Solo Lectura (`/guide/[slug]`)**: Activa el modo **Pública** en cualquier lista para generar un enlace compartible (con copia rápida o envío directo a WhatsApp). Tus amigos podrán ver la guía completa con mapa interactivo, paradas numeradas y botón **«Ruta en Google Maps»** sin necesidad de registrarse ni iniciar sesión. Puedes volver a poner la lista en modo **Privada** en cualquier momento para desactivar el enlace al instante.
+
 ---
 
 ## 5. Grupos Privados e Invitaciones

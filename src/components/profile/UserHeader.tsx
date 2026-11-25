@@ -5,6 +5,7 @@ import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { EditProfileModal } from "./EditProfileModal";
 import { GroupsModal } from "./GroupsModal";
+import { ListsModal } from "./ListsModal";
 import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
@@ -33,6 +34,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
   const { t } = useT();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
+  const [isListsOpen, setIsListsOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
@@ -242,6 +244,21 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                     </Link>
                   )}
 
+                  {/* Mis Listas / Guías compartibles */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsListsOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 font-semibold transition cursor-pointer text-left group"
+                  >
+                    <span className="material-symbols-outlined text-[18px] leading-none text-slate-500 dark:text-slate-400 group-hover:text-orange-600 transition-colors">
+                      collections_bookmark
+                    </span>
+                    <span>{t("lists.menu_label")}</span>
+                  </button>
+
                   {/* Mis Grupos (siempre accesible aquí en móvil y desktop) */}
                   <button
                     type="button"
@@ -343,6 +360,12 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
         currentUser={currentUser}
+      />
+
+      {/* Modal de gestión de listas y guías compartibles */}
+      <ListsModal
+        isOpen={isListsOpen}
+        onClose={() => setIsListsOpen(false)}
       />
 
       {/* Modal de gestión de grupos privados */}

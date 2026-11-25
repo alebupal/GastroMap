@@ -29,9 +29,10 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Teselas ligeras de OpenStreetMap / CartoDB (sin coste ni cuotas de Google Maps API).
   * Clustering dinámico de chinchetas y colores según tu estado personal.
 
-* **🔒 Privacidad y Comunidad:**
+* **🔒 Privacidad, Comunidad y Guías Compartibles:**
   * Despliegue privado bajo servidor propio (Docker).
   * Acceso por invitación para tu círculo cercano y **grupos privados de compartición** (`👥 Grupos`) con permisos acumulativos en servidor.
+  * **Listas / Guías personales compartibles**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales), ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Solo los administradores pueden eliminar lugares.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Dedicado (`/admin`):**

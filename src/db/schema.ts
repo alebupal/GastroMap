@@ -308,6 +308,47 @@ export const groupInvitations = pgTable(
   ]
 );
 
+export const placeLists = pgTable(
+  "place_lists",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 120 }).notNull(),
+    description: text("description"),
+    icon: varchar("icon", { length: 32 }).notNull().default("bookmark"),
+    isPublic: boolean("is_public").notNull().default(false),
+    shareSlug: varchar("share_slug", { length: 120 }).unique(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("place_lists_owner_idx").on(table.ownerId),
+    uniqueIndex("place_lists_share_slug_idx").on(table.shareSlug),
+  ]
+);
+
+export const placeListItems = pgTable(
+  "place_list_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    listId: uuid("list_id")
+      .notNull()
+      .references(() => placeLists.id, { onDelete: "cascade" }),
+    placeId: uuid("place_id")
+      .notNull()
+      .references(() => places.id, { onDelete: "cascade" }),
+    position: integer("position").notNull().default(0),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("place_list_items_unique_idx").on(table.listId, table.placeId),
+    index("place_list_items_list_idx").on(table.listId),
+  ]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
@@ -329,3 +370,5 @@ export type PlaceUserAccess = typeof placeUserAccess.$inferSelect;
 export type SavedFilter = typeof savedFilters.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type PlaceVisit = typeof placeVisits.$inferSelect;
+export type PlaceList = typeof placeLists.$inferSelect;
+export type PlaceListItem = typeof placeListItems.$inferSelect;

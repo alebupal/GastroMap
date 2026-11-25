@@ -137,6 +137,11 @@ When launching on a clean database:
 - **Action Buttons with Explicit Text Labels**: Each card displays clear, named buttons at the bottom: `💬 Comments`, `🗺️ Map`, `📍 Maps ↗`, `⚖️ Compare`, `✏️ Edit`, and `🗑️ Delete` (strictly restricted to administrators).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.
 
+### 🔖 Shareable Lists & Collections (Personal Guides)
+- **Themed Organization**: From the user menu (*My lists & guides*) or via `⋮ > Save to list` on any place card, organize places into themed collections such as *“Tapas tour in Granada”*, *“Lisbon trip”*, or *“Special dinners”*.
+- **Manual Stop Ordering**: Expand any list in *My lists & guides* to reorder stops (`↑`/`↓`) or remove places without deleting them from the main catalog.
+- **Read-Only Public Link (`/guide/[slug]`)**: Toggle any list to **Public** to generate a shareable link (with one-tap copy or WhatsApp share). Friends can browse the full guide with an interactive map, numbered stops, and a multi-stop **«Route in Google Maps»** button without registering or logging in. Switch the list back to **Private** at any time to immediately revoke public access.
+
 ---
 
 ## 5. Private Groups & Invitations
