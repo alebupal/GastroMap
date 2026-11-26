@@ -555,7 +555,7 @@ export default function DocsViewer({
 
   return (
     <>
-      <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex-1 flex flex-col gap-5">
+      <div className="max-w-[1720px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 flex-1 flex flex-col gap-5">
         {/* Cabecera pública solo si no se muestra el UserHeader global */}
         {!hasGlobalHeader && (
           <header className="w-full flex items-center justify-between py-2 border-b border-slate-200/60 dark:border-slate-800/80 gap-3">
@@ -720,7 +720,7 @@ export default function DocsViewer({
 
       {/* Pie de página minimalista coherente con toda la web */}
       <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-5 mt-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <GastroMapIcon className="w-5 h-5 shrink-0 shadow-xs rounded-[28%]" />
             <span className="font-bold text-slate-900 dark:text-slate-100">
