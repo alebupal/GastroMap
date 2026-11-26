@@ -97,6 +97,7 @@ function PlaceCardComponent({
   const [copiedPlace, setCopiedPlace] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   // Sincronizar estado local si cambian los datos externos (ej. importación o edición)
   useEffect(() => {
@@ -438,7 +439,7 @@ function PlaceCardComponent({
                 </span>
               );
             })}
-            {place.tags.map((tg) => (
+            {(showAllTags ? place.tags : place.tags.slice(0, 5)).map((tg) => (
               <span
                 key={tg}
                 className="px-1.5 py-0.5 rounded-md bg-slate-100/80 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-[11px] font-medium"
@@ -446,6 +447,20 @@ function PlaceCardComponent({
                 #{tg}
               </span>
             ))}
+            {place.tags.length > 5 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAllTags((prev) => !prev);
+                }}
+                className="px-2 py-0.5 rounded-md bg-orange-50/80 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-[11px] font-bold transition cursor-pointer"
+              >
+                {showAllTags
+                  ? t("decision.show_less")
+                  : t("decision.more_tags", { count: place.tags.length - 5 })}
+              </button>
+            )}
           </div>
         )}
 
