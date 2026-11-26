@@ -105,6 +105,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   const sheet = useSwipeToClose(onClose);
   const [activeTab, setActiveTab] = useState<"overview" | "wrapped">("overview");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [spaceFilter, setSpaceFilter] = useState<string>("all");
   const [stats, setStats] = useState<UserStatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
@@ -112,11 +113,11 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      getUserStatsAction(selectedYear)
+      getUserStatsAction(selectedYear, spaceFilter)
         .then(setStats)
         .finally(() => setLoading(false));
     }
-  }, [isOpen, selectedYear]);
+  }, [isOpen, selectedYear, spaceFilter]);
 
   if (!isOpen) return null;
 
@@ -345,6 +346,28 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <span className="truncate">{t("stats.wrapped_tab", { year: selectedYear }).replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
           </div>
+
+          {stats && stats.availableSpaces.length > 0 && (
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                {t("stats.space_filter_label")}
+              </span>
+              <select
+                value={spaceFilter}
+                onChange={(e) => setSpaceFilter(e.target.value)}
+                aria-label={t("stats.space_filter_label")}
+                className="px-3 py-1.5 rounded-full text-xs font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 cursor-pointer"
+              >
+                <option value="all">🌍 {t("spaces.all_my_places")}</option>
+                <option value="personal">🏠 {t("spaces.personal_map")}</option>
+                {stats.availableSpaces.map((sp) => (
+                  <option key={sp.id} value={sp.id}>
+                    {sp.icon} {sp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Contenido */}
@@ -446,6 +469,53 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   </span>
                 </div>
               </div>
+
+              {/* Desglose por grupos (Punto 8) */}
+              {spaceFilter === "all" && stats.groupBreakdown.length > 0 && (
+                <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                        diversity_3
+                      </span>
+                      <span>{t("stats.my_groups_title")}</span>
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                      {stats.groupBreakdown.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {stats.groupBreakdown.map((g) => (
+                      <button
+                        key={g.groupId}
+                        type="button"
+                        onClick={() => setSpaceFilter(g.groupId)}
+                        className="p-2.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700/70 hover:border-orange-400 flex items-center justify-between gap-2 text-left transition cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-base shrink-0">{g.icon}</span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                              {g.name}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                              {g.role === "owner"
+                                ? t("group_admin.owner_badge")
+                                : g.role === "admin"
+                                  ? t("spaces.group_admin_badge")
+                                  : t("group_admin.member_badge")}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                          <div>{g.placesAdded} 📍</div>
+                          <div className="text-[10px] text-slate-400">{g.commentsCount} 💬</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Gráficas 2x2 estilo Stitch */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">

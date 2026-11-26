@@ -5,12 +5,16 @@ import {
   bulkDeletePlacesAction,
   deletePlaceAction,
   mergePlacesAction,
+  undoBulkCopyAction,
   type PlaceWithDetails,
 } from "@/lib/actions/places";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
+import { BulkCopyPlacesModal } from "@/components/places/BulkCopyPlacesModal";
+import { TrashPlacesPanel } from "./TrashPlacesPanel";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { normalizeSearchText } from "@/lib/search";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -19,6 +23,7 @@ interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
   occasionsList?: Array<{ id: string; name: string; icon: string }>;
   showSpaceColumn?: boolean;
+  groupId?: string | null;
 }
 
 type PlaceSortField = "name" | "space" | "city" | "price" | "occasions" | "author" | "createdAt";
@@ -35,11 +40,22 @@ export function PlacesTableManager({
   places: initialPlaces,
   occasionsList = [],
   showSpaceColumn = true,
+  groupId,
 }: PlacesTableManagerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
+  const [activeView, setActiveView] = useState<"active" | "trash">("active");
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkCopyModal, setShowBulkCopyModal] = useState(false);
+  const [lastCopyBatch, setLastCopyBatch] = useState<{
+    batchId: string;
+    copiedCount: number;
+    replacedCount: number;
+    skippedCount: number;
+    targetLabel: string;
+  } | null>(null);
+  const [undoingCopy, setUndoingCopy] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [spaceFilter, setSpaceFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
@@ -416,6 +432,81 @@ export function PlacesTableManager({
 
   return (
     <div className="w-full space-y-4 text-left">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <SegmentedTabs
+          value={activeView}
+          onChange={setActiveView}
+          ariaLabel={t("admin_places.title")}
+          items={[
+            {
+              id: "active",
+              label: t("admin_places.active_tab"),
+              icon: "storefront",
+              badge: placesList.length,
+            },
+            {
+              id: "trash",
+              label: t("trash.tab_label"),
+              icon: "delete_sweep",
+            },
+          ]}
+        />
+      </div>
+
+      {activeView === "trash" ? (
+        <div className="gm-tab-in">
+          <TrashPlacesPanel
+            groupId={groupId}
+            onRestored={() => {
+              if (typeof window !== "undefined") window.location.reload();
+            }}
+          />
+        </div>
+      ) : (
+      <div className="space-y-4 gm-tab-in">
+      {lastCopyBatch && (
+        <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900 dark:text-emerald-200">
+          <span className="font-bold">
+            {t("bulk_copy.result_banner", {
+              copied: lastCopyBatch.copiedCount,
+              replaced: lastCopyBatch.replacedCount,
+              skipped: lastCopyBatch.skippedCount,
+              target: lastCopyBatch.targetLabel,
+            })}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={undoingCopy}
+              onClick={async () => {
+                setUndoingCopy(true);
+                const res = await undoBulkCopyAction(lastCopyBatch.batchId);
+                setUndoingCopy(false);
+                if (res.error) {
+                  toast(res.error, { kind: "error" });
+                } else {
+                  toast(t("bulk_copy.undone_toast"), { kind: "success" });
+                  setLastCopyBatch(null);
+                  if (typeof window !== "undefined") window.location.reload();
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer transition disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-sm leading-none">undo</span>
+              <span>{undoingCopy ? t("common.loading") : t("bulk_copy.undo_btn")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLastCopyBatch(null)}
+              className="text-xs opacity-60 hover:opacity-100 cursor-pointer px-1"
+              aria-label={t("common.close")}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Barra de control y búsqueda */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 flex-1">
@@ -514,6 +605,15 @@ export function PlacesTableManager({
         <div className="flex items-center gap-2 shrink-0 flex-wrap justify-between sm:justify-end">
           {selectedIds.size > 0 && (
             <>
+              <button
+                type="button"
+                onClick={() => setShowBulkCopyModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 transition cursor-pointer shadow-xs"
+              >
+                <span className="material-symbols-outlined text-sm leading-none">library_add</span>
+                <span>{t("bulk_copy.btn_copy_to", { count: selectedIds.size })}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleBulkBackup}
@@ -1128,6 +1228,28 @@ export function PlacesTableManager({
           isOpen={true}
           onClose={() => setEditingPlace(null)}
         />
+      )}
+
+      {/* Modal de copia masiva a otro espacio */}
+      <BulkCopyPlacesModal
+        isOpen={showBulkCopyModal}
+        placeIds={Array.from(selectedIds)}
+        onClose={() => setShowBulkCopyModal(false)}
+        onCompleted={(res) => {
+          setLastCopyBatch(res);
+          setSelectedIds(new Set());
+          toast(
+            t("bulk_copy.result_banner", {
+              copied: res.copiedCount,
+              replaced: res.replacedCount,
+              skipped: res.skippedCount,
+              target: res.targetLabel,
+            }),
+            { kind: "success" }
+          );
+        }}
+      />
+      </div>
       )}
     </div>
   );

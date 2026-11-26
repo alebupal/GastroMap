@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { eq, desc, and, or, isNull, isNotNull, sql, inArray } from "drizzle-orm";
+import { eq, desc, and, or, isNull, isNotNull, sql, inArray, lt } from "drizzle-orm";
 import { db } from "@/db";
 import {
   places,
@@ -17,8 +17,15 @@ import {
   placeListItems,
   sharingGroups,
   sharingGroupMembers,
+  auditLogs,
   type Place,
 } from "@/db/schema";
+import {
+  normalizeMapsUrlKey,
+  matchPlaceIdentity,
+  buildCopyName,
+  type DuplicateMatchReason,
+} from "@/lib/place-identity";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import {
@@ -32,10 +39,10 @@ import { KNOWN_OCCASIONS } from "@/data/occasions";
 import {
   resolveGoogleMapsDetails,
   parseGoogleMapsUrl,
-  fetchGooglePlacesDetails,
   suggestOccasionsFromMetadata,
   looksLikeStreetAddress,
 } from "@/lib/maps";
+import { resolvePlacesLookup } from "@/lib/places-api";
 import { getSetting } from "@/lib/actions/settings";
 import {
   searchAddressNominatim,
@@ -137,12 +144,13 @@ export interface CreatePlaceResult {
   placeId?: string;
 }
 
-export async function parseUrlAction(rawUrl: string) {
-  const [resolvedDetails, googlePlacesApiKey] = await Promise.all([
-    resolveGoogleMapsDetails(rawUrl),
-    getSetting("google_places_api_key"),
-  ]);
+export async function parseUrlAction(rawUrl: string, targetSpace?: string | null) {
+  const resolvedDetails = await resolveGoogleMapsDetails(rawUrl);
   const parsed = parseGoogleMapsUrl(resolvedDetails.resolvedUrl);
+  const groupId =
+    targetSpace && targetSpace !== "personal"
+      ? targetSpace.replace(/^group:/, "")
+      : null;
 
   let latitude = parsed.latitude ?? resolvedDetails.htmlLat;
   let longitude = parsed.longitude ?? resolvedDetails.htmlLng;
@@ -158,15 +166,20 @@ export async function parseUrlAction(rawUrl: string) {
   let phone: string | undefined;
   let googleTypes: string[] | undefined;
   let source: "google_places" | "openstreetmap" | "url" = "url";
+  let quotaExceeded = false;
 
-  if (googlePlacesApiKey && (name || address)) {
+  if (name || address) {
     const query = [name, address].filter(Boolean).join(", ");
-    const gp = await fetchGooglePlacesDetails({
-      apiKey: googlePlacesApiKey,
-      query,
-      latitude,
-      longitude,
+    const lookup = await resolvePlacesLookup({
+      groupId,
+      textQuery: query,
+      latitudeHint: latitude,
+      longitudeHint: longitude,
     });
+    if (lookup.source === "quota_exceeded") {
+      quotaExceeded = true;
+    }
+    const gp = lookup.data;
     if (gp) {
       source = "google_places";
       const isAddressOnlyType =
@@ -240,6 +253,7 @@ export async function parseUrlAction(rawUrl: string) {
   return {
     ...parsed,
     name: name || safeLocationName,
+    quotaExceeded,
     address:
       address ||
       (locationDetails?.road
@@ -352,6 +366,8 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
       latitude,
       longitude,
       googleMapsUrl,
+      mapsUrlKey: normalizeMapsUrlKey(googleMapsUrl),
+      googlePlaceId: (formData.get("googlePlaceId") as string)?.trim() || null,
       priceRange,
       notes,
       communityPublished: targetGroupId !== null,
@@ -500,6 +516,7 @@ export async function updatePlaceAction(
       latitude,
       longitude,
       googleMapsUrl,
+      mapsUrlKey: normalizeMapsUrlKey(googleMapsUrl),
       website,
       phone,
       priceRange,
@@ -703,7 +720,7 @@ export async function deletePlaceAction(placeId: string) {
   const [place] = await db
     .select()
     .from(places)
-    .where(eq(places.id, placeId))
+    .where(and(eq(places.id, placeId), isNull(places.deletedAt)))
     .limit(1);
 
   if (!place) {
@@ -717,28 +734,27 @@ export async function deletePlaceAction(placeId: string) {
     };
   }
 
-  await db.delete(placeListItems).where(eq(placeListItems.placeId, placeId));
-  await db.delete(placeComments).where(eq(placeComments.placeId, placeId));
-  await db.delete(userPlaces).where(eq(userPlaces.placeId, placeId));
-  await db.delete(placeOccasions).where(eq(placeOccasions.placeId, placeId));
-  await db.delete(placeTags).where(eq(placeTags.placeId, placeId));
-  await db.delete(places).where(eq(places.id, placeId));
+  await db
+    .update(places)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(eq(places.id, placeId));
 
   await logAudit({
     actorUserId: currentUser.id,
     entityType: "place",
     entityId: placeId,
     action: "place_deleted",
-    metadata: { name: place.name, groupId: place.groupId },
+    metadata: { name: place.name, groupId: place.groupId, softDelete: true },
   });
 
   revalidatePath("/");
   revalidatePath("/admin");
+  revalidatePath("/group-admin");
   return { success: true };
 }
 
 /**
- * Elimina múltiples establecimientos en bloque (Superadmin o Admin del grupo al que pertenezcan todos).
+ * Envía múltiples establecimientos a la papelera (borrado lógico reversible 30 días).
  */
 export async function bulkDeletePlacesAction(placeIds: string[]) {
   const currentUser = await getCurrentUser();
@@ -753,7 +769,7 @@ export async function bulkDeletePlacesAction(placeIds: string[]) {
   const targetPlaces = await db
     .select({ id: places.id, groupId: places.groupId, createdById: places.createdById })
     .from(places)
-    .where(inArray(places.id, placeIds));
+    .where(and(inArray(places.id, placeIds), isNull(places.deletedAt)));
 
   if (targetPlaces.length === 0) {
     return { error: "No se encontraron los establecimientos seleccionados." };
@@ -772,24 +788,695 @@ export async function bulkDeletePlacesAction(placeIds: string[]) {
 
   const validIds = targetPlaces.map((p) => p.id);
 
-  await db.delete(placeListItems).where(inArray(placeListItems.placeId, validIds));
-  await db.delete(placeComments).where(inArray(placeComments.placeId, validIds));
-  await db.delete(userPlaces).where(inArray(userPlaces.placeId, validIds));
-  await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, validIds));
-  await db.delete(placeTags).where(inArray(placeTags.placeId, validIds));
-  await db.delete(places).where(inArray(places.id, validIds));
+  await db
+    .update(places)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(inArray(places.id, validIds));
 
   await logAudit({
     actorUserId: currentUser.id,
     entityType: "place",
     entityId: "bulk",
     action: "place_bulk_deleted",
-    metadata: { count: validIds.length },
+    metadata: { count: validIds.length, softDelete: true },
   });
 
   revalidatePath("/");
   revalidatePath("/admin");
+  revalidatePath("/group-admin");
   return { success: true, count: validIds.length };
+}
+
+export interface CopyTargetSpaceOption {
+  value: string;
+  label: string;
+  icon: string;
+}
+
+/**
+ * Devuelve los espacios destino a los que el usuario puede copiar sitios desde administración:
+ * - Superadmin: todos los grupos + su Mapa Personal.
+ * - Admin de grupo: los grupos donde es creador/admin + su Mapa Personal.
+ */
+export async function getCopyTargetSpacesAction(): Promise<CopyTargetSpaceOption[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  if (currentUser.role === "admin") {
+    const allGroups = await db
+      .select({ id: sharingGroups.id, name: sharingGroups.name, icon: sharingGroups.icon })
+      .from(sharingGroups);
+
+    return [
+      ...allGroups
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .map((g) => ({ value: g.id, label: g.name, icon: g.icon || "🍻" })),
+      { value: "personal", label: "Mi Mapa Personal", icon: "🏠" },
+    ];
+  }
+
+  const [owned, memberAdmin] = await Promise.all([
+    db
+      .select({ id: sharingGroups.id, name: sharingGroups.name, icon: sharingGroups.icon })
+      .from(sharingGroups)
+      .where(eq(sharingGroups.ownerUserId, currentUser.id)),
+    db
+      .select({ id: sharingGroups.id, name: sharingGroups.name, icon: sharingGroups.icon })
+      .from(sharingGroupMembers)
+      .innerJoin(sharingGroups, eq(sharingGroupMembers.groupId, sharingGroups.id))
+      .where(
+        and(
+          eq(sharingGroupMembers.userId, currentUser.id),
+          eq(sharingGroupMembers.role, "admin")
+        )
+      ),
+  ]);
+
+  const map = new Map<string, CopyTargetSpaceOption>();
+  for (const g of [...owned, ...memberAdmin]) {
+    map.set(g.id, { value: g.id, label: g.name, icon: g.icon || "🍻" });
+  }
+
+  return [
+    ...Array.from(map.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { sensitivity: "base" })
+    ),
+    { value: "personal", label: "Mi Mapa Personal", icon: "🏠" },
+  ];
+}
+
+async function resolveAdminCopyTarget(targetSpace: string, user: { id: string; role: string }) {
+  if (!targetSpace || targetSpace === "personal") {
+    return { groupId: null as string | null };
+  }
+  const [group] = await db
+    .select({ id: sharingGroups.id })
+    .from(sharingGroups)
+    .where(eq(sharingGroups.id, targetSpace))
+    .limit(1);
+  if (!group) {
+    return { error: "Grupo de destino no encontrado." };
+  }
+  if (user.role !== "admin") {
+    const membership = await getGroupMembership(user.id, group.id);
+    if (!membership.isGroupAdmin) {
+      return { error: "Solo los administradores del grupo destino pueden copiar sitios en él." };
+    }
+  }
+  return { groupId: group.id };
+}
+
+export interface CopyConflictPreview {
+  placeId: string;
+  placeName: string;
+  existingId: string;
+  existingName: string;
+  reason: DuplicateMatchReason;
+}
+
+/**
+ * Previsualiza qué sitios entrarían en conflicto (duplicados) al copiarlos a un espacio destino.
+ */
+export async function previewCopyPlacesAction(
+  placeIds: string[],
+  targetSpace: string
+): Promise<{
+  conflicts?: CopyConflictPreview[];
+  validIds?: string[];
+  error?: string;
+}> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "Debes iniciar sesión." };
+
+  const target = await resolveAdminCopyTarget(targetSpace, currentUser);
+  if ("error" in target) return { error: target.error };
+
+  const uniqueIds = Array.from(new Set(placeIds)).filter(Boolean);
+  if (uniqueIds.length === 0) return { error: "No hay sitios seleccionados." };
+
+  const sources = await db
+    .select()
+    .from(places)
+    .where(and(inArray(places.id, uniqueIds), isNull(places.deletedAt)));
+
+  const validSources: Place[] = [];
+  for (const src of sources) {
+    if (src.groupId === target.groupId) continue;
+    const perms = await getPlacePermissions(currentUser, src);
+    if (perms.canRead) validSources.push(src);
+  }
+
+  if (validSources.length === 0) {
+    return { error: "Ninguno de los sitios seleccionados puede copiarse al espacio destino." };
+  }
+
+  const destPlaces = await db
+    .select({
+      id: places.id,
+      name: places.name,
+      latitude: places.latitude,
+      longitude: places.longitude,
+      mapsUrlKey: places.mapsUrlKey,
+      googleMapsUrl: places.googleMapsUrl,
+      googlePlaceId: places.googlePlaceId,
+    })
+    .from(places)
+    .where(
+      and(
+        isNull(places.deletedAt),
+        target.groupId
+          ? eq(places.groupId, target.groupId)
+          : and(isNull(places.groupId), eq(places.createdById, currentUser.id))
+      )
+    );
+
+  const conflicts: CopyConflictPreview[] = [];
+  for (const src of validSources) {
+    for (const dest of destPlaces) {
+      const reason = matchPlaceIdentity(src, dest);
+      if (reason) {
+        conflicts.push({
+          placeId: src.id,
+          placeName: src.name,
+          existingId: dest.id,
+          existingName: dest.name,
+          reason,
+        });
+        break;
+      }
+    }
+  }
+
+  return {
+    conflicts,
+    validIds: validSources.map((s) => s.id),
+  };
+}
+
+/**
+ * Copia uno o varios sitios a otro grupo o Mapa Personal con resolución de conflictos
+ * ('skip' | 'replace' | 'keep_both') y soporte de Deshacer durante 10 minutos.
+ */
+export async function bulkCopyPlacesAction(
+  items: Array<{
+    placeId: string;
+    strategy: "skip" | "replace" | "keep_both";
+    conflictWithId?: string;
+  }>,
+  targetSpace: string
+): Promise<{
+  success?: boolean;
+  batchId?: string;
+  copiedCount?: number;
+  replacedCount?: number;
+  skippedCount?: number;
+  error?: string;
+}> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "Debes iniciar sesión." };
+
+  const target = await resolveAdminCopyTarget(targetSpace, currentUser);
+  if ("error" in target) return { error: target.error };
+
+  const targetGroupId = target.groupId;
+  const targetScopeKey = buildScopeKey(targetGroupId, currentUser.id);
+  const requestedIds = Array.from(new Set(items.map((i) => i.placeId))).filter(Boolean);
+  if (requestedIds.length === 0) return { error: "No hay sitios seleccionados." };
+
+  const sources = await db
+    .select()
+    .from(places)
+    .where(and(inArray(places.id, requestedIds), isNull(places.deletedAt)));
+  const sourceMap = new Map(sources.map((s) => [s.id, s]));
+
+  const destPlaces = await db
+    .select()
+    .from(places)
+    .where(
+      and(
+        isNull(places.deletedAt),
+        targetGroupId
+          ? eq(places.groupId, targetGroupId)
+          : and(isNull(places.groupId), eq(places.createdById, currentUser.id))
+      )
+    );
+  const existingNames = new Set(destPlaces.map((d) => d.name));
+  const destMap = new Map(destPlaces.map((d) => [d.id, d]));
+
+  const batchId = crypto.randomUUID();
+  const createdIds: string[] = [];
+  const replacedSnapshots: Array<{
+    placeId: string;
+    previous: {
+      name: string;
+      address: string | null;
+      city: string | null;
+      country: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      googleMapsUrl: string | null;
+      mapsUrlKey: string | null;
+      googlePlaceId: string | null;
+      priceRange: string;
+      notes: string | null;
+      occasions: string[];
+      tags: string[];
+    };
+  }> = [];
+
+  let copiedCount = 0;
+  let replacedCount = 0;
+  let skippedCount = 0;
+
+  for (const item of items) {
+    const source = sourceMap.get(item.placeId);
+    if (!source || source.groupId === targetGroupId) {
+      skippedCount++;
+      continue;
+    }
+
+    const perms = await getPlacePermissions(currentUser, source);
+    if (!perms.canRead) {
+      skippedCount++;
+      continue;
+    }
+
+    if (item.strategy === "skip") {
+      skippedCount++;
+      continue;
+    }
+
+    const [srcOccs, srcTags, [myInteraction]] = await Promise.all([
+      db.select().from(placeOccasions).where(eq(placeOccasions.placeId, source.id)),
+      db.select().from(placeTags).where(eq(placeTags.placeId, source.id)),
+      db
+        .select()
+        .from(userPlaces)
+        .where(and(eq(userPlaces.placeId, source.id), eq(userPlaces.userId, currentUser.id)))
+        .limit(1),
+    ]);
+
+    if (srcOccs.length > 0) {
+      await db
+        .insert(occasionsTable)
+        .values(
+          srcOccs.map((o) => {
+            const cleanOcc = o.occasion.trim().toLowerCase();
+            const known = KNOWN_OCCASIONS[cleanOcc];
+            return {
+              scopeKey: targetScopeKey,
+              id: cleanOcc,
+              name: known
+                ? known.name
+                : cleanOcc.charAt(0).toUpperCase() + cleanOcc.slice(1).replace(/[-_]/g, " "),
+              icon: known ? known.icon : "🍽️",
+            };
+          })
+        )
+        .onConflictDoNothing();
+    }
+
+    if (srcTags.length > 0) {
+      await db
+        .insert(tags)
+        .values(srcTags.map((t) => ({ scopeKey: targetScopeKey, id: t.tag, name: t.tag })))
+        .onConflictDoNothing();
+    }
+
+    if (item.strategy === "replace" && item.conflictWithId && destMap.has(item.conflictWithId)) {
+      const existing = destMap.get(item.conflictWithId)!;
+      const [prevOccs, prevTags] = await Promise.all([
+        db.select().from(placeOccasions).where(eq(placeOccasions.placeId, existing.id)),
+        db.select().from(placeTags).where(eq(placeTags.placeId, existing.id)),
+      ]);
+
+      replacedSnapshots.push({
+        placeId: existing.id,
+        previous: {
+          name: existing.name,
+          address: existing.address,
+          city: existing.city,
+          country: existing.country,
+          latitude: existing.latitude,
+          longitude: existing.longitude,
+          googleMapsUrl: existing.googleMapsUrl,
+          mapsUrlKey: existing.mapsUrlKey,
+          googlePlaceId: existing.googlePlaceId,
+          priceRange: existing.priceRange,
+          notes: existing.notes,
+          occasions: prevOccs.map((o) => o.occasion),
+          tags: prevTags.map((t) => t.tag),
+        },
+      });
+
+      await db
+        .update(places)
+        .set({
+          name: source.name,
+          address: source.address,
+          city: source.city,
+          country: source.country,
+          latitude: source.latitude,
+          longitude: source.longitude,
+          googleMapsUrl: source.googleMapsUrl,
+          mapsUrlKey: source.mapsUrlKey || normalizeMapsUrlKey(source.googleMapsUrl),
+          googlePlaceId: source.googlePlaceId,
+          priceRange: source.priceRange,
+          notes: source.notes,
+          updatedAt: new Date(),
+        })
+        .where(eq(places.id, existing.id));
+
+      await db.delete(placeOccasions).where(eq(placeOccasions.placeId, existing.id));
+      if (srcOccs.length > 0) {
+        await db.insert(placeOccasions).values(
+          srcOccs.map((o) => ({ placeId: existing.id, occasion: o.occasion }))
+        );
+      }
+
+      await db.delete(placeTags).where(eq(placeTags.placeId, existing.id));
+      if (srcTags.length > 0) {
+        await db.insert(placeTags).values(
+          srcTags.map((t) => ({ placeId: existing.id, tag: t.tag }))
+        );
+      }
+
+      replacedCount++;
+      continue;
+    }
+
+    // Estrategia 'keep_both' o sin conflicto: crear nuevo registro independiente
+    const hasConflict = Boolean(item.conflictWithId) || existingNames.has(source.name);
+    const finalName = hasConflict ? buildCopyName(source.name, existingNames) : source.name;
+    existingNames.add(finalName);
+
+    const [copied] = await db
+      .insert(places)
+      .values({
+        groupId: targetGroupId,
+        name: finalName,
+        address: source.address,
+        city: source.city,
+        country: source.country,
+        latitude: source.latitude,
+        longitude: source.longitude,
+        googleMapsUrl: source.googleMapsUrl,
+        mapsUrlKey: source.mapsUrlKey || normalizeMapsUrlKey(source.googleMapsUrl),
+        googlePlaceId: source.googlePlaceId,
+        priceRange: source.priceRange,
+        notes: source.notes,
+        communityPublished: targetGroupId !== null,
+        website: source.website,
+        phone: source.phone,
+        createdById: currentUser.id,
+      })
+      .returning();
+
+    if (srcOccs.length > 0) {
+      await db.insert(placeOccasions).values(
+        srcOccs.map((o) => ({ placeId: copied.id, occasion: o.occasion }))
+      );
+    }
+    if (srcTags.length > 0) {
+      await db.insert(placeTags).values(
+        srcTags.map((t) => ({ placeId: copied.id, tag: t.tag }))
+      );
+    }
+    if (myInteraction) {
+      await db
+        .insert(userPlaces)
+        .values({
+          userId: currentUser.id,
+          placeId: copied.id,
+          favorite: myInteraction.favorite,
+          personalStatus: myInteraction.personalStatus,
+          rating: myInteraction.rating,
+          privateNotes: myInteraction.privateNotes,
+        })
+        .onConflictDoNothing();
+    }
+
+    createdIds.push(copied.id);
+    copiedCount++;
+  }
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: batchId,
+    action: "places_bulk_copied",
+    metadata: {
+      batchId,
+      targetSpace,
+      targetGroupId,
+      copiedCount,
+      replacedCount,
+      skippedCount,
+      createdIds,
+      replacedSnapshots,
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
+  return {
+    success: true,
+    batchId,
+    copiedCount,
+    replacedCount,
+    skippedCount,
+  };
+}
+
+/**
+ * Deshace una copia masiva realizada en los últimos 10 minutos.
+ */
+export async function undoBulkCopyAction(
+  batchId: string
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autorizado." };
+
+  const [entry] = await db
+    .select()
+    .from(auditLogs)
+    .where(and(eq(auditLogs.entityId, batchId), eq(auditLogs.action, "places_bulk_copied")))
+    .limit(1);
+
+  if (!entry) return { error: "No se encontró el lote de copia." };
+
+  if (currentUser.role !== "admin" && entry.actorUserId !== currentUser.id) {
+    return { error: "Solo quien realizó la copia o un superadministrador puede deshacerla." };
+  }
+
+  const ageMs = Date.now() - new Date(entry.createdAt).getTime();
+  if (ageMs > 10 * 60 * 1000) {
+    return { error: "El plazo de 10 minutos para deshacer esta copia ya ha expirado." };
+  }
+
+  const meta = (entry.metadata || {}) as {
+    createdIds?: string[];
+    replacedSnapshots?: Array<{
+      placeId: string;
+      previous: {
+        name: string;
+        address: string | null;
+        city: string | null;
+        country: string | null;
+        latitude: number | null;
+        longitude: number | null;
+        googleMapsUrl: string | null;
+        mapsUrlKey: string | null;
+        googlePlaceId: string | null;
+        priceRange: string;
+        notes: string | null;
+        occasions: string[];
+        tags: string[];
+      };
+    }>;
+  };
+
+  if (meta.createdIds && meta.createdIds.length > 0) {
+    await db
+      .update(places)
+      .set({ deletedAt: new Date(), updatedAt: new Date() })
+      .where(inArray(places.id, meta.createdIds));
+  }
+
+  if (meta.replacedSnapshots && meta.replacedSnapshots.length > 0) {
+    for (const snap of meta.replacedSnapshots) {
+      await db
+        .update(places)
+        .set({
+          name: snap.previous.name,
+          address: snap.previous.address,
+          city: snap.previous.city,
+          country: snap.previous.country,
+          latitude: snap.previous.latitude,
+          longitude: snap.previous.longitude,
+          googleMapsUrl: snap.previous.googleMapsUrl,
+          mapsUrlKey: snap.previous.mapsUrlKey,
+          googlePlaceId: snap.previous.googlePlaceId,
+          priceRange: snap.previous.priceRange,
+          notes: snap.previous.notes,
+          updatedAt: new Date(),
+        })
+        .where(eq(places.id, snap.placeId));
+
+      await db.delete(placeOccasions).where(eq(placeOccasions.placeId, snap.placeId));
+      if (snap.previous.occasions.length > 0) {
+        await db.insert(placeOccasions).values(
+          snap.previous.occasions.map((occ) => ({ placeId: snap.placeId, occasion: occ }))
+        );
+      }
+
+      await db.delete(placeTags).where(eq(placeTags.placeId, snap.placeId));
+      if (snap.previous.tags.length > 0) {
+        await db.insert(placeTags).values(
+          snap.previous.tags.map((tag) => ({ placeId: snap.placeId, tag }))
+        );
+      }
+    }
+  }
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: batchId,
+    action: "places_bulk_copy_undone",
+    metadata: { batchId },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
+  return { success: true };
+}
+
+export interface TrashPlaceItem {
+  id: string;
+  name: string;
+  city: string | null;
+  groupId: string | null;
+  groupName: string | null;
+  groupIcon: string | null;
+  deletedAt: Date;
+}
+
+/**
+ * Lista los sitios en papelera (purgando automáticamente los que superen 30 días).
+ */
+export async function getTrashPlacesAction(groupId?: string | null): Promise<TrashPlaceItem[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  if (groupId) {
+    const membership = await getGroupMembership(currentUser.id, groupId);
+    if (!membership.isGroupAdmin && currentUser.role !== "admin") return [];
+  } else if (currentUser.role !== "admin") {
+    return [];
+  }
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  await db
+    .delete(places)
+    .where(and(isNotNull(places.deletedAt), lt(places.deletedAt, thirtyDaysAgo)));
+
+  const rows = await db
+    .select({
+      id: places.id,
+      name: places.name,
+      city: places.city,
+      groupId: places.groupId,
+      groupName: sharingGroups.name,
+      groupIcon: sharingGroups.icon,
+      deletedAt: places.deletedAt,
+    })
+    .from(places)
+    .leftJoin(sharingGroups, eq(places.groupId, sharingGroups.id))
+    .where(
+      groupId
+        ? and(isNotNull(places.deletedAt), eq(places.groupId, groupId))
+        : and(
+            isNotNull(places.deletedAt),
+            or(isNotNull(places.groupId), eq(places.createdById, currentUser.id))
+          )
+    )
+    .orderBy(desc(places.deletedAt));
+
+  return rows.map((r) => ({
+    ...r,
+    deletedAt: r.deletedAt!,
+  }));
+}
+
+export async function restorePlaceAction(placeId: string): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autorizado." };
+
+  const [place] = await db
+    .select()
+    .from(places)
+    .where(and(eq(places.id, placeId), isNotNull(places.deletedAt)))
+    .limit(1);
+
+  if (!place) return { error: "Sitio no encontrado en la papelera." };
+
+  const perms = await getPlacePermissions(currentUser, place);
+  if (!perms.canDelete) {
+    return { error: "No tienes permiso para restaurar este sitio." };
+  }
+
+  await db
+    .update(places)
+    .set({ deletedAt: null, updatedAt: new Date() })
+    .where(eq(places.id, placeId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: placeId,
+    action: "place_restored",
+    metadata: { name: place.name, groupId: place.groupId },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
+  return { success: true };
+}
+
+export async function purgePlaceAction(placeId: string): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autorizado." };
+
+  const [place] = await db
+    .select()
+    .from(places)
+    .where(and(eq(places.id, placeId), isNotNull(places.deletedAt)))
+    .limit(1);
+
+  if (!place) return { error: "Sitio no encontrado en la papelera." };
+
+  const perms = await getPlacePermissions(currentUser, place);
+  if (!perms.canDelete) {
+    return { error: "No tienes permiso para eliminar definitivamente este sitio." };
+  }
+
+  await db.delete(places).where(eq(places.id, placeId));
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "place",
+    entityId: placeId,
+    action: "place_purged",
+    metadata: { name: place.name, groupId: place.groupId },
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
+  return { success: true };
 }
 
 export async function getAllPlaces(
@@ -827,7 +1514,7 @@ export async function getAllPlaces(
       .map((g) => g.id)
   );
 
-  const whereConditions = [];
+  const whereConditions = [isNull(places.deletedAt)];
 
   if (options?.forceAllForSuperAdmin && currentUser.role === "admin") {
     // Superadmin en /admin: visión global de todos los grupos + propios
@@ -1188,9 +1875,12 @@ export async function findPotentialDuplicatesAction(params: {
     })
     .from(places)
     .where(
-      target.groupId
-        ? eq(places.groupId, target.groupId)
-        : and(isNull(places.groupId), eq(places.createdById, currentUser.id))
+      and(
+        isNull(places.deletedAt),
+        target.groupId
+          ? eq(places.groupId, target.groupId)
+          : and(isNull(places.groupId), eq(places.createdById, currentUser.id))
+      )
     );
 
   const matches: PotentialDuplicate[] = [];
@@ -1393,4 +2083,124 @@ export async function mergePlacesAction(
   revalidatePath("/");
   revalidatePath("/admin");
   return { success: true };
+}
+
+export interface CrossSpaceMatch {
+  id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  googleMapsUrl: string | null;
+  spaceId: string;
+  spaceName: string;
+  spaceIcon: string;
+  reason: DuplicateMatchReason;
+}
+
+/**
+ * Punto 4A: Detecta si un local ya existe en alguno de los espacios que el usuario puede leer
+ * (su Mapa Personal y sus grupos) para ofrecer importar sus datos básicos sin duplicar esfuerzo.
+ */
+export async function checkPlaceAcrossSpacesAction(params: {
+  name?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  googleMapsUrl?: string | null;
+  targetSpace?: string | null;
+}): Promise<{ inOtherSpaces: CrossSpaceMatch[] }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { inOtherSpaces: [] };
+
+  const cleanName = (params.name || "").trim();
+  const cleanUrlKey = normalizeMapsUrlKey(params.googleMapsUrl);
+  const hasCoords =
+    typeof params.latitude === "number" &&
+    typeof params.longitude === "number" &&
+    !isNaN(params.latitude) &&
+    !isNaN(params.longitude);
+
+  if (cleanName.length < 3 && !cleanUrlKey && !hasCoords) {
+    return { inOtherSpaces: [] };
+  }
+
+  const memberships = await db
+    .select({
+      groupId: sharingGroupMembers.groupId,
+      groupName: sharingGroups.name,
+      groupIcon: sharingGroups.icon,
+    })
+    .from(sharingGroupMembers)
+    .innerJoin(sharingGroups, eq(sharingGroupMembers.groupId, sharingGroups.id))
+    .where(eq(sharingGroupMembers.userId, currentUser.id));
+
+  const groupIds = memberships.map((m) => m.groupId);
+  const groupInfoMap = new Map(memberships.map((m) => [m.groupId, m]));
+
+  const rows = await db
+    .select({
+      id: places.id,
+      groupId: places.groupId,
+      name: places.name,
+      address: places.address,
+      city: places.city,
+      country: places.country,
+      latitude: places.latitude,
+      longitude: places.longitude,
+      googleMapsUrl: places.googleMapsUrl,
+      mapsUrlKey: places.mapsUrlKey,
+      googlePlaceId: places.googlePlaceId,
+    })
+    .from(places)
+    .where(
+      and(
+        isNull(places.deletedAt),
+        groupIds.length > 0
+          ? or(
+              and(isNull(places.groupId), eq(places.createdById, currentUser.id)),
+              inArray(places.groupId, groupIds)
+            )
+          : and(isNull(places.groupId), eq(places.createdById, currentUser.id))
+      )
+    );
+
+  const targetGroupId =
+    !params.targetSpace || params.targetSpace === "personal" ? null : params.targetSpace;
+
+  const inOtherSpaces: CrossSpaceMatch[] = [];
+  for (const row of rows) {
+    if (row.groupId === targetGroupId) continue;
+    const reason = matchPlaceIdentity(
+      {
+        name: cleanName,
+        latitude: hasCoords ? params.latitude! : null,
+        longitude: hasCoords ? params.longitude! : null,
+        googleMapsUrl: params.googleMapsUrl,
+        mapsUrlKey: cleanUrlKey,
+      },
+      row
+    );
+    if (reason) {
+      const grp = row.groupId ? groupInfoMap.get(row.groupId) : null;
+      inOtherSpaces.push({
+        id: row.id,
+        name: row.name,
+        address: row.address,
+        city: row.city,
+        country: row.country,
+        latitude: row.latitude,
+        longitude: row.longitude,
+        googleMapsUrl: row.googleMapsUrl,
+        spaceId: row.groupId || "personal",
+        spaceName: grp?.groupName || "Mi Mapa Personal",
+        spaceIcon: grp?.groupIcon || "🏠",
+        reason,
+      });
+      if (inOtherSpaces.length >= 3) break;
+    }
+  }
+
+  return { inOtherSpaces };
 }

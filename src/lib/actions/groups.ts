@@ -2,13 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { and, eq, inArray, ne, or, gt, desc, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, or, gt, desc, sql, isNull } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { db } from "@/db";
 import {
   sharingGroups,
   sharingGroupMembers,
   groupInvitations,
+  groupJoinRequests,
   places,
   occasions,
   tags,
@@ -19,6 +20,7 @@ import {
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { rateLimit } from "@/lib/rate-limit";
+import { encryptApiKey, getGroupApiUsageSummary } from "@/lib/places-api";
 import {
   ACTIVE_SPACE_COOKIE,
   buildScopeKey,
@@ -173,7 +175,7 @@ export async function getMyGroupsAction(): Promise<SharingGroupWithMembers[]> {
         count: sql<number>`cast(count(*) as integer)`,
       })
       .from(places)
-      .where(inArray(places.groupId, groupIds))
+      .where(and(inArray(places.groupId, groupIds), isNull(places.deletedAt)))
       .groupBy(places.groupId),
   ]);
 
@@ -250,7 +252,8 @@ export async function getActiveUsersForSharingAction(): Promise<SimpleUserOption
 export async function createGroupAction(
   name: string,
   icon: string = "🍻",
-  description?: string
+  description?: string,
+  template?: { mode: "default" | "empty" | "clone"; sourceGroupId?: string }
 ): Promise<{ success?: boolean; groupId?: string; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "No autenticado." };
@@ -285,8 +288,50 @@ export async function createGroupAction(
       set: { role: "admin" },
     });
 
-  // Inicializar los 8 planes por defecto del nuevo grupo
-  await ensureDefaultOccasionsForScope(buildScopeKey(created.id, currentUser.id));
+  const targetScopeKey = buildScopeKey(created.id, currentUser.id);
+  const templateMode = template?.mode || "default";
+
+  if (templateMode === "clone" && template?.sourceGroupId) {
+    const membership = await getGroupMembership(currentUser.id, template.sourceGroupId);
+    if (membership.isMember || currentUser.role === "admin") {
+      const srcScope = `group:${template.sourceGroupId}`;
+      const [srcOccs, srcTags] = await Promise.all([
+        db.select().from(occasions).where(eq(occasions.scopeKey, srcScope)),
+        db.select().from(tags).where(eq(tags.scopeKey, srcScope)),
+      ]);
+      if (srcOccs.length > 0) {
+        await db
+          .insert(occasions)
+          .values(
+            srcOccs.map((o) => ({
+              scopeKey: targetScopeKey,
+              id: o.id,
+              name: o.name,
+              icon: o.icon,
+            }))
+          )
+          .onConflictDoNothing();
+      }
+      if (srcTags.length > 0) {
+        await db
+          .insert(tags)
+          .values(
+            srcTags.map((t) => ({
+              scopeKey: targetScopeKey,
+              id: t.id,
+              name: t.name,
+            }))
+          )
+          .onConflictDoNothing();
+      }
+    } else {
+      await ensureDefaultOccasionsForScope(targetScopeKey);
+    }
+  } else if (templateMode === "default") {
+    // Inicializar los 8 planes por defecto del nuevo grupo
+    await ensureDefaultOccasionsForScope(targetScopeKey);
+  }
+  // Si templateMode === "empty", arranca sin planes ni etiquetas predefinidos
 
   // Activar automáticamente el nuevo grupo como espacio en uso
   const cookieStore = await cookies();
@@ -314,7 +359,12 @@ export async function createGroupAction(
  */
 export async function updateGroupSettingsAction(
   groupId: string,
-  input: { name: string; icon?: string; description?: string | null }
+  input: {
+    name: string;
+    icon?: string;
+    description?: string | null;
+    requireJoinApproval?: boolean;
+  }
 ): Promise<{ success?: boolean; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "No autenticado." };
@@ -336,6 +386,9 @@ export async function updateGroupSettingsAction(
       ...(input.icon !== undefined ? { icon: input.icon.trim().slice(0, 50) || "🍻" } : {}),
       ...(input.description !== undefined
         ? { description: input.description?.trim() || null }
+        : {}),
+      ...(input.requireJoinApproval !== undefined
+        ? { requireJoinApproval: input.requireJoinApproval }
         : {}),
       updatedAt: new Date(),
     })
@@ -670,7 +723,7 @@ export async function getAllGroupsAdminAction(): Promise<AdminGroupOverviewItem[
         count: sql<number>`cast(count(*) as integer)`,
       })
       .from(places)
-      .where(inArray(places.groupId, groupIds))
+      .where(and(inArray(places.groupId, groupIds), isNull(places.deletedAt)))
       .groupBy(places.groupId),
     db
       .select({
@@ -792,6 +845,7 @@ export async function getGroupInvitesAction(
     .where(
       and(
         eq(groupInvitations.groupId, groupId),
+        isNull(groupInvitations.revokedAt),
         gt(groupInvitations.expiresAt, new Date())
       )
     )
@@ -825,7 +879,10 @@ export async function revokeGroupInviteAction(
     return { error: "Solo los administradores del grupo pueden revocar esta invitación." };
   }
 
-  await db.delete(groupInvitations).where(eq(groupInvitations.id, inviteId));
+  await db
+    .update(groupInvitations)
+    .set({ revokedAt: new Date() })
+    .where(eq(groupInvitations.id, inviteId));
 
   await logAudit({
     actorUserId: currentUser.id,
@@ -905,6 +962,7 @@ export async function getGroupInviteInfoAction(token: string): Promise<{
  */
 export async function joinGroupWithTokenAction(token: string): Promise<{
   success?: boolean;
+  pendingApproval?: boolean;
   groupName?: string;
   groupId?: string;
   error?: string;
@@ -922,15 +980,17 @@ export async function joinGroupWithTokenAction(token: string): Promise<{
       expiresAt: groupInvitations.expiresAt,
       usedCount: groupInvitations.usedCount,
       maxUses: groupInvitations.maxUses,
+      revokedAt: groupInvitations.revokedAt,
       groupName: sharingGroups.name,
+      requireJoinApproval: sharingGroups.requireJoinApproval,
     })
     .from(groupInvitations)
     .innerJoin(sharingGroups, eq(groupInvitations.groupId, sharingGroups.id))
     .where(eq(groupInvitations.token, token))
     .limit(1);
 
-  if (!invite) {
-    return { error: "El enlace de invitación no es válido o ya no existe." };
+  if (!invite || invite.revokedAt) {
+    return { error: "El enlace de invitación no es válido o ha sido revocado." };
   }
 
   if (new Date(invite.expiresAt).getTime() < Date.now()) {
@@ -939,6 +999,53 @@ export async function joinGroupWithTokenAction(token: string): Promise<{
 
   if (invite.maxUses !== null && (invite.usedCount || 0) >= invite.maxUses) {
     return { error: "Este enlace ya ha alcanzado su número máximo de usos." };
+  }
+
+  const [alreadyMember] = await db
+    .select({ id: sharingGroupMembers.id })
+    .from(sharingGroupMembers)
+    .where(
+      and(
+        eq(sharingGroupMembers.groupId, invite.groupId),
+        eq(sharingGroupMembers.userId, currentUser.id)
+      )
+    )
+    .limit(1);
+
+  if (!alreadyMember && invite.requireJoinApproval) {
+    await db
+      .insert(groupJoinRequests)
+      .values({
+        groupId: invite.groupId,
+        userId: currentUser.id,
+        invitationId: invite.id,
+        status: "pending",
+      })
+      .onConflictDoUpdate({
+        target: [groupJoinRequests.groupId, groupJoinRequests.userId],
+        set: {
+          status: "pending",
+          invitationId: invite.id,
+          decidedById: null,
+          decidedAt: null,
+          createdAt: new Date(),
+        },
+      });
+
+    await logAudit({
+      actorUserId: currentUser.id,
+      entityType: "group",
+      entityId: invite.groupId,
+      action: "group_join_requested",
+      metadata: { tokenPrefix: token.slice(0, 8), groupName: invite.groupName },
+    });
+
+    return {
+      success: true,
+      pendingApproval: true,
+      groupName: invite.groupName,
+      groupId: invite.groupId,
+    };
   }
 
   await db
@@ -973,4 +1080,136 @@ export async function joinGroupWithTokenAction(token: string): Promise<{
 
   revalidatePath("/");
   return { success: true, groupName: invite.groupName, groupId: invite.groupId };
+}
+
+export interface GroupJoinRequestItem {
+  id: string;
+  userId: string;
+  name: string;
+  username: string | null;
+  createdAt: Date;
+}
+
+export async function getGroupJoinRequestsAction(
+  groupId: string
+): Promise<GroupJoinRequestItem[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+  const membership = await getGroupMembership(currentUser.id, groupId);
+  if (!membership.isGroupAdmin && currentUser.role !== "admin") return [];
+
+  return db
+    .select({
+      id: groupJoinRequests.id,
+      userId: groupJoinRequests.userId,
+      name: users.name,
+      username: users.username,
+      createdAt: groupJoinRequests.createdAt,
+    })
+    .from(groupJoinRequests)
+    .innerJoin(users, eq(groupJoinRequests.userId, users.id))
+    .where(
+      and(
+        eq(groupJoinRequests.groupId, groupId),
+        eq(groupJoinRequests.status, "pending")
+      )
+    )
+    .orderBy(desc(groupJoinRequests.createdAt));
+}
+
+export async function decideGroupJoinRequestAction(
+  requestId: string,
+  decision: "approve" | "reject"
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const [req] = await db
+    .select()
+    .from(groupJoinRequests)
+    .where(eq(groupJoinRequests.id, requestId))
+    .limit(1);
+
+  if (!req) return { error: "Solicitud no encontrada." };
+
+  const membership = await getGroupMembership(currentUser.id, req.groupId);
+  if (!membership.isGroupAdmin && currentUser.role !== "admin") {
+    return { error: "No tienes permiso para decidir sobre esta solicitud." };
+  }
+
+  await db
+    .update(groupJoinRequests)
+    .set({
+      status: decision === "approve" ? "approved" : "rejected",
+      decidedById: currentUser.id,
+      decidedAt: new Date(),
+    })
+    .where(eq(groupJoinRequests.id, requestId));
+
+  if (decision === "approve") {
+    await db
+      .insert(sharingGroupMembers)
+      .values({ groupId: req.groupId, userId: req.userId, role: "member" })
+      .onConflictDoNothing();
+  }
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "group",
+    entityId: req.groupId,
+    action: decision === "approve" ? "group_join_approved" : "group_join_rejected",
+    metadata: { requestId, userId: req.userId },
+  });
+
+  revalidatePath("/group-admin");
+  revalidatePath("/");
+  return { success: true };
+}
+
+/**
+ * Actualiza la clave de Google Places API cifrada del grupo (Punto 6).
+ */
+export async function updateGroupApiSettingsAction(
+  groupId: string,
+  input: { apiKey?: string | null; clearKey?: boolean }
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const membership = await getGroupMembership(currentUser.id, groupId);
+  if (!membership.isGroupAdmin && currentUser.role !== "admin") {
+    return { error: "Solo los administradores del grupo pueden configurar la API." };
+  }
+
+  let nextEnc: string | null | undefined = undefined;
+  if (input.clearKey) {
+    nextEnc = null;
+  } else if (input.apiKey && input.apiKey.trim()) {
+    nextEnc = encryptApiKey(input.apiKey.trim());
+  }
+
+  if (nextEnc !== undefined) {
+    await db
+      .update(sharingGroups)
+      .set({ googlePlacesApiKeyEnc: nextEnc, updatedAt: new Date() })
+      .where(eq(sharingGroups.id, groupId));
+
+    await logAudit({
+      actorUserId: currentUser.id,
+      entityType: "group",
+      entityId: groupId,
+      action: input.clearKey ? "group_api_key_cleared" : "group_api_key_updated",
+    });
+  }
+
+  revalidatePath("/group-admin");
+  return { success: true };
+}
+
+export async function getGroupApiUsageAction(groupId: string) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return null;
+  const membership = await getGroupMembership(currentUser.id, groupId);
+  if (!membership.isGroupAdmin && currentUser.role !== "admin") return null;
+  return getGroupApiUsageSummary(groupId);
 }

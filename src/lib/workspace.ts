@@ -97,7 +97,7 @@ export const getActiveWorkspace = cache(async (): Promise<ActiveWorkspace | null
     db
       .select({ count: sql<number>`cast(count(*) as integer)` })
       .from(places)
-      .where(and(isNull(places.groupId), eq(places.createdById, user.id))),
+      .where(and(isNull(places.groupId), eq(places.createdById, user.id), isNull(places.deletedAt))),
   ]);
 
   const roleByGroupId = new Map<string, "admin" | "member">();
@@ -134,7 +134,7 @@ export const getActiveWorkspace = cache(async (): Promise<ActiveWorkspace | null
           count: sql<number>`cast(count(*) as integer)`,
         })
         .from(places)
-        .where(inArray(places.groupId, groupIds))
+        .where(and(inArray(places.groupId, groupIds), isNull(places.deletedAt)))
         .groupBy(places.groupId),
     ]);
 

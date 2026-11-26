@@ -30,6 +30,8 @@ export function AdminGroupsManager() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupIcon, setNewGroupIcon] = useState("🍻");
+  const [templateMode, setTemplateMode] = useState<"default" | "empty" | "clone">("default");
+  const [cloneSourceId, setCloneSourceId] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
   const [sortField, setSortField] = useState<GroupSortField>("placesCount");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -104,7 +106,10 @@ export function AdminGroupsManager() {
     e.preventDefault();
     if (!newGroupName.trim() || creatingGroup) return;
     setCreatingGroup(true);
-    const res = await createGroupAction(newGroupName, newGroupIcon);
+    const res = await createGroupAction(newGroupName, newGroupIcon, undefined, {
+      mode: templateMode,
+      sourceGroupId: templateMode === "clone" ? cloneSourceId : undefined,
+    });
     setCreatingGroup(false);
     if (res.error) {
       toast(res.error, { kind: "error" });
@@ -262,40 +267,70 @@ export function AdminGroupsManager() {
         {showCreateForm && (
           <form
             onSubmit={handleCreateGroup}
-            className="p-3.5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-orange-200/70 dark:border-orange-900/50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
+            className="p-3.5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-orange-200/70 dark:border-orange-900/50 space-y-2.5"
           >
-            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
-              {["🍻", "🍕", "🍷", "🍽️", "🍣", "☕", "🌍", "🎉"].map((ic) => (
-                <button
-                  key={ic}
-                  type="button"
-                  onClick={() => setNewGroupIcon(ic)}
-                  className={`w-8 h-8 rounded-full text-sm flex items-center justify-center border cursor-pointer shrink-0 ${
-                    newGroupIcon === ic
-                      ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500"
-                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
-                  }`}
-                >
-                  {ic}
-                </button>
-              ))}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
+                {["🍻", "🍕", "🍷", "🍽️", "🍣", "☕", "🌍", "🎉"].map((ic) => (
+                  <button
+                    key={ic}
+                    type="button"
+                    onClick={() => setNewGroupIcon(ic)}
+                    className={`w-8 h-8 rounded-full text-sm flex items-center justify-center border cursor-pointer shrink-0 ${
+                      newGroupIcon === ic
+                        ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                    }`}
+                  >
+                    {ic}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="text"
+                required
+                minLength={2}
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder={`${t("groups.name")}...`}
+                className="flex-1 px-3.5 py-2 rounded-full text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              />
+              <button
+                type="submit"
+                disabled={creatingGroup || !newGroupName.trim()}
+                className="px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 shrink-0"
+              >
+                {creatingGroup ? t("common.loading") : t("common.save")}
+              </button>
             </div>
-            <input
-              type="text"
-              required
-              minLength={2}
-              value={newGroupName}
-              onChange={(e) => setNewGroupName(e.target.value)}
-              placeholder={`${t("groups.name")}...`}
-              className="flex-1 px-3.5 py-2 rounded-full text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
-            <button
-              type="submit"
-              disabled={creatingGroup || !newGroupName.trim()}
-              className="px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 shrink-0"
-            >
-              {creatingGroup ? t("common.loading") : t("common.save")}
-            </button>
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              <span className="font-bold text-slate-500 dark:text-slate-400">
+                {t("groups.template_label")}
+              </span>
+              <select
+                value={templateMode}
+                onChange={(e) => setTemplateMode(e.target.value as "default" | "empty" | "clone")}
+                className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+              >
+                <option value="default">{t("groups.template_default")}</option>
+                <option value="empty">{t("groups.template_empty")}</option>
+                {groups.length > 0 && <option value="clone">{t("groups.template_clone")}</option>}
+              </select>
+              {templateMode === "clone" && groups.length > 0 && (
+                <select
+                  value={cloneSourceId}
+                  onChange={(e) => setCloneSourceId(e.target.value)}
+                  className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+                >
+                  <option value="">{t("groups.template_clone_pick")}</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.icon} {g.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
           </form>
         )}
       </div>

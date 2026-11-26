@@ -95,6 +95,9 @@ export const places = pgTable(
     communityPublished: boolean("community_published").notNull().default(true),
     website: text("website"),
     phone: varchar("phone", { length: 50 }),
+    googlePlaceId: varchar("google_place_id", { length: 255 }),
+    mapsUrlKey: varchar("maps_url_key", { length: 255 }),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdById: uuid("created_by_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -105,6 +108,9 @@ export const places = pgTable(
     index("places_created_by_idx").on(table.createdById),
     index("places_group_idx").on(table.groupId),
     index("places_coords_idx").on(table.latitude, table.longitude),
+    index("places_google_place_id_idx").on(table.googlePlaceId),
+    index("places_maps_url_key_idx").on(table.mapsUrlKey),
+    index("places_deleted_at_idx").on(table.deletedAt),
   ]
 );
 
@@ -196,6 +202,9 @@ export const sharingGroups = pgTable("sharing_groups", {
   ownerUserId: uuid("owner_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  googlePlacesApiKeyEnc: text("google_places_api_key_enc"),
+  placesApiMonthlyQuota: integer("places_api_monthly_quota"),
+  requireJoinApproval: boolean("require_join_approval").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -266,6 +275,7 @@ export const groupInvitations = pgTable(
     usedCount: integer("used_count").notNull().default(0),
     maxUses: integer("max_uses"), // null = ilimitado
     neverExpires: boolean("never_expires").notNull().default(false),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -317,11 +327,73 @@ export const placeListItems = pgTable(
   ]
 );
 
+export const groupJoinRequests = pgTable(
+  "group_join_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => sharingGroups.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    invitationId: uuid("invitation_id").references(() => groupInvitations.id, {
+      onDelete: "set null",
+    }),
+    status: varchar("status", { length: 20 }).notNull().default("pending"), // 'pending' | 'approved' | 'rejected'
+    decidedById: uuid("decided_by_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("group_join_requests_group_user_idx").on(table.groupId, table.userId),
+    index("group_join_requests_group_status_idx").on(table.groupId, table.status),
+  ]
+);
+
+export const apiUsage = pgTable(
+  "api_usage",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    scopeKey: varchar("scope_key", { length: 80 }).notNull(), // 'project' | 'group:<uuid>'
+    provider: varchar("provider", { length: 40 }).notNull().default("google_places"),
+    period: varchar("period", { length: 10 }).notNull(), // 'YYYY-MM'
+    requests: integer("requests").notNull().default(0),
+    cacheHits: integer("cache_hits").notNull().default(0),
+    blocked: integer("blocked").notNull().default(0),
+    lastAt: timestamp("last_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("api_usage_scope_provider_period_idx").on(
+      table.scopeKey,
+      table.provider,
+      table.period
+    ),
+  ]
+);
+
+export const placesApiCache = pgTable(
+  "places_api_cache",
+  {
+    queryKey: varchar("query_key", { length: 320 }).primaryKey(),
+    googlePlaceId: varchar("google_place_id", { length: 255 }),
+    payload: jsonb("payload").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("places_api_cache_expires_idx").on(table.expiresAt)]
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Session = typeof sessions.$inferSelect;
 export type Invitation = typeof invitations.$inferSelect;
 export type GroupInvitation = typeof groupInvitations.$inferSelect;
+export type GroupJoinRequest = typeof groupJoinRequests.$inferSelect;
+export type ApiUsage = typeof apiUsage.$inferSelect;
+export type PlacesApiCache = typeof placesApiCache.$inferSelect;
 export type Occasion = typeof occasions.$inferSelect;
 export type Tag = typeof tags.$inferSelect;
 export type Place = typeof places.$inferSelect;

@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, gte, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
   users,
@@ -49,6 +49,15 @@ export interface UserStatsData {
   topOccasions: CountItem[];
   topTags: CountItem[];
   priceDistribution: CountItem[];
+  availableSpaces: Array<{ id: string; name: string; icon: string }>;
+  groupBreakdown: Array<{
+    groupId: string;
+    name: string;
+    icon: string;
+    role: "owner" | "admin" | "member";
+    placesAdded: number;
+    commentsCount: number;
+  }>;
   wrapped: UserWrappedData;
 }
 
@@ -113,20 +122,96 @@ function topEntries(map: Map<string, number>, limit: number): CountItem[] {
 /**
  * Estadísticas personales del usuario actual + Resumen anual «Wrapped».
  */
-export async function getUserStatsAction(selectedYear?: number): Promise<UserStatsData | null> {
+export async function getUserStatsAction(
+  selectedYear?: number,
+  spaceFilter: string = "all"
+): Promise<UserStatsData | null> {
   const user = await getCurrentUser();
   if (!user) return null;
 
   const targetYear = selectedYear || new Date().getFullYear();
 
-  const [myInteractions, myContributed, myComments, allOccasions] = await Promise.all([
-    db.select().from(userPlaces).where(eq(userPlaces.userId, user.id)),
-    db.select().from(places).where(eq(places.createdById, user.id)),
-    db.select().from(placeComments).where(eq(placeComments.userId, user.id)),
-    db.select().from(occasions),
-  ]);
+  const [allMyInteractions, allMyContributed, allMyComments, allOccasions, myMemberGroups] =
+    await Promise.all([
+      db.select().from(userPlaces).where(eq(userPlaces.userId, user.id)),
+      db.select().from(places).where(and(eq(places.createdById, user.id), isNull(places.deletedAt))),
+      db.select().from(placeComments).where(eq(placeComments.userId, user.id)),
+      db.select().from(occasions),
+      db
+        .select({
+          groupId: sharingGroups.id,
+          name: sharingGroups.name,
+          icon: sharingGroups.icon,
+          ownerUserId: sharingGroups.ownerUserId,
+          role: sharingGroupMembers.role,
+        })
+        .from(sharingGroupMembers)
+        .innerJoin(sharingGroups, eq(sharingGroupMembers.groupId, sharingGroups.id))
+        .where(eq(sharingGroupMembers.userId, user.id)),
+    ]);
 
   const occMap = new Map(allOccasions.map((o) => [o.id, { name: o.name, icon: o.icon }]));
+
+  const allRelevantPlaceIds = Array.from(
+    new Set([
+      ...allMyInteractions.map((i) => i.placeId),
+      ...allMyContributed.map((p) => p.id),
+      ...allMyComments.map((c) => c.placeId),
+    ])
+  );
+
+  const [allRelevantPlaces, relevantOccs, relevantTags] =
+    allRelevantPlaceIds.length > 0
+      ? await Promise.all([
+          db
+            .select()
+            .from(places)
+            .where(and(inArray(places.id, allRelevantPlaceIds), isNull(places.deletedAt))),
+          db
+            .select()
+            .from(placeOccasions)
+            .where(inArray(placeOccasions.placeId, allRelevantPlaceIds)),
+          db.select().from(placeTags).where(inArray(placeTags.placeId, allRelevantPlaceIds)),
+        ])
+      : [[], [], []];
+
+  // Resumen por grupo del usuario (siempre sobre todos sus grupos)
+  const rawPlaceById = new Map(allRelevantPlaces.map((p) => [p.id, p]));
+  const groupBreakdown = myMemberGroups
+    .map((g) => {
+      const placesAdded = allMyContributed.filter((p) => p.groupId === g.groupId).length;
+      const commentsCount = allMyComments.filter(
+        (c) => rawPlaceById.get(c.placeId)?.groupId === g.groupId
+      ).length;
+      const role: "owner" | "admin" | "member" =
+        g.ownerUserId === user.id ? "owner" : g.role === "admin" ? "admin" : "member";
+      return {
+        groupId: g.groupId,
+        name: g.name,
+        icon: g.icon || "🍻",
+        role,
+        placesAdded,
+        commentsCount,
+      };
+    })
+    .sort((a, b) => b.placesAdded - a.placesAdded || a.name.localeCompare(b.name, "es"));
+
+  const availableSpaces = myMemberGroups
+    .map((g) => ({ id: g.groupId, name: g.name, icon: g.icon || "🍻" }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+  // Filtrar según spaceFilter ('all' | 'personal' | '<groupId>')
+  const relevantPlaces = allRelevantPlaces.filter((p) => {
+    if (spaceFilter === "personal") return p.groupId === null;
+    if (spaceFilter !== "all") return p.groupId === spaceFilter;
+    return true;
+  });
+  const allowedPlaceIds = new Set(relevantPlaces.map((p) => p.id));
+
+  const myInteractions = allMyInteractions.filter((i) => allowedPlaceIds.has(i.placeId));
+  const myContributed = allMyContributed.filter((p) => allowedPlaceIds.has(p.id));
+  const myComments = allMyComments.filter((c) => allowedPlaceIds.has(c.placeId));
+  const relevantPlaceIds = relevantPlaces.map((p) => p.id);
 
   const visitedCount = myInteractions.filter((i) => i.personalStatus === "visited").length;
   const pendingCount = myInteractions.filter((i) => i.personalStatus === "pending").length;
@@ -139,26 +224,6 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
     ratings.length > 0
       ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
       : null;
-
-  // IDs de sitios con los que el usuario interactuó (guardados/visitados/favoritos o aportados)
-  const relevantPlaceIds = Array.from(
-    new Set([
-      ...myInteractions.map((i) => i.placeId),
-      ...myContributed.map((p) => p.id),
-    ])
-  );
-
-  const [relevantPlaces, relevantOccs, relevantTags] =
-    relevantPlaceIds.length > 0
-      ? await Promise.all([
-          db.select().from(places).where(inArray(places.id, relevantPlaceIds)),
-          db
-            .select()
-            .from(placeOccasions)
-            .where(inArray(placeOccasions.placeId, relevantPlaceIds)),
-          db.select().from(placeTags).where(inArray(placeTags.placeId, relevantPlaceIds)),
-        ])
-      : [[], [], []];
 
   const placeById = new Map(relevantPlaces.map((p) => [p.id, p]));
 
@@ -272,6 +337,8 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
     topOccasions,
     topTags: topEntries(tagCounts, 8),
     priceDistribution,
+    availableSpaces,
+    groupBreakdown,
     wrapped: {
       year: targetYear,
       availableYears,
@@ -318,7 +385,7 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     publicRegistrationEnabled,
   ] = await Promise.all([
     db.select().from(users),
-    db.select().from(places),
+    db.select().from(places).where(isNull(places.deletedAt)),
     db.select().from(userPlaces),
     db.select().from(placeComments),
     db.select().from(occasions),
@@ -556,7 +623,7 @@ export async function getGroupStatsAction(groupId: string): Promise<GroupStatsDa
       .from(sharingGroupMembers)
       .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
       .where(eq(sharingGroupMembers.groupId, groupId)),
-    db.select().from(places).where(eq(places.groupId, groupId)),
+    db.select().from(places).where(and(eq(places.groupId, groupId), isNull(places.deletedAt))),
   ]);
 
   if (!group) return null;

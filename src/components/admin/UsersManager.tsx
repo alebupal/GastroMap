@@ -8,6 +8,7 @@ import {
   resetUserPasswordAction,
   deleteUserAction,
   deleteMultipleUsersAction,
+  getUserDeletionImpactAction,
   createUserDirectlyAction,
   updateUserByAdminAction,
   type SafeUser,
@@ -432,13 +433,43 @@ export function UsersManager({
     setSavingPassword(false);
   }
 
+  // Modal de baja segura de usuario (Punto 13)
+  const [deleteImpactUser, setDeleteImpactUser] = useState<{
+    user: SafeUser;
+    ownedGroups: Array<{ id: string; name: string; icon: string }>;
+    groupPlacesCount: number;
+    groupCommentsCount: number;
+    personalPlacesCount: number;
+  } | null>(null);
+  const [deletingWithStrategy, setDeletingWithStrategy] = useState(false);
+
   async function handleDeleteUser(user: SafeUser) {
+    const impact = await getUserDeletionImpactAction(user.id);
+    if (
+      impact &&
+      (impact.ownedGroups.length > 0 ||
+        impact.groupPlacesCount > 0 ||
+        impact.groupCommentsCount > 0)
+    ) {
+      setDeleteImpactUser({ user, ...impact });
+      return;
+    }
+
     if (!confirm(`¿Eliminar definitivamente al usuario @${user.username || user.name}?`))
       return;
 
+    await executeUserDeletion(user, "reassign_owner");
+  }
+
+  async function executeUserDeletion(
+    user: SafeUser,
+    strategy: "reassign_owner" | "delete"
+  ) {
+    setDeletingWithStrategy(true);
     setError(null);
     setSuccess(null);
-    const res = await deleteUserAction(user.id);
+    const res = await deleteUserAction(user.id, { groupDataStrategy: strategy });
+    setDeletingWithStrategy(false);
     if (res.error) {
       setError(res.error);
       toast(res.error, { kind: "error" });
@@ -446,6 +477,7 @@ export function UsersManager({
       const msg = `Usuario @${user.username || user.name} eliminado.`;
       setSuccess(msg);
       toast(msg, { kind: "success" });
+      setDeleteImpactUser(null);
       setSelectedUserIds((prev) => {
         const next = new Set(prev);
         next.delete(user.id);
@@ -1149,6 +1181,98 @@ export function UsersManager({
                 {t("common.close")}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación segura al eliminar usuario con datos en grupos */}
+      {deleteImpactUser && (
+        <div className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-4 text-left gm-modal-in">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 text-rose-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-xl leading-none">person_off</span>
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100">
+                    {t("admin_users.safe_delete_title", {
+                      username: `@${deleteImpactUser.user.username || deleteImpactUser.user.name}`,
+                    })}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {t("admin_users.safe_delete_subtitle")}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteImpactUser(null)}
+                className="w-8 h-8 rounded-full bg-[#f2f3ff] dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base leading-none">close</span>
+              </button>
+            </div>
+
+            {deleteImpactUser.ownedGroups.length > 0 ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                <p className="font-bold">{t("admin_users.safe_delete_owner_block")}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {deleteImpactUser.ownedGroups.map((g) => (
+                    <span
+                      key={g.id}
+                      className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-[11px] font-bold"
+                    >
+                      {g.icon} {g.name}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const uId = deleteImpactUser.user.id;
+                    setDeleteImpactUser(null);
+                    setManagingGroupsUserId(uId);
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold cursor-pointer transition"
+                >
+                  {t("admin_users.safe_delete_transfer_btn")}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 space-y-1">
+                  <div>
+                    • {t("admin_users.safe_delete_group_places", { count: deleteImpactUser.groupPlacesCount })}
+                  </div>
+                  <div>
+                    • {t("admin_users.safe_delete_group_comments", { count: deleteImpactUser.groupCommentsCount })}
+                  </div>
+                  <div>
+                    • {t("admin_users.safe_delete_personal_places", { count: deleteImpactUser.personalPlacesCount })}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    disabled={deletingWithStrategy}
+                    onClick={() => executeUserDeletion(deleteImpactUser.user, "reassign_owner")}
+                    className="w-full py-2.5 px-4 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold transition cursor-pointer disabled:opacity-50"
+                  >
+                    {t("admin_users.safe_delete_reassign_btn")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deletingWithStrategy}
+                    onClick={() => executeUserDeletion(deleteImpactUser.user, "delete")}
+                    className="w-full py-2.5 px-4 rounded-full bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 text-rose-700 dark:text-rose-300 font-bold transition cursor-pointer disabled:opacity-50"
+                  >
+                    {t("admin_users.safe_delete_purge_btn")}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

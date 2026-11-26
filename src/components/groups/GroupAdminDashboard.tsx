@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,8 +12,13 @@ import {
   createGroupInviteAction,
   revokeGroupInviteAction,
   deleteGroupAction,
+  getGroupJoinRequestsAction,
+  decideGroupJoinRequestAction,
+  updateGroupApiSettingsAction,
+  getGroupApiUsageAction,
   type SharingGroupWithMembers,
   type GroupInviteItem,
+  type GroupJoinRequestItem,
 } from "@/lib/actions/groups";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import type { GroupStatsData } from "@/lib/actions/stats";
@@ -21,6 +26,7 @@ import type { Occasion } from "@/db/schema";
 import { PlacesTableManager } from "@/components/admin/PlacesTableManager";
 import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
 import { RoleLegendCard } from "@/components/admin/RoleLegendCard";
+import { ExportImportModal } from "@/components/places/ExportImportModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
@@ -94,8 +100,32 @@ export function GroupAdminDashboard({
   const [groupName, setGroupName] = useState(group.name);
   const [groupIcon, setGroupIcon] = useState(group.icon || "🍻");
   const [groupDescription, setGroupDescription] = useState(group.description || "");
+  const [requireJoinApproval, setRequireJoinApproval] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   const [deletingGroup, setDeletingGroup] = useState(false);
+
+  // Solicitudes de unión, API propia y Exportación
+  const [joinRequests, setJoinRequests] = useState<GroupJoinRequestItem[]>([]);
+  const [decidingReqId, setDecidingReqId] = useState<string | null>(null);
+  const [groupApiKeyInput, setGroupApiKeyInput] = useState("");
+  const [savingApiKey, setSavingApiKey] = useState(false);
+  const [apiUsage, setApiUsage] = useState<{
+    period: string;
+    requests: number;
+    cacheHits: number;
+    blocked: number;
+    limit: number | null;
+    hasOwnKey: boolean;
+    maskedKey: string | null;
+  } | null>(null);
+  const [showExportGroupModal, setShowExportGroupModal] = useState(false);
+
+  useEffect(() => {
+    getGroupJoinRequestsAction(group.id).then(setJoinRequests);
+    getGroupApiUsageAction(group.id).then((u) => {
+      if (u) setApiUsage(u);
+    });
+  }, [group.id]);
 
   const canDeleteGroup = group.isOwner || currentUser.role === "admin";
 
@@ -237,6 +267,7 @@ export function GroupAdminDashboard({
       name: groupName,
       icon: groupIcon,
       description: groupDescription,
+      requireJoinApproval,
     });
     setSavingSettings(false);
     if (res.error) {
@@ -546,6 +577,7 @@ export function GroupAdminDashboard({
               places={places}
               occasionsList={initialOccasions}
               showSpaceColumn={false}
+              groupId={group.id}
             />
           )}
 
@@ -715,6 +747,66 @@ export function GroupAdminDashboard({
                 </div>
 
                 <RoleLegendCard scope="group" />
+
+                {joinRequests.length > 0 && (
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                        person_add
+                      </span>
+                      <span>
+                        {t("group_admin.join_requests_title")} ({joinRequests.length})
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {joinRequests.map((req) => (
+                        <div
+                          key={req.id}
+                          className="p-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 flex items-center justify-between gap-2 text-xs"
+                        >
+                          <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                            @{req.username || req.name} ({req.name})
+                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              disabled={decidingReqId === req.id}
+                              onClick={async () => {
+                                setDecidingReqId(req.id);
+                                const res = await decideGroupJoinRequestAction(req.id, "approve");
+                                setDecidingReqId(null);
+                                if (!res.error) {
+                                  setJoinRequests((prev) => prev.filter((r) => r.id !== req.id));
+                                  toast(t("group_admin.join_approved_toast"), { kind: "success" });
+                                  router.refresh();
+                                }
+                              }}
+                              className="px-2.5 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold cursor-pointer"
+                            >
+                              {t("group_admin.approve_btn")}
+                            </button>
+                            <button
+                              type="button"
+                              disabled={decidingReqId === req.id}
+                              onClick={async () => {
+                                setDecidingReqId(req.id);
+                                const res = await decideGroupJoinRequestAction(req.id, "reject");
+                                setDecidingReqId(null);
+                                if (!res.error) {
+                                  setJoinRequests((prev) => prev.filter((r) => r.id !== req.id));
+                                  toast(t("group_admin.join_rejected_toast"), { kind: "info" });
+                                }
+                              }}
+                              className="px-2.5 py-1 rounded-full bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-[11px] font-bold cursor-pointer"
+                            >
+                              {t("group_admin.reject_btn")}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Invitaciones por enlace */}
@@ -912,6 +1004,18 @@ export function GroupAdminDashboard({
                   />
                 </div>
 
+                <label className="flex items-center gap-2.5 p-3 rounded-xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={requireJoinApproval}
+                    onChange={(e) => setRequireJoinApproval(e.target.checked)}
+                    className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4"
+                  />
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">
+                    {t("group_admin.require_join_approval")}
+                  </span>
+                </label>
+
                 <div className="flex justify-end">
                   <button
                     type="submit"
@@ -922,6 +1026,111 @@ export function GroupAdminDashboard({
                   </button>
                 </div>
               </form>
+
+              {/* API de Google Places propia del grupo (Punto 6) */}
+              <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs space-y-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                      {t("api_usage.group_api_title")}
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {t("api_usage.group_api_recommend")}
+                    </p>
+                  </div>
+                  {apiUsage && (
+                    <span className="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 text-[11px] font-bold">
+                      {apiUsage.limit !== null
+                        ? t("api_usage.requests_badge", {
+                            used: apiUsage.requests,
+                            limit: apiUsage.limit,
+                          })
+                        : t("api_usage.own_key_requests_badge", { used: apiUsage.requests })}
+                    </span>
+                  )}
+                </div>
+
+                {apiUsage?.hasOwnKey && apiUsage.maskedKey && (
+                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/35 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between gap-2 text-xs text-emerald-800 dark:text-emerald-200">
+                    <span className="font-bold">
+                      {t("api_usage.own_key_active", { key: apiUsage.maskedKey })}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={savingApiKey}
+                      onClick={async () => {
+                        setSavingApiKey(true);
+                        await updateGroupApiSettingsAction(group.id, { clearKey: true });
+                        const u = await getGroupApiUsageAction(group.id);
+                        if (u) setApiUsage(u);
+                        setSavingApiKey(false);
+                        toast(t("api_usage.key_cleared_toast"), { kind: "info" });
+                      }}
+                      className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 text-[11px] font-bold cursor-pointer"
+                    >
+                      {t("api_usage.clear_key_btn")}
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="password"
+                    value={groupApiKeyInput}
+                    onChange={(e) => setGroupApiKeyInput(e.target.value)}
+                    placeholder="AIza..."
+                    autoComplete="off"
+                    className="flex-1 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-950 text-xs"
+                  />
+                  <button
+                    type="button"
+                    disabled={savingApiKey || !groupApiKeyInput.trim()}
+                    onClick={async () => {
+                      setSavingApiKey(true);
+                      const res = await updateGroupApiSettingsAction(group.id, {
+                        apiKey: groupApiKeyInput,
+                      });
+                      const u = await getGroupApiUsageAction(group.id);
+                      if (u) setApiUsage(u);
+                      setGroupApiKeyInput("");
+                      setSavingApiKey(false);
+                      if (!res.error) toast(t("api_usage.key_saved_toast"), { kind: "success" });
+                    }}
+                    className="px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold cursor-pointer disabled:opacity-40 shrink-0"
+                  >
+                    {t("api_usage.save_key_btn")}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {t("api_usage.restrict_hint")}
+                </p>
+              </div>
+
+              {/* Exportar grupo completo (Punto 16) */}
+              <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                    {t("group_admin.export_group_title")}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {t("group_admin.export_group_desc", { count: places.length })}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowExportGroupModal(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold cursor-pointer shrink-0 transition"
+                >
+                  <span className="material-symbols-outlined text-base leading-none">download</span>
+                  <span>{t("group_admin.export_group_btn")}</span>
+                </button>
+              </div>
+
+              <ExportImportModal
+                isOpen={showExportGroupModal}
+                onClose={() => setShowExportGroupModal(false)}
+                places={places}
+              />
 
               {canDeleteGroup && (
                 <div className="p-5 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50/60 dark:bg-red-950/20 space-y-3">
