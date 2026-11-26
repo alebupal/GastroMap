@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   getCopyTargetSpacesAction,
@@ -41,6 +41,7 @@ export function BulkCopyPlacesModal({
 
   const [step, setStep] = useState<1 | 2>(1);
   const [targets, setTargets] = useState<CopyTargetSpaceOption[]>([]);
+  const [targetSearch, setTargetSearch] = useState("");
   const [loadingTargets, setLoadingTargets] = useState(false);
   const [selectedTarget, setSelectedTarget] = useState("");
   const [checking, setChecking] = useState(false);
@@ -59,6 +60,7 @@ export function BulkCopyPlacesModal({
     if (!isOpen) return;
     setStep(1);
     setSelectedTarget("");
+    setTargetSearch("");
     setConflicts([]);
     setValidIds([]);
     setStrategies({});
@@ -74,6 +76,15 @@ export function BulkCopyPlacesModal({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
+
+  const filteredTargets = useMemo(() => {
+    const sorted = [...targets].sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { sensitivity: "base" })
+    );
+    const q = targetSearch.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((opt) => opt.label.toLowerCase().includes(q));
+  }, [targets, targetSearch]);
 
   if (!isOpen || !mounted) return null;
 
@@ -200,8 +211,32 @@ export function BulkCopyPlacesModal({
                   {t("spaces.copy_no_targets")}
                 </p>
               ) : (
-                <div className="space-y-2">
-                  {targets.map((opt) => {
+                <div className="space-y-2.5">
+                  {targets.length > 3 && (
+                    <div className="relative">
+                      <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                        search
+                      </span>
+                      <input
+                        type="text"
+                        value={targetSearch}
+                        onChange={(e) => setTargetSearch(e.target.value)}
+                        placeholder={t("admin_places.search_space_placeholder")}
+                        className="w-full pl-9 pr-8 py-2 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                      />
+                      {targetSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setTargetSearch("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-sm leading-none">close</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                  {filteredTargets.map((opt) => {
                     const active = selectedTarget === opt.value;
                     return (
                       <button
@@ -238,6 +273,7 @@ export function BulkCopyPlacesModal({
                       </button>
                     );
                   })}
+                  </div>
                 </div>
               )}
 
