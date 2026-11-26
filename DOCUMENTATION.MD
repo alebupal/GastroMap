@@ -135,8 +135,13 @@ When launching on a clean database:
 ### 💬 Collaborative Comments, Ratings & Detail Modals
 - **Unified Comments & Private Note**: The comments modal brings together community reviews and your private note (visible only to you) with animated tabs (`All`, `Private`, `Community`), inline editing of your private note, and a mobile-friendly collapsible composer. Administrators can edit or delete any comment for moderation or fixes (tracked in the audit log).
 - **Private Rating (`My rating`, 1 to 10)**: Dedicated quick modal to score any restaurant from 1 to 10.
-- **Quick Actions & `⋮` Menu**: Each card displays clear footer actions (`Comments`, `Compare`, `Map`, `Maps`, `Share`) plus a `⋮` menu with **Save to list**, `Edit`, and `Delete` (strictly restricted to administrators).
+- **Quick Actions & `⋮` Menu**: Each card displays clear footer actions (`Comments`, `Compare`, `Map`, `Google Maps` —using the official link or coordinates automatically when missing—, `Share`) plus a `⋮` menu with **Save to list**, **Copy / move to another space…**, **Search on Google**, `Edit`, and `Delete`.
+- **Adding Places (`/new`)**:
+  - **Destination Space Banner**: Displays *«Adding to…»* at the top with a quick selector (required when viewing *All my places*).
+  - **Detect & Import**: If the venue already exists in another space you can access, offers to import its basic details (name, address, city, coordinates, Maps link) while keeping each group's plans, tags, and comments independent.
+  - **Google Maps URL Validation**: Warns if a pasted URL is not a Google Maps link, offering **Remove link** (use coordinates only) or **Keep anyway** (the card still opens Maps via coordinates).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.
+- **Personal Stats (`📊 Stats`) & «Wrapped»**: Filter your KPIs and annual summary by **All my places**, **Personal Map**, or any **group**, plus a **My groups** breakdown card showing your role and contributions per group.
 
 ### 🔖 Shareable Lists & Collections (Personal Guides)
 - **Themed Organization**: From the user menu (*My lists & guides*) or via `⋮ > Save to list` on any place card, organize places into themed collections such as *“Tapas tour in Granada”*, *“Lisbon trip”*, or *“Special dinners”*.
@@ -151,16 +156,19 @@ GastroMap organizes places into **100% isolated spaces**, so every group of frie
 
 - **Header Workspace Switcher**:
   - **🏠 My Personal Map**: Strictly private space visible only to you (`group_id = NULL`).
-  - **🍻 My Friend Groups**: Independent collaborative spaces (with custom name, emoji, and description). Switching groups automatically scopes the map, filters, friend picker, lists, plans, and tags to that group.
+  - **🍻 My Friend Groups**: Independent collaborative spaces (with custom name, emoji, description, and an automatic **quick search input** when you belong to more than 5 groups). When creating a group, choose **empty**, **8 default plans**, or **clone taxonomy** from another group.
   - **🌍 All my places**: Combined read view bringing together your Personal Map and all your groups, displaying each card's space badge and enabling the **Spaces** filter.
-- **Copy Place to Another Space**: Use `⋮ > Copy to another space…` on any place card to create an independent copy of that restaurant in another group or in your Personal Map (preserving your personal rating without cross-linking comments from other groups).
-- **Group Invitation Links (`/groups/join/[token]`)**:
+- **Copy or Move Places Across Spaces**: From `⋮ > Copy to another space…` (single) or `/admin` and `/group-admin` tables (bulk), copy or **move** places to another group or Personal Map. Duplicate detection lets you choose **Keep both** (`(copia)`), **Replace existing**, or **Skip**, with a 10-minute **Undo**.
+- **Group Invitation Links & Join Requests (`/groups/join/[token]`)**:
   - Generate shareable links with **configurable expiry** (7 days, 30 days, or never-expiring), **usage limits (`maxUses`)**, and **early revocation**.
+  - Enable **«Invite links require administrator approval»** so new joiners wait in a pending queue inside `/group-admin > Members` until approved or rejected.
   - New users opening an invite link can sign up at `/register` and are automatically redirected back to join the group.
+- **Roles & Permissions (Built-In Legend)**:
+  - **Global roles:** `SUPERADMIN` (first user created at `/setup`, full platform control) and `USER` (subsequent accounts with their private Personal Map).
+  - **Per-group roles:** `CREATOR` (primary owner, can transfer ownership or delete the group), `GROUP ADMIN` (manages members, join requests, taxonomy, places, trash, and API), and `MEMBER` (adds places, comments, and tracks visits).
 - **Per-Group Administration Panel (`/group-admin`)**:
-  - Group creators are owners + admins and can promote co-admins (`Admin`).
-  - Group admins access `/group-admin` (via the header switcher gear icon or *My groups*) to manage **Group Statistics**, **Places & Duplicate Merging** (with sortable columns), **Members, Roles & Invites**, **Group Plans & Tags** (with alphabetically sorted merge/reassign selectors), and **Group Settings / Deletion**.
-  - The global `/admin` dashboard remains exclusively for the instance **Superadministrator**, featuring a global **Groups** tab and sortable columns across all tables.
+  - Group admins access `/group-admin` to manage **Group Statistics**, **Places** (bulk copy/move, duplicate merging, **Data health**, and **30-day Trash**), **Members, Join Requests & Invites**, **Group Plans & Tags** (collapsed by default), and **Settings** (**Export entire group**, **own encrypted Google Places API key**, and group deletion).
+  - The global `/admin` dashboard remains exclusively for the instance **Superadministrator**.
 
 ---
 

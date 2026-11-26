@@ -15,7 +15,8 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **➕ Alta ultrarrápida de sitios:**
   * Compatible con **Web Share Target API**: Comparte un enlace desde Google Maps o redes sociales y abre la ficha al instante en el móvil.
-  * Extracción y normalización automática de coordenadas y enlaces.
+  * Banner superior con el espacio destino (*«Se añadirá a…»*), detección automática si el local ya existe en otro de tus espacios para **importar sus datos básicos**, y validación de enlaces de Google Maps con respaldo directo por coordenadas en móvil y opción **Buscar en Google** en cada tarjeta.
+  * Soporte opcional de **Google Places API (New)** con **clave propia cifrada por grupo**, cupos mensuales configurables (`900/mes` global, `50/mes` por grupo), caché global de 30 días y respaldo automático gratuito con OpenStreetMap + Open Graph.
   * Clasificación ágil por 8 planes por defecto (*Desayuno / Brunch, Tapear / Cañas, Comer / Cenar, Informal / Rápido, Café / Merienda, Copas / Cócteles, Cita / Especial, Grupos / Celebración*) personalizables con emojis o iconos **Material Symbols**, y rango de precios (`€` a `€€€€` o `???` para no dejar sitios fuera).
 
 * **🔍 Explorador Principal y Búsqueda Universal (Diseño Stitch UI/UX):**
@@ -30,14 +31,14 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Clustering dinámico de chinchetas y colores según tu estado personal.
 
 * **🌍 Espacios Independientes, Grupos de Amigos, Mapa Personal y Guías:**
-  * Despliegue autohospedado bajo servidor propio (Docker), con **registro público abierto** (`/register`) o **modo cerrado por invitación** configurable desde `/admin > Configuración`.
-  * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`). Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas y **panel de administración de grupo (`/group-admin`)**, además de una vista combinada **🌍 Todos mis sitios** y acción rápida para **copiar un sitio a otro espacio**.
+  * Despliegue autohospedado bajo servidor propio (Docker), con **registro público abierto** (`/register`) o **modo cerrado por invitación** configurable desde `/admin > Sistema y Auditoría`.
+  * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear (desde plantilla vacía, planes base o clonando otro grupo) o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`) con aprobación opcional del administrador. Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas, **panel de administración de grupo (`/group-admin`)**, copia/movimiento masivo de sitios entre espacios con detección de duplicados y **Deshacer**, **Papelera (30 días)** y pestaña **Salud de datos**. Además, dispone de vista combinada **🌍 Todos mis sitios** y buscador rápido de grupos en la cabecera.
   * **Listas / Guías personales compartibles**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales), ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Los autores y administradores del grupo gestionan sus sitios.
 
-* **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Dedicado (`/admin`):**
-  * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
-  * **Panel de Administración dedicado (`/admin`)** con navegación lateral estilo Stitch: analítica global en tiempo real, tabla de sitios, gestión de usuarios, taxonomía, invitaciones, auditoría, configuración del sistema, copias de seguridad y generador de sitios demo.
+* **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Escalable (`/admin`):**
+  * Panel de estadísticas personales (`📊 Stats`) con **filtro por espacio** y desglose **Mis grupos**, más resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
+  * **Panel de Superadministración en 5 secciones (`/admin`)** con navegación lateral estilo Stitch: **Resumen** (KPIs + Top grupos), **Grupos** (directorio paginado con acceso a `/group-admin`), **Usuarios** (modal *«Grupos y roles»*, leyenda de permisos, baja segura con reasignación e invitaciones de plataforma), **Sitios** (moderación global, copia/movimiento masivo, **Salud de datos** y **Papelera**) y **Sistema y Auditoría** (cupos de API, backups compatibles con `v0.1.x`, datos demo y auditoría).
 
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.

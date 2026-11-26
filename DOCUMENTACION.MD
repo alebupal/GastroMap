@@ -135,8 +135,13 @@ Al acceder por primera vez a una instancia limpia:
 ### 💬 Comentarios Colaborativos, Valoración y Ficha Enriquecida
 - **Comentarios y Nota Privada Unificados**: El modal de comentarios agrupa las reseñas de la comunidad y tu nota privada (solo visible para ti) con pestañas animadas (`Todos`, `Privadas`, `Comunidad`), edición inline de tu nota privada y compositor desplegable optimizado para móvil. Los administradores pueden editar o eliminar cualquier comentario para moderar o corregir erratas (con registro en auditoría).
 - **Valoración Privada (`Mi nota`, 1 al 10)**: Modal rápido dedicado para asignar tu puntuación personal del 1 al 10 a cualquier restaurante.
-- **Acciones Rápidas y Menú `⋮`**: Cada tarjeta cuenta con botones claros en su parte inferior (`Comentarios`, `Comparar`, `Mapa`, `Maps`, `Compartir`) y un menú `⋮` con **Guardar en lista**, `Editar` y `Eliminar` (este último reservado a administradores).
+- **Acciones Rápidas y Menú `⋮`**: Cada tarjeta cuenta con botones claros en su parte inferior (`Comentarios`, `Comparar`, `Mapa`, `Google Maps` —que usa el enlace oficial o las coordenadas automáticamente si no hay ficha—, `Compartir`) y un menú `⋮` con **Guardar en lista**, **Copiar / mover a otro espacio…**, **Buscar en Google**, `Editar` y `Eliminar`.
+- **Alta de Sitios (`/new`)**:
+  - **Banner de espacio destino**: Muestra arriba *«Se añadirá a…»* con selector rápido (obligatorio si vienes desde *Todos mis sitios*).
+  - **Detectar e importar**: Si el local ya existe en otro de tus espacios, ofrece importar sus datos básicos (nombre, dirección, ciudad, coordenadas y enlace) conservando independientes los planes, etiquetas y comentarios de cada grupo.
+  - **Validación de enlaces de Google Maps**: Si pegas un enlace que no es de Maps, muestra aviso con opciones **Quitar enlace** (usar solo coordenadas) o **Mantener igualmente** (la tarjeta abrirá Maps usando las coordenadas).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.
+- **Mis Estadísticas (`📊 Stats`) y «Wrapped»**: Consulta tus KPIs y resumen anual filtrados por **Todos mis sitios**, **Mapa Personal** o cualquiera de tus **grupos**, junto con la tarjeta **Mis grupos** (tu rol y aportaciones en cada uno).
 
 ### 🔖 Listas / Colecciones Compartibles (Guías Personales)
 - **Organización Temática**: Desde el menú de usuario (*Mis listas y guías*) o pulsando `⋮ > Guardar en lista` en cualquier establecimiento, puedes crear colecciones temáticas como *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»* o *«Cenas especiales»*.
@@ -151,16 +156,19 @@ GastroMap organiza la experiencia en **espacios 100 % aislados**, de forma que c
 
 - **Conmutador de Espacio en la Cabecera (Workspace Switcher)**:
   - **🏠 Mi Mapa Personal**: Espacio privado exclusivo para ti (`group_id = NULL`). Nadie más puede ver los sitios que guardes aquí.
-  - **🍻 Mis Grupos de Amigos**: Espacios colaborativos independientes (con nombre, emoji y descripción). Al cambiar de grupo, el mapa, los filtros, el selector de amigos, las listas y las categorías/etiquetas cambian automáticamente a los de ese grupo.
+  - **🍻 Mis Grupos de Amigos**: Espacios colaborativos independientes (con nombre, emoji, descripción y **buscador rápido** en el desplegable cuando perteneces a más de 5 grupos). Al cambiar de grupo, el mapa, los filtros, el selector de amigos, las listas y las categorías/etiquetas cambian automáticamente a los de ese grupo. Al crear un grupo puedes elegir empezar **vacío**, con los **8 planes base** o **clonando la taxonomía** de otro de tus grupos.
   - **🌍 Todos mis sitios**: Vista combinada de solo lectura que reúne tu Mapa Personal y todos tus grupos, mostrando en cada tarjeta la insignia del espacio al que pertenece y habilitando el filtro rápido por **Espacios**.
-- **Copiar Sitio a Otro Espacio**: Desde el menú `⋮ > Copiar a otro espacio…` de cualquier tarjeta puedes crear una copia independiente del restaurante en otro grupo o en tu Mapa Personal (conservando tu valoración personal, sin exponer comentarios ni reseñas de otros grupos).
-- **Enlaces de Invitación a Grupos (`/groups/join/[token]`)**:
+- **Copiar o Mover Sitios entre Espacios**: Desde `⋮ > Copiar a otro espacio…` (individual) o desde la tabla de `/admin` y `/group-admin` (copia masiva) puedes copiar o **mover** sitios a otro grupo o a tu Mapa Personal. El sistema detecta duplicados y te permite elegir entre **Conservar ambos** (`(copia)`), **Reemplazar existente** u **Omitir**, con opción **Deshacer** durante 10 minutos.
+- **Enlaces de Invitación y Solicitudes de Unión (`/groups/join/[token]`)**:
   - Genera enlaces compartibles con **caducidad configurable** (7 días, 30 días o sin caducidad), **límite de usos (`maxUses`)** y **revocación anticipada**.
+  - Si activas **«Los enlaces requieren aprobación»**, quienes usen el enlace quedarán pendientes hasta que un administrador del grupo los apruebe o rechace en `/group-admin > Miembros`.
   - Si quien abre el enlace aún no tiene cuenta, tras registrarse en `/register` o iniciar sesión vuelve automáticamente a la invitación para unirse al grupo.
+- **Roles y Permisos (con Leyenda Integrada)**:
+  - **Roles globales:** `SUPERADMIN` (primer usuario en `/setup`, control total de la plataforma) y `USUARIO` (cuentas posteriores con su Mapa Personal privado).
+  - **Roles dentro de cada grupo:** `CREADOR` (propietario principal, puede transferir o eliminar el grupo), `ADMIN GRUPO` (gestiona miembros, solicitudes, taxonomía, sitios, papelera y API) y `MIEMBRO` (añade, comenta y registra visitas).
 - **Panel de Administración por Grupo (`/group-admin`)**:
-  - El creador de cada grupo es su propietario + administrador y puede ascender a otros integrantes como **co-administradores (`Admin`)**.
-  - Los administradores de un grupo acceden a `/group-admin` (desde el icono de ajustes junto al selector de espacio o *Mis grupos*) para gestionar **Estadísticas del grupo**, **Tabla de sitios y fusión de duplicados** (con columnas ordenables), **Miembros, roles e invitaciones**, **Planes y etiquetas propios del grupo** (con selector de fusión ordenado alfabéticamente) y **Ajustes / eliminación del grupo**.
-  - El panel global `/admin` queda reservado exclusivamente al **Superadministrador** de la instancia e incluye la pestaña global **Grupos** y cabeceras de ordenación en todas sus tablas.
+  - Los administradores de un grupo acceden a `/group-admin` para gestionar **Estadísticas del grupo**, **Sitios** (copia/movimiento masivo, fusión de duplicados, **Salud de datos** y **Papelera de 30 días**), **Miembros, solicitudes e invitaciones**, **Planes y etiquetas propios del grupo** (plegados por defecto para mantener la vista limpia) y **Ajustes** (**Exportar grupo completo**, **clave propia cifrada de Google Places API** y eliminación del grupo).
+  - El panel global `/admin` queda reservado exclusivamente al **Superadministrador** de la instancia.
 
 ---
 
