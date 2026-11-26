@@ -68,8 +68,8 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
         {/* Cabecera principal unificada */}
         <UserHeader currentUser={currentUser} workspace={workspace} />
 
-        {/* Contenedor centrado del formulario estilo Stitch */}
-        <main className="w-full max-w-2xl mx-auto py-3 sm:py-5 space-y-5 flex-1">
+        {/* Contenedor a ancho completo del formulario estilo Stitch */}
+        <main className="w-full py-3 sm:py-5 space-y-5 flex-1">
           <div className="flex items-center gap-3.5">
             <Link
               href="/"
