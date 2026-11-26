@@ -18,6 +18,7 @@ import {
 } from "@/lib/actions/taxonomy";
 import type { Occasion } from "@/db/schema";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import {
   OccasionIcon,
   OccasionIconPicker,
@@ -47,7 +48,30 @@ export function TaxonomyManager({
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"occasions" | "tags">(section || "occasions");
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const storageKey = `gm_tax_open_${explicitGroupId || "global"}_${section || "all"}`;
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === "undefined") return defaultOpen;
+    try {
+      const saved = window.sessionStorage.getItem(storageKey);
+      if (saved === "1") return true;
+      if (saved === "0") return false;
+    } catch {
+      // Ignorar si sessionStorage no está disponible
+    }
+    return defaultOpen;
+  });
+
+  function toggleOpen() {
+    setIsOpen((prev) => {
+      const next = !prev;
+      try {
+        window.sessionStorage.setItem(storageKey, next ? "1" : "0");
+      } catch {
+        // Ignorar
+      }
+      return next;
+    });
+  }
   const currentTab = section ?? activeTab;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -561,7 +585,7 @@ export function TaxonomyManager({
         </div>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition active:scale-95 cursor-pointer shrink-0"
         >
           {isOpen ? t("common.collapse") : t("common.manage")}
@@ -569,7 +593,7 @@ export function TaxonomyManager({
       </div>
 
       {isOpen && (
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4 gm-tab-in">
           {/* Mensajes de feedback */}
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
@@ -584,28 +608,24 @@ export function TaxonomyManager({
 
           {/* Selector de Pestañas (solo si no se ha fijado una sección específica) */}
           {!section && (
-            <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
-              <button
-                onClick={() => setActiveTab("occasions")}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                  currentTab === "occasions"
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                {t("admin_taxonomy.title_occasions")} ({occasionsList.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("tags")}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                  currentTab === "tags"
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                {t("admin_taxonomy.title_tags")} ({tagsList.length})
-              </button>
-            </div>
+            <SegmentedTabs
+              value={currentTab}
+              onChange={(val) => setActiveTab(val)}
+              variant="neutral"
+              fullWidth
+              items={[
+                {
+                  id: "occasions",
+                  label: t("admin_taxonomy.title_occasions"),
+                  badge: occasionsList.length,
+                },
+                {
+                  id: "tags",
+                  label: t("admin_taxonomy.title_tags"),
+                  badge: tagsList.length,
+                },
+              ]}
+            />
           )}
 
           {/* ==================== PESTAÑA 1: CATEGORÍAS ==================== */}

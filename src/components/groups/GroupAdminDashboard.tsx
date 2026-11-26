@@ -835,7 +835,7 @@ export function GroupAdminDashboard({
               <TaxonomyManager
                 key={`occ-${group.id}`}
                 section="occasions"
-                defaultOpen={true}
+                defaultOpen={false}
                 explicitGroupId={group.id}
                 initialOccasions={initialOccasions}
                 initialTags={initialTags}
@@ -843,7 +843,7 @@ export function GroupAdminDashboard({
               <TaxonomyManager
                 key={`tag-${group.id}`}
                 section="tags"
-                defaultOpen={true}
+                defaultOpen={false}
                 explicitGroupId={group.id}
                 initialOccasions={initialOccasions}
                 initialTags={initialTags}

@@ -9,6 +9,7 @@ import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
 import { formatCityCountry } from "@/lib/location";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 
 const PRICE_OPTIONS = [
@@ -50,6 +51,10 @@ export function EditPlaceModal({
   const [resolving, setResolving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allowNonMapsUrl, setAllowNonMapsUrl] = useState(false);
+
+  const isNonMapsUrl = Boolean(googleMapsUrl.trim()) && !isValidGoogleMapsUrl(googleMapsUrl);
+  const hasUnresolvedNonMapsUrl = isNonMapsUrl && !allowNonMapsUrl;
 
   // Asegurar que las ocasiones de la ficha se muestren aunque la lista externa viniera parcial
   const mergedOccasions = useMemo(() => {
@@ -253,12 +258,16 @@ export function EditPlaceModal({
               <input
                 type="url"
                 value={googleMapsUrl}
-                onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                onChange={(e) => {
+                  setGoogleMapsUrl(e.target.value);
+                  setAllowNonMapsUrl(false);
+                }}
                 onPaste={(e) => {
                   const pasted = e.clipboardData.getData("text").trim();
                   if (/https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
                     e.preventDefault();
                     setGoogleMapsUrl(pasted);
+                    setAllowNonMapsUrl(false);
                     setTimeout(() => handleAutoResolve(pasted), 0);
                   }
                 }}
@@ -277,15 +286,37 @@ export function EditPlaceModal({
                 <span>{resolving ? t("form.analyzing") : t("form.analyze_button")}</span>
               </button>
             </div>
-            {/^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(googleMapsUrl.trim()) &&
-              !/\/maps\b/i.test(googleMapsUrl.trim()) && (
-                <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 font-semibold leading-snug">
+            {isNonMapsUrl && (
+              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 space-y-2">
+                <div className="flex items-start gap-2 font-semibold leading-snug">
                   <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
                     warning
                   </span>
-                  <span>{t("form.google_search_url_warning")}</span>
+                  <span>{t("form.non_maps_url_warning")}</span>
                 </div>
-              )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGoogleMapsUrl("");
+                      setAllowNonMapsUrl(false);
+                    }}
+                    className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 cursor-pointer transition"
+                  >
+                    {t("form.remove_url_btn")}
+                  </button>
+                  {!allowNonMapsUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setAllowNonMapsUrl(true)}
+                      className="px-2.5 py-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold cursor-pointer transition"
+                    >
+                      {t("form.keep_url_anyway_btn")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Ubicación */}
@@ -378,7 +409,7 @@ export function EditPlaceModal({
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || hasUnresolvedNonMapsUrl}
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm leading-none">save</span>

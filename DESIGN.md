@@ -75,9 +75,12 @@ Tokens definidos en `src/app/globals.css`:
   ```
 
 ### Pestañas Segmentadas (Segmented Control)
-Usar pista redondeada `p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60`:
-- Pestaña activa neutra: `bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs rounded-full`.
-- Pestaña activa destacada: `bg-orange-600 text-white shadow-sm rounded-full`.
+**Regla obligatoria:** Toda navegación por pestañas (en paneles, modales o sub-vistas) **DEBE** usar el componente `<SegmentedTabs>` (`src/components/ui/SegmentedTabs.tsx`) con su píldora deslizante animada (`translateX`), soporte de teclado (`ArrowLeft`/`ArrowRight`) y respeto a `prefers-reduced-motion`, acompañado de la animación `gm-tab-in` en el contenedor de contenido de cada pestaña. **Prohibido** usar botones sueltos sin animación para simular pestañas.
+
+- Pista redondeada `p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70`:
+- Variante `primary` (por defecto): píldora activa `bg-orange-600 text-white shadow-sm`.
+- Variante `neutral`: píldora activa `bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs`.
+- Variante `dark`: píldora activa `bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs`.
 
 ### Inputs y Buscadores
 - Fondo suave `bg-[#f2f3ff] dark:bg-slate-800/70` (o `bg-white dark:bg-slate-900` con borde `border-slate-200/80 dark:border-slate-700`).

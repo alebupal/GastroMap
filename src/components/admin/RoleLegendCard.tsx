@@ -6,11 +6,13 @@ import { useT } from "@/lib/i18n/client";
 interface RoleLegendCardProps {
   scope?: "all" | "group";
   defaultOpen?: boolean;
+  variant?: "default" | "compact";
 }
 
 export function RoleLegendCard({
   scope = "all",
   defaultOpen = false,
+  variant = "default",
 }: RoleLegendCardProps) {
   const { t } = useT();
   const [open, setOpen] = useState(defaultOpen);
@@ -69,17 +71,19 @@ export function RoleLegendCard({
       </button>
 
       {open && (
-        <div className="px-3.5 pb-3.5 pt-1 border-t border-slate-200/70 dark:border-slate-800 space-y-3 text-xs">
+        <div className="px-3.5 pb-3.5 pt-2.5 border-t border-slate-200/70 dark:border-slate-800 space-y-3 text-xs gm-tab-in">
           {scope === "all" && (
             <div className="space-y-1.5">
               <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                 {t("role_legend.global_section")}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className={`grid grid-cols-1 ${variant === "compact" ? "" : "md:grid-cols-2"} gap-2`}>
                 {globalRoles.map((r) => (
                   <div
                     key={r.badge}
-                    className="p-2.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 flex items-start gap-2"
+                    className={`p-2.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 flex items-start ${
+                      variant === "compact" ? "flex-col gap-1.5" : "gap-2"
+                    }`}
                   >
                     <span
                       className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold border shrink-0 whitespace-nowrap ${r.badgeClass}`}
@@ -99,11 +103,13 @@ export function RoleLegendCard({
             <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
               {t("role_legend.group_section")}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className={`grid grid-cols-1 ${variant === "compact" ? "" : "md:grid-cols-3"} gap-2`}>
               {groupRoles.map((r) => (
                 <div
                   key={r.badge}
-                  className="p-2.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 flex items-start gap-2"
+                  className={`p-2.5 rounded-xl bg-white dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 flex items-start ${
+                    variant === "compact" ? "flex-col gap-1.5" : "gap-2"
+                  }`}
                 >
                   <span
                     className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold border shrink-0 whitespace-nowrap ${r.badgeClass}`}
