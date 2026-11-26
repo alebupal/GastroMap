@@ -14,6 +14,7 @@ import {
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { impersonateUserAction } from "@/lib/actions/auth";
 import {
   addGroupMemberAction,
@@ -1143,18 +1144,23 @@ export function UsersManager({
                     {t("admin_users.add_to_group_label")}
                   </label>
                   <div className="flex items-center gap-2">
-                    <select
+                    <SearchableSelect
                       value={selectedNewGroupId}
-                      onChange={(e) => setSelectedNewGroupId(e.target.value)}
-                      className="flex-1 min-w-0 px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
-                    >
-                      <option value="">{t("admin_users.add_to_group_placeholder")}</option>
-                      {availableGroupsForModalUser.map((g) => (
-                        <option key={g.id} value={g.id}>
-                          {g.icon} {g.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setSelectedNewGroupId}
+                      options={availableGroupsForModalUser
+                        .slice()
+                        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                        .map((g) => ({
+                          value: g.id,
+                          label: g.name,
+                          icon: <span>{g.icon}</span>,
+                        }))}
+                      placeholder={t("admin_users.add_to_group_placeholder")}
+                      searchPlaceholder={t("admin_groups.search_placeholder")}
+                      ariaLabel={t("admin_users.add_to_group_label")}
+                      className="flex-1 min-w-0"
+                      buttonClassName="w-full justify-between !rounded-xl !px-3 !py-2 !text-xs bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    />
                     <button
                       type="button"
                       onClick={handleAddUserToGroup}

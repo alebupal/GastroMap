@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -352,20 +353,34 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
                 {t("stats.space_filter_label")}
               </span>
-              <select
+              <SearchableSelect
                 value={spaceFilter}
-                onChange={(e) => setSpaceFilter(e.target.value)}
-                aria-label={t("stats.space_filter_label")}
-                className="px-3 py-1.5 rounded-full text-xs font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 cursor-pointer"
-              >
-                <option value="all">🌍 {t("spaces.all_my_places")}</option>
-                <option value="personal">🏠 {t("spaces.personal_map")}</option>
-                {stats.availableSpaces.map((sp) => (
-                  <option key={sp.id} value={sp.id}>
-                    {sp.icon} {sp.name}
-                  </option>
-                ))}
-              </select>
+                onChange={setSpaceFilter}
+                allOption={{
+                  value: "all",
+                  label: t("spaces.all_my_places"),
+                  icon: <span>🌍</span>,
+                }}
+                options={[
+                  {
+                    value: "personal",
+                    label: t("spaces.personal_map"),
+                    icon: <span>🏠</span>,
+                  },
+                  ...stats.availableSpaces
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                    .map((sp) => ({
+                      value: sp.id,
+                      label: sp.name,
+                      icon: <span>{sp.icon}</span>,
+                    })),
+                ]}
+                searchPlaceholder={t("admin_places.search_space_placeholder")}
+                ariaLabel={t("stats.space_filter_label")}
+                className="w-56 sm:w-64"
+                buttonClassName="w-full justify-between !py-1.5 !px-3 !text-xs bg-[#f2f3ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+              />
             </div>
           )}
         </div>
