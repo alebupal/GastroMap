@@ -110,6 +110,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   const [stats, setStats] = useState<UserStatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+  const [showGroupBreakdown, setShowGroupBreakdown] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -529,50 +530,60 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 </div>
               </div>
 
-              {/* Desglose por grupos (Punto 8) */}
+              {/* Desglose por grupos (colapsable por defecto) */}
               {spaceFilter === "all" && stats.groupBreakdown.length > 0 && (
-                <div className="p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2.5">
-                  <div className="flex items-center justify-between gap-2">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowGroupBreakdown((prev) => !prev)}
+                    aria-expanded={showGroupBreakdown}
+                    className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
+                  >
                     <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-base text-orange-600 leading-none">
                         diversity_3
                       </span>
                       <span>{t("stats.my_groups_title")}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        {stats.groupBreakdown.length}
+                      </span>
                     </span>
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                      {stats.groupBreakdown.length}
+                    <span className="material-symbols-outlined text-lg text-slate-400 leading-none">
+                      {showGroupBreakdown ? "expand_less" : "expand_more"}
                     </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {stats.groupBreakdown.map((g) => (
-                      <button
-                        key={g.groupId}
-                        type="button"
-                        onClick={() => setSpaceFilter(g.groupId)}
-                        className="p-2.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700/70 hover:border-orange-400 flex items-center justify-between gap-2 text-left transition cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-base shrink-0">{g.icon}</span>
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                              {g.name}
-                            </div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                              {g.role === "owner"
-                                ? t("group_admin.owner_badge")
-                                : g.role === "admin"
-                                  ? t("spaces.group_admin_badge")
-                                  : t("group_admin.member_badge")}
+                  </button>
+                  {showGroupBreakdown && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {stats.groupBreakdown.map((g) => (
+                        <button
+                          key={g.groupId}
+                          type="button"
+                          onClick={() => setSpaceFilter(g.groupId)}
+                          className="p-2.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700/70 hover:border-orange-400 flex items-center justify-between gap-2 text-left transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-base shrink-0">{g.icon}</span>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                {g.name}
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {g.role === "owner"
+                                  ? t("group_admin.owner_badge")
+                                  : g.role === "admin"
+                                    ? t("spaces.group_admin_badge")
+                                    : t("group_admin.member_badge")}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="text-right text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
-                          <div>{g.placesAdded} 📍 · {g.visitedCount} ✓</div>
-                          <div className="text-[10px] text-slate-400">{g.commentsCount} 💬</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                          <div className="text-right text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                            <div>{g.placesAdded} 📍 · {g.visitedCount} ✓</div>
+                            <div className="text-[10px] text-slate-400">{g.commentsCount} 💬</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

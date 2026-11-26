@@ -457,8 +457,8 @@ function PlaceCardComponent({
                 className="px-2 py-0.5 rounded-md bg-orange-50/80 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-[11px] font-bold transition cursor-pointer"
               >
                 {showAllTags
-                  ? t("decision.show_less")
-                  : t("decision.more_tags", { count: place.tags.length - 5 })}
+                  ? t("assistant.show_less")
+                  : t("assistant.more_tags", { count: place.tags.length - 5 })}
               </button>
             )}
           </div>
