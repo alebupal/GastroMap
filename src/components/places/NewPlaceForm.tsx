@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import {
   createPlaceAction,
   parseUrlAction,
@@ -70,6 +71,26 @@ export function NewPlaceForm({
   const isNonMapsUrl = Boolean(url.trim()) && !isValidGoogleMapsUrl(url);
   const hasUnresolvedNonMapsUrl = isNonMapsUrl && !allowNonMapsUrl;
   const activeGroupInfo = availableGroups.find((g) => g.id === targetSpace);
+
+  const spaceSelectOptions = useMemo(
+    () => [
+      ...[...availableGroups]
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .map((g) => ({
+          value: g.id,
+          label: g.name,
+          icon: g.icon || "🍻",
+          subtitle: t("spaces.group_destination_sub"),
+        })),
+      {
+        value: "personal",
+        label: t("spaces.personal_map"),
+        icon: "🏠",
+        subtitle: t("spaces.personal_subtitle"),
+      },
+    ],
+    [availableGroups, t]
+  );
 
   // Detección automática en vivo de posibles establecimientos duplicados dentro del espacio destino
   useEffect(() => {
@@ -234,20 +255,16 @@ export function NewPlaceForm({
           </span>
         </div>
 
-        <select
+        <SearchableSelect
           value={targetSpace}
-          onChange={(e) => setTargetSpace(e.target.value)}
-          aria-label={t("spaces.destination_space_title")}
-          className="px-3 py-1.5 rounded-full text-xs font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 cursor-pointer shrink-0 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-        >
-          {!targetSpace && <option value="">{t("form.choose_space_placeholder")}</option>}
-          {availableGroups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.icon || "🍻"} {g.name}
-            </option>
-          ))}
-          <option value="personal">🏠 {t("spaces.personal_map")}</option>
-        </select>
+          onChange={setTargetSpace}
+          options={spaceSelectOptions}
+          placeholder={t("form.choose_space_placeholder")}
+          searchPlaceholder={t("admin_places.search_space_placeholder")}
+          ariaLabel={t("spaces.destination_space_title")}
+          className="w-full sm:w-auto sm:min-w-[230px] shrink-0"
+          buttonClassName="w-full sm:w-auto bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-orange-400"
+        />
       </div>
 
       {error && (
@@ -607,93 +624,37 @@ export function NewPlaceForm({
         />
       </section>
 
-      {/* 8. Tarjeta: Espacio donde se guarda este sitio (v2 aislado) */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
-        <div>
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-            {t("spaces.save_destination_label")}
-          </h2>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {t("spaces.save_destination_hint")}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {availableGroups.map((g) => {
-            const active = targetSpace === g.id;
-            return (
-              <button
-                key={g.id}
-                type="button"
-                onClick={() => setTargetSpace(g.id)}
-                className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-                  active
-                    ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
-                    : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-base shrink-0">
-                    {g.icon || "🍻"}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
-                      {g.name}
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                      {t("spaces.group_destination_sub")}
-                    </div>
-                  </div>
-                </div>
-                <span
-                  className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                    active
-                      ? "bg-orange-600 border-orange-600 text-white"
-                      : "border-slate-300 dark:border-slate-600"
-                  }`}
-                >
-                  {active && (
-                    <span className="material-symbols-outlined text-xs leading-none">check</span>
-                  )}
-                </span>
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            onClick={() => setTargetSpace("personal")}
-            className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-              targetSpace === "personal"
-                ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
-                : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-slate-200/80 dark:bg-slate-700 flex items-center justify-center text-base shrink-0">
-                🏠
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                  {t("spaces.personal_map")}
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  {t("spaces.personal_subtitle")}
-                </div>
-              </div>
+      {/* 8. Tarjeta: Espacio donde se guarda este sitio (compacto y buscable para muchos grupos) */}
+      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 flex items-center justify-center text-lg shrink-0">
+              {!targetSpace ? "🌍" : activeGroupInfo ? activeGroupInfo.icon || "🍻" : "🏠"}
             </div>
-            <span
-              className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                targetSpace === "personal"
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "border-slate-300 dark:border-slate-600"
-              }`}
-            >
-              {targetSpace === "personal" && (
-                <span className="material-symbols-outlined text-xs leading-none">check</span>
-              )}
-            </span>
-          </button>
+            <div className="min-w-0">
+              <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                {t("spaces.save_destination_label")}
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                {!targetSpace
+                  ? t("form.select_space_required")
+                  : activeGroupInfo
+                    ? `${activeGroupInfo.name} · ${t("spaces.group_destination_sub")}`
+                    : `${t("spaces.personal_map")} · ${t("spaces.personal_subtitle")}`}
+              </p>
+            </div>
+          </div>
+
+          <SearchableSelect
+            value={targetSpace}
+            onChange={setTargetSpace}
+            options={spaceSelectOptions}
+            placeholder={t("form.choose_space_placeholder")}
+            searchPlaceholder={t("admin_places.search_space_placeholder")}
+            ariaLabel={t("spaces.save_destination_label")}
+            className="w-full sm:w-auto sm:min-w-[250px] shrink-0"
+            buttonClassName="w-full sm:w-auto bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-orange-400"
+          />
         </div>
 
         <input type="hidden" name="targetSpace" value={targetSpace} />

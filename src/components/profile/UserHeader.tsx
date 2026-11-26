@@ -241,7 +241,7 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                         <span>{t("spaces.my_groups_section")}</span>
                         <span>{workspace.myGroups.length}</span>
                       </div>
-                      {workspace.myGroups.length > 5 && (
+                      {workspace.myGroups.length > 3 && (
                         <div className="px-1 pb-1">
                           <input
                             type="text"
