@@ -57,9 +57,9 @@ export async function GET(
 
     const content = await res.text();
     return NextResponse.json({ filename, content });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { error: (error as Error).message || "Error al leer la documentación" },
+      { error: "Error al leer la documentación" },
       { status: 500 }
     );
   }
