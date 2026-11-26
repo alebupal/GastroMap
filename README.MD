@@ -39,7 +39,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Private personal notes and collaborative comments on each place, moderated by place authors and group administrators.
 
 * **📊 Personal Statistics, Annual «Wrapped» & Scalable 5-Section Admin Panel (`/admin`):**
-  * Personal stats dashboard (`📊 Stats`) with **space filtering** and **My groups** breakdown, plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
+  * Personal stats dashboard (`📊 Stats`) with **space filtering**, **exploration progress** (*To discover* / `% visited`), and collapsible **My groups** breakdown, plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
   * **Scalable 5-Section Superadmin Panel (`/admin`)** with Stitch sidebar navigation: **Overview** (KPIs + Top groups), **Groups** (paginated directory linking to `/group-admin`), **Users** (*«Groups & roles»* modal, permissions legend, safe user deletion with reassignment, and platform invites), **Places** (global moderation, bulk copy/move, **Data health**, and **Trash**), and **System & Audit** (API quotas, `v0.1.x`-compatible backups, demo seeder, and audit log).
 
 * **⚖️ Comparator, Saved Filters & Import / Export:**

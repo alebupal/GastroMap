@@ -1186,6 +1186,8 @@
     "save_destination_label": "Espacio donde guardar este sitio",
     "save_destination_hint": "Cada grupo y tu Mapa Personal son espacios independientes.",
     "group_destination_sub": "Visible para los miembros de este grupo",
+    "places_count": "sitios",
+    "members_count": "miembros",
     "belonging_space": "Espacio al que pertenece",
     "copy_to_space_menu": "Copiar a otro espacio…",
     "copy_modal_title": "Copiar sitio a otro espacio",

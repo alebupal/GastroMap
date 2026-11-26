@@ -42,10 +42,11 @@ Multi-space evolution of **GastroMap**: configurable open registration, a **priv
   - **Tag & category merge/reassign selectors** are now sorted strictly alphabetically (`A-Z`) with place counts.
   - Clickable ascending/descending (`↑`/`↓`) sortable column headers across all admin tables.
 - **Multi-Group UX & Card Refinements**:
-  - **Alphabetically Sorted Searchable Selects (`SearchableSelect`)** across `/new`, `GroupsModal`, `/group-admin`, workspace switcher, and bulk place copy (`BulkCopyPlacesModal`).
+  - **Alphabetically Sorted Searchable Selects (`SearchableSelect`)** matching trigger width across `/new`, `GroupsModal`, `/group-admin`, `/admin`, `StatsModal`, workspace switcher, and single/bulk place copy (`CopyPlaceModal` / `BulkCopyPlacesModal`).
   - **Accordion Groups Modal (`GroupsModal`)**: Collapsible group creation form, live search bar, and collapsed-by-default group cards to handle large group counts smoothly.
-  - **Compact `PlaceCard` Badges**: Context chips (group badge and dashed *To discover* badge) unified inline with categories and `#tags` via a subtle vertical divider, avoiding redundant status badges.
-  - **Full-Width `/docs` & `/new`**: Documentation viewer and place creation page aligned to full desktop width.
+  - **Compact `PlaceCard` Badges & Collapsible Tags**: Context chips (group badge and dashed *To discover* badge) unified inline with categories and `#tags` via a subtle vertical divider, plus a 5-tag cap with **`+N more` / `Show less`**.
+  - **Upgraded Statistics Across All 3 Tiers**: Exploration progress (*To discover* & `% visited`), collapsible *My groups* breakdown, and strict space filtering in `StatsModal`; 30-day pulse, group health shortcuts, and distributions in `/group-admin`; Google Places API usage and active/empty group counts in `/admin`.
+  - **Full-Width `/docs` & `/new`**, plus unified footers across `/admin`, `/group-admin`, and the main app.
 
 ## [0.1.0] - 2026-11-25
 
