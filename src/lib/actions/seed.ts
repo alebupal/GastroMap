@@ -13,11 +13,11 @@ import {
   placeComments,
   sharingGroups,
   sharingGroupMembers,
-  placeGroupAccess,
   savedFilters,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword } from "@/lib/auth";
 import { parseCityCountry } from "@/lib/location";
+import { buildScopeKey, ensureDefaultOccasionsForScope } from "@/lib/workspace";
 
 interface DemoComment {
   author?: string; // username del autor (ej. 'lauragourmet') o el admin si no se indica
@@ -1190,25 +1190,70 @@ export async function seedDemoPlacesAction() {
   // Limpiar cualquier comentario previo con texto vacío o corrupto
   await db.delete(placeComments).where(eq(placeComments.content, ""));
 
+  // Crear o reutilizar grupo demo aislado «Tapeo & Amigos» para no contaminar otros grupos
+  const [existingGroup] = await db
+    .select({ id: sharingGroups.id })
+    .from(sharingGroups)
+    .where(and(eq(sharingGroups.ownerUserId, currentUser.id), eq(sharingGroups.name, "Tapeo & Amigos")))
+    .limit(1);
+
+  let demoGroupId: string;
+  if (!existingGroup) {
+    const [createdGroup] = await db
+      .insert(sharingGroups)
+      .values({
+        name: "Tapeo & Amigos",
+        icon: "🍢",
+        description: "Grupo gastronómico de demostración con 50 locales del mundo",
+        ownerUserId: currentUser.id,
+      })
+      .returning({ id: sharingGroups.id });
+    demoGroupId = createdGroup.id;
+  } else {
+    demoGroupId = existingGroup.id;
+  }
+
+  const demoScopeKey = buildScopeKey(demoGroupId, currentUser.id);
+  await ensureDefaultOccasionsForScope(demoScopeKey);
+
+  // Asegurar membresía del admin actual y de todos los usuarios demo en el grupo demo
+  await db
+    .insert(sharingGroupMembers)
+    .values({ groupId: demoGroupId, userId: currentUser.id, role: "admin" })
+    .onConflictDoNothing();
+
+  for (const demoUser of DEMO_USERS) {
+    const uid = userMap[demoUser.username];
+    if (uid) {
+      await db
+        .insert(sharingGroupMembers)
+        .values({ groupId: demoGroupId, userId: uid, role: "member" })
+        .onConflictDoNothing();
+    }
+  }
+
   let insertedCount = 0;
 
   for (const item of DEMO_PLACES) {
-    // Determinar autor del lugar (usuario demo o admin actual)
     const creatorId =
       (item.createdByUser && userMap[item.createdByUser]) || currentUser.id;
 
-    // Comprobar si ya existe por nombre y ciudad
     const [existing] = await db
       .select({ id: places.id })
       .from(places)
-      .where(and(eq(places.name, item.name), eq(places.city, item.city)))
+      .where(
+        and(
+          eq(places.groupId, demoGroupId),
+          eq(places.name, item.name),
+          eq(places.city, item.city)
+        )
+      )
       .limit(1);
 
     let placeId: string;
 
     if (existing) {
       placeId = existing.id;
-      // Actualizar datos del lugar
       await db
         .update(places)
         .set({
@@ -1226,6 +1271,7 @@ export async function seedDemoPlacesAction() {
       const [newPlace] = await db
         .insert(places)
         .values({
+          groupId: demoGroupId,
           name: item.name,
           city: item.city,
           country: parseCityCountry(item.city, item.address).country,
@@ -1262,10 +1308,13 @@ export async function seedDemoPlacesAction() {
       }
     }
 
-    // 3. Insertar tags (y asegurar que existen en catálogo)
+    // 3. Insertar tags en el ámbito del grupo demo
     if (item.tags.length > 0) {
       for (const t of item.tags) {
-        await db.insert(tags).values({ id: t, name: t }).onConflictDoNothing();
+        await db
+          .insert(tags)
+          .values({ scopeKey: demoScopeKey, id: t, name: t })
+          .onConflictDoNothing();
 
         const [existingTag] = await db
           .select({ id: placeTags.id })
@@ -1360,43 +1409,7 @@ export async function seedDemoPlacesAction() {
     }
   }
 
-  // 7. Grupos compartidos demo para mostrar la funcionalidad de grupos privados
-  const [existingGroup] = await db
-    .select({ id: sharingGroups.id })
-    .from(sharingGroups)
-    .where(and(eq(sharingGroups.ownerUserId, currentUser.id), eq(sharingGroups.name, "Tapeo & Amigos")))
-    .limit(1);
-
-  let demoGroupId: string;
-  if (!existingGroup) {
-    const [createdGroup] = await db
-      .insert(sharingGroups)
-      .values({
-        name: "Tapeo & Amigos",
-        ownerUserId: currentUser.id,
-      })
-      .returning({ id: sharingGroups.id });
-    demoGroupId = createdGroup.id;
-  } else {
-    demoGroupId = existingGroup.id;
-  }
-
-  // Añadir miembros demo al grupo
-  const demoMembers = ["elena_tapas", "lauragourmet", "carlos_chef"];
-  for (const username of demoMembers) {
-    const memberId = userMap[username];
-    if (memberId) {
-      await db
-        .insert(sharingGroupMembers)
-        .values({
-          groupId: demoGroupId,
-          userId: memberId,
-        })
-        .onConflictDoNothing();
-    }
-  }
-
-  // 8. Filtros guardados demo para el usuario actual
+  // 7. Filtros guardados demo para el usuario actual en el grupo demo
   const demoSavedFiltersList = [
     {
       name: "Tapas en Granada",
@@ -1425,6 +1438,7 @@ export async function seedDemoPlacesAction() {
     if (!existingSf) {
       await db.insert(savedFilters).values({
         userId: currentUser.id,
+        groupId: demoGroupId,
         name: sf.name,
         criteria: sf.criteria,
       });
@@ -1458,7 +1472,6 @@ export async function deleteDemoPlacesAction() {
     await db.delete(placeTags).where(inArray(placeTags.placeId, demoPlaceIds));
     await db.delete(userPlaces).where(inArray(userPlaces.placeId, demoPlaceIds));
     await db.delete(placeComments).where(inArray(placeComments.placeId, demoPlaceIds));
-    await db.delete(placeGroupAccess).where(inArray(placeGroupAccess.placeId, demoPlaceIds));
     await db.delete(places).where(inArray(places.id, demoPlaceIds));
   }
 

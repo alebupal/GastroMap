@@ -226,8 +226,8 @@ export function AdminStatsPanel() {
         <div className="p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm text-slate-500">lock</span>
-              {t("admin_stats.kpi_groups_closed")}
+              <span className="material-symbols-outlined text-sm text-orange-600">diversity_3</span>
+              {t("admin_stats.kpi_groups_spaces")}
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">

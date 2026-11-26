@@ -1,31 +1,171 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq, and, sql, notInArray, inArray, desc } from "drizzle-orm";
+import { eq, and, or, isNull, sql, inArray, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { occasions, tags, placeOccasions, placeTags, places, type Occasion } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
+import {
+  buildScopeKey,
+  ensureDefaultOccasionsForScope,
+  getActiveWorkspace,
+  getGroupMembership,
+} from "@/lib/workspace";
 
-const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
-  { id: "desayuno", name: "Desayuno / Brunch", icon: "🥐" },
-  { id: "tapear", name: "Tapear / Cañas", icon: "🍢" },
-  { id: "comer", name: "Comer / Cenar", icon: "🍽️" },
-  { id: "informal", name: "Informal / Rápido", icon: "🍔" },
-  { id: "cafe", name: "Café / Merienda", icon: "☕" },
-  { id: "copas", name: "Copas / Cócteles", icon: "🍸" },
-  { id: "cita", name: "Cita / Especial", icon: "🕯️" },
-  { id: "grupos", name: "Grupos / Celebración", icon: "👥" },
-];
+interface ResolvedTaxonomyScope {
+  scopeKey: string;
+  groupId: string | null;
+  mode: "group" | "personal" | "all";
+  canManage: boolean;
+  myGroupIds: string[];
+}
 
+async function resolveTaxonomyScope(
+  explicitGroupId?: string | null
+): Promise<ResolvedTaxonomyScope | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  if (explicitGroupId !== undefined) {
+    if (explicitGroupId === null) {
+      const scopeKey = buildScopeKey(null, user.id);
+      await ensureDefaultOccasionsForScope(scopeKey);
+      return {
+        scopeKey,
+        groupId: null,
+        mode: "personal",
+        canManage: true,
+        myGroupIds: [],
+      };
+    }
+    const membership = await getGroupMembership(user.id, explicitGroupId);
+    if (!membership.isMember && user.role !== "admin") return null;
+    const scopeKey = buildScopeKey(explicitGroupId, user.id);
+    await ensureDefaultOccasionsForScope(scopeKey);
+    return {
+      scopeKey,
+      groupId: explicitGroupId,
+      mode: "group",
+      canManage: membership.isGroupAdmin || user.role === "admin",
+      myGroupIds: [explicitGroupId],
+    };
+  }
+
+  const ws = await getActiveWorkspace();
+  if (!ws) return null;
+
+  if (ws.mode === "all") {
+    return {
+      scopeKey: "all",
+      groupId: null,
+      mode: "all",
+      canManage: user.role === "admin",
+      myGroupIds: ws.myGroups.map((g) => g.id),
+    };
+  }
+
+  return {
+    scopeKey: ws.scopeKey,
+    groupId: ws.groupId,
+    mode: ws.mode,
+    canManage: ws.isSpaceAdmin || user.role === "admin",
+    myGroupIds: ws.myGroups.map((g) => g.id),
+  };
+}
+
+async function getPlaceIdsInScope(
+  scope: ResolvedTaxonomyScope,
+  userId: string
+): Promise<string[]> {
+  if (scope.mode === "group" && scope.groupId) {
+    const rows = await db
+      .select({ id: places.id })
+      .from(places)
+      .where(eq(places.groupId, scope.groupId));
+    return rows.map((r) => r.id);
+  }
+  if (scope.mode === "personal") {
+    const rows = await db
+      .select({ id: places.id })
+      .from(places)
+      .where(and(isNull(places.groupId), eq(places.createdById, userId)));
+    return rows.map((r) => r.id);
+  }
+  const rows = await db
+    .select({ id: places.id })
+    .from(places)
+    .where(
+      scope.myGroupIds.length > 0
+        ? or(
+            and(isNull(places.groupId), eq(places.createdById, userId)),
+            inArray(places.groupId, scope.myGroupIds)
+          )
+        : and(isNull(places.groupId), eq(places.createdById, userId))
+    );
+  return rows.map((r) => r.id);
+}
 
 /**
- * Obtiene todas las ocasiones junto con el conteo de establecimientos asociados.
- * Auto-sincroniza cualquier ocasión que esté asignada en place_occasions pero aún no en la tabla occasions.
+ * Obtiene todas las ocasiones del espacio activo junto con el conteo de establecimientos en ese espacio.
  */
-export async function getOccasions(): Promise<Array<Occasion & { placesCount: number }>> {
+export async function getOccasions(
+  explicitGroupId?: string | null
+): Promise<Array<Occasion & { placesCount: number }>> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope) return [];
+
+  if (scope.mode === "all") {
+    const scopeKeys = [
+      buildScopeKey(null, user.id),
+      ...scope.myGroupIds.map((gid) => buildScopeKey(gid, user.id)),
+    ];
+    const placeIds = await getPlaceIdsInScope(scope, user.id);
+
+    const [occRows, countRows] = await Promise.all([
+      db
+        .select()
+        .from(occasions)
+        .where(inArray(occasions.scopeKey, scopeKeys))
+        .orderBy(occasions.createdAt),
+      placeIds.length > 0
+        ? db
+            .select({
+              occasion: sql<string>`lower(trim(${placeOccasions.occasion}))`,
+              count: sql<number>`cast(count(distinct ${placeOccasions.placeId}) as integer)`,
+            })
+            .from(placeOccasions)
+            .where(inArray(placeOccasions.placeId, placeIds))
+            .groupBy(sql`lower(trim(${placeOccasions.occasion}))`)
+        : Promise.resolve([]),
+    ]);
+
+    const countMap = new Map(countRows.map((c) => [c.occasion, c.count]));
+    const dedup = new Map<string, Occasion>();
+    for (const o of occRows) {
+      if (!dedup.has(o.id)) dedup.set(o.id, o);
+    }
+
+    return Array.from(dedup.values()).map((occ) => ({
+      ...occ,
+      placesCount: countMap.get(occ.id.toLowerCase().trim()) || 0,
+    }));
+  }
+
+  const placeWhere =
+    scope.mode === "group" && scope.groupId
+      ? eq(places.groupId, scope.groupId)
+      : and(isNull(places.groupId), eq(places.createdById, user.id));
+
   const [initialList, counts] = await Promise.all([
-    db.select().from(occasions).orderBy(occasions.createdAt),
+    db
+      .select()
+      .from(occasions)
+      .where(eq(occasions.scopeKey, scope.scopeKey))
+      .orderBy(occasions.createdAt),
     db
       .select({
         occasion: sql<string>`lower(trim(${placeOccasions.occasion}))`,
@@ -33,6 +173,7 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
       })
       .from(placeOccasions)
       .innerJoin(places, eq(placeOccasions.placeId, places.id))
+      .where(placeWhere)
       .groupBy(sql`lower(trim(${placeOccasions.occasion}))`),
   ]);
 
@@ -46,6 +187,7 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
     const newItems = missing.map((occId) => {
       const known = KNOWN_OCCASIONS[occId];
       return {
+        scopeKey: scope.scopeKey,
         id: occId,
         name: known
           ? known.name
@@ -54,7 +196,11 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
       };
     });
     await db.insert(occasions).values(newItems).onConflictDoNothing();
-    list = await db.select().from(occasions).orderBy(occasions.createdAt);
+    list = await db
+      .select()
+      .from(occasions)
+      .where(eq(occasions.scopeKey, scope.scopeKey))
+      .orderBy(occasions.createdAt);
   }
 
   const countMap = new Map(counts.map((c) => [c.occasion, c.count]));
@@ -66,23 +212,57 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
 }
 
 /**
- * Obtiene todas las etiquetas del catálogo junto con el conteo de sitios asociados.
+ * Obtiene todas las etiquetas del espacio activo junto con el conteo de sitios asociados en ese espacio.
  */
-export async function getTagsWithCount(): Promise<Array<{ id: string; name: string; placesCount: number }>> {
+export async function getTagsWithCount(
+  explicitGroupId?: string | null
+): Promise<Array<{ id: string; name: string; placesCount: number }>> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope) return [];
+
+  if (scope.mode === "all") {
+    const placeIds = await getPlaceIdsInScope(scope, user.id);
+    if (placeIds.length === 0) return [];
+    const counts = await db
+      .select({
+        tag: placeTags.tag,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(placeTags)
+      .where(inArray(placeTags.placeId, placeIds))
+      .groupBy(placeTags.tag);
+
+    return counts
+      .map((c) => ({ id: c.tag, name: c.tag, placesCount: c.count }))
+      .sort((a, b) => b.placesCount - a.placesCount || a.name.localeCompare(b.name));
+  }
+
+  const placeWhere =
+    scope.mode === "group" && scope.groupId
+      ? eq(places.groupId, scope.groupId)
+      : and(isNull(places.groupId), eq(places.createdById, user.id));
+
   const [allTags, counts] = await Promise.all([
-    db.select().from(tags).orderBy(tags.name),
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.scopeKey, scope.scopeKey))
+      .orderBy(tags.name),
     db
       .select({
         tag: placeTags.tag,
         count: sql<number>`cast(count(*) as integer)`,
       })
       .from(placeTags)
+      .innerJoin(places, eq(placeTags.placeId, places.id))
+      .where(placeWhere)
       .groupBy(placeTags.tag),
   ]);
 
   const countMap = new Map(counts.map((c) => [c.tag, c.count]));
-
-  // Combinar etiquetas de la tabla tags y las que estén en place_tags
   const tagIds = new Set<string>(allTags.map((t) => t.id));
   const result: Array<{ id: string; name: string; placesCount: number }> = allTags.map((t) => ({
     id: t.id,
@@ -104,12 +284,18 @@ export async function getTagsWithCount(): Promise<Array<{ id: string; name: stri
 }
 
 /**
- * Crea una nueva ocasión (solo administradores).
+ * Crea una nueva ocasión en el espacio indicado (Admin del grupo, dueño del Mapa Personal o Superadmin).
  */
-export async function createOccasionAction(formData: FormData) {
+export async function createOccasionAction(
+  formData: FormData,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
-    return { error: "Solo los administradores pueden añadir categorías." };
+  if (!currentUser) return { error: "No autenticado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
+    return { error: "Solo los administradores de este espacio pueden añadir categorías." };
   }
 
   const name = (formData.get("name") as string)?.trim();
@@ -129,14 +315,14 @@ export async function createOccasionAction(formData: FormData) {
   const [existing] = await db
     .select()
     .from(occasions)
-    .where(eq(occasions.id, id))
+    .where(and(eq(occasions.scopeKey, scope.scopeKey), eq(occasions.id, id)))
     .limit(1);
 
   if (existing) {
     return { error: `Ya existe una categoría similar ("${existing.name}").` };
   }
 
-  await db.insert(occasions).values({ id, name, icon });
+  await db.insert(occasions).values({ scopeKey: scope.scopeKey, id, name, icon });
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -145,11 +331,19 @@ export async function createOccasionAction(formData: FormData) {
 }
 
 /**
- * Renombra una ocasión existente.
+ * Renombra o cambia el icono de una ocasión dentro del espacio.
  */
-export async function renameOccasionAction(id: string, newName: string, newIcon?: string) {
+export async function renameOccasionAction(
+  id: string,
+  newName: string,
+  newIcon?: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
@@ -162,7 +356,7 @@ export async function renameOccasionAction(id: string, newName: string, newIcon?
       name: cleanName,
       ...(newIcon ? { icon: newIcon } : {}),
     })
-    .where(eq(occasions.id, id));
+    .where(and(eq(occasions.scopeKey, scope.scopeKey), eq(occasions.id, id)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -171,12 +365,18 @@ export async function renameOccasionAction(id: string, newName: string, newIcon?
 }
 
 /**
- * Combina una ocasión de origen en una de destino (Fusión).
- * Todos los sitios con sourceId pasarán a tener targetId (evitando duplicados) y sourceId se elimina.
+ * Fusiona dos ocasiones únicamente en los sitios pertenecientes al espacio actual.
  */
-export async function mergeOccasionsAction(sourceId: string, targetId: string) {
+export async function mergeOccasionsAction(
+  sourceId: string,
+  targetId: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
@@ -184,34 +384,45 @@ export async function mergeOccasionsAction(sourceId: string, targetId: string) {
     return { error: "La categoría de origen y destino no pueden ser la misma." };
   }
 
-  // 1. Obtener los sitios que ya tienen targetId para no duplicar
-  const existingTargetPlaces = await db
-    .select({ placeId: placeOccasions.placeId })
-    .from(placeOccasions)
-    .where(eq(placeOccasions.occasion, targetId));
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
+  if (placeIds.length > 0) {
+    const existingTargetPlaces = await db
+      .select({ placeId: placeOccasions.placeId })
+      .from(placeOccasions)
+      .where(
+        and(
+          inArray(placeOccasions.placeId, placeIds),
+          eq(placeOccasions.occasion, targetId)
+        )
+      );
 
-  const existingTargetPlaceIds = existingTargetPlaces.map((p) => p.placeId);
+    const existingTargetPlaceIds = existingTargetPlaces.map((p) => p.placeId);
 
-  // 2. Si un sitio tiene ambos, simplemente borramos la fila con sourceId
-  if (existingTargetPlaceIds.length > 0) {
+    if (existingTargetPlaceIds.length > 0) {
+      await db
+        .delete(placeOccasions)
+        .where(
+          and(
+            eq(placeOccasions.occasion, sourceId),
+            inArray(placeOccasions.placeId, existingTargetPlaceIds)
+          )
+        );
+    }
+
     await db
-      .delete(placeOccasions)
+      .update(placeOccasions)
+      .set({ occasion: targetId })
       .where(
         and(
           eq(placeOccasions.occasion, sourceId),
-          sql`${placeOccasions.placeId} in ${existingTargetPlaceIds}`
+          inArray(placeOccasions.placeId, placeIds)
         )
       );
   }
 
-  // 3. A los sitios que solo tenían sourceId, se lo cambiamos a targetId
   await db
-    .update(placeOccasions)
-    .set({ occasion: targetId })
-    .where(eq(placeOccasions.occasion, sourceId));
-
-  // 4. Borrar la ocasión de origen
-  await db.delete(occasions).where(eq(occasions.id, sourceId));
+    .delete(occasions)
+    .where(and(eq(occasions.scopeKey, scope.scopeKey), eq(occasions.id, sourceId)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -219,27 +430,38 @@ export async function mergeOccasionsAction(sourceId: string, targetId: string) {
   return { success: true };
 }
 
-/**
- * Elimina una ocasión. Si replacementId se proporciona, reasigna los sitios a la nueva ocasión;
- * si no, simplemente los desvincula.
- */
-export async function deleteOccasionAction(id: string, replacementId?: string) {
+export async function deleteOccasionAction(
+  id: string,
+  replacementId?: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   if (replacementId && replacementId !== id) {
-    return await mergeOccasionsAction(id, replacementId);
+    return await mergeOccasionsAction(id, replacementId, explicitGroupId);
   }
 
-  // Desvincular de todos los sitios asociados (case-insensitive)
-  await db
-    .delete(placeOccasions)
-    .where(sql`lower(trim(${placeOccasions.occasion})) = ${id.toLowerCase().trim()}`);
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
+  if (placeIds.length > 0) {
+    await db
+      .delete(placeOccasions)
+      .where(
+        and(
+          inArray(placeOccasions.placeId, placeIds),
+          sql`lower(trim(${placeOccasions.occasion})) = ${id.toLowerCase().trim()}`
+        )
+      );
+  }
 
-  // Eliminar la categoría
-  await db.delete(occasions).where(eq(occasions.id, id));
+  await db
+    .delete(occasions)
+    .where(and(eq(occasions.scopeKey, scope.scopeKey), eq(occasions.id, id)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -247,12 +469,16 @@ export async function deleteOccasionAction(id: string, replacementId?: string) {
   return { success: true };
 }
 
-/**
- * Renombra una etiqueta en el catálogo global y en todos los sitios asociados.
- */
-export async function renameTagAction(oldTag: string, newTag: string) {
+export async function renameTagAction(
+  oldTag: string,
+  newTag: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
@@ -266,20 +492,32 @@ export async function renameTagAction(oldTag: string, newTag: string) {
   if (!cleanNew) return { error: "El nombre no es válido." };
   if (cleanNew === oldTag) return { success: true };
 
-  // Crear en tabla tags si no existe
   await db
     .insert(tags)
-    .values({ id: cleanNew, name: cleanNew })
+    .values({ scopeKey: scope.scopeKey, id: cleanNew, name: cleanNew })
     .onConflictDoNothing();
 
-  // Actualizar en place_tags
-  await db
-    .update(placeTags)
-    .set({ tag: cleanNew })
-    .where(eq(placeTags.tag, oldTag));
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
+  if (placeIds.length > 0) {
+    const alreadyWithNew = await db
+      .select({ placeId: placeTags.placeId })
+      .from(placeTags)
+      .where(and(inArray(placeTags.placeId, placeIds), eq(placeTags.tag, cleanNew)));
+    const alreadyIds = alreadyWithNew.map((r) => r.placeId);
+    if (alreadyIds.length > 0) {
+      await db
+        .delete(placeTags)
+        .where(and(inArray(placeTags.placeId, alreadyIds), eq(placeTags.tag, oldTag)));
+    }
+    await db
+      .update(placeTags)
+      .set({ tag: cleanNew })
+      .where(and(inArray(placeTags.placeId, placeIds), eq(placeTags.tag, oldTag)));
+  }
 
-  // Eliminar la vieja de la tabla tags
-  await db.delete(tags).where(eq(tags.id, oldTag));
+  await db
+    .delete(tags)
+    .where(and(eq(tags.scopeKey, scope.scopeKey), eq(tags.id, oldTag)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -287,12 +525,16 @@ export async function renameTagAction(oldTag: string, newTag: string) {
   return { success: true };
 }
 
-/**
- * Combina una etiqueta de origen en una etiqueta de destino.
- */
-export async function mergeTagsAction(sourceTag: string, targetTag: string) {
+export async function mergeTagsAction(
+  sourceTag: string,
+  targetTag: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
@@ -300,40 +542,39 @@ export async function mergeTagsAction(sourceTag: string, targetTag: string) {
     return { error: "La etiqueta de origen y destino no pueden ser la misma." };
   }
 
-  // Asegurar que targetTag exista en la tabla tags
   await db
     .insert(tags)
-    .values({ id: targetTag, name: targetTag })
+    .values({ scopeKey: scope.scopeKey, id: targetTag, name: targetTag })
     .onConflictDoNothing();
 
-  // Buscar sitios que ya tienen targetTag
-  const existingTargetPlaces = await db
-    .select({ placeId: placeTags.placeId })
-    .from(placeTags)
-    .where(eq(placeTags.tag, targetTag));
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
+  if (placeIds.length > 0) {
+    const existingTargetPlaces = await db
+      .select({ placeId: placeTags.placeId })
+      .from(placeTags)
+      .where(and(inArray(placeTags.placeId, placeIds), eq(placeTags.tag, targetTag)));
 
-  const existingPlaceIds = existingTargetPlaces.map((p) => p.placeId);
+    const existingPlaceIds = existingTargetPlaces.map((p) => p.placeId);
+    if (existingPlaceIds.length > 0) {
+      await db
+        .delete(placeTags)
+        .where(
+          and(
+            eq(placeTags.tag, sourceTag),
+            inArray(placeTags.placeId, existingPlaceIds)
+          )
+        );
+    }
 
-  // Si ya tienen targetTag, eliminar la fila duplicada con sourceTag
-  if (existingPlaceIds.length > 0) {
     await db
-      .delete(placeTags)
-      .where(
-        and(
-          eq(placeTags.tag, sourceTag),
-          sql`${placeTags.placeId} in ${existingPlaceIds}`
-        )
-      );
+      .update(placeTags)
+      .set({ tag: targetTag })
+      .where(and(inArray(placeTags.placeId, placeIds), eq(placeTags.tag, sourceTag)));
   }
 
-  // Actualizar el resto a targetTag
   await db
-    .update(placeTags)
-    .set({ tag: targetTag })
-    .where(eq(placeTags.tag, sourceTag));
-
-  // Borrar sourceTag de la tabla tags
-  await db.delete(tags).where(eq(tags.id, sourceTag));
+    .delete(tags)
+    .where(and(eq(tags.scopeKey, scope.scopeKey), eq(tags.id, sourceTag)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -341,24 +582,33 @@ export async function mergeTagsAction(sourceTag: string, targetTag: string) {
   return { success: true };
 }
 
-/**
- * Elimina una etiqueta. Si replacementTag se proporciona, reasigna los sitios; si no, desvincula.
- */
-export async function deleteTagAction(tag: string, replacementTag?: string) {
+export async function deleteTagAction(
+  tag: string,
+  replacementTag?: string,
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   if (replacementTag && replacementTag !== tag) {
-    return await mergeTagsAction(tag, replacementTag);
+    return await mergeTagsAction(tag, replacementTag, explicitGroupId);
   }
 
-  // Desvincular de todos los sitios
-  await db.delete(placeTags).where(eq(placeTags.tag, tag));
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
+  if (placeIds.length > 0) {
+    await db
+      .delete(placeTags)
+      .where(and(inArray(placeTags.placeId, placeIds), eq(placeTags.tag, tag)));
+  }
 
-  // Borrar de tags
-  await db.delete(tags).where(eq(tags.id, tag));
+  await db
+    .delete(tags)
+    .where(and(eq(tags.scopeKey, scope.scopeKey), eq(tags.id, tag)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -366,49 +616,47 @@ export async function deleteTagAction(tag: string, replacementTag?: string) {
   return { success: true };
 }
 
-/**
- * Obtiene las etiquetas más utilizadas para sugerencias.
- */
 export async function getPopularTags(limit = 20): Promise<string[]> {
   try {
-    const rows = await db
-      .select({
-        tag: placeTags.tag,
-        count: sql<number>`cast(count(*) as integer)`,
-      })
-      .from(placeTags)
-      .groupBy(placeTags.tag)
-      .orderBy(desc(sql`count(*)`))
-      .limit(limit);
-
-    return rows.map((r) => r.tag);
+    const all = await getTagsWithCount();
+    return all.slice(0, limit).map((t) => t.name);
   } catch {
     return [];
   }
 }
 
-/**
- * Elimina múltiples ocasiones simultáneamente.
- */
-export async function deleteMultipleOccasionsAction(ids: string[]) {
+export async function deleteMultipleOccasionsAction(
+  ids: string[],
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   if (ids.length === 0) return { success: true, count: 0 };
-
   const cleanIds = ids.map((id) => id.toLowerCase().trim());
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
 
-  // 1. Desvincular de todos los sitios asociados
-  for (const cleanId of cleanIds) {
-    await db
-      .delete(placeOccasions)
-      .where(sql`lower(trim(${placeOccasions.occasion})) = ${cleanId}`);
+  if (placeIds.length > 0) {
+    for (const cleanId of cleanIds) {
+      await db
+        .delete(placeOccasions)
+        .where(
+          and(
+            inArray(placeOccasions.placeId, placeIds),
+            sql`lower(trim(${placeOccasions.occasion})) = ${cleanId}`
+          )
+        );
+    }
   }
 
-  // 2. Eliminar categorías
-  await db.delete(occasions).where(inArray(occasions.id, ids));
+  await db
+    .delete(occasions)
+    .where(and(eq(occasions.scopeKey, scope.scopeKey), inArray(occasions.id, ids)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -416,28 +664,38 @@ export async function deleteMultipleOccasionsAction(ids: string[]) {
   return { success: true, count: ids.length };
 }
 
-/**
- * Elimina múltiples etiquetas simultáneamente.
- */
-export async function deleteMultipleTagsAction(tagIds: string[]) {
+export async function deleteMultipleTagsAction(
+  tagIds: string[],
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   if (tagIds.length === 0) return { success: true, count: 0 };
-
   const cleanTags = tagIds.map((t) => t.toLowerCase().trim());
+  const placeIds = await getPlaceIdsInScope(scope, currentUser.id);
 
-  // 1. Desvincular de todos los sitios
-  for (const cleanTag of cleanTags) {
-    await db
-      .delete(placeTags)
-      .where(sql`lower(trim(${placeTags.tag})) = ${cleanTag}`);
+  if (placeIds.length > 0) {
+    for (const cleanTag of cleanTags) {
+      await db
+        .delete(placeTags)
+        .where(
+          and(
+            inArray(placeTags.placeId, placeIds),
+            sql`lower(trim(${placeTags.tag})) = ${cleanTag}`
+          )
+        );
+    }
   }
 
-  // 2. Borrar de tabla tags
-  await db.delete(tags).where(inArray(tags.id, tagIds));
+  await db
+    .delete(tags)
+    .where(and(eq(tags.scopeKey, scope.scopeKey), inArray(tags.id, tagIds)));
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -445,37 +703,37 @@ export async function deleteMultipleTagsAction(tagIds: string[]) {
   return { success: true, count: tagIds.length };
 }
 
-/**
- * Elimina todas las categorías vacías (sin locales asociados).
- */
-export async function deleteEmptyOccasionsAction(emptyIds?: string[]) {
+export async function deleteEmptyOccasionsAction(
+  emptyIds?: string[],
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   let targetsToDelete: string[] = [];
-
   if (emptyIds && emptyIds.length > 0) {
     targetsToDelete = emptyIds.map((id) => id.toLowerCase().trim());
   } else {
-    const allOccs = await getOccasions();
-    targetsToDelete = allOccs.filter((o) => o.placesCount === 0).map((o) => o.id.toLowerCase().trim());
+    const allOccs = await getOccasions(explicitGroupId);
+    targetsToDelete = allOccs
+      .filter((o) => o.placesCount === 0)
+      .map((o) => o.id.toLowerCase().trim());
   }
 
   if (targetsToDelete.length === 0) {
     return { success: true, count: 0, deleted: [] };
   }
 
-  // 1. Limpiar cualquier fila en place_occasions (incluyendo huérfanas)
-  for (const target of targetsToDelete) {
-    await db
-      .delete(placeOccasions)
-      .where(sql`lower(trim(${placeOccasions.occasion})) = ${target}`);
-  }
-
-  // 2. Eliminar de la tabla occasions
-  await db.delete(occasions).where(inArray(occasions.id, targetsToDelete));
+  await db
+    .delete(occasions)
+    .where(
+      and(eq(occasions.scopeKey, scope.scopeKey), inArray(occasions.id, targetsToDelete))
+    );
 
   revalidatePath("/");
   revalidatePath("/new");
@@ -483,37 +741,35 @@ export async function deleteEmptyOccasionsAction(emptyIds?: string[]) {
   return { success: true, count: targetsToDelete.length, deleted: targetsToDelete };
 }
 
-/**
- * Elimina todas las etiquetas vacías (sin locales asociados).
- */
-export async function deleteEmptyTagsAction(emptyTags?: string[]) {
+export async function deleteEmptyTagsAction(
+  emptyTags?: string[],
+  explicitGroupId?: string | null
+) {
   const currentUser = await getCurrentUser();
-  if (!currentUser || currentUser.role !== "admin") {
+  if (!currentUser) return { error: "No autorizado." };
+
+  const scope = await resolveTaxonomyScope(explicitGroupId);
+  if (!scope || scope.mode === "all" || !scope.canManage) {
     return { error: "No autorizado." };
   }
 
   let targetsToDelete: string[] = [];
-
   if (emptyTags && emptyTags.length > 0) {
     targetsToDelete = emptyTags.map((t) => t.toLowerCase().trim());
   } else {
-    const allTags = await getTagsWithCount();
-    targetsToDelete = allTags.filter((t) => t.placesCount === 0).map((t) => t.id.toLowerCase().trim());
+    const allTags = await getTagsWithCount(explicitGroupId);
+    targetsToDelete = allTags
+      .filter((t) => t.placesCount === 0)
+      .map((t) => t.id.toLowerCase().trim());
   }
 
   if (targetsToDelete.length === 0) {
     return { success: true, count: 0, deleted: [] };
   }
 
-  // 1. Limpiar referencias huérfanas en place_tags
-  for (const target of targetsToDelete) {
-    await db
-      .delete(placeTags)
-      .where(sql`lower(trim(${placeTags.tag})) = ${target}`);
-  }
-
-  // 2. Eliminar de la tabla tags
-  await db.delete(tags).where(inArray(tags.id, targetsToDelete));
+  await db
+    .delete(tags)
+    .where(and(eq(tags.scopeKey, scope.scopeKey), inArray(tags.id, targetsToDelete)));
 
   revalidatePath("/");
   revalidatePath("/new");

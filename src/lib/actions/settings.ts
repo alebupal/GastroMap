@@ -9,8 +9,6 @@ import {
   placeOccasions,
   placeTags,
   placeComments,
-  placeGroupAccess,
-  placeUserAccess,
   userPlaces,
   sharingGroups,
   sharingGroupMembers,
@@ -37,6 +35,15 @@ export async function getSetting(key: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Indica si el registro público abierto (/register) está habilitado en la instancia.
+ * En GastroMap v2 está activo por defecto salvo que el superadmin lo ponga en 'false'.
+ */
+export async function isPublicRegistrationEnabled(): Promise<boolean> {
+  const val = await getSetting("allow_public_registration");
+  return val !== "false";
 }
 
 export async function saveSettingAction(key: string, value: string) {
@@ -152,8 +159,6 @@ export async function resetApplicationAction() {
   await db.delete(placeComments);
   await db.delete(placeOccasions);
   await db.delete(placeTags);
-  await db.delete(placeGroupAccess);
-  await db.delete(placeUserAccess);
   await db.delete(userPlaces);
   await db.delete(places);
 

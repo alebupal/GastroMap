@@ -32,10 +32,22 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Búsqueda, paginación y selección múltiple
+  // Búsqueda, ordenación, paginación y selección múltiple
   const [filterQuery, setFilterQuery] = useState("");
+  const [sortField, setSortField] = useState<"username" | "name" | "email" | "role" | "status" | "createdAt">("username");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  function toggleSort(field: "username" | "name" | "email" | "role" | "status" | "createdAt") {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir(field === "createdAt" ? "desc" : "asc");
+    }
+    setCurrentPage(1);
+  }
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [deletingMultiple, setDeletingMultiple] = useState(false);
   const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null);
@@ -138,18 +150,50 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     loadUsers();
   }, []);
 
-  // Filtrar lista de usuarios reactivamente por nombre, email o username (sin distinguir tildes)
+  // Filtrar y ordenar lista de usuarios reactivamente por nombre, email, username, rol o estado
   const filteredUsers = useMemo(() => {
     const q = normalizeSearchText(filterQuery);
-    if (!q) return usersList;
-    return usersList.filter(
-      (u) =>
-        normalizeSearchText(u.name).includes(q) ||
-        normalizeSearchText(u.email).includes(q) ||
-        (u.username && normalizeSearchText(u.username).includes(q)) ||
-        normalizeSearchText(u.role).includes(q)
-    );
-  }, [usersList, filterQuery]);
+    const base = !q
+      ? [...usersList]
+      : usersList.filter(
+          (u) =>
+            normalizeSearchText(u.name).includes(q) ||
+            normalizeSearchText(u.email).includes(q) ||
+            (u.username && normalizeSearchText(u.username).includes(q)) ||
+            normalizeSearchText(u.role).includes(q)
+        );
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return base.sort((a, b) => {
+      switch (sortField) {
+        case "username":
+          return (
+            (a.username || a.name).localeCompare(b.username || b.name, "es", {
+              sensitivity: "base",
+            }) * dir
+          );
+        case "name":
+          return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+        case "email":
+          return a.email.localeCompare(b.email, "es", { sensitivity: "base" }) * dir;
+        case "role": {
+          const cmp = a.role.localeCompare(b.role) * dir;
+          return cmp !== 0
+            ? cmp
+            : (a.username || a.name).localeCompare(b.username || b.name, "es");
+        }
+        case "status": {
+          const cmp = a.status.localeCompare(b.status) * dir;
+          return cmp !== 0
+            ? cmp
+            : (a.username || a.name).localeCompare(b.username || b.name, "es");
+        }
+        case "createdAt":
+        default:
+          return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
+      }
+    });
+  }, [usersList, filterQuery, sortField, sortDir]);
 
   // Paginación de usuarios
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
@@ -526,7 +570,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
           {/* Barra de acción para selección múltiple */}
           <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
@@ -545,6 +589,38 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   {selectedUserIds.size} {t("admin_places.delete_selected")}
                 </span>
               )}
+            </div>
+
+            <div className="flex items-center gap-1 flex-wrap text-[11px]">
+              {(
+                [
+                  { id: "username", label: "@Usuario" },
+                  { id: "name", label: t("common.sort_title") },
+                  { id: "email", label: "Email" },
+                  { id: "role", label: t("admin_users.role") },
+                  { id: "status", label: t("common.sort_status") },
+                  { id: "createdAt", label: t("common.sort_date") },
+                ] as const
+              ).map((col) => {
+                const active = sortField === col.id;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    onClick={() => toggleSort(col.id)}
+                    className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
+                      active
+                        ? "bg-orange-600 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:border-orange-400"
+                    }`}
+                  >
+                    <span>{col.label}</span>
+                    <span className="material-symbols-outlined text-[13px] leading-none">
+                      {active ? (sortDir === "asc" ? "arrow_upward" : "arrow_downward") : "unfold_more"}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {selectedUserIds.size > 0 && (

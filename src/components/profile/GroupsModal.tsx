@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { copyText } from "@/lib/clipboard";
 import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
@@ -13,9 +15,12 @@ import {
   createGroupInviteAction,
   getGroupInvitesAction,
   revokeGroupInviteAction,
+  switchActiveSpaceAction,
   type SharingGroupWithMembers,
   type GroupInviteItem,
 } from "@/lib/actions/groups";
+
+const GROUP_ICONS = ["🍻", "🍢", "🍽️", "🍕", "🍷", "❤️", "✈️", "💼", "☕", "🎉"];
 
 interface GroupsModalProps {
   isOpen: boolean;
@@ -25,10 +30,12 @@ interface GroupsModalProps {
 
 export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps) {
   const { t, locale } = useT();
+  const router = useRouter();
   const sheet = useSwipeToClose(onClose);
   const [groups, setGroups] = useState<SharingGroupWithMembers[]>([]);
   const [loading, setLoading] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupIcon, setNewGroupIcon] = useState("🍻");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
@@ -134,14 +141,21 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
     if (!newGroupName.trim() || creating) return;
     setCreating(true);
     setError(null);
-    const res = await createGroupAction(newGroupName);
+    const res = await createGroupAction(newGroupName, newGroupIcon);
     setCreating(false);
     if (res.error) {
       setError(res.error);
     } else {
       setNewGroupName("");
-      loadData();
+      await loadData();
+      router.refresh();
     }
+  }
+
+  async function handleEnterGroup(groupId: string) {
+    await switchActiveSpaceAction(`group:${groupId}`);
+    onClose();
+    router.refresh();
   }
 
   async function handleRemoveMember(groupId: string, userId: string, label: string) {
@@ -251,28 +265,46 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
             </div>
           )}
 
-          {/* Formulario nuevo grupo */}
-          <form onSubmit={handleCreateGroup} className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1 min-w-0">
-              <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
-                group_add
-              </span>
-              <input
-                type="text"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder={`${t("groups.name")}...`}
-                className="w-full pl-10 pr-4 py-2.5 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
-              />
+          {/* Formulario nuevo grupo con selector de icono */}
+          <form onSubmit={handleCreateGroup} className="space-y-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              {GROUP_ICONS.map((ic) => (
+                <button
+                  key={ic}
+                  type="button"
+                  onClick={() => setNewGroupIcon(ic)}
+                  className={`w-8 h-8 rounded-full text-sm flex items-center justify-center shrink-0 transition cursor-pointer border ${
+                    newGroupIcon === ic
+                      ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500 scale-105"
+                      : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200/70 dark:border-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  {ic}
+                </button>
+              ))}
             </div>
-            <button
-              type="submit"
-              disabled={creating || !newGroupName.trim()}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
-            >
-              <span className="material-symbols-outlined text-sm leading-none">add</span>
-              <span>{creating ? t("common.loading") : t("groups.create")}</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1 min-w-0">
+                <span className="text-base absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                  {newGroupIcon}
+                </span>
+                <input
+                  type="text"
+                  value={newGroupName}
+                  onChange={(e) => setNewGroupName(e.target.value)}
+                  placeholder={`${t("groups.name")}...`}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={creating || !newGroupName.trim()}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
+              >
+                <span className="material-symbols-outlined text-sm leading-none">add</span>
+                <span>{creating ? t("common.loading") : t("groups.create")}</span>
+              </button>
+            </div>
           </form>
 
           {/* Listado de grupos */}
@@ -314,8 +346,8 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-black text-xs flex items-center justify-center shrink-0">
-                          {groupInitials}
+                        <div className="w-9 h-9 rounded-xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 font-black text-base flex items-center justify-center shrink-0">
+                          {g.icon || groupInitials}
                         </div>
 
                         {renamingGroupId === g.id ? (
@@ -343,36 +375,51 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 min-w-0 flex-wrap">
-                            <h4 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 truncate">
-                              {g.name}
-                            </h4>
-                            {g.isOwner && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
-                                {t("groups.owner_badge")}
-                              </span>
-                            )}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
+                              <h4 className="font-extrabold text-sm text-slate-900 dark:text-slate-100 truncate">
+                                {g.name}
+                              </h4>
+                              {g.isOwner ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
+                                  {t("groups.owner_badge")}
+                                </span>
+                              ) : g.isAdmin ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
+                                  Admin
+                                </span>
+                              ) : null}
+                            </div>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                              {g.placesCount} {t("places.locales_count")} • {g.members.length}{" "}
+                              {t("spaces.members_short")}
+                            </p>
                           </div>
                         )}
                       </div>
 
                       {renamingGroupId !== g.id && (
-                      <div className="flex items-center gap-1 shrink-0">
-                        {g.isOwner ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setRenamingGroupId(g.id);
-                                setRenameValue(g.name);
-                              }}
-                              className="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700 rounded-full transition cursor-pointer"
-                              title={t("groups.rename_group")}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleEnterGroup(g.id)}
+                            className="px-2.5 py-1 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-bold transition cursor-pointer"
+                          >
+                            {t("spaces.enter_group_btn")}
+                          </button>
+                          {g.isAdmin && (
+                            <Link
+                              href={`/group-admin?groupId=${g.id}`}
+                              onClick={onClose}
+                              className="p-1.5 text-slate-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700 rounded-full transition"
+                              title={t("spaces.manage_group_btn")}
                             >
                               <span className="material-symbols-outlined text-base leading-none">
-                                edit
+                                tune
                               </span>
-                            </button>
+                            </Link>
+                          )}
+                          {g.isOwner ? (
                             <button
                               type="button"
                               onClick={() => handleDeleteGroup(g)}
@@ -383,22 +430,20 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                 delete
                               </span>
                             </button>
-                          </>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoveMember(g.id, currentUserId, t("groups.yourself"))
-                            }
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-sm leading-none">
-                              logout
-                            </span>
-                            <span>{t("groups.leave_group")}</span>
-                          </button>
-                        )}
-                      </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveMember(g.id, currentUserId, t("groups.yourself"))
+                              }
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-sm leading-none">
+                                logout
+                              </span>
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
 
@@ -439,8 +484,8 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                       </div>
                     </div>
 
-                    {/* Sección Enlaces de Invitación (Solo propietario) */}
-                    {g.isOwner && (
+                    {/* Sección Enlaces de Invitación (Admins del grupo) */}
+                    {g.isAdmin && (
                       <div className="pt-2.5 border-t border-slate-200/70 dark:border-slate-700/60">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <button

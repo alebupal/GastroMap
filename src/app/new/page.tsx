@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { getActiveWorkspace } from "@/lib/workspace";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getMyGroupsAction } from "@/lib/actions/groups";
 import { NewPlaceForm } from "@/components/places/NewPlaceForm";
@@ -26,7 +27,8 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     redirect("/login");
   }
 
-  const [occasions, allTags, myGroups, params, t] = await Promise.all([
+  const [workspace, occasions, allTags, myGroups, params, t] = await Promise.all([
+    getActiveWorkspace(),
     getOccasions(),
     getTagsWithCount(),
     getMyGroupsAction(),
@@ -34,7 +36,17 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     getT(),
   ]);
   const popularTags = allTags.map((t) => t.name);
-  const availableGroups = myGroups.map((g) => ({ id: g.id, name: g.name }));
+  const availableGroups = myGroups.map((g) => ({
+    id: g.id,
+    name: g.name,
+    icon: g.icon,
+  }));
+  const defaultTargetSpace =
+    workspace?.mode === "group" && workspace.groupId
+      ? workspace.groupId
+      : workspace?.mode === "all" && availableGroups.length > 0
+        ? availableGroups[0].id
+        : "personal";
 
   // Extraer URL si venía en el texto compartido (habitual en WhatsApp/Twitter/Instagram)
   let initialUrl = params.url || "";
@@ -54,7 +66,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       <div className="max-w-[1720px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-3 flex-1 flex flex-col">
         {/* Cabecera principal unificada */}
-        <UserHeader currentUser={currentUser} />
+        <UserHeader currentUser={currentUser} workspace={workspace} />
 
         {/* Contenedor centrado del formulario estilo Stitch */}
         <main className="w-full max-w-2xl mx-auto py-3 sm:py-5 space-y-5 flex-1">
@@ -87,6 +99,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
             availableOccasions={occasions}
             popularTags={popularTags}
             availableGroups={availableGroups}
+            defaultTargetSpace={defaultTargetSpace}
           />
         </main>
       </div>

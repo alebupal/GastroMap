@@ -10,6 +10,7 @@ import {
   integer,
   index,
   uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -48,23 +49,40 @@ export const invitations = pgTable("invitations", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-export const occasions = pgTable("occasions", {
-  id: varchar("id", { length: 50 }).primaryKey(), // slug ej. 'tapear', 'comer'
-  name: varchar("name", { length: 100 }).notNull(),
-  icon: varchar("icon", { length: 50 }).notNull().default("🍽️"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const occasions = pgTable(
+  "occasions",
+  {
+    scopeKey: varchar("scope_key", { length: 80 }).notNull().default("global"), // 'group:<uuid>' | 'personal:<uuid>' | 'global'
+    id: varchar("id", { length: 50 }).notNull(), // slug ej. 'tapear', 'comer'
+    name: varchar("name", { length: 100 }).notNull(),
+    icon: varchar("icon", { length: 50 }).notNull().default("🍽️"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ name: "occasions_scope_key_id_pk", columns: [table.scopeKey, table.id] }),
+    index("occasions_scope_idx").on(table.scopeKey),
+  ]
+);
 
-export const tags = pgTable("tags", {
-  id: varchar("id", { length: 50 }).primaryKey(), // normalizado ej. 'italiana'
-  name: varchar("name", { length: 50 }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const tags = pgTable(
+  "tags",
+  {
+    scopeKey: varchar("scope_key", { length: 80 }).notNull().default("global"), // 'group:<uuid>' | 'personal:<uuid>' | 'global'
+    id: varchar("id", { length: 50 }).notNull(), // normalizado ej. 'italiana'
+    name: varchar("name", { length: 50 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ name: "tags_scope_key_id_pk", columns: [table.scopeKey, table.id] }),
+    index("tags_scope_idx").on(table.scopeKey),
+  ]
+);
 
 export const places = pgTable(
   "places",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id").references(() => sharingGroups.id, { onDelete: "cascade" }), // null = Mapa Personal privado
     name: varchar("name", { length: 255 }).notNull(),
     address: text("address"),
     city: varchar("city", { length: 100 }),
@@ -85,6 +103,7 @@ export const places = pgTable(
   },
   (table) => [
     index("places_created_by_idx").on(table.createdById),
+    index("places_group_idx").on(table.groupId),
     index("places_coords_idx").on(table.latitude, table.longitude),
   ]
 );
@@ -172,6 +191,8 @@ export const placeComments = pgTable(
 export const sharingGroups = pgTable("sharing_groups", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
+  icon: varchar("icon", { length: 50 }).notNull().default("🍻"),
+  description: text("description"),
   ownerUserId: uuid("owner_user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -189,48 +210,11 @@ export const sharingGroupMembers = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 20 }).notNull().default("member"), // 'admin' | 'member'
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex("sharing_group_members_unique_idx").on(table.groupId, table.userId),
-  ]
-);
-
-export const placeGroupAccess = pgTable(
-  "place_group_access",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    placeId: uuid("place_id")
-      .notNull()
-      .references(() => places.id, { onDelete: "cascade" }),
-    groupId: uuid("group_id")
-      .notNull()
-      .references(() => sharingGroups.id, { onDelete: "cascade" }),
-    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("place_group_access_unique_idx").on(table.placeId, table.groupId),
-    index("place_group_access_group_idx").on(table.groupId),
-  ]
-);
-
-export const placeUserAccess = pgTable(
-  "place_user_access",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    placeId: uuid("place_id")
-      .notNull()
-      .references(() => places.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    grantedBy: uuid("granted_by").references(() => users.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("place_user_access_unique_idx").on(table.placeId, table.userId),
-    index("place_user_access_user_idx").on(table.userId),
   ]
 );
 
@@ -241,12 +225,16 @@ export const savedFilters = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    groupId: uuid("group_id").references(() => sharingGroups.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 100 }).notNull(),
     criteria: jsonb("criteria").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("saved_filters_user_idx").on(table.userId)]
+  (table) => [
+    index("saved_filters_user_idx").on(table.userId),
+    index("saved_filters_group_idx").on(table.groupId),
+  ]
 );
 
 export const auditLogs = pgTable(
@@ -293,6 +281,7 @@ export const placeLists = pgTable(
     ownerId: uuid("owner_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    groupId: uuid("group_id").references(() => sharingGroups.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 120 }).notNull(),
     description: text("description"),
     icon: varchar("icon", { length: 32 }).notNull().default("bookmark"),
@@ -303,6 +292,7 @@ export const placeLists = pgTable(
   },
   (table) => [
     index("place_lists_owner_idx").on(table.ownerId),
+    index("place_lists_group_idx").on(table.groupId),
     uniqueIndex("place_lists_share_slug_idx").on(table.shareSlug),
   ]
 );
@@ -343,8 +333,6 @@ export type UserPlace = typeof userPlaces.$inferSelect;
 export type PlaceComment = typeof placeComments.$inferSelect;
 export type SharingGroup = typeof sharingGroups.$inferSelect;
 export type SharingGroupMember = typeof sharingGroupMembers.$inferSelect;
-export type PlaceGroupAccess = typeof placeGroupAccess.$inferSelect;
-export type PlaceUserAccess = typeof placeUserAccess.$inferSelect;
 export type SavedFilter = typeof savedFilters.$inferSelect;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type PlaceList = typeof placeLists.$inferSelect;

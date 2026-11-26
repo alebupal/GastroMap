@@ -1,10 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { loginAction } from "@/lib/actions/auth";
 import { useT } from "@/lib/i18n/client";
 
-export function LoginForm() {
+interface LoginFormProps {
+  callbackUrl?: string;
+  publicRegistrationEnabled?: boolean;
+}
+
+export function LoginForm({
+  callbackUrl,
+  publicRegistrationEnabled = true,
+}: LoginFormProps) {
   const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,8 +32,13 @@ export function LoginForm() {
     }
   }
 
+  const registerHref = callbackUrl
+    ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+    : "/register";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
       {error && (
         <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
           {error}
@@ -64,6 +78,20 @@ export function LoginForm() {
       >
         {loading ? t("auth.loading") : t("auth.enter")}
       </button>
+
+      {publicRegistrationEnabled && (
+        <div className="pt-2 text-center">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {t("auth.no_account_prompt")}{" "}
+            <Link
+              href={registerHref}
+              className="font-bold text-orange-600 dark:text-orange-400 hover:underline"
+            >
+              {t("auth.create_account_link")}
+            </Link>
+          </p>
+        </div>
+      )}
     </form>
   );
 }

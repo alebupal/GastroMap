@@ -5,6 +5,31 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-11-26
+
+Evolución multi-espacio de **GastroMap**: registro público configurable, **Mapa Personal privado** para cada cuenta y **grupos de amigos 100 % aislados** donde cada grupo funciona como su propia app independiente con sus sitios, categorías, etiquetas, listas y administradores propios.
+
+### 🌍 Espacios Independientes, Grupos de Amigos y Mapa Personal
+- **Arquitectura Multi-Espacio con Aislamiento Total**:
+  - **🏠 Mi Mapa Personal**: Espacio estrictamente privado (`group_id = NULL`) para guardar sitios, notas y planes propios sin compartirlos con nadie.
+  - **🍻 Grupos de Amigos Aislados**: Cualquier usuario puede crear tantos grupos como quiera (con nombre, emoji y descripción) e invitar amigos mediante enlaces mágicos (`/groups/join/[token]`). Cada grupo mantiene su propio catálogo, sus 8 planes base personalizables, sus etiquetas (`scope_key`), listas y filtros guardados sin mezclar datos ni miembros entre grupos.
+  - **🌍 Todos mis sitios**: Vista combinada de lectura para consultar de un vistazo tu Mapa Personal junto con todos tus grupos, con insignia del espacio en cada tarjeta y filtro exclusivo por espacio.
+- **Selector Rápido de Espacio (Workspace Switcher)**: Conmutador en la cabecera estilo Slack/Notion para saltar en un clic entre cualquiera de tus grupos, tu Mapa Personal o la vista combinada *Todos mis sitios*.
+- **Copiar Sitio a Otro Espacio (`📋 Copiar a otro espacio…`)**: Crea una copia independiente de cualquier restaurante en otro grupo o en tu Mapa Personal conservando tu valoración personal, sin vincular ni exponer comentarios de otros grupos.
+- **Migración Automática al Grupo «Pinono»**: Migración transparente de todos los usuarios, establecimientos, ocasiones, etiquetas, listas y filtros previos de `v0.1.0` dentro del grupo **«Pinono»**.
+- **Eliminación de «Grupos Privados» Heredados v1**: Retiradas las antiguas tablas de compartición cruzada por ficha (`place_group_access` y `place_user_access`) y simplificada `getAllPlaces` a 4 consultas paralelas en bloque.
+
+### 🔓 Registro Público Abierto (`/register`) y Control en `/admin`
+- **Página de Registro Público (`/register`)**: Alta abierta con validación, *rate limiting*, soporte de redirección directa a invitaciones de grupo (`callbackUrl`) e inicialización automática del Mapa Personal.
+- **Modo de Registro Configurable por Superadmin**: Conmutador instantáneo en `/admin > Configuración` para alternar entre **Registro Abierto** y **Solo por Invitación**.
+
+### 🛡️ Administración por Grupo (`/group-admin`) y Mejoras en Tablas Admin
+- **Panel Dedicado `/group-admin` para Administradores de Grupo**: El creador del grupo y los co-administradores designados cuentan con su propio panel para consultar estadísticas del grupo, editar/fusionar duplicados, gestionar miembros/roles (`Admin` / `Miembro`) e invitaciones, administrar planes/etiquetas propios del grupo y editar sus ajustes.
+- **Pestaña Global de Grupos en `/admin`**: Nueva vista `Grupos` para el Superadministrador con supervisión global de todos los espacios creados en la instancia.
+- **Ordenación Alfabética y Columnas Ordenables en Admin**:
+  - Selector de **fusionar y reasignar etiquetas/categorías** ordenado estrictamente por orden alfabético (`A-Z`) con contador de sitios.
+  - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración (*Sitios*, *Usuarios*, *Grupos*, *Taxonomía* y *Auditoría*).
+
 ## [0.1.0] - 2026-11-25
 
 Lanzamiento inicial completo de **GastroMap**, plataforma web privada y autohospedada para guardar, organizar, descubrir y decidir sitios donde comer, tapear o tomar algo.
