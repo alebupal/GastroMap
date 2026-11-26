@@ -404,55 +404,58 @@ function PlaceCardComponent({
           </p>
         )}
 
-        {/* Fila de Insignia de Espacio (en vista Todo junto) + Estado Personal + Ocasiones + Etiquetas */}
+        {/* Nivel 1: Contexto (Espacio / Grupo + Estado personal) */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
           {showSpaceBadge && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/60 font-extrabold text-[10px]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700 font-extrabold text-[10px] shadow-2xs">
               <span>{place.groupId ? place.groupIcon || "🍻" : "🏠"}</span>
               <span>{place.groupId ? place.groupName || "Grupo" : t("spaces.personal_map")}</span>
             </span>
           )}
           {personalStatus === "visited" ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/50 font-bold text-[11px]">
               <span className="material-symbols-outlined text-[13px] leading-none">check_circle</span>
               <span>{t("cards.visited")}</span>
             </span>
           ) : personalStatus === "pending" ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100 font-bold text-[11px]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 border border-amber-300/70 dark:border-amber-700/60 font-bold text-[11px]">
               <span className="material-symbols-outlined text-[13px] leading-none">schedule</span>
               <span>{t("places.want_to_go")}</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-dashed border-indigo-300 dark:border-indigo-700/80 font-bold text-[11px]">
               <span className="material-symbols-outlined text-[12px] leading-none">auto_awesome</span>
               <span>{t("places.unexplored")}</span>
             </span>
           )}
-
-          {/* Ocasiones / Categorías */}
-          {place.occasions.map((occId) => {
-            const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
-            return (
-              <span
-                key={occId}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
-              >
-                <OccasionIcon icon={info.icon} msClassName="text-[13px]" />
-                <span>{info.name}</span>
-              </span>
-            );
-          })}
-
-          {/* Etiquetas gastronómicas */}
-          {place.tags.map((tg) => (
-            <span
-              key={tg}
-              className="px-1.5 py-0.5 rounded bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-[11px]"
-            >
-              #{tg}
-            </span>
-          ))}
         </div>
+
+        {/* Nivel 2: Taxonomía (Ocasiones / Categorías + Etiquetas) */}
+        {(place.occasions.length > 0 || place.tags.length > 0) && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+            {place.occasions.map((occId) => {
+              const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
+              return (
+                <span
+                  key={occId}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
+                >
+                  <OccasionIcon icon={info.icon} msClassName="text-[13px]" />
+                  <span>{info.name}</span>
+                </span>
+              );
+            })}
+
+            {place.tags.map((tg) => (
+              <span
+                key={tg}
+                className="px-1.5 py-0.5 rounded-md bg-slate-100/80 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-[11px] font-medium"
+              >
+                #{tg}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Notas públicas del creador */}
         {place.notes && (
