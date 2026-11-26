@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import crypto from "crypto";
 import argon2 from "argon2";
 import { eq, sql } from "drizzle-orm";
@@ -140,15 +140,27 @@ export async function invalidateSession(sessionId: string): Promise<void> {
   await db.delete(sessions).where(eq(sessions.id, sessionId));
 }
 
+async function isCookieSecure(): Promise<boolean> {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.COOKIE_SECURE === "false") return false;
+  try {
+    const h = await headers();
+    const proto = h.get("x-forwarded-proto");
+    return proto?.split(",")[0]?.trim().toLowerCase() === "https";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Establece la cookie de sesión HttpOnly en el cliente.
  */
 export async function setSessionCookie(sessionId: string, expiresAt: Date): Promise<void> {
-  const cookieStore = await cookies();
+  const [cookieStore, secure] = await Promise.all([cookies(), isCookieSecure()]);
   cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.COOKIE_SECURE === "true",
+    secure,
     expires: expiresAt,
     path: "/",
   });
@@ -158,11 +170,11 @@ export async function setSessionCookie(sessionId: string, expiresAt: Date): Prom
  * Elimina la cookie de sesión del cliente.
  */
 export async function deleteSessionCookie(): Promise<void> {
-  const cookieStore = await cookies();
+  const [cookieStore, secure] = await Promise.all([cookies(), isCookieSecure()]);
   cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.COOKIE_SECURE === "true",
+    secure,
     maxAge: 0,
     path: "/",
   });
@@ -175,11 +187,11 @@ export async function setImpersonatorSessionCookie(
   sessionId: string,
   expiresAt: Date
 ): Promise<void> {
-  const cookieStore = await cookies();
+  const [cookieStore, secure] = await Promise.all([cookies(), isCookieSecure()]);
   cookieStore.set(IMPERSONATOR_COOKIE_NAME, sessionId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.COOKIE_SECURE === "true",
+    secure,
     expires: expiresAt,
     path: "/",
   });
@@ -189,11 +201,11 @@ export async function setImpersonatorSessionCookie(
  * Elimina la cookie de sesión del administrador suplantador.
  */
 export async function deleteImpersonatorSessionCookie(): Promise<void> {
-  const cookieStore = await cookies();
+  const [cookieStore, secure] = await Promise.all([cookies(), isCookieSecure()]);
   cookieStore.set(IMPERSONATOR_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.COOKIE_SECURE === "true",
+    secure,
     maxAge: 0,
     path: "/",
   });

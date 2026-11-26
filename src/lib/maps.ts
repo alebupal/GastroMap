@@ -147,6 +147,81 @@ export interface ResolvedGoogleMapsResult {
   htmlLng?: number;
 }
 
+function isPrivateOrLocalHostname(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    h === "localhost" ||
+    h.endsWith(".localhost") ||
+    h.endsWith(".local") ||
+    h.endsWith(".internal") ||
+    h === "::1" ||
+    h === "0.0.0.0" ||
+    h.startsWith("fe80:") ||
+    h.startsWith("fc") ||
+    h.startsWith("fd")
+  ) {
+    return true;
+  }
+  const ipv4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!ipv4) return false;
+  const [, a, b] = ipv4.map(Number);
+  return (
+    a === 127 ||
+    a === 10 ||
+    a === 0 ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168)
+  );
+}
+
+function isAllowedGoogleMapsFetchUrl(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    const host = parsed.hostname.toLowerCase();
+    if (isPrivateOrLocalHostname(host)) return false;
+
+    if (host === "maps.app.goo.gl" || host === "share.google" || host === "goo.gl" || host === "g.co") {
+      return true;
+    }
+    if (host.startsWith("maps.google.") || host.startsWith("consent.google.")) return true;
+    if (/^(www\.)?google\.[a-z.]+$/.test(host)) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchGoogleMapsWithSafeRedirects(initialUrl: string): Promise<Response | null> {
+  let currentUrl = initialUrl;
+  for (let hop = 0; hop < 4; hop++) {
+    if (!isAllowedGoogleMapsFetchUrl(currentUrl)) return null;
+    const response = await fetch(currentUrl, {
+      method: "GET",
+      redirect: "manual",
+      signal: AbortSignal.timeout(4500),
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+      },
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) return response;
+      const nextUrl = new URL(location, currentUrl).toString();
+      currentUrl = nextUrl;
+      continue;
+    }
+
+    return response;
+  }
+  return null;
+}
+
 /**
  * Resuelve URLs acortadas de Google Maps (maps.app.goo.gl, goo.gl/maps, share.google)
  * y extrae metadatos Open Graph (nombre, dirección, rango de precio y coordenadas embebidas)
@@ -157,21 +232,14 @@ export async function resolveGoogleMapsDetails(rawInput: string): Promise<Resolv
   const result: ResolvedGoogleMapsResult = { resolvedUrl: url };
 
   try {
-    const isMapsUrl = /(google\.|goo\.gl|g\.co\/kgs|share\.google|maps\.app)/i.test(url);
-    if (!isMapsUrl) {
+    if (!isValidGoogleMapsUrl(url) || !isAllowedGoogleMapsFetchUrl(url)) {
       return result;
     }
 
-    const response = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
-      signal: AbortSignal.timeout(4500),
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
-      },
-    });
+    const response = await fetchGoogleMapsWithSafeRedirects(url);
+    if (!response) {
+      return result;
+    }
 
     if (response.url && response.url !== url) {
       result.resolvedUrl = response.url;
