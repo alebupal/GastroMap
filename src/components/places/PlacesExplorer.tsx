@@ -1,13 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback, useDeferredValue } from "react";
 import { createPortal } from "react-dom";
+import dynamic from "next/dynamic";
 import { PlaceCard } from "./PlaceCard";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
-import { RandomPickerModal } from "./RandomPickerModal";
-import { DecisionAssistantModal } from "./DecisionAssistantModal";
-import { ExportImportModal } from "./ExportImportModal";
-import { ComparePlacesModal } from "./ComparePlacesModal";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
 import { normalizeSearchText } from "@/lib/search";
@@ -23,12 +20,27 @@ import { MultiSearchableSelect } from "@/components/ui/MultiSearchableSelect";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
 import { OfflineSyncBanner } from "@/components/pwa/OfflineSyncBanner";
-import { CommandPalette } from "@/components/ui/CommandPalette";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { MobileBottomNav, MOBILE_NAV_EVENTS } from "@/components/layout/MobileBottomNav";
 import { MobileFilterBar } from "./MobileFilterBar";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
+
+const RandomPickerModal = dynamic(() =>
+  import("./RandomPickerModal").then((m) => m.RandomPickerModal)
+);
+const DecisionAssistantModal = dynamic(() =>
+  import("./DecisionAssistantModal").then((m) => m.DecisionAssistantModal)
+);
+const ExportImportModal = dynamic(() =>
+  import("./ExportImportModal").then((m) => m.ExportImportModal)
+);
+const ComparePlacesModal = dynamic(() =>
+  import("./ComparePlacesModal").then((m) => m.ComparePlacesModal)
+);
+const CommandPalette = dynamic(() =>
+  import("@/components/ui/CommandPalette").then((m) => m.CommandPalette)
+);
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -76,6 +88,12 @@ export function PlacesExplorer({
 }: PlacesExplorerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
+  // Catálogo local sincronizado para reflejar micro-interacciones en 0 ms sin revalidatePath("/")
+  const [placesData, setPlacesData] = useState<PlaceWithDetails[]>(initialPlaces);
+  useEffect(() => {
+    setPlacesData(initialPlaces);
+  }, [initialPlaces]);
+
   // En móvil: alternar entre vista lista o mapa. En desktop: ambas se muestran simultáneamente.
   const [activeMobileView, setActiveMobileView] = useState<"list" | "map">("map");
   // Filtros acumulables
@@ -86,7 +104,64 @@ export function PlacesExplorer({
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [textSearch, setTextSearch] = useState<string>("");
+  const deferredTextSearch = useDeferredValue(textSearch);
   const [showExtraFilters, setShowExtraFilters] = useState(false);
+
+  const handlePersonalUpdate = useCallback(
+    (
+      placeId: string,
+      patch: Partial<
+        Pick<PlaceWithDetails, "isFavorite" | "personalStatus" | "rating" | "privateNotes">
+      >
+    ) => {
+      setPlacesData((prev) =>
+        prev.map((p) => {
+          if (p.id !== placeId) return p;
+          const nextFavorite = patch.isFavorite !== undefined ? patch.isFavorite : p.isFavorite;
+          const nextStatus =
+            patch.personalStatus !== undefined ? patch.personalStatus : p.personalStatus;
+          const nextRating = patch.rating !== undefined ? patch.rating : p.rating;
+          const nextPrivateNotes =
+            patch.privateNotes !== undefined ? patch.privateNotes : p.privateNotes;
+
+          const toggleUid = (arr: string[] | undefined, active: boolean) => {
+            const base = arr || [];
+            if (active) return base.includes(currentUserId) ? base : [...base, currentUserId];
+            return base.filter((id) => id !== currentUserId);
+          };
+
+          const isVisitedByMe =
+            nextStatus === "visited" || (nextRating !== null && (nextRating ?? 0) > 0);
+          const nextVisitedIds = toggleUid(p.visitedUserIds, isVisitedByMe);
+          const nextPendingIds = toggleUid(p.pendingUserIds, nextStatus === "pending");
+          const nextFavoriteIds = toggleUid(p.favoriteUserIds, Boolean(nextFavorite));
+          const nextHighRatedIds = toggleUid(
+            p.highRatedUserIds,
+            nextRating !== null && (nextRating ?? 0) >= 8
+          );
+          const nextExperienceStatus: PlaceWithDetails["experienceStatus"] = isVisitedByMe
+            ? "visited_by_me"
+            : nextVisitedIds.some((id) => id !== currentUserId)
+              ? "visited_by_others"
+              : "untried";
+
+          return {
+            ...p,
+            isFavorite: nextFavorite,
+            personalStatus: nextStatus,
+            rating: nextRating,
+            privateNotes: nextPrivateNotes,
+            visitedUserIds: nextVisitedIds,
+            pendingUserIds: nextPendingIds,
+            favoriteUserIds: nextFavoriteIds,
+            highRatedUserIds: nextHighRatedIds,
+            experienceStatus: nextExperienceStatus,
+          };
+        })
+      );
+    },
+    [currentUserId]
+  );
 
   // Grupos privados
   const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
@@ -182,6 +257,18 @@ export function PlacesExplorer({
   const expTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [expIndicator, setExpIndicator] = useState<{ left: number; width: number } | null>(null);
 
+  const experienceCounts = useMemo(() => {
+    let favorites = 0;
+    let pending = 0;
+    let visited = 0;
+    for (const p of placesData) {
+      if (p.isFavorite) favorites++;
+      if (p.personalStatus === "pending") pending++;
+      if (p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)) visited++;
+    }
+    return { total: placesData.length, favorites, pending, visited };
+  }, [placesData]);
+
   useEffect(() => {
     const updateIndicator = () => {
       const btn = expTabRefs.current[experienceFilter];
@@ -191,7 +278,14 @@ export function PlacesExplorer({
     updateIndicator();
     window.addEventListener("resize", updateIndicator);
     return () => window.removeEventListener("resize", updateIndicator);
-  }, [experienceFilter, initialPlaces.length, locale]);
+  }, [
+    experienceFilter,
+    experienceCounts.total,
+    experienceCounts.favorites,
+    experienceCounts.pending,
+    experienceCounts.visited,
+    locale,
+  ]);
   const [minRating, setMinRating] = useState<number | null>(null);
   // Filtro «Plan con amigos» (usuarios con los que vas + modo de coincidencia)
   const [selectedFriendIds, setSelectedFriendIds] = useState<string[]>([]);
@@ -334,7 +428,7 @@ export function PlacesExplorer({
 
     // Guardar favoritos y pendientes en caché local para consulta sin cobertura
     try {
-      const offlineCollection = initialPlaces.filter(
+      const offlineCollection = placesData.filter(
         (p) => p.isFavorite || p.personalStatus === "pending"
       );
       localStorage.setItem(
@@ -347,7 +441,7 @@ export function PlacesExplorer({
     } catch {
       // Ignorar si localStorage no está disponible
     }
-  }, [initialPlaces]);
+  }, [placesData]);
 
   // Cargar grupos privados del usuario para el filtro rápido
   useEffect(() => {
@@ -356,13 +450,13 @@ export function PlacesExplorer({
       .catch(() => { });
   }, []);
 
-  function toggleComparePlace(placeId: string) {
+  const toggleComparePlace = useCallback((placeId: string) => {
     setCompareIds((prev) => {
       if (prev.includes(placeId)) return prev.filter((id) => id !== placeId);
       if (prev.length >= 3) return [...prev.slice(1), placeId];
       return [...prev, placeId];
     });
-  }
+  }, []);
 
   // Geolocalización
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -518,7 +612,7 @@ export function PlacesExplorer({
   // Lista única de países y ciudades filtradas con contadores (priorizando columna country real)
   const { allCountries, countryCounts, availableCities, cityCounts } = useMemo(() => {
     const cMap = new Map<string, number>();
-    initialPlaces.forEach((p) => {
+    placesData.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (effectiveCountry) cMap.set(effectiveCountry, (cMap.get(effectiveCountry) || 0) + 1);
@@ -528,7 +622,7 @@ export function PlacesExplorer({
     );
 
     const cityMap = new Map<string, number>();
-    initialPlaces.forEach((p) => {
+    placesData.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (selectedCountries.length === 0 || selectedCountries.includes(effectiveCountry)) {
@@ -546,13 +640,13 @@ export function PlacesExplorer({
       availableCities: cities,
       cityCounts: cityMap,
     };
-  }, [initialPlaces, selectedCountries]);
+  }, [placesData, selectedCountries]);
 
   // Pueblos / municipios disponibles cuando se selecciona una o varias ciudades/provincias de España
   const availableTowns = useMemo(() => {
     if (selectedCities.length === 0) return [] as Array<{ name: string; count: number }>;
     const counts = new Map<string, number>();
-    initialPlaces.forEach((p) => {
+    placesData.forEach((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (effectiveCountry !== "España") return;
@@ -567,7 +661,7 @@ export function PlacesExplorer({
     return Array.from(counts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "es"));
-  }, [initialPlaces, selectedCountries, selectedCities]);
+  }, [placesData, selectedCountries, selectedCities]);
 
   const countryOptions = useMemo(() => {
     return allCountries.map((c) => {
@@ -604,7 +698,7 @@ export function PlacesExplorer({
   // Pre-indexar texto normalizado una única vez cuando cambia el catálogo (búsqueda O(1) en CPU por tecla)
   const searchIndexMap = useMemo(() => {
     const map = new Map<string, string>();
-    for (const p of initialPlaces) {
+    for (const p of placesData) {
       map.set(
         p.id,
         normalizeSearchText(
@@ -627,11 +721,11 @@ export function PlacesExplorer({
       );
     }
     return map;
-  }, [initialPlaces]);
+  }, [placesData]);
 
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
-    let result = initialPlaces.map((place) => {
+    let result = placesData.map((place) => {
       let distanceMeters = place.distanceMeters ?? null;
 
       if (
@@ -653,9 +747,9 @@ export function PlacesExplorer({
       };
     });
 
-    // 0. Búsqueda por texto libre universal (usando índice precalculado en memoria)
-    if (textSearch.trim().length > 0) {
-      const q = normalizeSearchText(textSearch);
+    // 0. Búsqueda por texto libre universal (diferida con useDeferredValue e índice precalculado)
+    if (deferredTextSearch.trim().length > 0) {
+      const q = normalizeSearchText(deferredTextSearch);
       const tokens = q.split(/\s+/).filter(Boolean);
       result = result.filter((p) => {
         const searchableText = searchIndexMap.get(p.id) || "";
@@ -842,9 +936,9 @@ export function PlacesExplorer({
 
     return result;
   }, [
-    initialPlaces,
+    placesData,
     searchIndexMap,
-    textSearch,
+    deferredTextSearch,
     selectedOccasions,
     selectedTags,
     selectedPrices,
@@ -867,7 +961,7 @@ export function PlacesExplorer({
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    textSearch,
+    deferredTextSearch,
     selectedOccasions,
     selectedTags,
     selectedPrices,
@@ -934,14 +1028,14 @@ export function PlacesExplorer({
     }
   }
 
-  // Manejar clic en "Ver en mapa" desde una tarjeta
-  function handleSelectOnMap(placeId: string) {
+  // Manejar clic en "Ver en mapa" desde una tarjeta (referencia estable para React.memo en PlaceCard)
+  const handleSelectOnMap = useCallback((placeId: string) => {
     setSelectedPlaceId(placeId);
     setActiveMobileView("map");
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       window.scrollTo({ top: 180, behavior: "smooth" });
     }
-  }
+  }, []);
 
   // Manejar selección de un lugar para enfocarlo y hacer scroll en la lista
   function handleSelectInList(placeId: string) {
@@ -1015,6 +1109,8 @@ export function PlacesExplorer({
     );
   }, [tagsList]);
 
+  const availableTagNames = useMemo(() => tagsList.map((t) => t.name), [tagsList]);
+
   // Filtrado de etiquetas por texto de búsqueda
   const filteredTags = useMemo(() => {
     const q = normalizeSearchText(tagSearchQuery);
@@ -1083,7 +1179,7 @@ export function PlacesExplorer({
         onToggleMobileView={() =>
           setActiveMobileView((prev) => (prev === "map" ? "list" : "map"))
         }
-        initialPlaces={initialPlaces}
+        initialPlaces={placesData}
         filteredPlacesCount={filteredPlaces.length}
         experienceFilter={experienceFilter}
         onSelectExperience={(exp) => {
@@ -1270,10 +1366,10 @@ export function PlacesExplorer({
               />
             )}
             {[
-              { key: "all", icon: null, iconClass: "", label: `${t("places.all")} (${initialPlaces.length})` },
-              { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `${t("places.favorites")} (${initialPlaces.filter(p => p.isFavorite).length})` },
-              { key: "pending", icon: "schedule", iconClass: "text-orange-600 dark:text-orange-400", label: `${t("places.want_to_go")} (${initialPlaces.filter(p => p.personalStatus === "pending").length})` },
-              { key: "visited_by_me", icon: "check_circle", iconClass: "text-emerald-600 dark:text-emerald-400", label: `${t("places.visited")} (${initialPlaces.filter(p => p.personalStatus === "visited" || (p.rating !== null && (p.rating ?? 0) > 0)).length})` },
+              { key: "all", icon: null, iconClass: "", label: `${t("places.all")} (${experienceCounts.total})` },
+              { key: "favorite", icon: "star", iconClass: "text-amber-500", label: `${t("places.favorites")} (${experienceCounts.favorites})` },
+              { key: "pending", icon: "schedule", iconClass: "text-orange-600 dark:text-orange-400", label: `${t("places.want_to_go")} (${experienceCounts.pending})` },
+              { key: "visited_by_me", icon: "check_circle", iconClass: "text-emerald-600 dark:text-emerald-400", label: `${t("places.visited")} (${experienceCounts.visited})` },
               { key: "untried", icon: "auto_awesome", iconClass: "text-amber-600 dark:text-amber-400", label: t("places.unexplored") },
             ].map((item) => {
               const active = experienceFilter === item.key;
@@ -2746,10 +2842,11 @@ export function PlacesExplorer({
                     isAdmin={isAdmin}
                     occasionMap={occasionMap}
                     occasionsList={occasionsList}
-                    availableTags={tagsList.map((t) => t.name)}
-                    onSelectOnMap={() => handleSelectOnMap(place.id)}
+                    availableTags={availableTagNames}
+                    onSelectPlaceId={handleSelectOnMap}
                     isCompared={compareIds.includes(place.id)}
-                    onToggleCompare={() => toggleComparePlace(place.id)}
+                    onToggleCompareId={toggleComparePlace}
+                    onPersonalUpdate={handlePersonalUpdate}
                     isSelected={selectedPlaceId === place.id}
                   />
                 </div>
@@ -2851,101 +2948,111 @@ export function PlacesExplorer({
         </div>
       )}
 
-      {/* Modales Interactivos */}
-      <RandomPickerModal
-        isOpen={isRandomModalOpen}
-        onClose={() => setIsRandomModalOpen(false)}
-        places={filteredPlaces}
-        onSelectOnMap={(id) => handleSelectOnMap(id)}
-        onSelectInList={(id) => handleSelectInList(id)}
-      />
+      {/* Modales Interactivos cargados bajo demanda (code-splitting + lazy mount) */}
+      {isRandomModalOpen && (
+        <RandomPickerModal
+          isOpen={isRandomModalOpen}
+          onClose={() => setIsRandomModalOpen(false)}
+          places={filteredPlaces}
+          onSelectOnMap={(id) => handleSelectOnMap(id)}
+          onSelectInList={(id) => handleSelectInList(id)}
+        />
+      )}
 
-      <DecisionAssistantModal
-        isOpen={isAssistantOpen}
-        onClose={() => setIsAssistantOpen(false)}
-        occasions={occasionsList}
-        selectedOccasions={selectedOccasions}
-        onSelectOccasions={(occs) => setSelectedOccasions(occs)}
-        tags={sortedTags}
-        selectedTags={selectedTags}
-        onSelectTags={(tgs) => setSelectedTags(tgs)}
-        selectedPrice={selectedPrices[0] || null}
-        onSelectPrice={(p) => setSelectedPrices(p ? [p] : [])}
-        experienceFilter={experienceFilter}
-        onSelectExperience={(exp) => setExperienceFilter(exp)}
-        nearMeActive={userLocation !== null}
-        onToggleNearMe={() => {
-          if (userLocation) handleDisableLocation();
-          else handleRequestLocation();
-        }}
-        radiusKm={radiusKm || 10}
-        onChangeRadius={(km) => setRadiusKm(km)}
-        countries={countryOptions}
-        selectedCountries={selectedCountries}
-        onSelectCountries={(vals) => {
-          setSelectedCountries(vals);
-          setSelectedCities([]);
-          setSelectedTowns([]);
-        }}
-        cities={cityOptions}
-        selectedCities={selectedCities}
-        onSelectCities={(vals) => {
-          setSelectedCities(vals);
-          setSelectedTowns([]);
-        }}
-        towns={townOptions}
-        selectedTowns={selectedTowns}
-        onSelectTowns={(vals) => setSelectedTowns(vals)}
-        minRating={minRating}
-        onSelectMinRating={(val) => setMinRating(val)}
-        friendOptions={friendSelectOptions}
-        selectedFriendIds={selectedFriendIds}
-        onSelectFriends={setSelectedFriendIds}
-        friendsFilterMode={friendsFilterMode}
-        onChangeFriendsFilterMode={setFriendsFilterMode}
-        includeMeWithFriends={includeMeWithFriends}
-        onToggleIncludeMeWithFriends={setIncludeMeWithFriends}
-        groups={myGroups}
-        selectedGroupIds={selectedGroupFilterIds}
-        onToggleGroup={(gid) =>
-          setSelectedGroupFilterIds((prev) =>
-            prev.includes(gid) ? prev.filter((id) => id !== gid) : [...prev, gid]
-          )
-        }
-        matchingCount={filteredPlaces.length}
-        onReset={resetAllFilters}
-      />
+      {isAssistantOpen && (
+        <DecisionAssistantModal
+          isOpen={isAssistantOpen}
+          onClose={() => setIsAssistantOpen(false)}
+          occasions={occasionsList}
+          selectedOccasions={selectedOccasions}
+          onSelectOccasions={(occs) => setSelectedOccasions(occs)}
+          tags={sortedTags}
+          selectedTags={selectedTags}
+          onSelectTags={(tgs) => setSelectedTags(tgs)}
+          selectedPrice={selectedPrices[0] || null}
+          onSelectPrice={(p) => setSelectedPrices(p ? [p] : [])}
+          experienceFilter={experienceFilter}
+          onSelectExperience={(exp) => setExperienceFilter(exp)}
+          nearMeActive={userLocation !== null}
+          onToggleNearMe={() => {
+            if (userLocation) handleDisableLocation();
+            else handleRequestLocation();
+          }}
+          radiusKm={radiusKm || 10}
+          onChangeRadius={(km) => setRadiusKm(km)}
+          countries={countryOptions}
+          selectedCountries={selectedCountries}
+          onSelectCountries={(vals) => {
+            setSelectedCountries(vals);
+            setSelectedCities([]);
+            setSelectedTowns([]);
+          }}
+          cities={cityOptions}
+          selectedCities={selectedCities}
+          onSelectCities={(vals) => {
+            setSelectedCities(vals);
+            setSelectedTowns([]);
+          }}
+          towns={townOptions}
+          selectedTowns={selectedTowns}
+          onSelectTowns={(vals) => setSelectedTowns(vals)}
+          minRating={minRating}
+          onSelectMinRating={(val) => setMinRating(val)}
+          friendOptions={friendSelectOptions}
+          selectedFriendIds={selectedFriendIds}
+          onSelectFriends={setSelectedFriendIds}
+          friendsFilterMode={friendsFilterMode}
+          onChangeFriendsFilterMode={setFriendsFilterMode}
+          includeMeWithFriends={includeMeWithFriends}
+          onToggleIncludeMeWithFriends={setIncludeMeWithFriends}
+          groups={myGroups}
+          selectedGroupIds={selectedGroupFilterIds}
+          onToggleGroup={(gid) =>
+            setSelectedGroupFilterIds((prev) =>
+              prev.includes(gid) ? prev.filter((id) => id !== gid) : [...prev, gid]
+            )
+          }
+          matchingCount={filteredPlaces.length}
+          onReset={resetAllFilters}
+        />
+      )}
 
-      <ExportImportModal
-        isOpen={isExportImportOpen}
-        onClose={() => setIsExportImportOpen(false)}
-        places={filteredPlaces}
-      />
+      {isExportImportOpen && (
+        <ExportImportModal
+          isOpen={isExportImportOpen}
+          onClose={() => setIsExportImportOpen(false)}
+          places={filteredPlaces}
+        />
+      )}
 
-      <ComparePlacesModal
-        isOpen={isCompareOpen}
-        onClose={() => setIsCompareOpen(false)}
-        places={initialPlaces.filter((p) => compareIds.includes(p.id))}
-        occasionMap={occasionMap}
-        onRemovePlace={(id) => toggleComparePlace(id)}
-        onSelectOnMap={handleSelectOnMap}
-        onClearAll={() => {
-          setCompareIds([]);
-          setIsCompareOpen(false);
-        }}
-      />
+      {isCompareOpen && (
+        <ComparePlacesModal
+          isOpen={isCompareOpen}
+          onClose={() => setIsCompareOpen(false)}
+          places={placesData.filter((p) => compareIds.includes(p.id))}
+          occasionMap={occasionMap}
+          onRemovePlace={(id) => toggleComparePlace(id)}
+          onSelectOnMap={handleSelectOnMap}
+          onClearAll={() => {
+            setCompareIds([]);
+            setIsCompareOpen(false);
+          }}
+        />
+      )}
 
-      <CommandPalette
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        places={initialPlaces}
-        isAdmin={isAdmin}
-        onSelectPlaceOnMap={handleSelectOnMap}
-        onSelectPlaceInList={handleSelectInList}
-        onOpenRandom={() => setIsRandomModalOpen(true)}
-        onOpenAssistant={() => setIsAssistantOpen(true)}
-        onOpenExportImport={() => setIsExportImportOpen(true)}
-      />
+      {isCommandPaletteOpen && (
+        <CommandPalette
+          isOpen={isCommandPaletteOpen}
+          onClose={() => setIsCommandPaletteOpen(false)}
+          places={placesData}
+          isAdmin={isAdmin}
+          onSelectPlaceOnMap={handleSelectOnMap}
+          onSelectPlaceInList={handleSelectInList}
+          onOpenRandom={() => setIsRandomModalOpen(true)}
+          onOpenAssistant={() => setIsAssistantOpen(true)}
+          onOpenExportImport={() => setIsExportImportOpen(true)}
+        />
+      )}
 
       {/* Opción 7: Tarjeta flotante inferior en móvil con sitio seleccionado en el mapa */}
       {selectedPlace && activeMobileView === "map" && (

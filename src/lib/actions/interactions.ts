@@ -31,26 +31,18 @@ export async function setFavoriteAction(placeId: string, favorite: boolean) {
   const user = await getCurrentUser();
   if (!user) return { error: "No autenticado" };
 
-  const [existing] = await db
-    .select()
-    .from(userPlaces)
-    .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(userPlaces)
-      .set({ favorite, updatedAt: new Date() })
-      .where(eq(userPlaces.id, existing.id));
-  } else {
-    await db.insert(userPlaces).values({
+  await db
+    .insert(userPlaces)
+    .values({
       userId: user.id,
       placeId,
       favorite,
+    })
+    .onConflictDoUpdate({
+      target: [userPlaces.userId, userPlaces.placeId],
+      set: { favorite, updatedAt: new Date() },
     });
-  }
 
-  revalidatePath("/");
   return { success: true, favorite };
 }
 
@@ -62,28 +54,25 @@ export async function toggleFavoriteAction(placeId: string) {
   if (!user) return { error: "No autenticado" };
 
   const [existing] = await db
-    .select()
+    .select({ id: userPlaces.id, favorite: userPlaces.favorite })
     .from(userPlaces)
     .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
     .limit(1);
 
-  if (existing) {
-    const newFav = !existing.favorite;
-    await db
-      .update(userPlaces)
-      .set({ favorite: newFav, updatedAt: new Date() })
-      .where(eq(userPlaces.id, existing.id));
-    revalidatePath("/");
-    return { success: true, favorite: newFav };
-  } else {
-    await db.insert(userPlaces).values({
+  const nextFav = existing ? !existing.favorite : true;
+  await db
+    .insert(userPlaces)
+    .values({
       userId: user.id,
       placeId,
-      favorite: true,
+      favorite: nextFav,
+    })
+    .onConflictDoUpdate({
+      target: [userPlaces.userId, userPlaces.placeId],
+      set: { favorite: nextFav, updatedAt: new Date() },
     });
-    revalidatePath("/");
-    return { success: true, favorite: true };
-  }
+
+  return { success: true, favorite: nextFav };
 }
 
 /**
@@ -96,26 +85,18 @@ export async function setPersonalStatusAction(
   const user = await getCurrentUser();
   if (!user) return { error: "No autenticado" };
 
-  const [existing] = await db
-    .select()
-    .from(userPlaces)
-    .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(userPlaces)
-      .set({ personalStatus: status, updatedAt: new Date() })
-      .where(eq(userPlaces.id, existing.id));
-  } else {
-    await db.insert(userPlaces).values({
+  await db
+    .insert(userPlaces)
+    .values({
       userId: user.id,
       placeId,
       personalStatus: status,
+    })
+    .onConflictDoUpdate({
+      target: [userPlaces.userId, userPlaces.placeId],
+      set: { personalStatus: status, updatedAt: new Date() },
     });
-  }
 
-  revalidatePath("/");
   return { success: true, personalStatus: status };
 }
 
@@ -129,26 +110,18 @@ export async function setPersonalRatingAction(
   const user = await getCurrentUser();
   if (!user) return { error: "No autenticado" };
 
-  const [existing] = await db
-    .select()
-    .from(userPlaces)
-    .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(userPlaces)
-      .set({ rating, updatedAt: new Date() })
-      .where(eq(userPlaces.id, existing.id));
-  } else {
-    await db.insert(userPlaces).values({
+  await db
+    .insert(userPlaces)
+    .values({
       userId: user.id,
       placeId,
       rating,
+    })
+    .onConflictDoUpdate({
+      target: [userPlaces.userId, userPlaces.placeId],
+      set: { rating, updatedAt: new Date() },
     });
-  }
 
-  revalidatePath("/");
   return { success: true, rating };
 }
 
@@ -164,26 +137,18 @@ export async function savePrivateNotesAction(
 
   const trimmed = privateNotes.trim() || null;
 
-  const [existing] = await db
-    .select()
-    .from(userPlaces)
-    .where(and(eq(userPlaces.userId, user.id), eq(userPlaces.placeId, placeId)))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(userPlaces)
-      .set({ privateNotes: trimmed, updatedAt: new Date() })
-      .where(eq(userPlaces.id, existing.id));
-  } else {
-    await db.insert(userPlaces).values({
+  await db
+    .insert(userPlaces)
+    .values({
       userId: user.id,
       placeId,
       privateNotes: trimmed,
+    })
+    .onConflictDoUpdate({
+      target: [userPlaces.userId, userPlaces.placeId],
+      set: { privateNotes: trimmed, updatedAt: new Date() },
     });
-  }
 
-  revalidatePath("/");
   return { success: true, privateNotes: trimmed };
 }
 

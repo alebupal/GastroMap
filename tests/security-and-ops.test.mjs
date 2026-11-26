@@ -201,3 +201,43 @@ test("Optimizaciones de carga y renderizado: migración singleton, React.cache e
   assert.ok(cardSrc.includes("{canEdit && showEditModal && ("), "EditPlaceModal debe montarse bajo demanda");
   assert.ok(explorerSrc.includes("const searchIndexMap = useMemo("), "PlacesExplorer debe pre-indexar el texto de búsqueda");
 });
+
+test("Micro-interacciones instantáneas, code-splitting de modales y React.memo", () => {
+  const interactionsSrc = fs.readFileSync(
+    path.join(root, "src/lib/actions/interactions.ts"),
+    "utf8"
+  );
+  const cardSrc = fs.readFileSync(
+    path.join(root, "src/components/places/PlaceCard.tsx"),
+    "utf8"
+  );
+  const explorerSrc = fs.readFileSync(
+    path.join(root, "src/components/places/PlacesExplorer.tsx"),
+    "utf8"
+  );
+  const headerSrc = fs.readFileSync(
+    path.join(root, "src/components/profile/UserHeader.tsx"),
+    "utf8"
+  );
+
+  // UPSERT atómico y sin revalidatePath("/") en micro-interacciones personales
+  const commentsStart = interactionsSrc.indexOf("export async function getPlaceCommentsAction");
+  assert.ok(commentsStart !== -1);
+  const microActionsBody = interactionsSrc.slice(0, commentsStart);
+  assert.ok(
+    microActionsBody.includes(".onConflictDoUpdate("),
+    "Las acciones personales deben usar UPSERT atómico onConflictDoUpdate"
+  );
+  assert.equal(
+    microActionsBody.includes('revalidatePath("/")'),
+    false,
+    "Las micro-interacciones no deben forzar revalidatePath('/') completo"
+  );
+
+  // Code-splitting (next/dynamic), React.memo y useDeferredValue
+  assert.ok(cardSrc.includes("export const PlaceCard = memo(PlaceCardComponent)"));
+  assert.ok(cardSrc.includes('import dynamic from "next/dynamic"'));
+  assert.ok(explorerSrc.includes('import dynamic from "next/dynamic"'));
+  assert.ok(explorerSrc.includes("useDeferredValue(textSearch)"));
+  assert.ok(headerSrc.includes('import dynamic from "next/dynamic"'));
+});

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
+import dynamic from "next/dynamic";
 import { deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
 import {
   setFavoriteAction,
@@ -9,12 +10,21 @@ import {
 import { enqueueOfflineMutation } from "@/lib/offlineQueue";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
-import { PlaceCommentsThread } from "./PlaceCommentsThread";
-import { PlacePersonalNotesModal } from "./PlacePersonalNotesModal";
-import { EditPlaceModal } from "./EditPlaceModal";
-import { AddToListModal } from "./AddToListModal";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+
+const PlaceCommentsThread = dynamic(() =>
+  import("./PlaceCommentsThread").then((m) => m.PlaceCommentsThread)
+);
+const PlacePersonalNotesModal = dynamic(() =>
+  import("./PlacePersonalNotesModal").then((m) => m.PlacePersonalNotesModal)
+);
+const EditPlaceModal = dynamic(() =>
+  import("./EditPlaceModal").then((m) => m.EditPlaceModal)
+);
+const AddToListModal = dynamic(() =>
+  import("./AddToListModal").then((m) => m.AddToListModal)
+);
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 20 €",
@@ -32,12 +42,18 @@ interface PlaceCardProps {
   occasionsList?: Array<{ id: string; name: string; icon: string }>;
   availableTags?: string[];
   onSelectOnMap?: () => void;
+  onSelectPlaceId?: (placeId: string) => void;
   isCompared?: boolean;
   onToggleCompare?: () => void;
+  onToggleCompareId?: (placeId: string) => void;
+  onPersonalUpdate?: (
+    placeId: string,
+    patch: Partial<Pick<PlaceWithDetails, "isFavorite" | "personalStatus" | "rating" | "privateNotes">>
+  ) => void;
   isSelected?: boolean;
 }
 
-export function PlaceCard({
+function PlaceCardComponent({
   place,
   currentUserId,
   isAdmin,
@@ -45,8 +61,11 @@ export function PlaceCard({
   occasionsList = [],
   availableTags = [],
   onSelectOnMap,
+  onSelectPlaceId,
   isCompared = false,
   onToggleCompare,
+  onToggleCompareId,
+  onPersonalUpdate,
   isSelected = false,
 }: PlaceCardProps) {
   const { t } = useT();
@@ -66,6 +85,21 @@ export function PlaceCard({
   const [copiedPlace, setCopiedPlace] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+
+  // Sincronizar estado local si cambian los datos externos (ej. importación o edición)
+  useEffect(() => {
+    setFavorite(place.isFavorite ?? false);
+    setPersonalStatus(place.personalStatus ?? null);
+    setRating(place.rating ?? null);
+    setPrivateNotes(place.privateNotes ?? null);
+    setCommentsCount(place.commentsCount ?? 0);
+  }, [
+    place.isFavorite,
+    place.personalStatus,
+    place.rating,
+    place.privateNotes,
+    place.commentsCount,
+  ]);
 
   function buildShareText() {
     const parts = [place.name];
@@ -146,6 +180,7 @@ export function PlaceCard({
   async function handleToggleFavorite() {
     const nextFav = !favorite;
     setFavorite(nextFav);
+    onPersonalUpdate?.(place.id, { isFavorite: nextFav });
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       await enqueueOfflineMutation({
         type: "set_favorite",
@@ -170,6 +205,7 @@ export function PlaceCard({
   async function handleStatusChange(newStatus: "pending" | "visited" | null) {
     const finalStatus = personalStatus === newStatus ? null : newStatus;
     setPersonalStatus(finalStatus);
+    onPersonalUpdate?.(place.id, { personalStatus: finalStatus });
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       await enqueueOfflineMutation({
         type: "set_status",
@@ -512,10 +548,10 @@ export function PlaceCard({
             </span>
           </button>
 
-          {onToggleCompare && (
+          {(onToggleCompareId || onToggleCompare) && (
             <button
               type="button"
-              onClick={onToggleCompare}
+              onClick={() => (onToggleCompareId ? onToggleCompareId(place.id) : onToggleCompare?.())}
               aria-pressed={isCompared}
               aria-label={isCompared ? t("places.remove_compare") : t("places.add_compare")}
               title={isCompared ? t("places.remove_compare") : t("places.compare_side_by_side")}
@@ -530,9 +566,9 @@ export function PlaceCard({
             </button>
           )}
 
-          {hasCoords && onSelectOnMap && (
+          {hasCoords && (onSelectPlaceId || onSelectOnMap) && (
             <button
-              onClick={onSelectOnMap}
+              onClick={() => (onSelectPlaceId ? onSelectPlaceId(place.id) : onSelectOnMap?.())}
               type="button"
               aria-label={t("places.view_map")}
               className="group flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950/40 sm:hover:bg-transparent font-bold cursor-pointer py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap transition"
@@ -646,7 +682,10 @@ export function PlaceCard({
           isOpen={showComments}
           onClose={() => setShowComments(false)}
           onCommentsCountChange={(count) => setCommentsCount(count)}
-          onPrivateNotesSaved={(newNotes) => setPrivateNotes(newNotes)}
+          onPrivateNotesSaved={(newNotes) => {
+            setPrivateNotes(newNotes);
+            onPersonalUpdate?.(place.id, { privateNotes: newNotes });
+          }}
           onOpenPrivateNotesModal={() => setShowNotesModal(true)}
         />
       )}
@@ -661,6 +700,7 @@ export function PlaceCard({
           onClose={() => setShowNotesModal(false)}
           onSave={(newRating) => {
             setRating(newRating);
+            onPersonalUpdate?.(place.id, { rating: newRating });
           }}
         />
       )}
@@ -694,3 +734,5 @@ export function PlaceCard({
     </article>
   );
 }
+
+export const PlaceCard = memo(PlaceCardComponent);

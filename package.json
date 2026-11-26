@@ -4,8 +4,9 @@
   "private": true,
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "dev": "docker compose up -d db && WATCHPACK_POLLING=true next dev",
-    "dev:only": "WATCHPACK_POLLING=true next dev",
+    "dev": "docker compose up -d db && next dev",
+    "dev:only": "next dev",
+    "dev:poll": "WATCHPACK_POLLING=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

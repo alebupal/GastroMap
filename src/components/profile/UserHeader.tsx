@@ -2,17 +2,27 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { logoutAction } from "@/lib/actions/auth";
-import { EditProfileModal } from "./EditProfileModal";
-import { GroupsModal } from "./GroupsModal";
-import { ListsModal } from "./ListsModal";
-import { StatsModal } from "@/components/stats/StatsModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { MOBILE_NAV_EVENTS } from "@/components/layout/MobileBottomNav";
 import { clearAppOfflineCache } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
+
+const EditProfileModal = dynamic(() =>
+  import("./EditProfileModal").then((m) => m.EditProfileModal)
+);
+const GroupsModal = dynamic(() =>
+  import("./GroupsModal").then((m) => m.GroupsModal)
+);
+const ListsModal = dynamic(() =>
+  import("./ListsModal").then((m) => m.ListsModal)
+);
+const StatsModal = dynamic(() =>
+  import("@/components/stats/StatsModal").then((m) => m.StatsModal)
+);
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -416,32 +426,37 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
         </div>
       </header>
 
-      {/* Modal interactivo para edición de perfil */}
-      <EditProfileModal
-        isOpen={isEditProfileOpen}
-        onClose={() => setIsEditProfileOpen(false)}
-        currentUser={currentUser}
-      />
+      {/* Modales cargados bajo demanda (code-splitting) solo cuando se abren */}
+      {isEditProfileOpen && (
+        <EditProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          currentUser={currentUser}
+        />
+      )}
 
-      {/* Modal de gestión de listas y guías compartibles */}
-      <ListsModal
-        isOpen={isListsOpen}
-        onClose={() => setIsListsOpen(false)}
-      />
+      {isListsOpen && (
+        <ListsModal
+          isOpen={isListsOpen}
+          onClose={() => setIsListsOpen(false)}
+        />
+      )}
 
-      {/* Modal de gestión de grupos privados */}
-      <GroupsModal
-        isOpen={isGroupsOpen}
-        onClose={() => setIsGroupsOpen(false)}
-        currentUserId={currentUser.id}
-      />
+      {isGroupsOpen && (
+        <GroupsModal
+          isOpen={isGroupsOpen}
+          onClose={() => setIsGroupsOpen(false)}
+          currentUserId={currentUser.id}
+        />
+      )}
 
-      {/* Modal de estadísticas personales y Wrapped */}
-      <StatsModal
-        isOpen={isStatsOpen}
-        onClose={() => setIsStatsOpen(false)}
-        username={displayUsername}
-      />
+      {isStatsOpen && (
+        <StatsModal
+          isOpen={isStatsOpen}
+          onClose={() => setIsStatsOpen(false)}
+          username={displayUsername}
+        />
+      )}
     </>
   );
 }
