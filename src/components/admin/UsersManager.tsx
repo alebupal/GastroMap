@@ -23,6 +23,7 @@ import {
 } from "@/lib/actions/groups";
 import { InviteManager } from "@/components/InviteManager";
 import { RoleLegendCard } from "./RoleLegendCard";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
@@ -488,35 +489,26 @@ export function UsersManager({
   return (
     <div className="space-y-4 text-left">
       {/* Sub-pestañas: Usuarios | Invitaciones de plataforma */}
-      <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[#f2f3ff] dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
-        <button
-          type="button"
-          onClick={() => setSubTab("users")}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-            subTab === "users"
-              ? "bg-orange-600 text-white shadow-xs"
-              : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
-          }`}
-        >
-          <span className="material-symbols-outlined text-base leading-none">group</span>
-          <span>
-            {t("admin_users.tab_users")} ({usersList.length})
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setSubTab("invites")}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-            subTab === "invites"
-              ? "bg-orange-600 text-white shadow-xs"
-              : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
-          }`}
-        >
-          <span className="material-symbols-outlined text-base leading-none">confirmation_number</span>
-          <span>{t("admin_users.tab_invites")}</span>
-        </button>
-      </div>
+      <SegmentedTabs
+        value={subTab}
+        onChange={setSubTab}
+        ariaLabel={t("admin_users.title")}
+        items={[
+          {
+            id: "users",
+            label: t("admin_users.tab_users"),
+            icon: "group",
+            badge: usersList.length,
+          },
+          {
+            id: "invites",
+            label: t("admin_users.tab_invites"),
+            icon: "confirmation_number",
+          },
+        ]}
+      />
 
+      <div key={subTab} className="gm-tab-in">
       {subTab === "invites" ? (
         <InviteManager />
       ) : (
@@ -988,6 +980,7 @@ export function UsersManager({
           </div>
         </div>
       )}
+      </div>
 
       {/* Modal para gestionar los grupos y roles de un usuario */}
       {managingGroupsUser && (
@@ -1144,7 +1137,7 @@ export function UsersManager({
               )}
 
               {/* Leyenda explicativa de roles dentro de grupos */}
-              <RoleLegendCard scope="group" />
+              <RoleLegendCard scope="group" variant="compact" />
             </div>
 
             <div className="px-5 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 flex justify-end border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">

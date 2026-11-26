@@ -13,6 +13,7 @@ import {
 import { CommentSkeleton } from "@/components/ui/Skeleton";
 import { useT } from "@/lib/i18n/client";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 
 interface PlaceCommentsThreadProps {
@@ -258,33 +259,20 @@ function RichTextarea({
         </div>
 
         {/* Toggle escribir / previsualizar */}
-        <div className="flex items-center gap-0.5 bg-[#f2f3ff] dark:bg-slate-800 p-0.5 rounded-full text-[10px] font-bold">
-          <button
-            type="button"
-            onClick={() => setTab("write")}
-            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition ${
-              tab === "write"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-          >
-            {t("comments.write")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("preview")}
-            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition ${
-              tab === "preview"
-                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                : "text-slate-500 dark:text-slate-400"
-            }`}
-          >
-            {t("comments.preview")}
-          </button>
-        </div>
+        <SegmentedTabs
+          value={tab}
+          onChange={setTab}
+          variant="neutral"
+          size="sm"
+          items={[
+            { id: "write", label: t("comments.write") },
+            { id: "preview", label: t("comments.preview") },
+          ]}
+        />
       </div>
 
       {/* Área de texto / Vista previa */}
+      <div key={tab} className="gm-tab-in">
       {tab === "write" ? (
         <textarea
           ref={textareaRef}
@@ -303,6 +291,7 @@ function RichTextarea({
           )}
         </div>
       )}
+      </div>
 
       {/* Pie del editor */}
       <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 bg-white dark:bg-slate-900/90 border-t border-slate-200/70 dark:border-slate-800">

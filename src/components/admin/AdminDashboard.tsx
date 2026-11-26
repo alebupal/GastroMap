@@ -12,6 +12,7 @@ import { AuditLogViewer } from "./AuditLogViewer";
 import { AdminStatsPanel } from "./AdminStatsPanel";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
@@ -371,52 +372,36 @@ export function AdminDashboard({
           {activeTab === "system" && (
             <div className="space-y-4">
               {/* Sub-pestañas de Sistema y Auditoría */}
-              <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[#f2f3ff] dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex-wrap">
-                {(
-                  [
-                    { id: "general", label: t("admin.system_tab_general"), icon: "tune" },
-                    { id: "demo", label: t("admin.system_tab_demo"), icon: "science" },
-                    { id: "audit", label: t("admin.system_tab_audit"), icon: "receipt_long" },
-                  ] as const
-                ).map((sub) => {
-                  const active = systemSubTab === sub.id;
-                  return (
-                    <button
-                      key={sub.id}
-                      type="button"
-                      onClick={() => setSystemSubTab(sub.id)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
-                        active
-                          ? "bg-orange-600 text-white shadow-xs"
-                          : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-base leading-none">
-                        {sub.icon}
-                      </span>
-                      <span>{sub.label}</span>
-                    </button>
-                  );
-                })}
+              <SegmentedTabs
+                value={systemSubTab}
+                onChange={setSystemSubTab}
+                ariaLabel={t("admin.tab_system")}
+                items={[
+                  { id: "general", label: t("admin.system_tab_general"), icon: "tune" },
+                  { id: "demo", label: t("admin.system_tab_demo"), icon: "science" },
+                  { id: "audit", label: t("admin.system_tab_audit"), icon: "receipt_long" },
+                ]}
+              />
+
+              <div key={systemSubTab} className="gm-tab-in">
+                {systemSubTab === "general" && (
+                  <SettingsManager
+                    initialGooglePlacesApiKey={googlePlacesApiKey}
+                    initialPublicRegistrationEnabled={publicRegistrationEnabled}
+                    totalPlacesCount={allPlaces.length}
+                  />
+                )}
+
+                {systemSubTab === "demo" && (
+                  <DemoPlacesSeeder
+                    totalPlacesCount={allPlaces.length}
+                    totalOccasionsCount={initialOccasions.length}
+                    totalTagsCount={initialTags.length}
+                  />
+                )}
+
+                {systemSubTab === "audit" && <AuditLogViewer />}
               </div>
-
-              {systemSubTab === "general" && (
-                <SettingsManager
-                  initialGooglePlacesApiKey={googlePlacesApiKey}
-                  initialPublicRegistrationEnabled={publicRegistrationEnabled}
-                  totalPlacesCount={allPlaces.length}
-                />
-              )}
-
-              {systemSubTab === "demo" && (
-                <DemoPlacesSeeder
-                  totalPlacesCount={allPlaces.length}
-                  totalOccasionsCount={initialOccasions.length}
-                  totalTagsCount={initialTags.length}
-                />
-              )}
-
-              {systemSubTab === "audit" && <AuditLogViewer />}
             </div>
           )}
         </main>

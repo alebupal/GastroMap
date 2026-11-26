@@ -226,11 +226,6 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                       ? t("spaces.all_my_places")
                       : t("spaces.personal_map")}
                 </span>
-                {workspace.mode === "group" && workspace.isSpaceAdmin && (
-                  <span className="hidden md:inline-flex px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase tracking-wider shrink-0">
-                    {t("spaces.group_admin_badge")}
-                  </span>
-                )}
                 <span className="material-symbols-outlined text-sm text-slate-400 shrink-0 leading-none">
                   {isSpaceMenuOpen ? "expand_less" : "expand_more"}
                 </span>

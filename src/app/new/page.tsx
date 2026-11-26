@@ -45,7 +45,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
     workspace?.mode === "group" && workspace.groupId
       ? workspace.groupId
       : workspace?.mode === "all" && availableGroups.length > 0
-        ? availableGroups[0].id
+        ? ""
         : "personal";
 
   // Extraer URL si venía en el texto compartido (habitual en WhatsApp/Twitter/Instagram)

@@ -10,6 +10,60 @@ export interface ParsedMapUrl {
 }
 
 /**
+ * Comprueba si una URL pertenece a un dominio/ruta oficial de Google Maps.
+ * Una cadena vacía se considera válida (el sitio puede usar solo coordenadas).
+ */
+export function isValidGoogleMapsUrl(rawUrl?: string | null): boolean {
+  const clean = (rawUrl || "").trim();
+  if (!clean) return true;
+  const extracted = extractFirstUrl(clean);
+  try {
+    const parsed = new URL(extracted);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+
+    if (host === "maps.app.goo.gl") return true;
+    if (host === "share.google") return true;
+    if (host === "goo.gl" && path.startsWith("/maps")) return true;
+    if (host === "g.co" && (path.startsWith("/kgs") || path.startsWith("/maps"))) return true;
+    if (host.startsWith("maps.google.")) return true;
+    if (/^(www\.)?google\.[a-z.]+$/.test(host) && path.startsWith("/maps")) return true;
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Devuelve el enlace efectivo para abrir el local en Google Maps:
+ * prioriza la URL de Maps si es válida y, si no, genera un enlace directo por coordenadas.
+ */
+export function getMapsHref(place: {
+  googleMapsUrl?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}): string | null {
+  const cleanUrl = (place.googleMapsUrl || "").trim();
+  if (cleanUrl && isValidGoogleMapsUrl(cleanUrl)) {
+    return cleanUrl;
+  }
+  if (place.latitude != null && place.longitude != null) {
+    return `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`;
+  }
+  return null;
+}
+
+/**
+ * Genera una URL de búsqueda en Google para el establecimiento.
+ */
+export function getGoogleSearchHref(name: string, city?: string | null): string {
+  const query = [name, city].filter(Boolean).join(" ").trim();
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+}
+
+/**
  * Extrae la primera URL http(s) aunque el usuario pegue texto compartido desde WhatsApp/Maps
  * (ej. "Mira este restaurante: https://maps.app.goo.gl/xyz").
  */

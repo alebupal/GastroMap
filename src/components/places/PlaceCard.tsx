@@ -12,6 +12,7 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { getGoogleSearchHref, getMapsHref } from "@/lib/maps";
 
 const PlaceCommentsThread = dynamic(() =>
   import("./PlaceCommentsThread").then((m) => m.PlaceCommentsThread)
@@ -117,11 +118,7 @@ function PlaceCardComponent({
     if (place.address || place.city) {
       parts.push([place.address, place.city].filter(Boolean).join(", "));
     }
-    const mapsLink =
-      place.googleMapsUrl ||
-      (place.latitude != null && place.longitude != null
-        ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`
-        : "");
+    const mapsLink = getMapsHref(place) || "";
     if (mapsLink) parts.push(mapsLink);
     return { text: parts.join(" — "), mapsLink };
   }
@@ -351,6 +348,16 @@ function PlaceCardComponent({
                         <span>{t("spaces.copy_to_space_menu")}</span>
                       </button>
                     )}
+                    <a
+                      href={getGoogleSearchHref(place.name, place.city)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowActionsMenu(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-orange-600">travel_explore</span>
+                      <span>{t("cards.search_google")}</span>
+                    </a>
                     {canEdit && (
                       <button
                         type="button"
@@ -612,22 +619,26 @@ function PlaceCardComponent({
             </button>
           )}
 
-          {place.googleMapsUrl && (
-            <a
-              href={place.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Maps: ${place.name}`}
-              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
-              title="Abrir en Google Maps"
-            >
-              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
-              <span className="text-[9.5px] sm:text-[11px] leading-tight">
-                <span className="sm:hidden">Maps</span>
-                <span className="hidden sm:inline">Google Maps</span>
-              </span>
-            </a>
-          )}
+          {(() => {
+            const effectiveMapsHref = getMapsHref(place);
+            if (!effectiveMapsHref) return null;
+            return (
+              <a
+                href={effectiveMapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Maps: ${place.name}`}
+                className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
+                title="Abrir en Google Maps"
+              >
+                <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
+                <span className="text-[9.5px] sm:text-[11px] leading-tight">
+                  <span className="sm:hidden">Maps</span>
+                  <span className="hidden sm:inline">Google Maps</span>
+                </span>
+              </a>
+            );
+          })()}
 
           <div className="relative">
             <button

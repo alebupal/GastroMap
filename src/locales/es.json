@@ -162,7 +162,8 @@
     "share_native": "Más apps…",
     "share_instagram": "Instagram",
     "instagram_copied_toast": "Datos copiados: pégalos en Instagram",
-    "view_on_map": "Ver en mapa"
+    "view_on_map": "Ver en mapa",
+    "search_google": "Buscar en Google"
   },
   "location": {
     "title": "Localización y Coordenadas",
@@ -301,7 +302,13 @@
     "price_no_estimate": "Sin estimación",
     "maps_parse_error": "No pudimos leer automáticamente el enlace de Google Maps.",
     "analyze_button": "Analizar",
-    "analyzing": "Analizando..."
+    "analyzing": "Analizando...",
+    "non_maps_url_warning": "No parece un enlace de Google Maps. Puedes quitarlo para usar las coordenadas del mapa o mantenerlo igualmente (la tarjeta abrirá Maps con las coordenadas).",
+    "remove_url_btn": "Quitar enlace",
+    "keep_url_anyway_btn": "Mantener igualmente",
+    "adding_to_space": "Se añadirá a {space}",
+    "select_space_required": "Estás en «Todos mis sitios»: elige a qué espacio añadir este local.",
+    "choose_space_placeholder": "Selecciona un espacio..."
   },
   "profile": {
     "title": "Editar mi perfil",

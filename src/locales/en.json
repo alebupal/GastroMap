@@ -162,7 +162,8 @@
     "share_native": "More apps…",
     "share_instagram": "Instagram",
     "instagram_copied_toast": "Copied: paste it in Instagram",
-    "view_on_map": "View on map"
+    "view_on_map": "View on map",
+    "search_google": "Search on Google"
   },
   "location": {
     "title": "Location & Coordinates",
@@ -301,7 +302,13 @@
     "price_no_estimate": "No estimate",
     "maps_parse_error": "We could not automatically parse the Google Maps link.",
     "analyze_button": "Analyze",
-    "analyzing": "Analyzing..."
+    "analyzing": "Analyzing...",
+    "non_maps_url_warning": "This does not look like a Google Maps link. You can remove it to rely on the map coordinates, or keep it anyway (the card will open Maps using coordinates).",
+    "remove_url_btn": "Remove link",
+    "keep_url_anyway_btn": "Keep anyway",
+    "adding_to_space": "Adding to {space}",
+    "select_space_required": "You are viewing \"All my places\": pick a destination space for this place.",
+    "choose_space_placeholder": "Select a space..."
   },
   "profile": {
     "title": "Edit my profile",
