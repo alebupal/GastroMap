@@ -256,6 +256,7 @@
     "tags_label": "Etiquetas",
     "tags_placeholder": "Añadir etiqueta (ej. terraza, cócteles, postres caseros...)",
     "notes_label": "Breve descripción",
+    "author_label": "Autor / Aportado por",
     "notes_placeholder": "Ej. Taberna de cocina tradicional y vinos en el centro. Imprescindible la tarta de queso...",
     "visibility_label": "Visibilidad de la ficha",
     "visibility_community": "Comunidad (Todos)",
@@ -823,6 +824,7 @@
     "safe_delete_group_places": "{count} sitios creados en grupos compartidos",
     "safe_delete_group_comments": "{count} comentarios en grupos compartidos",
     "safe_delete_personal_places": "{count} sitios en su Mapa Personal (se eliminarán)",
+    "safe_delete_ghost_btn": "👻 Conservar en grupos como «Usuario eliminado»",
     "safe_delete_reassign_btn": "Reasignar al creador de cada grupo y eliminar cuenta",
     "safe_delete_purge_btn": "Eliminar también sus sitios y comentarios de grupo"
   },

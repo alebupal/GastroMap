@@ -1,7 +1,8 @@
 "use server";
 
+import crypto from "crypto";
 import { revalidatePath } from "next/cache";
-import { eq, ne, and, sql, inArray, isNull } from "drizzle-orm";
+import { eq, ne, or, and, sql, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
   users,
@@ -17,7 +18,91 @@ import {
   type User,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { getGroupMembership } from "@/lib/workspace";
 import { logAudit } from "@/lib/audit";
+
+const GHOST_USER_EMAIL = "deleted-user@gastromap.local";
+
+async function ensureGhostUser(): Promise<string> {
+  const [existing] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, GHOST_USER_EMAIL))
+    .limit(1);
+  if (existing) return existing.id;
+
+  const passwordHash = await hashPassword(crypto.randomUUID());
+  const [created] = await db
+    .insert(users)
+    .values({
+      username: "usuario_eliminado",
+      name: "Usuario eliminado",
+      email: GHOST_USER_EMAIL,
+      passwordHash,
+      role: "user",
+      status: "disabled",
+      locale: "es",
+    })
+    .returning({ id: users.id });
+  return created.id;
+}
+
+export interface AssignableAuthorOption {
+  id: string;
+  name: string;
+  username: string | null;
+  isGhost?: boolean;
+}
+
+/**
+ * Devuelve los usuarios elegibles para asignar como autor de un sitio o comentario.
+ */
+export async function getAssignableAuthorsAction(
+  groupId?: string | null
+): Promise<AssignableAuthorOption[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  let rows: Array<{ id: string; name: string; username: string | null; email: string }> = [];
+
+  if (currentUser.role === "admin") {
+    rows = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        email: users.email,
+      })
+      .from(users)
+      .where(or(ne(users.status, "disabled"), eq(users.email, GHOST_USER_EMAIL)));
+  } else if (groupId) {
+    const membership = await getGroupMembership(currentUser.id, groupId);
+    if (!membership.isGroupAdmin) return [];
+    rows = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        email: users.email,
+      })
+      .from(sharingGroupMembers)
+      .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
+      .where(eq(sharingGroupMembers.groupId, groupId));
+  } else {
+    return [];
+  }
+
+  return rows
+    .map((u) => ({
+      id: u.id,
+      name: u.name,
+      username: u.username,
+      isGhost: u.email === GHOST_USER_EMAIL,
+    }))
+    .sort((a, b) =>
+      (a.username || a.name).localeCompare(b.username || b.name, "es", { sensitivity: "base" })
+    );
+}
 
 export interface UserGroupRoleSummary {
   groupId: string;
@@ -63,6 +148,7 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
         createdAt: users.createdAt,
       })
       .from(users)
+      .where(ne(users.email, GHOST_USER_EMAIL))
       .orderBy(users.createdAt),
     db
       .select({
@@ -405,7 +491,7 @@ export async function getUserDeletionImpactAction(userId: string): Promise<{
  */
 export async function deleteUserAction(
   userId: string,
-  options?: { groupDataStrategy?: "reassign_owner" | "delete" }
+  options?: { groupDataStrategy?: "reassign_owner" | "assign_ghost" | "delete" }
 ) {
   const currentUser = await getCurrentUser();
   if (!currentUser || currentUser.role !== "admin") {
@@ -414,6 +500,15 @@ export async function deleteUserAction(
 
   if (userId === currentUser.id) {
     return { error: "No puedes eliminar tu propia cuenta de administrador." };
+  }
+
+  const [targetUserRow] = await db
+    .select({ email: users.email })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (targetUserRow?.email === GHOST_USER_EMAIL) {
+    return { error: "La cuenta de sistema «Usuario eliminado» no se puede borrar." };
   }
 
   const owned = await db
@@ -434,8 +529,10 @@ export async function deleteUserAction(
   await db.delete(sessions).where(eq(sessions.userId, userId));
   await db.delete(invitations).where(eq(invitations.createdById, userId));
 
+  const ghostUserId = strategy === "assign_ghost" ? await ensureGhostUser() : null;
+
   // 2. Comentarios en grupos vs personales
-  if (strategy === "reassign_owner") {
+  if (strategy === "reassign_owner" || strategy === "assign_ghost") {
     const commentsInGroups = await db
       .select({
         commentId: placeComments.id,
@@ -446,17 +543,22 @@ export async function deleteUserAction(
       .innerJoin(sharingGroups, eq(places.groupId, sharingGroups.id))
       .where(eq(placeComments.userId, userId));
 
-    const byOwner = new Map<string, string[]>();
+    const byTarget = new Map<string, string[]>();
     for (const row of commentsInGroups) {
-      const targetOwner = row.ownerUserId === userId ? currentUser.id : row.ownerUserId;
-      const list = byOwner.get(targetOwner) || [];
+      const targetId =
+        strategy === "assign_ghost" && ghostUserId
+          ? ghostUserId
+          : row.ownerUserId === userId
+            ? currentUser.id
+            : row.ownerUserId;
+      const list = byTarget.get(targetId) || [];
       list.push(row.commentId);
-      byOwner.set(targetOwner, list);
+      byTarget.set(targetId, list);
     }
-    for (const [ownerId, cIds] of byOwner.entries()) {
+    for (const [targetId, cIds] of byTarget.entries()) {
       await db
         .update(placeComments)
-        .set({ userId: ownerId })
+        .set({ userId: targetId })
         .where(inArray(placeComments.id, cIds));
     }
   }
@@ -477,7 +579,13 @@ export async function deleteUserAction(
   let deletedPlaceIds = [...personalPlaceIds];
 
   if (groupPlaces.length > 0) {
-    if (strategy === "reassign_owner") {
+    if (strategy === "assign_ghost" && ghostUserId) {
+      await db
+        .update(places)
+        .set({ createdById: ghostUserId, updatedAt: new Date() })
+        .where(inArray(places.id, groupPlaces.map((p) => p.id)));
+      reassignedCount = groupPlaces.length;
+    } else if (strategy === "reassign_owner") {
       const groupIds = Array.from(new Set(groupPlaces.map((p) => p.groupId as string)));
       const owners = await db
         .select({ id: sharingGroups.id, ownerUserId: sharingGroups.ownerUserId })

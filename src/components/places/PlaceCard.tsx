@@ -733,6 +733,7 @@ function PlaceCardComponent({
           personalRating={rating}
           currentUserId={currentUserId}
           isAdmin={isAdmin || isSpaceAdmin}
+          groupId={place.groupId ?? null}
           isOpen={showComments}
           onClose={() => setShowComments(false)}
           onCommentsCountChange={(count) => setCommentsCount(count)}
@@ -794,6 +795,7 @@ function PlaceCardComponent({
           availableTags={availableTags}
           isOpen={showEditModal}
           onClose={() => setShowEditModal(false)}
+          canReassignAuthor={isAdmin || isSpaceAdmin}
         />
       )}
     </article>

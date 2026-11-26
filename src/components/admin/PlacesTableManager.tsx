@@ -1252,6 +1252,7 @@ export function PlacesTableManager({
           availableTags={Array.from(new Set(placesList.flatMap((p) => p.tags || [])))}
           isOpen={true}
           onClose={() => setEditingPlace(null)}
+          canReassignAuthor={true}
         />
       )}
 
