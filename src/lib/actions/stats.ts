@@ -7,7 +7,6 @@ import {
   places,
   userPlaces,
   placeComments,
-  placeVisits,
   placeOccasions,
   placeTags,
   occasions,
@@ -25,7 +24,6 @@ export interface CountItem {
 export interface UserWrappedData {
   year: number;
   availableYears: number[];
-  visitsCount: number;
   uniquePlacesVisited: number;
   favoritesCount: number;
   placesAdded: number;
@@ -43,7 +41,6 @@ export interface UserStatsData {
   favoritesCount: number;
   contributedPlacesCount: number;
   commentsCount: number;
-  totalVisitsCount: number;
   averageRating: number | null;
   topCities: CountItem[];
   topOccasions: CountItem[];
@@ -109,11 +106,10 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
 
   const targetYear = selectedYear || new Date().getFullYear();
 
-  const [myInteractions, myContributed, myComments, myVisits, allOccasions] = await Promise.all([
+  const [myInteractions, myContributed, myComments, allOccasions] = await Promise.all([
     db.select().from(userPlaces).where(eq(userPlaces.userId, user.id)),
     db.select().from(places).where(eq(places.createdById, user.id)),
     db.select().from(placeComments).where(eq(placeComments.userId, user.id)),
-    db.select().from(placeVisits).where(eq(placeVisits.userId, user.id)),
     db.select().from(occasions),
   ]);
 
@@ -135,7 +131,6 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
   const relevantPlaceIds = Array.from(
     new Set([
       ...myInteractions.map((i) => i.placeId),
-      ...myVisits.map((v) => v.placeId),
       ...myContributed.map((p) => p.id),
     ])
   );
@@ -187,24 +182,17 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
 
   // Cálculo del Wrapped anual
   const yearsSet = new Set<number>([new Date().getFullYear()]);
-  myVisits.forEach((v) => yearsSet.add(new Date(v.visitedAt).getFullYear()));
   myInteractions.forEach((i) => yearsSet.add(new Date(i.updatedAt).getFullYear()));
   myContributed.forEach((p) => yearsSet.add(new Date(p.createdAt).getFullYear()));
   const availableYears = Array.from(yearsSet).sort((a, b) => b - a);
 
-  const yearVisits = myVisits.filter(
-    (v) => new Date(v.visitedAt).getFullYear() === targetYear
-  );
   const yearInteractionsVisited = myInteractions.filter(
     (i) =>
       i.personalStatus === "visited" &&
       new Date(i.updatedAt).getFullYear() === targetYear
   );
   const yearPlaceIds = Array.from(
-    new Set([
-      ...yearVisits.map((v) => v.placeId),
-      ...yearInteractionsVisited.map((i) => i.placeId),
-    ])
+    new Set(yearInteractionsVisited.map((i) => i.placeId))
   );
 
   const yearPlacesAdded = myContributed.filter(
@@ -266,7 +254,6 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
     favoritesCount,
     contributedPlacesCount: myContributed.length,
     commentsCount: myComments.length,
-    totalVisitsCount: myVisits.length,
     averageRating,
     topCities: topEntries(cityCounts, 6),
     topOccasions,
@@ -275,7 +262,6 @@ export async function getUserStatsAction(selectedYear?: number): Promise<UserSta
     wrapped: {
       year: targetYear,
       availableYears,
-      visitsCount: yearVisits.length,
       uniquePlacesVisited: yearPlaceIds.length,
       favoritesCount: yearFavoritesCount,
       placesAdded: yearPlacesAdded,
@@ -310,7 +296,6 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     allPlaces,
     allUserPlaces,
     allComments,
-    allVisits,
     allOccasions,
     allTags,
     allPlaceOccs,
@@ -321,7 +306,6 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     db.select().from(places),
     db.select().from(userPlaces),
     db.select().from(placeComments),
-    db.select().from(placeVisits),
     db.select().from(occasions),
     db.select().from(tags),
     db.select().from(placeOccasions),
@@ -338,11 +322,13 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
   const communityPlaceIds = new Set(communityPlacesList.map((p) => p.id));
   const privatePlaces = allPlaces.length - communityPlacesList.length;
 
+  const visitedMarks = allUserPlaces.filter((up) => up.personalStatus === "visited");
+
   // Actividad últimos 30 días
   const last30Days = {
     places: allPlaces.filter((p) => new Date(p.createdAt) >= since30d).length,
     comments: allComments.filter((c) => new Date(c.createdAt) >= since30d).length,
-    visits: allVisits.filter((v) => new Date(v.createdAt) >= since30d).length,
+    visits: visitedMarks.filter((up) => new Date(up.updatedAt) >= since30d).length,
     users: allUsers.filter((u) => new Date(u.createdAt) >= since30d).length,
   };
 
@@ -462,7 +448,7 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     communityPlaces: communityPlacesList.length,
     privatePlaces,
     totalComments: allComments.length,
-    totalVisits: allVisits.length,
+    totalVisits: visitedMarks.length,
     totalGroups: allGroups.length,
     totalOccasions: allOccasions.length,
     totalTags: allTags.length,

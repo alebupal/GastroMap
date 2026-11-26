@@ -241,3 +241,19 @@ test("Micro-interacciones instantáneas, code-splitting de modales y React.memo"
   assert.ok(explorerSrc.includes("useDeferredValue(textSearch)"));
   assert.ok(headerSrc.includes('import dynamic from "next/dynamic"'));
 });
+
+test("Limpieza de funcionalidad obsoleta place_visits: eliminada de esquema, código y modales", () => {
+  const schemaSrc = fs.readFileSync(path.join(root, "src/db/schema.ts"), "utf8");
+  assert.equal(schemaSrc.includes("placeVisits"), false, "schema.ts no debe declarar placeVisits");
+  assert.equal(schemaSrc.includes("place_visits"), false, "schema.ts no debe declarar place_visits");
+  assert.equal(
+    fs.existsSync(path.join(root, "src/lib/actions/visits.ts")),
+    false,
+    "visits.ts debe estar eliminado"
+  );
+  assert.equal(
+    fs.existsSync(path.join(root, "src/components/places/PlaceVisitsModal.tsx")),
+    false,
+    "PlaceVisitsModal.tsx debe estar eliminado"
+  );
+});

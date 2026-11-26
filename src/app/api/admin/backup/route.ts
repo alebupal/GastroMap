@@ -170,7 +170,6 @@ export async function POST(request: NextRequest) {
     "place_group_access",
     "place_user_access",
     "saved_filters",
-    "place_visits",
     "audit_logs",
   ];
 
