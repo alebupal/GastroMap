@@ -384,9 +384,9 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
                                   {t("groups.owner_badge")}
                                 </span>
-                              ) : g.isAdmin ? (
+                                ) : g.isAdmin ? (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300">
-                                  Admin
+                                  {t("spaces.group_admin_badge")}
                                 </span>
                               ) : null}
                             </div>
@@ -459,14 +459,18 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-[11px] text-slate-700 dark:text-slate-300 font-semibold"
                           >
                             <span>@{m.username || m.name}</span>
-                            {m.userId === g.ownerUserId && (
+                            {m.userId === g.ownerUserId ? (
                               <span
-                                className="text-[10px] text-amber-500 font-bold"
+                                className="px-1.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-[9px] text-orange-700 dark:text-orange-300 font-extrabold uppercase"
                                 title={t("groups.owner_star")}
                               >
-                                ★
+                                {t("groups.owner_badge")}
                               </span>
-                            )}
+                            ) : m.role === "admin" ? (
+                              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-[9px] text-amber-800 dark:text-amber-300 font-extrabold uppercase">
+                                {t("spaces.group_admin_badge")}
+                              </span>
+                            ) : null}
                             {g.isOwner && m.userId !== g.ownerUserId && (
                               <button
                                 type="button"

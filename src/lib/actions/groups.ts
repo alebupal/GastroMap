@@ -362,12 +362,15 @@ export async function renameGroupAction(
 }
 
 /**
- * Cambia el rol ('admin' | 'member') de un integrante dentro de un grupo (solo admins del grupo).
+ * Cambia el rol ('owner' | 'admin' | 'member') de un integrante dentro de un grupo.
+ * - Los Admins de grupo pueden alternar 'admin' <-> 'member' en miembros que no sean el creador.
+ * - El Creador o el Superadmin pueden transferir 'owner'.
+ * - El Superadmin puede cambiar el rol de TODOS los miembros del grupo (incluido el creador).
  */
 export async function setGroupMemberRoleAction(
   groupId: string,
   targetUserId: string,
-  newRole: "admin" | "member"
+  newRole: "owner" | "admin" | "member"
 ): Promise<{ success?: boolean; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "No autenticado." };
@@ -380,24 +383,84 @@ export async function setGroupMemberRoleAction(
 
   if (!group) return { error: "Grupo no encontrado." };
 
+  const isSuperAdmin = currentUser.role === "admin";
   const membership = await getGroupMembership(currentUser.id, groupId);
-  if (!membership.isGroupAdmin && currentUser.role !== "admin") {
+  if (!membership.isGroupAdmin && !isSuperAdmin) {
     return { error: "Solo los administradores del grupo pueden gestionar roles." };
   }
 
+  // Caso 1: Transferir rol de Creador / Propietario del grupo
+  if (newRole === "owner") {
+    if (!isSuperAdmin && group.ownerUserId !== currentUser.id) {
+      return { error: "Solo el creador del grupo o un superadministrador puede asignar otro creador." };
+    }
+    await db
+      .update(sharingGroups)
+      .set({ ownerUserId: targetUserId, updatedAt: new Date() })
+      .where(eq(sharingGroups.id, groupId));
+
+    await db
+      .insert(sharingGroupMembers)
+      .values({ groupId, userId: targetUserId, role: "admin" })
+      .onConflictDoUpdate({
+        target: [sharingGroupMembers.groupId, sharingGroupMembers.userId],
+        set: { role: "admin" },
+      });
+
+    await logAudit({
+      actorUserId: currentUser.id,
+      entityType: "group",
+      entityId: groupId,
+      action: "group_member_role_changed",
+      metadata: { targetUserId, newRole: "owner" },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/group-admin");
+    revalidatePath("/admin");
+    return { success: true };
+  }
+
+  // Caso 2: Modificar rol del actual creador del grupo
   if (targetUserId === group.ownerUserId && newRole !== "admin") {
-    return { error: "El creador del grupo siempre conserva permisos de administrador." };
+    if (!isSuperAdmin) {
+      return { error: "Solo un superadministrador puede rebajar el rol del creador del grupo." };
+    }
+    // Buscar otro admin del grupo para heredar la propiedad técnica, o asignarla al superadmin actual
+    const otherAdmins = await db
+      .select({ userId: sharingGroupMembers.userId })
+      .from(sharingGroupMembers)
+      .where(
+        and(
+          eq(sharingGroupMembers.groupId, groupId),
+          eq(sharingGroupMembers.role, "admin"),
+          ne(sharingGroupMembers.userId, targetUserId)
+        )
+      )
+      .limit(1);
+
+    const fallbackOwnerId = otherAdmins[0]?.userId || currentUser.id;
+    await db
+      .insert(sharingGroupMembers)
+      .values({ groupId, userId: fallbackOwnerId, role: "admin" })
+      .onConflictDoUpdate({
+        target: [sharingGroupMembers.groupId, sharingGroupMembers.userId],
+        set: { role: "admin" },
+      });
+
+    await db
+      .update(sharingGroups)
+      .set({ ownerUserId: fallbackOwnerId, updatedAt: new Date() })
+      .where(eq(sharingGroups.id, groupId));
   }
 
   await db
-    .update(sharingGroupMembers)
-    .set({ role: newRole })
-    .where(
-      and(
-        eq(sharingGroupMembers.groupId, groupId),
-        eq(sharingGroupMembers.userId, targetUserId)
-      )
-    );
+    .insert(sharingGroupMembers)
+    .values({ groupId, userId: targetUserId, role: newRole })
+    .onConflictDoUpdate({
+      target: [sharingGroupMembers.groupId, sharingGroupMembers.userId],
+      set: { role: newRole },
+    });
 
   await logAudit({
     actorUserId: currentUser.id,
@@ -408,6 +471,8 @@ export async function setGroupMemberRoleAction(
   });
 
   revalidatePath("/");
+  revalidatePath("/group-admin");
+  revalidatePath("/admin");
   return { success: true };
 }
 

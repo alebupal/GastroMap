@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { impersonateUserAction } from "@/lib/actions/auth";
+import { setGroupMemberRoleAction } from "@/lib/actions/groups";
 import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
@@ -296,7 +297,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const newRole = user.role === "admin" ? "user" : "admin";
     if (
       !confirm(
-        `¿Cambiar el rol de @${user.username || user.name} a ${newRole === "admin" ? "Administrador" : "Usuario"
+        `¿Cambiar el rol global de @${user.username || user.name} a ${
+          newRole === "admin" ? "Superadministrador" : "Usuario"
         }?`
       )
     )
@@ -307,8 +309,28 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const res = await updateUserRoleAction(user.id, newRole);
     if (res.error) {
       setError(res.error);
+      toast(res.error, { kind: "error" });
     } else {
-      setSuccess(`Rol de @${user.username || user.name} actualizado.`);
+      const msg = `Rol global de @${user.username || user.name} actualizado.`;
+      setSuccess(msg);
+      toast(msg, { kind: "success" });
+      loadUsers();
+    }
+  }
+
+  async function handleChangeUserGroupRole(
+    userId: string,
+    groupId: string,
+    newRole: "owner" | "admin" | "member"
+  ) {
+    setError(null);
+    setSuccess(null);
+    const res = await setGroupMemberRoleAction(groupId, userId, newRole);
+    if (res.error) {
+      setError(res.error);
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.role_updated_toast"), { kind: "success" });
       loadUsers();
     }
   }
@@ -532,8 +554,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     onChange={(e) => setAddRole(e.target.value as "user" | "admin")}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
-                    <option value="user">Usuario estándar (puede ver y añadir sitios)</option>
-                    <option value="admin">Administrador (acceso total a configuración y gestión)</option>
+                    <option value="user">Usuario estándar (acceso a su mapa personal y sus grupos)</option>
+                    <option value="admin">Superadministrador (acceso global a toda la plataforma)</option>
                   </select>
                 </div>
 
@@ -694,12 +716,13 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                             </span>
                           )}
                           <span
-                            className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap ${u.role === "admin"
-                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                              : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                              }`}
+                            className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold whitespace-nowrap border ${
+                              u.role === "admin"
+                                ? "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30"
+                                : "bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-300/60 dark:border-slate-600"
+                            }`}
                           >
-                            {u.role.toUpperCase()}
+                            {u.role === "admin" ? "SUPERADMIN" : t("admin_users.role_user").toUpperCase()}
                           </span>
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                             {u.locale === "en" ? "🇬🇧 EN" : "🇪🇸 ES"}
@@ -713,6 +736,49 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           {u.name} • {u.email}
                         </div>
+
+                        {/* Chapitas y selector rápido de rol en cada grupo al que pertenece */}
+                        {u.groups && u.groups.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                            {u.groups.map((gm) => (
+                              <span
+                                key={gm.groupId}
+                                className={`inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[10px] font-bold border ${
+                                  gm.role === "owner"
+                                    ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-800 dark:text-orange-200"
+                                    : gm.role === "admin"
+                                      ? "bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+                                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                                }`}
+                              >
+                                <span>{gm.groupIcon}</span>
+                                <span className="truncate max-w-[110px]">{gm.groupName}:</span>
+                                <select
+                                  value={gm.role}
+                                  onChange={(e) =>
+                                    handleChangeUserGroupRole(
+                                      u.id,
+                                      gm.groupId,
+                                      e.target.value as "owner" | "admin" | "member"
+                                    )
+                                  }
+                                  aria-label={`${gm.groupName} role`}
+                                  className="bg-transparent font-extrabold focus:outline-none cursor-pointer pr-0.5"
+                                >
+                                  <option value="member" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                                    {t("group_admin.member_badge")}
+                                  </option>
+                                  <option value="admin" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                                    {t("spaces.group_admin_badge")}
+                                  </option>
+                                  <option value="owner" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                                    {t("group_admin.owner_badge")}
+                                  </option>
+                                </select>
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -737,12 +803,15 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                       <button
                         type="button"
                         onClick={() => handleToggleRole(u)}
-                        disabled={isMe}
-                        className={`px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition ${isMe
-                          ? "opacity-40 cursor-not-allowed text-slate-500"
-                          : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
-                          }`}
-                        title={isMe ? t("admin_users.role") : t("admin_users.role")}
+                        disabled={isMe && usersList.filter((x) => x.role === "admin").length <= 1}
+                        className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition ${
+                          isMe && usersList.filter((x) => x.role === "admin").length <= 1
+                            ? "opacity-40 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
+                            : u.role === "admin"
+                              ? "border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              : "border-violet-300 dark:border-violet-800 bg-violet-50/70 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/50 text-violet-700 dark:text-violet-300 cursor-pointer"
+                        }`}
+                        title={t("admin_users.role")}
                       >
                         {u.role === "admin" ? t("admin_users.make_user") : t("admin_users.make_admin")}
                       </button>
@@ -946,7 +1015,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <select
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value as "user" | "admin")}
-                    disabled={editingUser.id === currentUserId}
+                    disabled={
+                      editingUser.id === currentUserId &&
+                      usersList.filter((x) => x.role === "admin").length <= 1
+                    }
                     className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="user">{t("admin_users.role_user_option")}</option>
