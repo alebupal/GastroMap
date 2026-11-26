@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import argon2 from "argon2";
@@ -33,16 +34,24 @@ export async function verifyPassword(hash: string, password: string): Promise<bo
   }
 }
 
+let migrationsOncePromise: Promise<void> | null = null;
+
+function ensureMigrationsOnce(): Promise<void> {
+  if (!migrationsOncePromise) {
+    migrationsOncePromise = runMigrations().catch((err) => {
+      migrationsOncePromise = null;
+      console.error("[Auth] No se pudieron aplicar migraciones automáticas:", err);
+    });
+  }
+  return migrationsOncePromise;
+}
+
 /**
  * Cuenta cuántos usuarios existen en el sistema.
  * Útil para determinar si la aplicación está en modo de inicialización inicial (/setup).
  */
 export async function countUsers(): Promise<number> {
-  try {
-    await runMigrations();
-  } catch (err) {
-    console.error("[Auth] No se pudieron aplicar migraciones automáticas:", err);
-  }
+  await ensureMigrationsOnce();
 
   try {
     const result = await db
@@ -227,12 +236,13 @@ export async function getImpersonationState(): Promise<{
 
 /**
  * Obtiene el usuario autenticado actual desde las cookies en Server Components / Server Actions.
+ * Deduplicado por petición HTTP mediante React.cache().
  */
-export async function getCurrentUser(): Promise<User | null> {
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!sessionId) return null;
 
   const authData = await validateSessionToken(sessionId);
   return authData ? authData.user : null;
-}
+});

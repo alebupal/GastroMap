@@ -632,46 +632,49 @@ export function PlaceCard({
         </div>
       </div>
 
-      {/* Modal de comentarios y notas estilo Stitch */}
-      <PlaceCommentsThread
-        placeId={place.id}
-        placeName={place.name}
-        placeCity={place.city}
-        placeAddress={place.address}
-        privateNotes={privateNotes}
-        personalRating={rating}
-        currentUserId={currentUserId}
-        isAdmin={isAdmin}
-        isOpen={showComments}
-        onClose={() => setShowComments(false)}
-        onCommentsCountChange={(count) => setCommentsCount(count)}
-        onPrivateNotesSaved={(newNotes) => setPrivateNotes(newNotes)}
-        onOpenPrivateNotesModal={() => setShowNotesModal(true)}
-      />
+      {/* Modales montados bajo demanda solo cuando están abiertos (evita 80 instancias inactivas en lista) */}
+      {showComments && (
+        <PlaceCommentsThread
+          placeId={place.id}
+          placeName={place.name}
+          placeCity={place.city}
+          placeAddress={place.address}
+          privateNotes={privateNotes}
+          personalRating={rating}
+          currentUserId={currentUserId}
+          isAdmin={isAdmin}
+          isOpen={showComments}
+          onClose={() => setShowComments(false)}
+          onCommentsCountChange={(count) => setCommentsCount(count)}
+          onPrivateNotesSaved={(newNotes) => setPrivateNotes(newNotes)}
+          onOpenPrivateNotesModal={() => setShowNotesModal(true)}
+        />
+      )}
 
-      {/* Modal de valoración privada */}
-      <PlacePersonalNotesModal
-        placeId={place.id}
-        placeName={place.name}
-        initialRating={rating}
-        initialNotes={privateNotes}
-        isOpen={showNotesModal}
-        onClose={() => setShowNotesModal(false)}
-        onSave={(newRating) => {
-          setRating(newRating);
-        }}
-      />
+      {showNotesModal && (
+        <PlacePersonalNotesModal
+          placeId={place.id}
+          placeName={place.name}
+          initialRating={rating}
+          initialNotes={privateNotes}
+          isOpen={showNotesModal}
+          onClose={() => setShowNotesModal(false)}
+          onSave={(newRating) => {
+            setRating(newRating);
+          }}
+        />
+      )}
 
-      {/* Modal para guardar en listas / guías personales */}
-      <AddToListModal
-        placeId={place.id}
-        placeName={place.name}
-        isOpen={showAddToListModal}
-        onClose={() => setShowAddToListModal(false)}
-      />
+      {showAddToListModal && (
+        <AddToListModal
+          placeId={place.id}
+          placeName={place.name}
+          isOpen={showAddToListModal}
+          onClose={() => setShowAddToListModal(false)}
+        />
+      )}
 
-      {/* Modal de edición completa del establecimiento */}
-      {canEdit && (
+      {canEdit && showEditModal && (
         <EditPlaceModal
           place={place}
           occasionsList={

@@ -181,3 +181,23 @@ test("Guías públicas (/guide/[slug]): solo expone listas públicas y nunca dat
   assert.equal(publicBody.includes("privateNotes"), false);
   assert.equal(publicBody.includes("users.email"), false);
 });
+
+test("Optimizaciones de carga y renderizado: migración singleton, React.cache en getCurrentUser y lazy mount en PlaceCard", () => {
+  const authLib = fs.readFileSync(path.join(root, "src/lib/auth.ts"), "utf8");
+  const cardSrc = fs.readFileSync(
+    path.join(root, "src/components/places/PlaceCard.tsx"),
+    "utf8"
+  );
+  const explorerSrc = fs.readFileSync(
+    path.join(root, "src/components/places/PlacesExplorer.tsx"),
+    "utf8"
+  );
+
+  assert.ok(authLib.includes("migrationsOncePromise"), "runMigrations debe ejecutarse una sola vez por proceso");
+  assert.ok(authLib.includes("export const getCurrentUser = cache("), "getCurrentUser debe deduplicarse con React.cache");
+  assert.ok(cardSrc.includes("{showComments && ("), "PlaceCommentsThread debe montarse bajo demanda");
+  assert.ok(cardSrc.includes("{showNotesModal && ("), "PlacePersonalNotesModal debe montarse bajo demanda");
+  assert.ok(cardSrc.includes("{showAddToListModal && ("), "AddToListModal debe montarse bajo demanda");
+  assert.ok(cardSrc.includes("{canEdit && showEditModal && ("), "EditPlaceModal debe montarse bajo demanda");
+  assert.ok(explorerSrc.includes("const searchIndexMap = useMemo("), "PlacesExplorer debe pre-indexar el texto de búsqueda");
+});

@@ -601,6 +601,34 @@ export function PlacesExplorer({
     }));
   }, [availableTowns]);
 
+  // Pre-indexar texto normalizado una única vez cuando cambia el catálogo (búsqueda O(1) en CPU por tecla)
+  const searchIndexMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of initialPlaces) {
+      map.set(
+        p.id,
+        normalizeSearchText(
+          [
+            p.name,
+            p.city || "",
+            p.address || "",
+            p.notes || "",
+            p.privateNotes || "",
+            p.createdByName || "",
+            p.createdByUsername || "",
+            p.createdByUsername ? `@${p.createdByUsername}` : "",
+            ...p.tags,
+            ...p.occasions,
+            ...(p.commentsTexts || []),
+            ...(p.commentAuthors || []),
+            ...(p.sharedGroupNames || []),
+          ].join(" ")
+        )
+      );
+    }
+    return map;
+  }, [initialPlaces]);
+
   // Filtrado y cálculo de distancias
   const filteredPlaces = useMemo(() => {
     let result = initialPlaces.map((place) => {
@@ -625,28 +653,12 @@ export function PlacesExplorer({
       };
     });
 
-    // 0. Búsqueda por texto libre universal (insensible a mayúsculas y tildes: nombre, ciudad, dirección, notas, notas privadas, tags, ocasiones, autor y comentarios)
+    // 0. Búsqueda por texto libre universal (usando índice precalculado en memoria)
     if (textSearch.trim().length > 0) {
       const q = normalizeSearchText(textSearch);
       const tokens = q.split(/\s+/).filter(Boolean);
       result = result.filter((p) => {
-        const searchableText = normalizeSearchText(
-          [
-            p.name,
-            p.city || "",
-            p.address || "",
-            p.notes || "",
-            p.privateNotes || "",
-            p.createdByName || "",
-            p.createdByUsername || "",
-            p.createdByUsername ? `@${p.createdByUsername}` : "",
-            ...p.tags,
-            ...p.occasions,
-            ...(p.commentsTexts || []),
-            ...(p.commentAuthors || []),
-            ...(p.sharedGroupNames || []),
-          ].join(" ")
-        );
+        const searchableText = searchIndexMap.get(p.id) || "";
 
         return (
           searchableText.includes(q) ||
@@ -831,6 +843,7 @@ export function PlacesExplorer({
     return result;
   }, [
     initialPlaces,
+    searchIndexMap,
     textSearch,
     selectedOccasions,
     selectedTags,

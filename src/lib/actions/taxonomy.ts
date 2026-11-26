@@ -24,49 +24,38 @@ const INITIAL_OCCASIONS: Array<{ id: string; name: string; icon: string }> = [
  * Auto-sincroniza cualquier ocasión que esté asignada en place_occasions pero aún no en la tabla occasions.
  */
 export async function getOccasions(): Promise<Array<Occasion & { placesCount: number }>> {
-  // Solo sincronizar ocasiones que realmente tengan establecimientos existentes asociados
-  const usedOccasions = await db
-    .selectDistinct({ occasion: sql<string>`lower(trim(${placeOccasions.occasion}))` })
-    .from(placeOccasions)
-    .innerJoin(places, eq(placeOccasions.placeId, places.id));
+  const [initialList, counts] = await Promise.all([
+    db.select().from(occasions).orderBy(occasions.createdAt),
+    db
+      .select({
+        occasion: sql<string>`lower(trim(${placeOccasions.occasion}))`,
+        count: sql<number>`cast(count(distinct ${places.id}) as integer)`,
+      })
+      .from(placeOccasions)
+      .innerJoin(places, eq(placeOccasions.placeId, places.id))
+      .groupBy(sql`lower(trim(${placeOccasions.occasion}))`),
+  ]);
 
-  if (usedOccasions.length > 0) {
-    const existingList = await db.select({ id: occasions.id }).from(occasions);
-    const existingIds = new Set(existingList.map((o) => o.id.toLowerCase().trim()));
-    const missing = usedOccasions
-      .map((u) => u.occasion.trim().toLowerCase())
-      .filter((occ) => occ && !existingIds.has(occ));
+  const existingIds = new Set(initialList.map((o) => o.id.toLowerCase().trim()));
+  const missing = counts
+    .map((c) => c.occasion.trim().toLowerCase())
+    .filter((occ) => occ && !existingIds.has(occ));
 
-    if (missing.length > 0) {
-      await db
-        .insert(occasions)
-        .values(
-          missing.map((occId) => {
-            const known = KNOWN_OCCASIONS[occId];
-            return {
-              id: occId,
-              name: known
-                ? known.name
-                : occId.charAt(0).toUpperCase() + occId.slice(1).replace(/[-_]/g, " "),
-              icon: known ? known.icon : "🍽️",
-            };
-          })
-        )
-        .onConflictDoNothing();
-    }
+  let list = initialList;
+  if (missing.length > 0) {
+    const newItems = missing.map((occId) => {
+      const known = KNOWN_OCCASIONS[occId];
+      return {
+        id: occId,
+        name: known
+          ? known.name
+          : occId.charAt(0).toUpperCase() + occId.slice(1).replace(/[-_]/g, " "),
+        icon: known ? known.icon : "🍽️",
+      };
+    });
+    await db.insert(occasions).values(newItems).onConflictDoNothing();
+    list = await db.select().from(occasions).orderBy(occasions.createdAt);
   }
-
-  const list = await db.select().from(occasions).orderBy(occasions.createdAt);
-
-  // Contar sitios asociados a cada ocasión uniendo con places para exactitud
-  const counts = await db
-    .select({
-      occasion: sql<string>`lower(trim(${placeOccasions.occasion}))`,
-      count: sql<number>`cast(count(distinct ${places.id}) as integer)`,
-    })
-    .from(placeOccasions)
-    .innerJoin(places, eq(placeOccasions.placeId, places.id))
-    .groupBy(sql`lower(trim(${placeOccasions.occasion}))`);
 
   const countMap = new Map(counts.map((c) => [c.occasion, c.count]));
 
@@ -80,15 +69,16 @@ export async function getOccasions(): Promise<Array<Occasion & { placesCount: nu
  * Obtiene todas las etiquetas del catálogo junto con el conteo de sitios asociados.
  */
 export async function getTagsWithCount(): Promise<Array<{ id: string; name: string; placesCount: number }>> {
-  const allTags = await db.select().from(tags).orderBy(tags.name);
-
-  const counts = await db
-    .select({
-      tag: placeTags.tag,
-      count: sql<number>`cast(count(*) as integer)`,
-    })
-    .from(placeTags)
-    .groupBy(placeTags.tag);
+  const [allTags, counts] = await Promise.all([
+    db.select().from(tags).orderBy(tags.name),
+    db
+      .select({
+        tag: placeTags.tag,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(placeTags)
+      .groupBy(placeTags.tag),
+  ]);
 
   const countMap = new Map(counts.map((c) => [c.tag, c.count]));
 
