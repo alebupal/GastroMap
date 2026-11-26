@@ -452,6 +452,50 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 </div>
               </div>
 
+              {/* Franja de progreso de exploración */}
+              {stats.totalAvailablePlaces > 0 && (
+                <div className="p-3.5 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-indigo-600 dark:text-indigo-400 leading-none">
+                        explore
+                      </span>
+                      <span>{t("stats.exploration_progress")}</span>
+                    </span>
+                    <div className="flex items-center gap-2 font-bold">
+                      <span className="text-emerald-700 dark:text-emerald-400">
+                        {t("stats.visited_pct", {
+                          pct: Math.round((stats.visitedCount / stats.totalAvailablePlaces) * 100),
+                          visited: stats.visitedCount,
+                          total: stats.totalAvailablePlaces,
+                        })}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-dashed border-indigo-300 dark:border-indigo-700/80 text-[10px]">
+                        {t("stats.unexplored_count", { count: stats.unexploredCount })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-200/80 dark:bg-slate-700/70 overflow-hidden flex">
+                    {stats.visitedCount > 0 && (
+                      <div
+                        className="h-full bg-emerald-600 transition-all"
+                        style={{
+                          width: `${Math.round((stats.visitedCount / stats.totalAvailablePlaces) * 100)}%`,
+                        }}
+                      />
+                    )}
+                    {stats.pendingCount > 0 && (
+                      <div
+                        className="h-full bg-amber-400 transition-all"
+                        style={{
+                          width: `${Math.round((stats.pendingCount / stats.totalAvailablePlaces) * 100)}%`,
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Franja resumen secundaria */}
               <div className="px-4 py-3 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 flex items-center justify-around flex-wrap gap-3 text-xs">
                 <div className="flex items-center gap-1.5">
@@ -523,7 +567,7 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                           </div>
                         </div>
                         <div className="text-right text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
-                          <div>{g.placesAdded} 📍</div>
+                          <div>{g.placesAdded} 📍 · {g.visitedCount} ✓</div>
                           <div className="text-[10px] text-slate-400">{g.commentsCount} 💬</div>
                         </div>
                       </button>
@@ -573,6 +617,17 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   topLabelClass="text-orange-700 dark:text-orange-400"
                 />
               </div>
+
+              {stats.topCountries.length > 1 && (
+                <MiniBarList
+                  title={t("stats.top_countries")}
+                  icon="public"
+                  items={stats.topCountries}
+                  topBarClass="bg-indigo-600"
+                  restBarClass="bg-indigo-300 dark:bg-indigo-500/40"
+                  topLabelClass="text-indigo-700 dark:text-indigo-400"
+                />
+              )}
             </>
           ) : (
             /* Pestaña Wrapped Anual estilo Stitch */

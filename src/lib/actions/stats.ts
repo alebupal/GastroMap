@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, gte, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   users,
@@ -13,10 +13,13 @@ import {
   tags,
   sharingGroups,
   sharingGroupMembers,
+  groupJoinRequests,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getGroupMembership } from "@/lib/workspace";
 import { isPublicRegistrationEnabled } from "@/lib/actions/settings";
+import { getGlobalApiUsageSummary } from "@/lib/places-api";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 
 export interface CountItem {
   label: string;
@@ -41,11 +44,14 @@ export interface UserWrappedData {
 export interface UserStatsData {
   visitedCount: number;
   pendingCount: number;
+  unexploredCount: number;
+  totalAvailablePlaces: number;
   favoritesCount: number;
   contributedPlacesCount: number;
   commentsCount: number;
   averageRating: number | null;
   topCities: CountItem[];
+  topCountries: CountItem[];
   topOccasions: CountItem[];
   topTags: CountItem[];
   priceDistribution: CountItem[];
@@ -57,6 +63,7 @@ export interface UserStatsData {
     role: "owner" | "admin" | "member";
     placesAdded: number;
     commentsCount: number;
+    visitedCount: number;
   }>;
   wrapped: UserWrappedData;
 }
@@ -71,9 +78,17 @@ export interface AdminStatsData {
   totalComments: number;
   totalVisits: number;
   totalGroups: number;
+  activeGroupsCount: number;
+  emptyGroupsCount: number;
+  trashPlacesCount: number;
   totalOccasions: number;
   totalTags: number;
   publicRegistrationEnabled: boolean;
+  apiUsage: {
+    projectRequests: number;
+    projectCacheHits: number;
+    globalLimit: number;
+  };
   last30Days: {
     places: number;
     comments: number;
@@ -183,6 +198,9 @@ export async function getUserStatsAction(
       const commentsCount = allMyComments.filter(
         (c) => rawPlaceById.get(c.placeId)?.groupId === g.groupId
       ).length;
+      const groupVisitedCount = allMyInteractions.filter(
+        (i) => i.personalStatus === "visited" && rawPlaceById.get(i.placeId)?.groupId === g.groupId
+      ).length;
       const role: "owner" | "admin" | "member" =
         g.ownerUserId === user.id ? "owner" : g.role === "admin" ? "admin" : "member";
       return {
@@ -192,9 +210,33 @@ export async function getUserStatsAction(
         role,
         placesAdded,
         commentsCount,
+        visitedCount: groupVisitedCount,
       };
     })
     .sort((a, b) => b.placesAdded - a.placesAdded || a.name.localeCompare(b.name, "es"));
+
+  const myGroupIds = myMemberGroups.map((g) => g.groupId);
+  const scopeWhere =
+    spaceFilter === "personal"
+      ? and(isNull(places.groupId), eq(places.createdById, user.id), isNull(places.deletedAt))
+      : spaceFilter !== "all"
+        ? myGroupIds.includes(spaceFilter)
+          ? and(eq(places.groupId, spaceFilter), isNull(places.deletedAt))
+          : null
+        : myGroupIds.length > 0
+          ? and(
+              or(
+                inArray(places.groupId, myGroupIds),
+                and(isNull(places.groupId), eq(places.createdById, user.id))
+              ),
+              isNull(places.deletedAt)
+            )
+          : and(isNull(places.groupId), eq(places.createdById, user.id), isNull(places.deletedAt));
+
+  const scopePlacesRows = scopeWhere
+    ? await db.select({ id: places.id }).from(places).where(scopeWhere)
+    : [];
+  const totalAvailablePlaces = scopePlacesRows.length;
 
   const availableSpaces = myMemberGroups
     .map((g) => ({ id: g.groupId, name: g.name, icon: g.icon || "🍻" }))
@@ -215,6 +257,7 @@ export async function getUserStatsAction(
 
   const visitedCount = myInteractions.filter((i) => i.personalStatus === "visited").length;
   const pendingCount = myInteractions.filter((i) => i.personalStatus === "pending").length;
+  const unexploredCount = Math.max(0, totalAvailablePlaces - visitedCount - pendingCount);
   const favoritesCount = myInteractions.filter((i) => i.favorite).length;
 
   const ratings = myInteractions
@@ -227,20 +270,24 @@ export async function getUserStatsAction(
 
   const placeById = new Map(relevantPlaces.map((p) => [p.id, p]));
 
-  // Distribuciones personales
+  // Distribuciones personales (filtradas estrictamente por allowedPlaceIds)
   const cityCounts = new Map<string, number>();
+  const countryCounts = new Map<string, number>();
   const priceCounts = new Map<string, number>();
   const occCounts = new Map<string, number>();
   const tagCounts = new Map<string, number>();
 
   for (const p of relevantPlaces) {
     if (p.city) cityCounts.set(p.city, (cityCounts.get(p.city) || 0) + 1);
+    if (p.country) countryCounts.set(p.country, (countryCounts.get(p.country) || 0) + 1);
     priceCounts.set(p.priceRange, (priceCounts.get(p.priceRange) || 0) + 1);
   }
   for (const po of relevantOccs) {
+    if (!allowedPlaceIds.has(po.placeId)) continue;
     occCounts.set(po.occasion, (occCounts.get(po.occasion) || 0) + 1);
   }
   for (const pt of relevantTags) {
+    if (!allowedPlaceIds.has(pt.placeId)) continue;
     tagCounts.set(pt.tag, (tagCounts.get(pt.tag) || 0) + 1);
   }
 
@@ -320,7 +367,7 @@ export async function getUserStatsAction(
   const bestTagEntry = Array.from(yearTagMap.entries()).sort((a, b) => b[1] - a[1])[0];
 
   const yearFavoritesCount = myInteractions.filter(
-    (i) => i.favorite && (new Date(i.updatedAt).getFullYear() === targetYear || targetYear === new Date().getFullYear())
+    (i) => i.favorite && new Date(i.updatedAt).getFullYear() === targetYear
   ).length;
   const yearRatingsCount = myInteractions.filter(
     (i) => i.rating !== null && new Date(i.updatedAt).getFullYear() === targetYear
@@ -329,11 +376,14 @@ export async function getUserStatsAction(
   return {
     visitedCount,
     pendingCount,
+    unexploredCount,
+    totalAvailablePlaces,
     favoritesCount,
     contributedPlacesCount: myContributed.length,
     commentsCount: myComments.length,
     averageRating,
     topCities: topEntries(cityCounts, 6),
+    topCountries: topEntries(countryCounts, 6),
     topOccasions,
     topTags: topEntries(tagCounts, 8),
     priceDistribution,
@@ -383,6 +433,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     allGroups,
     allGroupMembers,
     publicRegistrationEnabled,
+    deletedPlacesRows,
+    globalApiUsage,
   ] = await Promise.all([
     db
       .select({
@@ -436,6 +488,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
       .from(sharingGroups),
     db.select({ groupId: sharingGroupMembers.groupId }).from(sharingGroupMembers),
     isPublicRegistrationEnabled(),
+    db.select({ id: places.id }).from(places).where(isNotNull(places.deletedAt)),
+    getGlobalApiUsageSummary(),
   ]);
 
   const occMap = new Map(allOccasions.map((o) => [o.id, { name: o.name, icon: o.icon }]));
@@ -443,7 +497,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
   const activeUsers = allUsers.filter((u) => u.status !== "disabled").length;
   const disabledUsers = allUsers.length - activeUsers;
 
-  const communityPlacesList = allPlaces.filter((p) => p.communityPublished);
+  // En v0.2.0 la separación real es Sitios en Grupos (groupId !== null) vs Mapas Personales (groupId === null)
+  const communityPlacesList = allPlaces.filter((p) => p.groupId !== null);
   const communityPlaceIds = new Set(communityPlacesList.map((p) => p.id));
   const privatePlaces = allPlaces.length - communityPlacesList.length;
 
@@ -592,6 +647,9 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     .sort((a, b) => b.placesCount * 3 + b.membersCount - (a.placesCount * 3 + a.membersCount))
     .slice(0, 6);
 
+  const activeGroupsCount = allGroups.filter((g) => (placesByGroup.get(g.id) || 0) > 0).length;
+  const emptyGroupsCount = Math.max(0, allGroups.length - activeGroupsCount);
+
   return {
     totalUsers: allUsers.length,
     activeUsers,
@@ -602,9 +660,17 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     totalComments: allComments.length,
     totalVisits: visitedMarks.length,
     totalGroups: allGroups.length,
+    activeGroupsCount,
+    emptyGroupsCount,
+    trashPlacesCount: deletedPlacesRows.length,
     totalOccasions: allOccasions.length,
     totalTags: allTags.length,
     publicRegistrationEnabled,
+    apiUsage: {
+      projectRequests: globalApiUsage.projectRequests,
+      projectCacheHits: globalApiUsage.projectCacheHits,
+      globalLimit: globalApiUsage.globalLimit,
+    },
     last30Days,
     topGroups,
     topContributors,
@@ -641,6 +707,20 @@ export interface GroupStatsData {
     avgRating: number | null;
   }>;
   topCities: CountItem[];
+  topOccasions: CountItem[];
+  topTags: CountItem[];
+  priceDistribution: CountItem[];
+  last30Days: {
+    places: number;
+    comments: number;
+    visits: number;
+  };
+  health: {
+    invalidLinks: number;
+    missingCoords: number;
+    pendingRequests: number;
+    trashCount: number;
+  };
 }
 
 /**
@@ -653,30 +733,46 @@ export async function getGroupStatsAction(groupId: string): Promise<GroupStatsDa
   const membership = await getGroupMembership(currentUser.id, groupId);
   if (!membership.isMember && currentUser.role !== "admin") return null;
 
-  const [[group], groupMembers, groupPlaces] = await Promise.all([
-    db.select().from(sharingGroups).where(eq(sharingGroups.id, groupId)).limit(1),
-    db
-      .select({
-        userId: users.id,
-        name: users.name,
-        username: users.username,
-      })
-      .from(sharingGroupMembers)
-      .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
-      .where(eq(sharingGroupMembers.groupId, groupId)),
-    db.select().from(places).where(and(eq(places.groupId, groupId), isNull(places.deletedAt))),
-  ]);
+  const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const [[group], groupMembers, groupPlaces, groupOccasions, pendingReqRows, trashRows] =
+    await Promise.all([
+      db.select().from(sharingGroups).where(eq(sharingGroups.id, groupId)).limit(1),
+      db
+        .select({
+          userId: users.id,
+          name: users.name,
+          username: users.username,
+        })
+        .from(sharingGroupMembers)
+        .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
+        .where(eq(sharingGroupMembers.groupId, groupId)),
+      db.select().from(places).where(and(eq(places.groupId, groupId), isNull(places.deletedAt))),
+      db.select({ id: occasions.id, name: occasions.name, icon: occasions.icon }).from(occasions),
+      db
+        .select({ id: groupJoinRequests.id })
+        .from(groupJoinRequests)
+        .where(and(eq(groupJoinRequests.groupId, groupId), eq(groupJoinRequests.status, "pending"))),
+      db
+        .select({ id: places.id })
+        .from(places)
+        .where(and(eq(places.groupId, groupId), isNotNull(places.deletedAt))),
+    ]);
 
   if (!group) return null;
 
+  const occMap = new Map(groupOccasions.map((o) => [o.id, { name: o.name, icon: o.icon }]));
+
   const placeIds = groupPlaces.map((p) => p.id);
-  const [groupUserPlaces, groupComments] =
+  const [groupUserPlaces, groupComments, groupPlaceOccs, groupPlaceTags] =
     placeIds.length > 0
       ? await Promise.all([
           db.select().from(userPlaces).where(inArray(userPlaces.placeId, placeIds)),
           db.select().from(placeComments).where(inArray(placeComments.placeId, placeIds)),
+          db.select().from(placeOccasions).where(inArray(placeOccasions.placeId, placeIds)),
+          db.select().from(placeTags).where(inArray(placeTags.placeId, placeIds)),
         ])
-      : [[], []];
+      : [[], [], [], []];
 
   const placesByUser = new Map<string, number>();
   const commentsByUser = new Map<string, number>();
@@ -747,9 +843,45 @@ export async function getGroupStatsAction(groupId: string): Promise<GroupStatsDa
     .slice(0, 6);
 
   const cityCounts = new Map<string, number>();
+  const priceCounts = new Map<string, number>();
+  const occCounts = new Map<string, number>();
+  const tagCounts = new Map<string, number>();
+
+  let invalidLinks = 0;
+  let missingCoords = 0;
   for (const p of groupPlaces) {
     if (p.city) cityCounts.set(p.city, (cityCounts.get(p.city) || 0) + 1);
+    priceCounts.set(p.priceRange, (priceCounts.get(p.priceRange) || 0) + 1);
+    if (p.googleMapsUrl && !isValidGoogleMapsUrl(p.googleMapsUrl)) invalidLinks++;
+    if (p.latitude === null || p.longitude === null) missingCoords++;
   }
+  for (const po of groupPlaceOccs) {
+    occCounts.set(po.occasion, (occCounts.get(po.occasion) || 0) + 1);
+  }
+  for (const pt of groupPlaceTags) {
+    tagCounts.set(pt.tag, (tagCounts.get(pt.tag) || 0) + 1);
+  }
+
+  const topOccasions: CountItem[] = Array.from(occCounts.entries())
+    .map(([id, count]) => ({
+      label: occMap.get(id)?.name || id,
+      icon: occMap.get(id)?.icon || "🍽️",
+      count,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
+
+  const priceOrder = ["€", "€€", "€€€", "€€€€", "???"];
+  const priceDistribution: CountItem[] = priceOrder
+    .map((p) => ({ label: p, count: priceCounts.get(p) || 0 }))
+    .filter((i) => i.count > 0);
+
+  const visitedMarks = groupUserPlaces.filter((u) => u.personalStatus === "visited");
+  const last30Days = {
+    places: groupPlaces.filter((p) => new Date(p.createdAt) >= since30d).length,
+    comments: groupComments.filter((c) => new Date(c.createdAt) >= since30d).length,
+    visits: visitedMarks.filter((u) => new Date(u.updatedAt) >= since30d).length,
+  };
 
   return {
     groupId: group.id,
@@ -757,9 +889,19 @@ export async function getGroupStatsAction(groupId: string): Promise<GroupStatsDa
     membersCount: Math.max(1, groupMembers.length),
     placesCount: groupPlaces.length,
     commentsCount: groupComments.length,
-    visitedMarksCount: groupUserPlaces.filter((u) => u.personalStatus === "visited").length,
+    visitedMarksCount: visitedMarks.length,
     topContributors,
     topPopularPlaces,
     topCities: topEntries(cityCounts, 6),
+    topOccasions,
+    topTags: topEntries(tagCounts, 8),
+    priceDistribution,
+    last30Days,
+    health: {
+      invalidLinks,
+      missingCoords,
+      pendingRequests: pendingReqRows.length,
+      trashCount: trashRows.length,
+    },
   };
 }

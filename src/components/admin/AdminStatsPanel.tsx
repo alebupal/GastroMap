@@ -225,18 +225,16 @@ export function AdminStatsPanel() {
         <div className="p-4 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
           <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
             <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm text-emerald-600">sell</span>
-              {t("admin_stats.kpi_taxonomy")}
-            </span>
-            <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[9px] font-bold">
-              {stats.totalOccasions + stats.totalTags}
+              <span className="material-symbols-outlined text-sm text-indigo-600">travel_explore</span>
+              {t("admin_stats.kpi_api_usage")}
             </span>
           </div>
           <div className="text-3xl font-black text-slate-900 dark:text-slate-100 mt-2">
-            <AnimatedNumber value={stats.totalOccasions} />/<AnimatedNumber value={stats.totalTags} />
+            <AnimatedNumber value={stats.apiUsage.projectRequests} />
+            <span className="text-sm font-bold text-slate-400">/{stats.apiUsage.globalLimit}</span>
           </div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-            {t("admin_stats.kpi_taxonomy_sub")}
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+            {t("admin_stats.kpi_api_cache", { count: stats.apiUsage.projectCacheHits })}
           </div>
         </div>
 
@@ -251,7 +249,11 @@ export function AdminStatsPanel() {
             <AnimatedNumber value={stats.totalGroups} />
           </div>
           <div className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">
-            {stats.privatePlaces} {t("admin_stats.kpi_places_priv")}
+            {t("admin_stats.kpi_groups_active_sub", {
+              active: stats.activeGroupsCount,
+              empty: stats.emptyGroupsCount,
+              trash: stats.trashPlacesCount,
+            })}
           </div>
         </div>
       </div>

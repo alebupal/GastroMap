@@ -515,6 +515,85 @@ export function GroupAdminDashboard({
                 </div>
               </div>
 
+              {/* Actividad últimos 30 días + Salud del grupo */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                <div className="px-4 py-3.5 rounded-2xl bg-orange-50/80 dark:bg-orange-950/25 border border-orange-200/70 dark:border-orange-900/50 flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-orange-200">
+                    <span className="w-7 h-7 rounded-full bg-orange-600 text-white flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-base leading-none">bolt</span>
+                    </span>
+                    <span>{t("admin_stats.pulse_title")}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-wrap font-bold">
+                    <span className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-300 border border-orange-200/60 dark:border-orange-900/50">
+                      +{stats.last30Days.places} {t("admin_stats.pulse_places")}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-300 border border-slate-200/70 dark:border-slate-800">
+                      +{stats.last30Days.comments} {t("admin_stats.pulse_comments")}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 border border-slate-200/70 dark:border-slate-800">
+                      +{stats.last30Days.visits} {t("admin_stats.pulse_visits")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="px-4 py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-2.5 text-xs">
+                  <span className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-base text-emerald-600 leading-none">
+                      health_and_safety
+                    </span>
+                    <span>{t("admin_stats.group_health_title")}</span>
+                  </span>
+                  {stats.health.invalidLinks === 0 &&
+                  stats.health.missingCoords === 0 &&
+                  stats.health.pendingRequests === 0 &&
+                  stats.health.trashCount === 0 ? (
+                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                      {t("admin_stats.health_all_ok")}
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-1.5 flex-wrap font-bold text-[11px]">
+                      {stats.health.invalidLinks > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => selectTab("places")}
+                          className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/70 dark:border-rose-800 cursor-pointer hover:bg-rose-100 transition"
+                        >
+                          {t("admin_stats.health_invalid_links", { count: stats.health.invalidLinks })}
+                        </button>
+                      )}
+                      {stats.health.missingCoords > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => selectTab("places")}
+                          className="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200/70 dark:border-amber-800 cursor-pointer hover:bg-amber-100 transition"
+                        >
+                          {t("admin_stats.health_missing_coords", { count: stats.health.missingCoords })}
+                        </button>
+                      )}
+                      {stats.health.pendingRequests > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => selectTab("members")}
+                          className="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800 cursor-pointer hover:bg-indigo-100 transition"
+                        >
+                          {t("admin_stats.health_pending_requests", { count: stats.health.pendingRequests })}
+                        </button>
+                      )}
+                      {stats.health.trashCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => selectTab("places")}
+                          className="px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-200 transition"
+                        >
+                          {t("admin_stats.health_trash", { count: stats.health.trashCount })}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
                   <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -571,6 +650,57 @@ export function GroupAdminDashboard({
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Distribuciones del grupo: Ciudades, Planes, Precios y Etiquetas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                {[
+                  { title: t("admin_stats.by_city"), icon: "location_city", items: stats.topCities, prefix: "", color: "bg-orange-600" },
+                  { title: t("admin_stats.by_occasion"), icon: "restaurant_menu", items: stats.topOccasions, prefix: "", color: "bg-amber-500" },
+                  { title: t("admin_stats.by_price"), icon: "payments", items: stats.priceDistribution, prefix: "", color: "bg-emerald-600" },
+                  { title: t("admin_stats.top_tags"), icon: "sell", items: stats.topTags, prefix: "#", color: "bg-orange-600" },
+                ]
+                  .filter((card) => card.items.length > 0)
+                  .map((card) => {
+                    const max = Math.max(...card.items.map((i) => i.count), 1);
+                    return (
+                      <div
+                        key={card.title}
+                        className="p-4 sm:p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-base text-orange-600 dark:text-orange-400">
+                            {card.icon}
+                          </span>
+                          <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            {card.title}
+                          </h4>
+                        </div>
+                        <div className="space-y-2.5">
+                          {card.items.map((item) => (
+                            <div key={item.label} className="space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                  {item.icon ? `${item.icon} ` : ""}
+                                  {card.prefix}
+                                  {item.label}
+                                </span>
+                                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 shrink-0 ml-2">
+                                  {item.count}
+                                </span>
+                              </div>
+                              <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${card.color}`}
+                                  style={{ width: `${Math.max(8, Math.round((item.count / max) * 100))}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           )}
