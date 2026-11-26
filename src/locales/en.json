@@ -661,6 +661,8 @@
   },
   "admin_places": {
     "search_placeholder": "Search by name, address, author or tags...",
+    "all_spaces": "All spaces",
+    "search_space_placeholder": "Search group or space...",
     "all_cities": "All cities",
     "delete_selected": "Delete selected",
     "bulk_backup": "Backup ({count})",

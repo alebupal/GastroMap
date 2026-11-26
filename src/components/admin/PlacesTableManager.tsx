@@ -41,6 +41,7 @@ export function PlacesTableManager({
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [spaceFilter, setSpaceFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
   const [sortField, setSortField] = useState<PlaceSortField>("createdAt");
@@ -64,10 +65,56 @@ export function PlacesTableManager({
   const [mergeSearch, setMergeSearch] = useState<string>("");
   const [editingPlace, setEditingPlace] = useState<PlaceWithDetails | null>(null);
 
-  // Lista única de países y ciudades filtradas
+  // Lista única de espacios/grupos, países y ciudades filtradas
+  const spaceOptions = useMemo(() => {
+    const groupsMap = new Map<string, { name: string; icon: string; count: number }>();
+    let personalCount = 0;
+
+    placesList.forEach((p) => {
+      if (!p.groupId) {
+        personalCount++;
+      } else {
+        const cur = groupsMap.get(p.groupId);
+        if (cur) {
+          cur.count++;
+        } else {
+          groupsMap.set(p.groupId, {
+            name: p.groupName || t("nav.my_groups"),
+            icon: p.groupIcon || "🍻",
+            count: 1,
+          });
+        }
+      }
+    });
+
+    const opts = Array.from(groupsMap.entries())
+      .sort((a, b) => a[1].name.localeCompare(b[1].name, "es", { sensitivity: "base" }))
+      .map(([id, info]) => ({
+        value: id,
+        label: `${info.name} (${info.count})`,
+        icon: info.icon,
+      }));
+
+    if (personalCount > 0) {
+      opts.push({
+        value: "personal",
+        label: `${t("spaces.personal_map")} (${personalCount})`,
+        icon: "🏠",
+      });
+    }
+
+    return opts;
+  }, [placesList, t]);
+
   const { allCountries, availableCities } = useMemo(() => {
     const cSet = new Set<string>();
     placesList.forEach((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return;
+      }
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (effectiveCountry) cSet.add(effectiveCountry);
@@ -76,6 +123,12 @@ export function PlacesTableManager({
 
     const citySet = new Set<string>();
     placesList.forEach((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return;
+      }
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (countryFilter === "all" || effectiveCountry === countryFilter) {
@@ -85,7 +138,7 @@ export function PlacesTableManager({
     const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
 
     return { allCountries: countries, availableCities: cities };
-  }, [placesList, countryFilter]);
+  }, [placesList, spaceFilter, countryFilter]);
 
   const countryOptions = useMemo(() => {
     return allCountries.map((c) => {
@@ -113,6 +166,13 @@ export function PlacesTableManager({
   const filteredPlaces = useMemo(() => {
     const q = normalizeSearchText(searchQuery);
     const filtered = placesList.filter((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return false;
+      }
+
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
 
@@ -190,7 +250,7 @@ export function PlacesTableManager({
         }
       }
     });
-  }, [placesList, searchQuery, countryFilter, cityFilter, sortField, sortDir, t]);
+  }, [placesList, searchQuery, spaceFilter, countryFilter, cityFilter, sortField, sortDir, t]);
 
   // Selección individual
   function toggleSelect(id: string) {
@@ -375,7 +435,32 @@ export function PlacesTableManager({
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-center gap-2">
+          {showSpaceColumn && spaceOptions.length > 0 && (
+            <SearchableSelect
+              value={spaceFilter}
+              onChange={(val) => {
+                setSpaceFilter(val);
+                setCountryFilter("all");
+                setCityFilter("all");
+                setCurrentPage(1);
+              }}
+              options={spaceOptions}
+              allOption={{
+                value: "all",
+                label: `${t("admin_places.all_spaces")} (${spaceOptions.length})`,
+                icon: (
+                  <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                    workspaces
+                  </span>
+                ),
+              }}
+              searchPlaceholder={t("admin_places.search_space_placeholder")}
+              className="w-full sm:w-auto sm:shrink-0"
+              buttonClassName="w-full sm:w-auto bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
+            />
+          )}
+
           {allCountries.length > 0 && (
             <SearchableSelect
               value={countryFilter}

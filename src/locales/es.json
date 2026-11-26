@@ -661,6 +661,8 @@
   },
   "admin_places": {
     "search_placeholder": "Buscar por nombre, dirección, autor o etiquetas...",
+    "all_spaces": "Todos los espacios",
+    "search_space_placeholder": "Buscar grupo o espacio...",
     "all_cities": "Todas las ciudades",
     "delete_selected": "Eliminar seleccionados",
     "bulk_backup": "Backup ({count})",
