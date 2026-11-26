@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-11-26
+
+Security hardening and author moderation release building on `v0.2.0`.
+
+### 🔒 Security
+- **Anti-SSRF Protection on Google Maps URLs**: Strict official hostname validation and blocking of private/local IPs (`127.x`, `10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, `::1`, `.local`, `.internal`) on both the initial request and every manual redirect hop (`redirect: "manual"`, max 4 hops).
+- **Automatic `Secure` Cookies Behind HTTPS**: `HttpOnly` session and impersonation cookies automatically set `secure: true` behind HTTPS reverse proxies (`x-forwarded-proto: https` or `COOKIE_SECURE=true`), while preserving `http://localhost` compatibility.
+- **Hardened CSP & Safe API Errors**: Added `object-src 'none'` to `Content-Security-Policy` and generic error responses without internal details in `/api/docs/[type]`.
+- **Production Encryption Secret Validation**: Enforces/warns on missing `APP_SECRET` / `SESSION_SECRET` for `AES-256-GCM` Google Places API key encryption.
+
+### 🛡️ Author Moderation & Ghost Account
+- **Preserve Contributions Under a Ghost Account (`👻 @usuario_eliminado`)**: When deleting a user in `/admin > Users`, superadmins can preserve all group places and comments under a protected, non-login system account (`@usuario_eliminado`), alongside reassigning to each group owner or purging.
+- **Author Reassignment on Places & Comments**: Superadmins and group admins can reassign the author (via alphabetical `SearchableSelect`, including `@usuario_eliminado`) when editing any place (`EditPlaceModal`) or comment (`PlaceCommentsThread`).
+
 ## [0.2.0] - 2026-11-26
 
 Multi-space evolution of **GastroMap**: configurable open registration, a **private Personal Map** for every account, and **100% isolated friend groups** where each group works like its own self-contained app with independent places, categories, tags, lists, and group administrators.

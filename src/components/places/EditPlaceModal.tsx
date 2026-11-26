@@ -3,8 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
+import { getAssignableAuthorsAction, type AssignableAuthorOption } from "@/lib/actions/users";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
@@ -26,6 +28,7 @@ interface EditPlaceModalProps {
   availableTags: string[];
   isOpen: boolean;
   onClose: () => void;
+  canReassignAuthor?: boolean;
 }
 
 export function EditPlaceModal({
@@ -34,6 +37,7 @@ export function EditPlaceModal({
   availableTags,
   isOpen,
   onClose,
+  canReassignAuthor = false,
 }: EditPlaceModalProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -47,6 +51,14 @@ export function EditPlaceModal({
   const [priceRange, setPriceRange] = useState(place.priceRange || "???");
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(place.occasions || []);
   const [notes, setNotes] = useState(place.notes || "");
+  const [createdById, setCreatedById] = useState(place.createdById);
+  const [assignableAuthors, setAssignableAuthors] = useState<AssignableAuthorOption[]>([]);
+
+  useEffect(() => {
+    if (isOpen && canReassignAuthor) {
+      getAssignableAuthorsAction(place.groupId ?? null).then(setAssignableAuthors);
+    }
+  }, [isOpen, canReassignAuthor, place.groupId]);
 
   const [resolving, setResolving] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -154,6 +166,9 @@ export function EditPlaceModal({
     formData.set("longitude", lng);
     formData.set("priceRange", priceRange);
     formData.set("notes", notes);
+    if (canReassignAuthor && createdById) {
+      formData.set("createdById", createdById);
+    }
 
     formData.delete("occasions");
     selectedOccasions.forEach((occ) => formData.append("occasions", occ));
@@ -382,6 +397,29 @@ export function EditPlaceModal({
               className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 resize-none"
             />
           </div>
+
+          {/* Reasignación de autor (solo admins) */}
+          {canReassignAuthor && assignableAuthors.length > 0 && (
+            <div className="p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+              <span className="font-semibold text-slate-600 dark:text-slate-300">
+                {t("form.author_label")}
+              </span>
+              <SearchableSelect
+                value={createdById}
+                onChange={setCreatedById}
+                options={assignableAuthors.map((u) => ({
+                  value: u.id,
+                  label: u.username ? `@${u.username}` : u.name,
+                  subtitle: u.username ? u.name : undefined,
+                  icon: <span>{u.isGhost ? "👻" : "👤"}</span>,
+                }))}
+                searchPlaceholder={t("friends_filter.search_placeholder")}
+                ariaLabel={t("form.author_label")}
+                className="w-full sm:w-64"
+                buttonClassName="w-full justify-between !py-1.5 !px-3 !text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+              />
+            </div>
+          )}
 
           {/* Espacio actual del sitio (aislado en v2) */}
           <div className="p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">

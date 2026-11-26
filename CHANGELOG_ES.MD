@@ -5,6 +5,20 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.1] - 2026-11-26
+
+Actualización de endurecimiento de seguridad y moderación avanzada de autoría sobre `v0.2.0`.
+
+### 🔒 Seguridad
+- **Protección Anti-SSRF en Enlaces de Google Maps**: Validación estricta de `hostname` oficial y bloqueo de IPs privadas/locales (`127.x`, `10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, `::1`, `.local`, `.internal`) tanto en la URL inicial como en cada salto de redirección manual (`redirect: "manual"`, máx. 4 saltos).
+- **Cookies `Secure` Automáticas tras HTTPS**: Las cookies `HttpOnly` de sesión e impersonación activan `secure: true` automáticamente cuando la petición llega por HTTPS detrás de un proxy inverso (`x-forwarded-proto: https` o `COOKIE_SECURE=true`), manteniendo compatibilidad con `http://localhost`.
+- **CSP Endurecida y Respuestas Limpias**: Añadido `object-src 'none'` en `Content-Security-Policy` y mensajes genéricos sin detalles internos en errores de `/api/docs/[type]`.
+- **Control de Secreto de Cifrado en Producción**: Validación y aviso de `APP_SECRET` / `SESSION_SECRET` para el cifrado `AES-256-GCM` de claves de Google Places API.
+
+### 🛡️ Moderación de Autoría y Cuenta Fantasma
+- **Conservar Aportaciones bajo Cuenta Fantasma (`👻 @usuario_eliminado`)**: Al eliminar una cuenta en `/admin > Usuarios`, el superadministrador puede conservar todos sus sitios y comentarios de grupo asignados a la cuenta de sistema protegida `@usuario_eliminado` (deshabilitada y sin acceso), además de las opciones de reasignar al creador de cada grupo o purgar.
+- **Reasignación de Autor al Editar Sitios y Comentarios**: Superadministradores y administradores de grupo pueden cambiar el autor (`SearchableSelect` alfabético, incluyendo `@usuario_eliminado`) directamente desde el modal de edición de un sitio (`EditPlaceModal`) y desde la edición de cualquier comentario (`PlaceCommentsThread`).
+
 ## [0.2.0] - 2026-11-26
 
 Evolución multi-espacio de **GastroMap**: registro público configurable, **Mapa Personal privado** para cada cuenta y **grupos de amigos 100 % aislados** donde cada grupo funciona como su propia app independiente con sus sitios, categorías, etiquetas, listas y administradores propios.

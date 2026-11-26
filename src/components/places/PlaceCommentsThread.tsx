@@ -10,7 +10,9 @@ import {
   savePrivateNotesAction,
   type CommentWithAuthor,
 } from "@/lib/actions/interactions";
+import { getAssignableAuthorsAction, type AssignableAuthorOption } from "@/lib/actions/users";
 import { CommentSkeleton } from "@/components/ui/Skeleton";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { useT } from "@/lib/i18n/client";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
@@ -25,6 +27,7 @@ interface PlaceCommentsThreadProps {
   personalRating?: number | null;
   currentUserId: string;
   isAdmin: boolean;
+  groupId?: string | null;
   isOpen: boolean;
   onClose: () => void;
   onCommentsCountChange?: (count: number) => void;
@@ -334,6 +337,7 @@ export function PlaceCommentsThread({
   personalRating = null,
   currentUserId,
   isAdmin,
+  groupId = null,
   isOpen,
   onClose,
   onCommentsCountChange,
@@ -467,16 +471,39 @@ export function PlaceCommentsThread({
     }
   }
 
+  const [editingAuthorId, setEditingAuthorId] = useState<string>("");
+  const [assignableAuthors, setAssignableAuthors] = useState<AssignableAuthorOption[]>([]);
+
+  useEffect(() => {
+    if (isOpen && isAdmin) {
+      getAssignableAuthorsAction(groupId).then(setAssignableAuthors);
+    }
+  }, [isOpen, isAdmin, groupId]);
+
   async function handleSaveEdit(commentId: string) {
     if (!editingContent.trim() || savingEdit) return;
     setSavingEdit(true);
-    const res = await updateCommentAction(commentId, editingContent);
+    const res = await updateCommentAction(
+      commentId,
+      editingContent,
+      isAdmin && editingAuthorId ? editingAuthorId : undefined
+    );
     if (res.success && res.content) {
       setComments((prev) =>
-        prev.map((c) => (c.id === commentId ? { ...c, content: res.content! } : c))
+        prev.map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                content: res.content!,
+                userId: res.userId ?? c.userId,
+                authorName: res.authorName ?? c.authorName,
+              }
+            : c
+        )
       );
       setEditingCommentId(null);
       setEditingContent("");
+      setEditingAuthorId("");
     }
     setSavingEdit(false);
   }
@@ -833,6 +860,7 @@ export function PlaceCommentsThread({
                                   onClick={() => {
                                     setEditingCommentId(c.id);
                                     setEditingContent(c.content);
+                                    setEditingAuthorId(c.userId);
                                   }}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
                                   title={t("comments.edit_tooltip")}
@@ -855,19 +883,43 @@ export function PlaceCommentsThread({
                         </div>
 
                         {isEditing ? (
-                          <RichTextarea
-                            value={editingContent}
-                            onChange={setEditingContent}
-                            placeholder={t("comments.edit_placeholder")}
-                            rows={2}
-                            onSubmit={() => handleSaveEdit(c.id)}
-                            isSubmitting={savingEdit}
-                            submitLabel={t("comments.save_btn")}
-                            onCancel={() => {
-                              setEditingCommentId(null);
-                              setEditingContent("");
-                            }}
-                          />
+                          <div className="space-y-2">
+                            {isAdmin && assignableAuthors.length > 0 && (
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700 text-xs">
+                                <span className="font-semibold text-slate-600 dark:text-slate-300">
+                                  {t("form.author_label")}
+                                </span>
+                                <SearchableSelect
+                                  value={editingAuthorId}
+                                  onChange={setEditingAuthorId}
+                                  options={assignableAuthors.map((u) => ({
+                                    value: u.id,
+                                    label: u.username ? `@${u.username}` : u.name,
+                                    subtitle: u.username ? u.name : undefined,
+                                    icon: <span>{u.isGhost ? "👻" : "👤"}</span>,
+                                  }))}
+                                  searchPlaceholder={t("friends_filter.search_placeholder")}
+                                  ariaLabel={t("form.author_label")}
+                                  className="w-full sm:w-56"
+                                  buttonClassName="w-full justify-between !py-1 !px-2.5 !text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                                />
+                              </div>
+                            )}
+                            <RichTextarea
+                              value={editingContent}
+                              onChange={setEditingContent}
+                              placeholder={t("comments.edit_placeholder")}
+                              rows={2}
+                              onSubmit={() => handleSaveEdit(c.id)}
+                              isSubmitting={savingEdit}
+                              submitLabel={t("comments.save_btn")}
+                              onCancel={() => {
+                                setEditingCommentId(null);
+                                setEditingContent("");
+                                setEditingAuthorId("");
+                              }}
+                            />
+                          </div>
                         ) : (
                           <FormattedCommentContent content={c.content} />
                         )}

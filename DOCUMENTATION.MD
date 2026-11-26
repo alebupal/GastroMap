@@ -166,8 +166,9 @@ GastroMap organizes places into **100% isolated spaces**, so every group of frie
 - **Roles & Permissions (Built-In Legend)**:
   - **Global roles:** `SUPERADMIN` (first user created at `/setup`, full platform control) and `USER` (subsequent accounts with their private Personal Map).
   - **Per-group roles:** `CREATOR` (primary owner, can transfer ownership or delete the group), `GROUP ADMIN` (manages members, join requests, taxonomy, places, trash, and API), and `MEMBER` (adds places, comments, and tracks visits).
-- **Per-Group Administration Panel (`/group-admin`)**:
+- **Per-Group Administration Panel (`/group-admin`) & Author Moderation**:
   - Group admins access `/group-admin` to manage **Group Statistics**, **Places** (bulk copy/move, duplicate merging, **Data health**, and **30-day Trash**), **Members, Join Requests & Invites**, **Group Plans & Tags** (collapsed by default), and **Settings** (**Export entire group**, **own encrypted Google Places API key**, and group deletion).
+  - If a member leaves a group, their places and comments stay intact in the group. When deleting an account in `/admin > Users`, superadmins can preserve contributions under a **`👻 @usuario_eliminado` ghost account**, reassign them to each group owner, or purge them; admins can also **reassign the author** when editing any place or comment.
   - The global `/admin` dashboard remains exclusively for the instance **Superadministrator**.
 
 ---
@@ -234,6 +235,7 @@ In the **Import / Export** modal (`📦`):
 - **Argon2id Password Hashing**: Best-in-class cryptographic hashing resistant to GPU cracking.
 - **In-Memory Rate Limiting**: Brute-force protection on `/login`, registration, and token validation.
 - **Strict HTTP Headers**: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy.
+- **Anti-SSRF Protection & Secure Cookies**: Shortened Google Maps URL resolution strictly validates official hostnames and blocks private/local IPs across redirects; `HttpOnly` cookies automatically enable `Secure` behind HTTPS reverse proxies (`x-forwarded-proto: https`).
 - **Group Isolation**: Server actions verify group memberships before serving data.
 - **Audit Logging (`audit_logs`)**: Permanent database audit trail of administrative changes.
 

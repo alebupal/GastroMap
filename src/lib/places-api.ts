@@ -5,10 +5,23 @@ import { apiUsage, placesApiCache, sharingGroups } from "@/db/schema";
 import { getSetting } from "@/lib/actions/settings";
 import { fetchGooglePlacesDetails } from "@/lib/maps";
 
+let warnedMissingSecret = false;
+
 function getEncryptionSecret(): Buffer {
+  const dedicated = process.env.APP_SECRET || process.env.SESSION_SECRET;
+  if (!dedicated && process.env.NODE_ENV === "production") {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("Falta APP_SECRET o SESSION_SECRET en producción para cifrar API keys.");
+    }
+    if (!warnedMissingSecret) {
+      warnedMissingSecret = true;
+      console.warn(
+        "[Security] Define APP_SECRET o SESSION_SECRET en producción; usando DATABASE_URL como respaldo."
+      );
+    }
+  }
   const raw =
-    process.env.APP_SECRET ||
-    process.env.SESSION_SECRET ||
+    dedicated ||
     process.env.DATABASE_URL ||
     "gastromap-default-dev-secret-key";
   return crypto.createHash("sha256").update(raw).digest();

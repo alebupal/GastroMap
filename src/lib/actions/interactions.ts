@@ -288,7 +288,11 @@ export async function deleteCommentAction(commentId: string) {
 /**
  * Edita el contenido de un comentario (el autor, Admin del grupo o Superadmin)
  */
-export async function updateCommentAction(commentId: string, content: string) {
+export async function updateCommentAction(
+  commentId: string,
+  content: string,
+  newUserId?: string
+) {
   const user = await getCurrentUser();
   if (!user) return { error: "No autenticado" };
 
@@ -303,27 +307,46 @@ export async function updateCommentAction(commentId: string, content: string) {
 
   if (!comment) return { error: "Comentario no encontrado." };
 
+  let isGroupAdmin = false;
   let canModerate = comment.userId === user.id || user.role === "admin";
-  if (!canModerate) {
-    const [place] = await db
-      .select()
-      .from(places)
-      .where(eq(places.id, comment.placeId))
-      .limit(1);
-    if (place) {
-      const perms = await getPlacePermissions(user, place);
-      canModerate = perms.isGroupAdmin;
-    }
+  const [place] = await db
+    .select()
+    .from(places)
+    .where(eq(places.id, comment.placeId))
+    .limit(1);
+  if (place) {
+    const perms = await getPlacePermissions(user, place);
+    isGroupAdmin = perms.isGroupAdmin;
+    if (!canModerate) canModerate = isGroupAdmin;
   }
 
   if (!canModerate) {
     return { error: "No tienes permiso para editar este comentario." };
   }
 
+  let nextUserId = comment.userId;
+  let nextAuthorName: string | undefined;
+  if (newUserId && newUserId !== comment.userId) {
+    if (user.role !== "admin" && !isGroupAdmin) {
+      return { error: "No tienes permiso para reasignar el autor del comentario." };
+    }
+    const [targetUser] = await db
+      .select({ id: users.id, name: users.name, username: users.username })
+      .from(users)
+      .where(eq(users.id, newUserId))
+      .limit(1);
+    if (!targetUser) {
+      return { error: "El usuario seleccionado no existe." };
+    }
+    nextUserId = targetUser.id;
+    nextAuthorName = targetUser.username ? `@${targetUser.username}` : targetUser.name;
+  }
+
   await db
     .update(placeComments)
     .set({
       content: trimmed,
+      userId: nextUserId,
       updatedAt: new Date(),
     })
     .where(eq(placeComments.id, commentId));
@@ -336,10 +359,16 @@ export async function updateCommentAction(commentId: string, content: string) {
     metadata: {
       placeId: comment.placeId,
       editedByAdmin: comment.userId !== user.id,
+      reassignedToUserId: nextUserId !== comment.userId ? nextUserId : undefined,
       preview: trimmed.slice(0, 80),
     },
   });
 
   revalidatePath("/");
-  return { success: true, content: trimmed };
+  return {
+    success: true,
+    content: trimmed,
+    userId: nextUserId,
+    authorName: nextAuthorName,
+  };
 }

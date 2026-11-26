@@ -464,7 +464,7 @@ export function UsersManager({
 
   async function executeUserDeletion(
     user: SafeUser,
-    strategy: "reassign_owner" | "delete"
+    strategy: "reassign_owner" | "assign_ghost" | "delete"
   ) {
     setDeletingWithStrategy(true);
     setError(null);
@@ -1260,6 +1260,14 @@ export function UsersManager({
                 </div>
 
                 <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    disabled={deletingWithStrategy}
+                    onClick={() => executeUserDeletion(deleteImpactUser.user, "assign_ghost")}
+                    className="w-full py-2.5 px-4 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition cursor-pointer disabled:opacity-50"
+                  >
+                    {t("admin_users.safe_delete_ghost_btn")}
+                  </button>
                   <button
                     type="button"
                     disabled={deletingWithStrategy}

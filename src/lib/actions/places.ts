@@ -506,6 +506,23 @@ export async function updatePlaceAction(
 
   const scopeKey = buildScopeKey(existing.groupId, existing.createdById);
 
+  const requestedCreatedById = (formData.get("createdById") as string | null)?.trim();
+  let nextCreatedById = existing.createdById;
+  if (requestedCreatedById && requestedCreatedById !== existing.createdById) {
+    if (currentUser.role !== "admin" && !perms.isGroupAdmin) {
+      return { error: "No tienes permiso para reasignar el autor de este establecimiento." };
+    }
+    const [targetAuthor] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, requestedCreatedById))
+      .limit(1);
+    if (!targetAuthor) {
+      return { error: "El usuario seleccionado como autor no existe." };
+    }
+    nextCreatedById = targetAuthor.id;
+  }
+
   await db
     .update(places)
     .set({
@@ -521,6 +538,7 @@ export async function updatePlaceAction(
       phone,
       priceRange,
       notes,
+      createdById: nextCreatedById,
       updatedAt: new Date(),
     })
     .where(eq(places.id, placeId));

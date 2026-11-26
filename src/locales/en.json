@@ -256,6 +256,7 @@
     "tags_label": "Tags",
     "tags_placeholder": "Add tag (e.g. terrace, cocktails, homemade desserts...)",
     "notes_label": "Short description",
+    "author_label": "Author / Added by",
     "notes_placeholder": "E.g. Traditional tapas and wine tavern in the city center. Must-try cheesecake...",
     "visibility_label": "Place visibility",
     "visibility_community": "Community (Everyone)",
@@ -823,6 +824,7 @@
     "safe_delete_group_places": "{count} places created in shared groups",
     "safe_delete_group_comments": "{count} comments in shared groups",
     "safe_delete_personal_places": "{count} places in their Personal Map (will be deleted)",
+    "safe_delete_ghost_btn": "👻 Keep in groups as «Deleted user»",
     "safe_delete_reassign_btn": "Reassign to each group owner & delete account",
     "safe_delete_purge_btn": "Also delete their group places & comments"
   },
