@@ -29,7 +29,8 @@ interface NewPlaceFormProps {
   initialTitle?: string;
   availableOccasions: Occasion[];
   popularTags?: string[];
-  availableGroups?: Array<{ id: string; name: string }>;
+  availableGroups?: Array<{ id: string; name: string; icon?: string }>;
+  defaultTargetSpace?: string;
 }
 
 export function NewPlaceForm({
@@ -38,6 +39,7 @@ export function NewPlaceForm({
   availableOccasions,
   popularTags = [],
   availableGroups = [],
+  defaultTargetSpace = "personal",
 }: NewPlaceFormProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -52,15 +54,14 @@ export function NewPlaceForm({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
-  const [isCommunityPublished, setIsCommunityPublished] = useState(true);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [targetSpace, setTargetSpace] = useState<string>(defaultTargetSpace || "personal");
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [duplicates, setDuplicates] = useState<PotentialDuplicate[]>([]);
   const [dismissedDuplicates, setDismissedDuplicates] = useState(false);
 
-  // Detección automática en vivo de posibles establecimientos duplicados
+  // Detección automática en vivo de posibles establecimientos duplicados dentro del espacio destino
   useEffect(() => {
     const parsedLat = lat ? parseFloat(lat) : null;
     const parsedLng = lng ? parseFloat(lng) : null;
@@ -78,6 +79,7 @@ export function NewPlaceForm({
           name: name.trim(),
           latitude: hasCoords ? parsedLat : null,
           longitude: hasCoords ? parsedLng : null,
+          targetSpace,
         });
         setDuplicates(found);
         setDismissedDuplicates(false);
@@ -87,7 +89,7 @@ export function NewPlaceForm({
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [name, lat, lng]);
+  }, [name, lat, lng, targetSpace]);
 
   async function handleAutoResolve(rawUrl?: string) {
     const target = (rawUrl ?? url).trim();
@@ -456,133 +458,96 @@ export function NewPlaceForm({
         />
       </section>
 
-      {/* 8. Tarjeta: Visibilidad de la ficha */}
+      {/* 8. Tarjeta: Espacio donde se guarda este sitio (v2 aislado) */}
       <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
         <div>
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-            {t("form.visibility_label")}
+            {t("spaces.save_destination_label")}
           </h2>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {t("form.visibility_hint")}
+            {t("spaces.save_destination_hint")}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setIsCommunityPublished(true);
-              setSelectedGroupIds([]);
-            }}
-            className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-              isCommunityPublished
-                ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
-                : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-base shrink-0">
-                🌍
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                  {t("form.visibility_community")}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {availableGroups.map((g) => {
+            const active = targetSpace === g.id;
+            return (
+              <button
+                key={g.id}
+                type="button"
+                onClick={() => setTargetSpace(g.id)}
+                className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
+                  active
+                    ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
+                    : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-950/60 flex items-center justify-center text-base shrink-0">
+                    {g.icon || "🍻"}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                      {g.name}
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                      {t("spaces.group_destination_sub")}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Visible en el mapa global y listas colaborativas
-                </div>
-              </div>
-            </div>
-            <span
-              className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                isCommunityPublished
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "border-slate-300 dark:border-slate-600"
-              }`}
-            >
-              {isCommunityPublished && (
-                <span className="material-symbols-outlined text-xs leading-none">check</span>
-              )}
-            </span>
-          </button>
+                <span
+                  className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
+                    active
+                      ? "bg-orange-600 border-orange-600 text-white"
+                      : "border-slate-300 dark:border-slate-600"
+                  }`}
+                >
+                  {active && (
+                    <span className="material-symbols-outlined text-xs leading-none">check</span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
 
           <button
             type="button"
-            onClick={() => setIsCommunityPublished(false)}
+            onClick={() => setTargetSpace("personal")}
             className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-              !isCommunityPublished
+              targetSpace === "personal"
                 ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
                 : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
             }`}
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 rounded-full bg-slate-200/80 dark:bg-slate-700 flex items-center justify-center text-base shrink-0">
-                🔒
+                🏠
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                  {t("form.visibility_private")}
+                  {t("spaces.personal_map")}
                 </div>
                 <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Solo visible para ti y tus grupos cerrados
+                  {t("spaces.personal_subtitle")}
                 </div>
               </div>
             </div>
             <span
               className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                !isCommunityPublished
+                targetSpace === "personal"
                   ? "bg-orange-600 border-orange-600 text-white"
                   : "border-slate-300 dark:border-slate-600"
               }`}
             >
-              {!isCommunityPublished && (
+              {targetSpace === "personal" && (
                 <span className="material-symbols-outlined text-xs leading-none">check</span>
               )}
             </span>
           </button>
         </div>
 
-        <input
-          type="hidden"
-          name="communityPublished"
-          value={isCommunityPublished ? "true" : "false"}
-        />
-
-        {/* Compartición con grupos privados */}
-        {!isCommunityPublished && availableGroups.length > 0 && (
-          <div className="pt-2 space-y-2 border-t border-slate-100 dark:border-slate-800">
-            <span className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">
-              {t("form.share_groups_title")}
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {availableGroups.map((g) => {
-                const active = selectedGroupIds.includes(g.id);
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() =>
-                      setSelectedGroupIds((prev) =>
-                        prev.includes(g.id) ? prev.filter((id) => id !== g.id) : [...prev, g.id]
-                      )
-                    }
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
-                      active
-                        ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                        : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    <span>👥 {g.name}</span>
-                    {active && <span className="text-[10px]">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-            {selectedGroupIds.map((gid) => (
-              <input key={gid} type="hidden" name="sharedGroups" value={gid} />
-            ))}
-          </div>
-        )}
+        <input type="hidden" name="targetSpace" value={targetSpace} />
       </section>
 
       {/* Botones finales */}

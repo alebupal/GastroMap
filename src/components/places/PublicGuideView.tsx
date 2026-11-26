@@ -37,6 +37,7 @@ export function PublicGuideView({ guide }: PublicGuideViewProps) {
     const now = new Date();
     return guide.items.map((item) => ({
       id: item.placeId,
+      groupId: null,
       name: item.name,
       address: item.address,
       city: item.city,

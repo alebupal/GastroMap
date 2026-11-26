@@ -1,6 +1,6 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -29,11 +29,11 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Teselas ligeras de OpenStreetMap / CartoDB (sin coste ni cuotas de Google Maps API).
   * Clustering dinámico de chinchetas y colores según tu estado personal.
 
-* **🔒 Privacidad, Comunidad y Guías Compartibles:**
-  * Despliegue privado bajo servidor propio (Docker).
-  * Acceso por invitación para tu círculo cercano y **grupos privados de compartición** (`👥 Grupos`) con permisos acumulativos en servidor.
+* **🌍 Espacios Independientes, Grupos de Amigos, Mapa Personal y Guías:**
+  * Despliegue autohospedado bajo servidor propio (Docker), con **registro público abierto** (`/register`) o **modo cerrado por invitación** configurable desde `/admin > Configuración`.
+  * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`). Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas y **panel de administración de grupo (`/group-admin`)**, además de una vista combinada **🌍 Todos mis sitios** y acción rápida para **copiar un sitio a otro espacio**.
   * **Listas / Guías personales compartibles**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales), ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
-  * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Solo los administradores pueden eliminar lugares.
+  * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Los autores y administradores del grupo gestionan sus sitios.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Dedicado (`/admin`):**
   * Panel de estadísticas personales (`📊 Stats`) para cualquier usuario con resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.

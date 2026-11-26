@@ -67,9 +67,9 @@ interface DecisionAssistantModalProps {
   ) => void;
   includeMeWithFriends?: boolean;
   onToggleIncludeMeWithFriends?: (val: boolean) => void;
-  groups?: Array<{ id: string; name: string }>;
-  selectedGroupIds?: string[];
-  onToggleGroup?: (groupId: string) => void;
+  spaces?: Array<{ id: string; name: string; icon?: string }>;
+  selectedSpaceIds?: string[];
+  onToggleSpace?: (spaceId: string) => void;
   matchingCount?: number;
   onReset: () => void;
 }
@@ -109,9 +109,9 @@ export function DecisionAssistantModal({
   onChangeFriendsFilterMode,
   includeMeWithFriends = true,
   onToggleIncludeMeWithFriends,
-  groups = [],
-  selectedGroupIds = [],
-  onToggleGroup,
+  spaces = [],
+  selectedSpaceIds = [],
+  onToggleSpace,
   matchingCount,
   onReset,
 }: DecisionAssistantModalProps) {
@@ -669,29 +669,29 @@ export function DecisionAssistantModal({
             </div>
           )}
 
-          {/* 8. Grupos privados (solo si el usuario pertenece a grupos) */}
-          {groups.length > 0 && onToggleGroup && (
+          {/* 8. Filtro por espacio (solo en vista combinada «Todos mis sitios») */}
+          {spaces.length > 1 && onToggleSpace && (
             <div>
               <label className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-2">
-                <span className="material-symbols-outlined text-sm text-orange-600 leading-none">group</span>
-                <span>{t("places.groups_filter")}</span>
+                <span className="material-symbols-outlined text-sm text-orange-600 leading-none">workspaces</span>
+                <span>{t("spaces.filter_by_space")}</span>
               </label>
               <div className="flex flex-wrap gap-1.5">
-                {groups.map((g) => {
-                  const active = selectedGroupIds.includes(g.id);
+                {spaces.map((sp) => {
+                  const active = selectedSpaceIds.includes(sp.id);
                   return (
                     <button
-                      key={g.id}
+                      key={sp.id}
                       type="button"
-                      onClick={() => onToggleGroup(g.id)}
+                      onClick={() => onToggleSpace(sp.id)}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition active:scale-95 cursor-pointer border ${
                         active
                           ? "bg-orange-600 border-orange-600 text-white shadow-xs"
                           : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-sm leading-none">group</span>
-                      <span>{g.name}</span>
+                      <span>{sp.icon || "🍻"}</span>
+                      <span>{sp.name}</span>
                     </button>
                   );
                 })}

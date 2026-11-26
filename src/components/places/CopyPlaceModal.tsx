@@ -1,0 +1,166 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { copyPlaceToSpaceAction } from "@/lib/actions/places";
+import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
+import { useToast } from "@/components/ui/Toast";
+import { useT } from "@/lib/i18n/client";
+
+export interface CopyTargetSpaceOption {
+  id: string; // 'personal' o groupId
+  name: string;
+  icon: string;
+  isPersonal?: boolean;
+}
+
+interface CopyPlaceModalProps {
+  placeId: string;
+  placeName: string;
+  currentGroupId: string | null;
+  availableSpaces: CopyTargetSpaceOption[];
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function CopyPlaceModal({
+  placeId,
+  placeName,
+  currentGroupId,
+  availableSpaces,
+  isOpen,
+  onClose,
+}: CopyPlaceModalProps) {
+  const { t } = useT();
+  const { toast } = useToast();
+  const sheet = useSwipeToClose(onClose);
+  const [mounted, setMounted] = useState(false);
+  const [copyingTo, setCopyingTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
+
+  const targets = availableSpaces.filter((s) => {
+    if (s.isPersonal) return currentGroupId !== null;
+    return s.id !== currentGroupId;
+  });
+
+  async function handleCopy(target: CopyTargetSpaceOption) {
+    setCopyingTo(target.id);
+    const res = await copyPlaceToSpaceAction(
+      placeId,
+      target.isPersonal ? "personal" : `group:${target.id}`
+    );
+    setCopyingTo(null);
+
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("spaces.copy_success_toast", { space: target.name }), { kind: "success" });
+      onClose();
+    }
+  }
+
+  return createPortal(
+    <div
+      style={sheet.backdropStyle}
+      className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in text-left"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        ref={sheet.sheetRef}
+        style={sheet.sheetStyle}
+        {...sheet.sheetHandlers}
+        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[88dvh] overflow-hidden gm-modal-in"
+      >
+        <SheetHandle {...sheet.handleHandlers} />
+
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span className="material-symbols-outlined text-lg text-orange-600 leading-none">
+                library_add
+              </span>
+              <span>{t("spaces.copy_modal_title")}</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+              {placeName}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center transition cursor-pointer shrink-0"
+            aria-label={t("common.close")}
+          >
+            <span className="material-symbols-outlined text-lg leading-none">close</span>
+          </button>
+        </div>
+
+        <div className="p-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:pb-5 space-y-3 overflow-y-auto">
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            {t("spaces.copy_modal_desc")}
+          </p>
+
+          {targets.length === 0 ? (
+            <div className="p-5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
+              {t("spaces.copy_no_targets")}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {targets.map((target) => {
+                const busy = copyingTo === target.id;
+                return (
+                  <button
+                    key={target.id}
+                    type="button"
+                    disabled={Boolean(copyingTo)}
+                    onClick={() => handleCopy(target)}
+                    className="w-full p-3.5 rounded-2xl bg-[#f8f9ff] hover:bg-orange-50 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 flex items-center justify-between gap-3 transition cursor-pointer disabled:opacity-50 text-left"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 flex items-center justify-center text-base shrink-0">
+                        {target.icon}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                          {target.name}
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                          {target.isPersonal
+                            ? t("spaces.personal_subtitle")
+                            : t("spaces.group_isolated_copy")}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-600 text-white text-[11px] font-bold shrink-0">
+                      <span className="material-symbols-outlined text-xs leading-none">
+                        {busy ? "progress_activity" : "content_copy"}
+                      </span>
+                      <span>{busy ? "..." : t("spaces.copy_action_btn")}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}

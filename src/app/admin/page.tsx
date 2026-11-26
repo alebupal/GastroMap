@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { countUsers, getCurrentUser } from "@/lib/auth";
 import { getAllPlaces } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
-import { getSetting } from "@/lib/actions/settings";
+import { getSetting, isPublicRegistrationEnabled } from "@/lib/actions/settings";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
 export const dynamic = "force-dynamic";
@@ -35,12 +35,14 @@ export default async function AdminPage({
   const resolvedParams = searchParams ? await searchParams : undefined;
   const initialTab = resolvedParams?.tab;
 
-  const [places, occasionsList, tagsList, googlePlacesApiKey] = await Promise.all([
-    getAllPlaces(),
-    getOccasions(),
-    getTagsWithCount(),
-    getSetting("google_places_api_key"),
-  ]);
+  const [places, occasionsList, tagsList, googlePlacesApiKey, publicRegistrationEnabled] =
+    await Promise.all([
+      getAllPlaces(undefined, { forceAllForSuperAdmin: true }),
+      getOccasions(),
+      getTagsWithCount(),
+      getSetting("google_places_api_key"),
+      isPublicRegistrationEnabled(),
+    ]);
 
   return (
     <AdminDashboard
@@ -48,6 +50,7 @@ export default async function AdminPage({
       initialTags={tagsList}
       allPlaces={places}
       googlePlacesApiKey={googlePlacesApiKey}
+      publicRegistrationEnabled={publicRegistrationEnabled}
       currentUser={currentUser}
       initialTab={initialTab}
     />

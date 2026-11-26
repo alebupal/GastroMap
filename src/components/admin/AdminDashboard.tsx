@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { UsersManager } from "./UsersManager";
+import { AdminGroupsManager } from "./AdminGroupsManager";
 import { TaxonomyManager } from "./TaxonomyManager";
 import { InviteManager } from "@/components/InviteManager";
 import { SettingsManager } from "./SettingsManager";
@@ -23,6 +24,7 @@ type AdminTab =
   | "stats"
   | "places"
   | "users"
+  | "groups"
   | "taxonomy"
   | "invites"
   | "audit"
@@ -33,6 +35,7 @@ const VALID_TABS: AdminTab[] = [
   "stats",
   "places",
   "users",
+  "groups",
   "taxonomy",
   "invites",
   "audit",
@@ -45,6 +48,7 @@ interface AdminDashboardProps {
   initialTags: { id: string; name: string; placesCount: number }[];
   allPlaces?: PlaceWithDetails[];
   googlePlacesApiKey?: string | null;
+  publicRegistrationEnabled?: boolean;
   currentUser: {
     id: string;
     username: string | null;
@@ -60,6 +64,7 @@ export function AdminDashboard({
   initialTags,
   allPlaces = [],
   googlePlacesApiKey,
+  publicRegistrationEnabled = true,
   currentUser,
   initialTab,
 }: AdminDashboardProps) {
@@ -121,6 +126,7 @@ export function AdminDashboard({
         badge: allPlaces.length,
       },
       { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
+      { id: "groups", label: t("admin.tab_groups"), icon: "diversity_3" },
       { id: "taxonomy", label: t("admin.tab_taxonomy").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "sell" },
       { id: "invites", label: t("admin.tab_invites").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "confirmation_number" },
       { id: "audit", label: t("admin.tab_audit").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "receipt_long" },
@@ -344,6 +350,8 @@ export function AdminDashboard({
 
           {activeTab === "users" && <UsersManager currentUserId={currentUser.id} />}
 
+          {activeTab === "groups" && <AdminGroupsManager />}
+
           {activeTab === "taxonomy" && (
             <div className="space-y-5">
               <TaxonomyManager
@@ -368,6 +376,7 @@ export function AdminDashboard({
           {activeTab === "settings" && (
             <SettingsManager
               initialGooglePlacesApiKey={googlePlacesApiKey}
+              initialPublicRegistrationEnabled={publicRegistrationEnabled}
               totalPlacesCount={allPlaces.length}
             />
           )}

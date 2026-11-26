@@ -12,8 +12,10 @@ import {
   occasions,
   tags,
   sharingGroups,
+  sharingGroupMembers,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { getGroupMembership } from "@/lib/workspace";
 
 export interface CountItem {
   label: string;
@@ -459,5 +461,153 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     topOccasionsGlobal,
     topTagsGlobal: topEntries(tagCounts, 10),
     priceDistributionGlobal,
+  };
+}
+
+export interface GroupStatsData {
+  groupId: string;
+  groupName: string;
+  membersCount: number;
+  placesCount: number;
+  commentsCount: number;
+  visitedMarksCount: number;
+  topContributors: Array<{
+    userId: string;
+    name: string;
+    username: string | null;
+    placesCount: number;
+    commentsCount: number;
+  }>;
+  topPopularPlaces: Array<{
+    placeId: string;
+    name: string;
+    city: string | null;
+    priceRange: string;
+    favoritesCount: number;
+    visitedCount: number;
+    commentsCount: number;
+    avgRating: number | null;
+  }>;
+  topCities: CountItem[];
+}
+
+/**
+ * Estadísticas específicas de un grupo (accesible para Admins del grupo o Superadmin).
+ */
+export async function getGroupStatsAction(groupId: string): Promise<GroupStatsData | null> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return null;
+
+  const membership = await getGroupMembership(currentUser.id, groupId);
+  if (!membership.isMember && currentUser.role !== "admin") return null;
+
+  const [[group], groupMembers, groupPlaces] = await Promise.all([
+    db.select().from(sharingGroups).where(eq(sharingGroups.id, groupId)).limit(1),
+    db
+      .select({
+        userId: users.id,
+        name: users.name,
+        username: users.username,
+      })
+      .from(sharingGroupMembers)
+      .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
+      .where(eq(sharingGroupMembers.groupId, groupId)),
+    db.select().from(places).where(eq(places.groupId, groupId)),
+  ]);
+
+  if (!group) return null;
+
+  const placeIds = groupPlaces.map((p) => p.id);
+  const [groupUserPlaces, groupComments] =
+    placeIds.length > 0
+      ? await Promise.all([
+          db.select().from(userPlaces).where(inArray(userPlaces.placeId, placeIds)),
+          db.select().from(placeComments).where(inArray(placeComments.placeId, placeIds)),
+        ])
+      : [[], []];
+
+  const placesByUser = new Map<string, number>();
+  const commentsByUser = new Map<string, number>();
+  for (const p of groupPlaces) {
+    placesByUser.set(p.createdById, (placesByUser.get(p.createdById) || 0) + 1);
+  }
+  for (const c of groupComments) {
+    commentsByUser.set(c.userId, (commentsByUser.get(c.userId) || 0) + 1);
+  }
+
+  const topContributors = groupMembers
+    .map((m) => ({
+      userId: m.userId,
+      name: m.name,
+      username: m.username,
+      placesCount: placesByUser.get(m.userId) || 0,
+      commentsCount: commentsByUser.get(m.userId) || 0,
+    }))
+    .filter((c) => c.placesCount > 0 || c.commentsCount > 0)
+    .sort((a, b) => b.placesCount * 2 + b.commentsCount - (a.placesCount * 2 + a.commentsCount))
+    .slice(0, 6);
+
+  const favByPlace = new Map<string, number>();
+  const visByPlace = new Map<string, number>();
+  const ratingsByPlace = new Map<string, number[]>();
+  const commByPlace = new Map<string, number>();
+
+  for (const up of groupUserPlaces) {
+    if (up.favorite) favByPlace.set(up.placeId, (favByPlace.get(up.placeId) || 0) + 1);
+    if (up.personalStatus === "visited") {
+      visByPlace.set(up.placeId, (visByPlace.get(up.placeId) || 0) + 1);
+    }
+    if (up.rating !== null && up.rating !== undefined) {
+      const arr = ratingsByPlace.get(up.placeId) || [];
+      arr.push(up.rating);
+      ratingsByPlace.set(up.placeId, arr);
+    }
+  }
+  for (const c of groupComments) {
+    commByPlace.set(c.placeId, (commByPlace.get(c.placeId) || 0) + 1);
+  }
+
+  const topPopularPlaces = groupPlaces
+    .map((p) => {
+      const rList = ratingsByPlace.get(p.id) || [];
+      const avgRating =
+        rList.length > 0
+          ? Math.round((rList.reduce((a, b) => a + b, 0) / rList.length) * 10) / 10
+          : null;
+      return {
+        placeId: p.id,
+        name: p.name,
+        city: p.city,
+        priceRange: p.priceRange,
+        favoritesCount: favByPlace.get(p.id) || 0,
+        visitedCount: visByPlace.get(p.id) || 0,
+        commentsCount: commByPlace.get(p.id) || 0,
+        avgRating,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.favoritesCount * 3 +
+        b.visitedCount * 2 +
+        b.commentsCount -
+        (a.favoritesCount * 3 + a.visitedCount * 2 + a.commentsCount)
+    )
+    .slice(0, 6);
+
+  const cityCounts = new Map<string, number>();
+  for (const p of groupPlaces) {
+    if (p.city) cityCounts.set(p.city, (cityCounts.get(p.city) || 0) + 1);
+  }
+
+  return {
+    groupId: group.id,
+    groupName: group.name,
+    membersCount: Math.max(1, groupMembers.length),
+    placesCount: groupPlaces.length,
+    commentsCount: groupComments.length,
+    visitedMarksCount: groupUserPlaces.filter((u) => u.personalStatus === "visited").length,
+    topContributors,
+    topPopularPlaces,
+    topCities: topEntries(cityCounts, 6),
   };
 }

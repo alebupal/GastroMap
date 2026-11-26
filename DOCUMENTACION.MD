@@ -86,7 +86,7 @@ Al acceder por primera vez a una instancia limpia:
    - Nombre de usuario (`@usuario`).
    - Correo electrónico.
    - Contraseña segura (hasheada internamente con **Argon2id**).
-3. Una vez completado el asistente, el sistema queda bloqueado para registros públicos directos: los nuevos usuarios solo podrán registrarse mediante **enlaces de invitación privados** generados por los administradores.
+3. Una vez completado el asistente, por defecto queda habilitado el **Registro Público Abierto (`/register`)**, de modo que cualquier persona puede crearse una cuenta con su propio **Mapa Personal** y crear o unirse a grupos de amigos. Si prefieres una instancia cerrada, desde `/admin > Configuración > Modo de Registro` puedes cambiar en cualquier momento a **Solo por Invitación**.
 
 ---
 
@@ -145,19 +145,22 @@ Al acceder por primera vez a una instancia limpia:
 
 ---
 
-## 5. Grupos Privados e Invitaciones
+## 5. Espacios Independientes, Grupos de Amigos y Mapa Personal
 
-GastroMap permite organizar recomendaciones en círculos cerrados (pareja, cuadrilla de amigos, compañeros de trabajo, etc.):
+GastroMap organiza la experiencia en **espacios 100 % aislados**, de forma que cada grupo de amigos funciona como una aplicación propia sin mezclar sitios ni miembros con otros grupos:
 
-- **Creación de Grupos**: En el menú de usuario > *Mis grupos privados*, define el nombre y descripción del grupo.
-- **Enlaces de Invitación Seguros**:
-  - Genera enlaces únicos compartibles (`/groups/join/[token]`).
-  - **Límite de Usos (`maxUses`)**: Configura cuántas personas pueden usar el enlace antes de que quede desactivado.
-  - **Caducidad Configurable**: Define expiración en 1, 7, 30 días o enlace permanente que nunca caduca.
-  - **Copia Universal al Portapapeles**: Compatible con redes locales HTTP y HTTPS.
-  - **Revocación Anticipada**: El creador puede cancelar un enlace en cualquier momento.
-- **Filtro de Grupos en el Explorador**: Selector visual en la barra superior para filtrar el mapa y ver únicamente los restaurantes compartidos dentro de un grupo privado concreto.
-- **Visibilidad Estricta**: Al crear o editar un local, el selector de grupos privados solo aparece cuando la visibilidad está marcada como «Privado».
+- **Conmutador de Espacio en la Cabecera (Workspace Switcher)**:
+  - **🏠 Mi Mapa Personal**: Espacio privado exclusivo para ti (`group_id = NULL`). Nadie más puede ver los sitios que guardes aquí.
+  - **🍻 Mis Grupos de Amigos**: Espacios colaborativos independientes (con nombre, emoji y descripción). Al cambiar de grupo, el mapa, los filtros, el selector de amigos, las listas y las categorías/etiquetas cambian automáticamente a los de ese grupo.
+  - **🌍 Todos mis sitios**: Vista combinada de solo lectura que reúne tu Mapa Personal y todos tus grupos, mostrando en cada tarjeta la insignia del espacio al que pertenece y habilitando el filtro rápido por **Espacios**.
+- **Copiar Sitio a Otro Espacio**: Desde el menú `⋮ > Copiar a otro espacio…` de cualquier tarjeta puedes crear una copia independiente del restaurante en otro grupo o en tu Mapa Personal (conservando tu valoración personal, sin exponer comentarios ni reseñas de otros grupos).
+- **Enlaces de Invitación a Grupos (`/groups/join/[token]`)**:
+  - Genera enlaces compartibles con **caducidad configurable** (7 días, 30 días o sin caducidad), **límite de usos (`maxUses`)** y **revocación anticipada**.
+  - Si quien abre el enlace aún no tiene cuenta, tras registrarse en `/register` o iniciar sesión vuelve automáticamente a la invitación para unirse al grupo.
+- **Panel de Administración por Grupo (`/group-admin`)**:
+  - El creador de cada grupo es su propietario + administrador y puede ascender a otros integrantes como **co-administradores (`Admin`)**.
+  - Los administradores de un grupo acceden a `/group-admin` (desde el icono de ajustes junto al selector de espacio o *Mis grupos*) para gestionar **Estadísticas del grupo**, **Tabla de sitios y fusión de duplicados** (con columnas ordenables), **Miembros, roles e invitaciones**, **Planes y etiquetas propios del grupo** (con selector de fusión ordenado alfabéticamente) y **Ajustes / eliminación del grupo**.
+  - El panel global `/admin` queda reservado exclusivamente al **Superadministrador** de la instancia e incluye la pestaña global **Grupos** y cabeceras de ordenación en todas sus tablas.
 
 ---
 

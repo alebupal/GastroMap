@@ -167,8 +167,6 @@ export async function POST(request: NextRequest) {
     "place_tags",
     "user_places",
     "place_comments",
-    "place_group_access",
-    "place_user_access",
     "saved_filters",
     "audit_logs",
   ];

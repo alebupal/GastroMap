@@ -25,6 +25,10 @@ const EditPlaceModal = dynamic(() =>
 const AddToListModal = dynamic(() =>
   import("./AddToListModal").then((m) => m.AddToListModal)
 );
+const CopyPlaceModal = dynamic(() =>
+  import("./CopyPlaceModal").then((m) => m.CopyPlaceModal)
+);
+import type { CopyTargetSpaceOption } from "./CopyPlaceModal";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 20 €",
@@ -50,6 +54,9 @@ interface PlaceCardProps {
     placeId: string,
     patch: Partial<Pick<PlaceWithDetails, "isFavorite" | "personalStatus" | "rating" | "privateNotes">>
   ) => void;
+  availableSpaces?: CopyTargetSpaceOption[];
+  showSpaceBadge?: boolean;
+  isSpaceAdmin?: boolean;
   isSelected?: boolean;
 }
 
@@ -66,6 +73,9 @@ function PlaceCardComponent({
   onToggleCompare,
   onToggleCompareId,
   onPersonalUpdate,
+  availableSpaces = [],
+  showSpaceBadge = false,
+  isSpaceAdmin = false,
   isSelected = false,
 }: PlaceCardProps) {
   const { t } = useT();
@@ -82,6 +92,7 @@ function PlaceCardComponent({
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
   const [copiedPlace, setCopiedPlace] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
@@ -162,8 +173,11 @@ function PlaceCardComponent({
     window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
   }
 
-  const canDelete = isAdmin;
-  const canEdit = isAdmin || place.createdById === currentUserId;
+  const canDelete = place.canDelete ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
+  const canEdit = place.canEdit ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
+  const canCopyToOtherSpace = availableSpaces.some((s) =>
+    s.isPersonal ? place.groupId !== null : s.id !== place.groupId
+  );
 
   async function handleDelete() {
     if (!confirm(t("places.delete_confirm", { name: place.name }))) return;
@@ -312,7 +326,7 @@ function PlaceCardComponent({
                     className="fixed inset-0 z-40"
                     onClick={() => setShowActionsMenu(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-44 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
+                  <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
                     <button
                       type="button"
                       onClick={() => {
@@ -324,6 +338,19 @@ function PlaceCardComponent({
                       <span className="material-symbols-outlined text-base leading-none text-orange-600">bookmark_add</span>
                       <span>{t("lists.save_to_list_action")}</span>
                     </button>
+                    {canCopyToOtherSpace && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowActionsMenu(false);
+                          setShowCopyModal(true);
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                      >
+                        <span className="material-symbols-outlined text-base leading-none text-orange-600">library_add</span>
+                        <span>{t("spaces.copy_to_space_menu")}</span>
+                      </button>
+                    )}
                     {canEdit && (
                       <button
                         type="button"
@@ -370,8 +397,14 @@ function PlaceCardComponent({
           </p>
         )}
 
-        {/* Fila de Insignia de Estado Personal + Ocasiones / Categorías + Etiquetas */}
+        {/* Fila de Insignia de Espacio (en vista Todo junto) + Estado Personal + Ocasiones + Etiquetas */}
         <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+          {showSpaceBadge && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/60 font-extrabold text-[10px]">
+              <span>{place.groupId ? place.groupIcon || "🍻" : "🏠"}</span>
+              <span>{place.groupId ? place.groupName || "Grupo" : t("spaces.personal_map")}</span>
+            </span>
+          )}
           {personalStatus === "visited" ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
               <span className="material-symbols-outlined text-[13px] leading-none">check_circle</span>
@@ -678,7 +711,7 @@ function PlaceCardComponent({
           privateNotes={privateNotes}
           personalRating={rating}
           currentUserId={currentUserId}
-          isAdmin={isAdmin}
+          isAdmin={isAdmin || isSpaceAdmin}
           isOpen={showComments}
           onClose={() => setShowComments(false)}
           onCommentsCountChange={(count) => setCommentsCount(count)}
@@ -711,6 +744,17 @@ function PlaceCardComponent({
           placeName={place.name}
           isOpen={showAddToListModal}
           onClose={() => setShowAddToListModal(false)}
+        />
+      )}
+
+      {showCopyModal && (
+        <CopyPlaceModal
+          placeId={place.id}
+          placeName={place.name}
+          currentGroupId={place.groupId ?? null}
+          availableSpaces={availableSpaces}
+          isOpen={showCopyModal}
+          onClose={() => setShowCopyModal(false)}
         />
       )}
 

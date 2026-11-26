@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-11-26
+
+Multi-space evolution of **GastroMap**: configurable open registration, a **private Personal Map** for every account, and **100% isolated friend groups** where each group works like its own self-contained app with independent places, categories, tags, lists, and group administrators.
+
+### 🌍 Independent Spaces, Friend Groups & Personal Map
+- **Total-Isolation Multi-Space Architecture**:
+  - **🏠 My Personal Map**: Strictly private space (`group_id = NULL`) to save your own places, notes, and plans without sharing them with anyone.
+  - **🍻 Isolated Friend Groups**: Any user can create unlimited friend groups (with custom name, emoji, and description) and invite friends via magic links (`/groups/join/[token]`). Each group owns an isolated catalog, its own customizable 8 default plans, scoped tags (`scope_key`), lists, and saved filters—never leaking places or member directories across groups.
+  - **🌍 All my places**: Combined read view across your Personal Map and all your groups, featuring space badges on cards and a dedicated space filter.
+- **Header Workspace Switcher**: Slack/Notion-style space switcher in the top header to jump in one click between any friend group, your Personal Map, or *All my places*.
+- **Copy Place to Another Space (`📋 Copy to another space…`)**: Duplicate any restaurant as an independent copy into another group or your Personal Map (preserving your personal rating) without cross-linking comments across groups.
+- **Automatic «Pinono» Migration**: Seamless migration moving all pre-existing `v0.1.0` users, places, occasions, tags, lists, and saved filters into the **«Pinono»** group.
+- **Legacy v1 Per-Place Group Sharing Removed**: Dropped obsolete `place_group_access` and `place_user_access` tables and streamlined `getAllPlaces` down to 4 parallel batch queries.
+
+### 🔓 Open Public Registration (`/register`) & `/admin` Toggle
+- **Public Sign-Up Page (`/register`)**: Open registration with rate limiting, `callbackUrl` support for group invite links, and automatic Personal Map initialization.
+- **Superadmin Registration Mode Toggle**: Instant switch in `/admin > Settings` between **Open Registration** and **Invite Only**.
+
+### 🛡️ Per-Group Admin Panel (`/group-admin`) & Sortable Admin Tables
+- **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Admin` / `Member`) & invite links, scoped plans/tags, and group settings.
+- **Global Groups Tab in `/admin`**: Superadministrators can inspect and manage all instance groups from `/admin > Groups`.
+- **Alphabetical Tag Merge & Sortable Admin Columns**:
+  - **Tag & category merge/reassign selectors** are now sorted strictly alphabetically (`A-Z`) with place counts.
+  - Clickable ascending/descending (`↑`/`↓`) sortable column headers across all admin tables (*Places*, *Users*, *Groups*, *Taxonomy*, and *Audit Log*).
+
 ## [0.1.0] - 2026-11-25
 
 Initial full release of **GastroMap**, a private, self-hosted web application to save, organize, discover, and decide where to eat, have tapas, or grab drinks.

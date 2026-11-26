@@ -13,12 +13,12 @@ test("Rendimiento getAllPlaces: consultas agrupadas en bloque sin N+1 por sitio"
 
   const getAllPlacesBody = placesSrc.slice(fnStart, fnEnd);
 
-  // Las 5 tablas relacionadas se cargan en bloque con inArray(..., placeIds)
+  // Las 4 tablas relacionadas se cargan en bloque con inArray(..., placeIds) (sin place_group_access obsoleta)
   assert.ok(getAllPlacesBody.includes("inArray(userPlaces.placeId, placeIds)"));
   assert.ok(getAllPlacesBody.includes("inArray(placeOccasions.placeId, placeIds)"));
   assert.ok(getAllPlacesBody.includes("inArray(placeTags.placeId, placeIds)"));
   assert.ok(getAllPlacesBody.includes("inArray(placeComments.placeId, placeIds)"));
-  assert.ok(getAllPlacesBody.includes("inArray(placeGroupAccess.placeId, placeIds)"));
+  assert.equal(getAllPlacesBody.includes("placeGroupAccess"), false);
 
   // El mapeo final de filas debe ser síncrono (sin await db dentro de rows.map)
   const mapStart = getAllPlacesBody.indexOf("rows.map(");
@@ -167,7 +167,8 @@ test("Purga y cobertura de auditoría: restricción admin, filtro por antigüeda
   assert.ok(interactionsActions.includes('action: "comment_created"'));
   assert.ok(interactionsActions.includes('action: "comment_updated"'));
   assert.ok(interactionsActions.includes('action: "comment_deleted"'));
-  assert.ok(interactionsActions.includes('comment.userId !== user.id && user.role !== "admin"'));
+  assert.ok(interactionsActions.includes('let canModerate = comment.userId === user.id || user.role === "admin"'));
+  assert.ok(interactionsActions.includes("canModerate = perms.isGroupAdmin"));
 });
 
 test("Guías públicas (/guide/[slug]): solo expone listas públicas y nunca datos privados", () => {
@@ -256,4 +257,50 @@ test("Limpieza de funcionalidad obsoleta place_visits: eliminada de esquema, có
     false,
     "PlaceVisitsModal.tsx debe estar eliminado"
   );
+});
+
+test("Arquitectura Multi-Espacio v0.2.0: aislamiento por grupo/mapa personal, migración Pinono y eliminación de grupos privados v1", () => {
+  const schemaSrc = fs.readFileSync(path.join(root, "src/db/schema.ts"), "utf8");
+  const mig14 = fs.readFileSync(
+    path.join(root, "drizzle/0014_strange_nightcrawler.sql"),
+    "utf8"
+  );
+  const mig15 = fs.readFileSync(
+    path.join(root, "drizzle/0015_slow_princess_powerful.sql"),
+    "utf8"
+  );
+  const placesSrc = fs.readFileSync(path.join(root, "src/lib/actions/places.ts"), "utf8");
+  const authActions = fs.readFileSync(path.join(root, "src/lib/actions/auth.ts"), "utf8");
+  const taxonomyUi = fs.readFileSync(
+    path.join(root, "src/components/admin/TaxonomyManager.tsx"),
+    "utf8"
+  );
+  const placesTableUi = fs.readFileSync(
+    path.join(root, "src/components/admin/PlacesTableManager.tsx"),
+    "utf8"
+  );
+
+  // Eliminación completa de tablas heredadas de compartición individual v1
+  assert.equal(schemaSrc.includes("placeGroupAccess"), false);
+  assert.equal(schemaSrc.includes("placeUserAccess"), false);
+  assert.ok(mig15.includes('DROP TABLE IF EXISTS "place_group_access"'));
+  assert.ok(mig15.includes('DROP TABLE IF EXISTS "place_user_access"'));
+
+  // Migración automática al grupo «Pinono» y clave primaria compuesta por scope_key
+  assert.ok(mig14.includes("'Pinono'"));
+  assert.ok(schemaSrc.includes("occasions_scope_key_id_pk"));
+  assert.ok(schemaSrc.includes("tags_scope_key_id_pk"));
+
+  // Registro público con control de superadmin, rate-limit y copia aislada entre espacios
+  assert.ok(authActions.includes("export async function registerPublicAction"));
+  assert.ok(authActions.includes("await isPublicRegistrationEnabled()"));
+  assert.ok(placesSrc.includes("export async function copyPlaceToSpaceAction"));
+
+  // Orden alfabético en selector de fusión de tags y ordenación por columnas en tablas admin
+  assert.ok(taxonomyUi.includes("const alphabeticalTags = useMemo("));
+  assert.ok(taxonomyUi.includes("a.name.localeCompare(b.name"));
+  assert.ok(placesTableUi.includes("function toggleSort(field: PlaceSortField)"));
+  assert.ok(fs.existsSync(path.join(root, "src/app/group-admin/page.tsx")));
+  assert.ok(fs.existsSync(path.join(root, "src/components/groups/GroupAdminDashboard.tsx")));
+  assert.ok(fs.existsSync(path.join(root, "src/components/admin/AdminGroupsManager.tsx")));
 });

@@ -1,6 +1,7 @@
 import DocsViewer from "@/components/docs/DocsViewer";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { getCurrentUser } from "@/lib/auth";
+import { getActiveWorkspace } from "@/lib/workspace";
 
 export const dynamic = "force-dynamic";
 
@@ -14,9 +15,10 @@ interface DocsPageProps {
 }
 
 export default async function DocsPage({ searchParams }: DocsPageProps) {
-  const [params, currentUser] = await Promise.all([
+  const [params, currentUser, workspace] = await Promise.all([
     searchParams,
     getCurrentUser(),
+    getActiveWorkspace(),
   ]);
   const initialTab =
     params.tab === "readme" || params.tab === "changelog" ? params.tab : "docs";
@@ -25,7 +27,7 @@ export default async function DocsPage({ searchParams }: DocsPageProps) {
     <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       {currentUser && (
         <div className="max-w-[1720px] mx-auto w-full px-4 sm:px-6 lg:px-8 pt-3">
-          <UserHeader currentUser={currentUser} />
+          <UserHeader currentUser={currentUser} workspace={workspace} />
         </div>
       )}
       <DocsViewer initialTab={initialTab} hasGlobalHeader={Boolean(currentUser)} />

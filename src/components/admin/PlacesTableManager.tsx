@@ -18,11 +18,23 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
   occasionsList?: Array<{ id: string; name: string; icon: string }>;
+  showSpaceColumn?: boolean;
 }
+
+type PlaceSortField = "name" | "space" | "city" | "price" | "occasions" | "author" | "createdAt";
+
+const PRICE_RANK: Record<string, number> = {
+  "€": 1,
+  "€€": 2,
+  "€€€": 3,
+  "€€€€": 4,
+  "???": 5,
+};
 
 export function PlacesTableManager({
   places: initialPlaces,
   occasionsList = [],
+  showSpaceColumn = true,
 }: PlacesTableManagerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
@@ -31,7 +43,19 @@ export function PlacesTableManager({
   const [searchQuery, setSearchQuery] = useState("");
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
+  const [sortField, setSortField] = useState<PlaceSortField>("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
+
+  function toggleSort(field: PlaceSortField) {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir(field === "createdAt" ? "desc" : "asc");
+    }
+    setCurrentPage(1);
+  }
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -85,10 +109,10 @@ export function PlacesTableManager({
       icon: "📍",
     }));
   }, [availableCities]);
-  // Sitios filtrados en la tabla
+  // Sitios filtrados y ordenados en la tabla
   const filteredPlaces = useMemo(() => {
     const q = normalizeSearchText(searchQuery);
-    return placesList.filter((p) => {
+    const filtered = placesList.filter((p) => {
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
 
@@ -104,6 +128,7 @@ export function PlacesTableManager({
       const searchableText = normalizeSearchText(
         [
           p.name,
+          p.groupName || "",
           p.city || "",
           p.address || "",
           p.notes || "",
@@ -123,7 +148,49 @@ export function PlacesTableManager({
         (tokens.length > 1 && tokens.every((tok) => searchableText.includes(tok)))
       );
     });
-  }, [placesList, searchQuery, countryFilter, cityFilter]);
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortField) {
+        case "name":
+          return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+        case "space": {
+          const sa = a.groupId ? a.groupName || "" : t("spaces.personal_map");
+          const sb = b.groupId ? b.groupName || "" : t("spaces.personal_map");
+          const cmp = sa.localeCompare(sb, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "city": {
+          const ca = a.city || "";
+          const cb = b.city || "";
+          const cmp = ca.localeCompare(cb, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "price": {
+          const pa = PRICE_RANK[a.priceRange] ?? 9;
+          const pb = PRICE_RANK[b.priceRange] ?? 9;
+          return pa !== pb ? (pa - pb) * dir : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "occasions": {
+          const oa = a.occasions[0] || "";
+          const ob = b.occasions[0] || "";
+          const cmp = oa.localeCompare(ob, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : (a.occasions.length - b.occasions.length) * dir;
+        }
+        case "author": {
+          const aa = a.createdByUsername || a.createdByName || "";
+          const ab = b.createdByUsername || b.createdByName || "";
+          return aa.localeCompare(ab, "es", { sensitivity: "base" }) * dir;
+        }
+        case "createdAt":
+        default: {
+          const ta = new Date(a.createdAt).getTime();
+          const tb = new Date(b.createdAt).getTime();
+          return (ta - tb) * dir;
+        }
+      }
+    });
+  }, [placesList, searchQuery, countryFilter, cityFilter, sortField, sortDir, t]);
 
   // Selección individual
   function toggleSelect(id: string) {
@@ -263,15 +330,18 @@ export function PlacesTableManager({
   const mergeCandidates = useMemo(() => {
     if (!mergeSource) return [];
     const q = normalizeSearchText(mergeSearch);
-    return placesList.filter((p) => {
-      if (p.id === mergeSource.id) return false;
-      if (!q) return true;
-      return (
-        normalizeSearchText(p.name).includes(q) ||
-        (p.city && normalizeSearchText(p.city).includes(q)) ||
-        (p.address && normalizeSearchText(p.address).includes(q))
-      );
-    });
+    return placesList
+      .filter((p) => {
+        if (p.id === mergeSource.id) return false;
+        if (p.groupId !== mergeSource.groupId) return false;
+        if (!q) return true;
+        return (
+          normalizeSearchText(p.name).includes(q) ||
+          (p.city && normalizeSearchText(p.city).includes(q)) ||
+          (p.address && normalizeSearchText(p.address).includes(q))
+        );
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
   }, [placesList, mergeSource, mergeSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPlaces.length / pageSize));
@@ -409,7 +479,7 @@ export function PlacesTableManager({
       {/* Vista Móvil: Tarjetas Responsive (< md) */}
       <div className="block md:hidden space-y-2.5">
         {paginatedPlaces.length > 0 && (
-          <div className="flex items-center justify-between px-2 py-1 text-xs text-slate-600 dark:text-slate-400 font-semibold">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 font-semibold">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -419,7 +489,36 @@ export function PlacesTableManager({
               />
               <span>{t("admin_places.col_select_all")}</span>
             </label>
-            <span>{paginatedPlaces.length} {t("pagination.places")}</span>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={sortField}
+                onChange={(e) => {
+                  const next = e.target.value as PlaceSortField;
+                  setSortField(next);
+                  setSortDir(next === "createdAt" ? "desc" : "asc");
+                  setCurrentPage(1);
+                }}
+                aria-label={t("common.sort_by")}
+                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+              >
+                <option value="createdAt">{t("common.sort_date")}</option>
+                <option value="name">{t("admin_places.col_place")}</option>
+                {showSpaceColumn && <option value="space">{t("spaces.belonging_space")}</option>}
+                <option value="city">{t("admin_places.col_city")}</option>
+                <option value="price">{t("admin_places.col_price")}</option>
+                <option value="author">{t("admin_places.col_author")}</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setSortDir((prev) => (prev === "asc" ? "desc" : "asc"))}
+                className="p-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
+                aria-label={t("common.sort_by")}
+              >
+                <span className="material-symbols-outlined text-sm leading-none block">
+                  {sortDir === "asc" ? "arrow_upward" : "arrow_downward"}
+                </span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -552,19 +651,143 @@ export function PlacesTableManager({
                     title={t("admin_places.col_select_all")}
                   />
                 </th>
-                <th className="p-3">{t("admin_places.col_place")}</th>
-                <th className="p-3">{t("admin_places.col_city")}</th>
-                <th className="p-3">{t("admin_places.col_price")}</th>
-                <th className="p-3">{t("admin_places.col_occasions")}</th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("name")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "name" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_place")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "name"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                {showSpaceColumn && (
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("space")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "space" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_places.col_space")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "space"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
+                )}
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("city")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "city" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_city")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "city"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("price")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "price" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_price")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "price"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("occasions")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "occasions" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_occasions")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "occasions"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
                 <th className="p-3">{t("admin_places.col_gps")}</th>
-                <th className="p-3">{t("admin_places.col_author")}</th>
+                <th className="p-3">
+                  <div className="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("author")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "author" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_places.col_author")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "author"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("createdAt")}
+                      title={t("common.sort_date")}
+                      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "createdAt"
+                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[13px] leading-none">schedule</span>
+                      {sortField === "createdAt" && (
+                        <span className="material-symbols-outlined text-[12px] leading-none">
+                          {sortDir === "asc" ? "arrow_upward" : "arrow_downward"}
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </th>
                 <th className="p-3 text-right">{t("admin_places.col_action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {paginatedPlaces.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
+                  <td colSpan={showSpaceColumn ? 9 : 8} className="p-8 text-center text-slate-500 text-xs">
                     {t("admin_places.empty_search")}
                   </td>
                 </tr>
@@ -594,6 +817,17 @@ export function PlacesTableManager({
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{place.address}</div>
                         )}
                       </td>
+
+                      {showSpaceColumn && (
+                        <td className="p-3 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-900/50">
+                            <span>{place.groupId ? place.groupIcon || "🍻" : "🏠"}</span>
+                            <span className="truncate max-w-[110px]">
+                              {place.groupId ? place.groupName || t("nav.my_groups") : t("spaces.personal_short")}
+                            </span>
+                          </span>
+                        </td>
+                      )}
 
                       <td className="p-3 whitespace-nowrap text-slate-700 dark:text-slate-300">
                         {place.city || <span className="text-slate-400 dark:text-slate-600">—</span>}
