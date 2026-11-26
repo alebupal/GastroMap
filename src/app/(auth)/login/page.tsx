@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { countUsers, getCurrentUser } from "@/lib/auth";
+import { isPublicRegistrationEnabled } from "@/lib/actions/settings";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -9,7 +10,11 @@ import { getT } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ callbackUrl?: string }>;
+}) {
   const userCount = await countUsers();
   if (userCount === 0) {
     redirect("/setup");
@@ -20,7 +25,12 @@ export default async function LoginPage() {
     redirect("/");
   }
 
-  const t = await getT();
+  const [t, publicRegistrationEnabled, resolvedParams] = await Promise.all([
+    getT(),
+    isPublicRegistrationEnabled(),
+    searchParams ? searchParams : Promise.resolve(undefined),
+  ]);
+  const callbackUrl = resolvedParams?.callbackUrl;
 
   return (
     <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden transition-colors duration-200">
@@ -124,11 +134,18 @@ export default async function LoginPage() {
               </div>
             </div>
 
-            <LoginForm />
+            <LoginForm
+              callbackUrl={callbackUrl}
+              publicRegistrationEnabled={publicRegistrationEnabled}
+            />
           </div>
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
-            <span>{t("auth.private_invite_notice")}</span>
+            <span>
+              {publicRegistrationEnabled
+                ? t("auth.open_groups_notice")
+                : t("auth.private_invite_notice")}
+            </span>
             <span className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold self-center sm:self-auto">
               v{APP_VERSION}
             </span>

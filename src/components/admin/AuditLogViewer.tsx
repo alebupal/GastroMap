@@ -13,7 +13,14 @@ const ACTION_LABELS: Record<string, { label: string; color: string }> = {
   place_deleted: { label: "Sitio eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
   place_bulk_deleted: { label: "Sitios eliminados (lote)", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
   place_merged: { label: "Sitios fusionados", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  place_copied: { label: "Sitio copiado a espacio", color: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30" },
   places_imported: { label: "Sitios importados", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  group_created: { label: "Grupo creado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  group_updated: { label: "Grupo actualizado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  group_deleted: { label: "Grupo eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
+  group_member_role_changed: { label: "Rol en grupo cambiado", color: "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30" },
+  group_invite_created: { label: "Invitación de grupo", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  group_invite_revoked: { label: "Invitación revocada", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
   comment_created: { label: "Comentario publicado", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
   comment_updated: { label: "Comentario editado", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
   comment_deleted: { label: "Comentario eliminado", color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30" },
@@ -49,12 +56,24 @@ export function AuditLogViewer() {
   const [loading, setLoading] = useState(true);
   const [purging, setPurging] = useState<string | null>(null);
 
-  // Filtros de búsqueda avanzados
+  // Filtros de búsqueda avanzados y ordenación
   const [searchQuery, setSearchQuery] = useState("");
   const [entityFilter, setEntityFilter] = useState("all");
   const [actionFilter, setActionFilter] = useState("all");
   const [actorFilter, setActorFilter] = useState("all");
   const [dateRange, setDateRange] = useState<DateRangeFilter>("all");
+  const [sortField, setSortField] = useState<"createdAt" | "actor" | "action" | "details">("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  function toggleSort(field: "createdAt" | "actor" | "action" | "details") {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir(field === "createdAt" ? "desc" : "asc");
+    }
+    setCurrentPage(1);
+  }
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -144,7 +163,7 @@ export function AuditLogViewer() {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    return logs.filter((l) => {
+    const base = logs.filter((l) => {
       if (entityFilter !== "all" && l.entityType !== entityFilter) return false;
       if (actionFilter !== "all" && l.action !== actionFilter) return false;
 
@@ -176,7 +195,31 @@ export function AuditLogViewer() {
 
       return true;
     });
-  }, [logs, searchQuery, entityFilter, actionFilter, actorFilter, dateRange]);
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...base].sort((a, b) => {
+      switch (sortField) {
+        case "actor": {
+          const aa = a.actorUsername || a.actorName || "";
+          const ab = b.actorUsername || b.actorName || "";
+          return aa.localeCompare(ab, "es", { sensitivity: "base" }) * dir;
+        }
+        case "action": {
+          const la = ACTION_LABELS[a.action]?.label || a.action;
+          const lb = ACTION_LABELS[b.action]?.label || b.action;
+          return la.localeCompare(lb, "es", { sensitivity: "base" }) * dir;
+        }
+        case "details": {
+          const da = a.metadata ? JSON.stringify(a.metadata) : a.entityId;
+          const dbStr = b.metadata ? JSON.stringify(b.metadata) : b.entityId;
+          return da.localeCompare(dbStr, "es", { sensitivity: "base" }) * dir;
+        }
+        case "createdAt":
+        default:
+          return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
+      }
+    });
+  }, [logs, searchQuery, entityFilter, actionFilter, actorFilter, dateRange, sortField, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
@@ -379,10 +422,78 @@ export function AuditLogViewer() {
             <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
               <thead className="bg-slate-50 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="p-3">{t("admin_audit.col_date")}</th>
-                  <th className="p-3">{t("admin_audit.col_user")}</th>
-                  <th className="p-3">{t("admin_audit.col_action")}</th>
-                  <th className="p-3">{t("admin_audit.col_details")}</th>
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("createdAt")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "createdAt" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_audit.col_date")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "createdAt"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("actor")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "actor" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_audit.col_user")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "actor"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("action")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "action" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_audit.col_action")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "action"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("details")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "details" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_audit.col_details")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "details"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">

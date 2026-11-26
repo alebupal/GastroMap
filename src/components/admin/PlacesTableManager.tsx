@@ -5,12 +5,18 @@ import {
   bulkDeletePlacesAction,
   deletePlaceAction,
   mergePlacesAction,
+  undoBulkCopyAction,
   type PlaceWithDetails,
 } from "@/lib/actions/places";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
+import { BulkCopyPlacesModal } from "@/components/places/BulkCopyPlacesModal";
+import { TrashPlacesPanel } from "./TrashPlacesPanel";
+import { DataHealthPanel } from "./DataHealthPanel";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { normalizeSearchText } from "@/lib/search";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -18,20 +24,70 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 interface PlacesTableManagerProps {
   places: PlaceWithDetails[];
   occasionsList?: Array<{ id: string; name: string; icon: string }>;
+  showSpaceColumn?: boolean;
+  groupId?: string | null;
 }
+
+type PlaceSortField = "name" | "space" | "city" | "price" | "occasions" | "author" | "createdAt";
+
+const PRICE_RANK: Record<string, number> = {
+  "€": 1,
+  "€€": 2,
+  "€€€": 3,
+  "€€€€": 4,
+  "???": 5,
+};
 
 export function PlacesTableManager({
   places: initialPlaces,
   occasionsList = [],
+  showSpaceColumn = true,
+  groupId,
 }: PlacesTableManagerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
+  const [activeView, setActiveView] = useState<"active" | "health" | "trash">("active");
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
+  const healthIssuesCount = useMemo(
+    () =>
+      placesList.filter(
+        (p) =>
+          Boolean(p.googleMapsUrl && !isValidGoogleMapsUrl(p.googleMapsUrl)) ||
+          p.latitude == null ||
+          p.longitude == null ||
+          !p.occasions ||
+          p.occasions.length === 0 ||
+          !p.city?.trim()
+      ).length,
+    [placesList]
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkCopyModal, setShowBulkCopyModal] = useState(false);
+  const [lastCopyBatch, setLastCopyBatch] = useState<{
+    batchId: string;
+    copiedCount: number;
+    replacedCount: number;
+    skippedCount: number;
+    targetLabel: string;
+  } | null>(null);
+  const [undoingCopy, setUndoingCopy] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [spaceFilter, setSpaceFilter] = useState("all");
   const [countryFilter, setCountryFilter] = useState("all");
   const [cityFilter, setCityFilter] = useState("all");
+  const [sortField, setSortField] = useState<PlaceSortField>("createdAt");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
+
+  function toggleSort(field: PlaceSortField) {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir(field === "createdAt" ? "desc" : "asc");
+    }
+    setCurrentPage(1);
+  }
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -40,10 +96,56 @@ export function PlacesTableManager({
   const [mergeSearch, setMergeSearch] = useState<string>("");
   const [editingPlace, setEditingPlace] = useState<PlaceWithDetails | null>(null);
 
-  // Lista única de países y ciudades filtradas
+  // Lista única de espacios/grupos, países y ciudades filtradas
+  const spaceOptions = useMemo(() => {
+    const groupsMap = new Map<string, { name: string; icon: string; count: number }>();
+    let personalCount = 0;
+
+    placesList.forEach((p) => {
+      if (!p.groupId) {
+        personalCount++;
+      } else {
+        const cur = groupsMap.get(p.groupId);
+        if (cur) {
+          cur.count++;
+        } else {
+          groupsMap.set(p.groupId, {
+            name: p.groupName || t("nav.my_groups"),
+            icon: p.groupIcon || "🍻",
+            count: 1,
+          });
+        }
+      }
+    });
+
+    const opts = Array.from(groupsMap.entries())
+      .sort((a, b) => a[1].name.localeCompare(b[1].name, "es", { sensitivity: "base" }))
+      .map(([id, info]) => ({
+        value: id,
+        label: `${info.name} (${info.count})`,
+        icon: info.icon,
+      }));
+
+    if (personalCount > 0) {
+      opts.push({
+        value: "personal",
+        label: `${t("spaces.personal_map")} (${personalCount})`,
+        icon: "🏠",
+      });
+    }
+
+    return opts;
+  }, [placesList, t]);
+
   const { allCountries, availableCities } = useMemo(() => {
     const cSet = new Set<string>();
     placesList.forEach((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return;
+      }
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (effectiveCountry) cSet.add(effectiveCountry);
@@ -52,6 +154,12 @@ export function PlacesTableManager({
 
     const citySet = new Set<string>();
     placesList.forEach((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return;
+      }
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
       if (countryFilter === "all" || effectiveCountry === countryFilter) {
@@ -61,7 +169,7 @@ export function PlacesTableManager({
     const cities = Array.from(citySet).sort((a, b) => a.localeCompare(b));
 
     return { allCountries: countries, availableCities: cities };
-  }, [placesList, countryFilter]);
+  }, [placesList, spaceFilter, countryFilter]);
 
   const countryOptions = useMemo(() => {
     return allCountries.map((c) => {
@@ -85,10 +193,17 @@ export function PlacesTableManager({
       icon: "📍",
     }));
   }, [availableCities]);
-  // Sitios filtrados en la tabla
+  // Sitios filtrados y ordenados en la tabla
   const filteredPlaces = useMemo(() => {
     const q = normalizeSearchText(searchQuery);
-    return placesList.filter((p) => {
+    const filtered = placesList.filter((p) => {
+      if (
+        spaceFilter !== "all" &&
+        (spaceFilter === "personal" ? p.groupId !== null : p.groupId !== spaceFilter)
+      ) {
+        return false;
+      }
+
       const parsed = parseCityCountry(p.city, p.address);
       const effectiveCountry = p.country || parsed.country;
 
@@ -104,6 +219,7 @@ export function PlacesTableManager({
       const searchableText = normalizeSearchText(
         [
           p.name,
+          p.groupName || "",
           p.city || "",
           p.address || "",
           p.notes || "",
@@ -123,7 +239,49 @@ export function PlacesTableManager({
         (tokens.length > 1 && tokens.every((tok) => searchableText.includes(tok)))
       );
     });
-  }, [placesList, searchQuery, countryFilter, cityFilter]);
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      switch (sortField) {
+        case "name":
+          return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+        case "space": {
+          const sa = a.groupId ? a.groupName || "" : t("spaces.personal_map");
+          const sb = b.groupId ? b.groupName || "" : t("spaces.personal_map");
+          const cmp = sa.localeCompare(sb, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "city": {
+          const ca = a.city || "";
+          const cb = b.city || "";
+          const cmp = ca.localeCompare(cb, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "price": {
+          const pa = PRICE_RANK[a.priceRange] ?? 9;
+          const pb = PRICE_RANK[b.priceRange] ?? 9;
+          return pa !== pb ? (pa - pb) * dir : a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+        }
+        case "occasions": {
+          const oa = a.occasions[0] || "";
+          const ob = b.occasions[0] || "";
+          const cmp = oa.localeCompare(ob, "es", { sensitivity: "base" }) * dir;
+          return cmp !== 0 ? cmp : (a.occasions.length - b.occasions.length) * dir;
+        }
+        case "author": {
+          const aa = a.createdByUsername || a.createdByName || "";
+          const ab = b.createdByUsername || b.createdByName || "";
+          return aa.localeCompare(ab, "es", { sensitivity: "base" }) * dir;
+        }
+        case "createdAt":
+        default: {
+          const ta = new Date(a.createdAt).getTime();
+          const tb = new Date(b.createdAt).getTime();
+          return (ta - tb) * dir;
+        }
+      }
+    });
+  }, [placesList, searchQuery, spaceFilter, countryFilter, cityFilter, sortField, sortDir, t]);
 
   // Selección individual
   function toggleSelect(id: string) {
@@ -263,15 +421,18 @@ export function PlacesTableManager({
   const mergeCandidates = useMemo(() => {
     if (!mergeSource) return [];
     const q = normalizeSearchText(mergeSearch);
-    return placesList.filter((p) => {
-      if (p.id === mergeSource.id) return false;
-      if (!q) return true;
-      return (
-        normalizeSearchText(p.name).includes(q) ||
-        (p.city && normalizeSearchText(p.city).includes(q)) ||
-        (p.address && normalizeSearchText(p.address).includes(q))
-      );
-    });
+    return placesList
+      .filter((p) => {
+        if (p.id === mergeSource.id) return false;
+        if (p.groupId !== mergeSource.groupId) return false;
+        if (!q) return true;
+        return (
+          normalizeSearchText(p.name).includes(q) ||
+          (p.city && normalizeSearchText(p.city).includes(q)) ||
+          (p.address && normalizeSearchText(p.address).includes(q))
+        );
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
   }, [placesList, mergeSource, mergeSearch]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPlaces.length / pageSize));
@@ -286,6 +447,91 @@ export function PlacesTableManager({
 
   return (
     <div className="w-full space-y-4 text-left">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <SegmentedTabs
+          value={activeView}
+          onChange={setActiveView}
+          ariaLabel={t("admin_places.title")}
+          items={[
+            {
+              id: "active",
+              label: t("admin_places.active_tab"),
+              icon: "storefront",
+              badge: placesList.length,
+            },
+            {
+              id: "health",
+              label: t("data_health.tab_label"),
+              icon: "health_and_safety",
+              badge: healthIssuesCount,
+            },
+            {
+              id: "trash",
+              label: t("trash.tab_label"),
+              icon: "delete_sweep",
+            },
+          ]}
+        />
+      </div>
+
+      {activeView === "health" ? (
+        <div className="gm-tab-in">
+          <DataHealthPanel places={placesList} occasionsList={occasionsList} />
+        </div>
+      ) : activeView === "trash" ? (
+        <div className="gm-tab-in">
+          <TrashPlacesPanel
+            groupId={groupId}
+            onRestored={() => {
+              if (typeof window !== "undefined") window.location.reload();
+            }}
+          />
+        </div>
+      ) : (
+      <div className="space-y-4 gm-tab-in">
+      {lastCopyBatch && (
+        <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex flex-wrap items-center justify-between gap-2 text-xs text-emerald-900 dark:text-emerald-200">
+          <span className="font-bold">
+            {t("bulk_copy.result_banner", {
+              copied: lastCopyBatch.copiedCount,
+              replaced: lastCopyBatch.replacedCount,
+              skipped: lastCopyBatch.skippedCount,
+              target: lastCopyBatch.targetLabel,
+            })}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={undoingCopy}
+              onClick={async () => {
+                setUndoingCopy(true);
+                const res = await undoBulkCopyAction(lastCopyBatch.batchId);
+                setUndoingCopy(false);
+                if (res.error) {
+                  toast(res.error, { kind: "error" });
+                } else {
+                  toast(t("bulk_copy.undone_toast"), { kind: "success" });
+                  setLastCopyBatch(null);
+                  if (typeof window !== "undefined") window.location.reload();
+                }
+              }}
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold cursor-pointer transition disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-sm leading-none">undo</span>
+              <span>{undoingCopy ? t("common.loading") : t("bulk_copy.undo_btn")}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setLastCopyBatch(null)}
+              className="text-xs opacity-60 hover:opacity-100 cursor-pointer px-1"
+              aria-label={t("common.close")}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Barra de control y búsqueda */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 flex-1">
@@ -305,7 +551,32 @@ export function PlacesTableManager({
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap sm:items-center gap-2">
+          {showSpaceColumn && spaceOptions.length > 0 && (
+            <SearchableSelect
+              value={spaceFilter}
+              onChange={(val) => {
+                setSpaceFilter(val);
+                setCountryFilter("all");
+                setCityFilter("all");
+                setCurrentPage(1);
+              }}
+              options={spaceOptions}
+              allOption={{
+                value: "all",
+                label: `${t("admin_places.all_spaces")} (${spaceOptions.length})`,
+                icon: (
+                  <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                    workspaces
+                  </span>
+                ),
+              }}
+              searchPlaceholder={t("admin_places.search_space_placeholder")}
+              className="w-full sm:w-auto sm:shrink-0"
+              buttonClassName="w-full sm:w-auto bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-700"
+            />
+          )}
+
           {allCountries.length > 0 && (
             <SearchableSelect
               value={countryFilter}
@@ -361,6 +632,15 @@ export function PlacesTableManager({
             <>
               <button
                 type="button"
+                onClick={() => setShowBulkCopyModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 transition cursor-pointer shadow-xs"
+              >
+                <span className="material-symbols-outlined text-sm leading-none">library_add</span>
+                <span>{t("bulk_copy.btn_copy_to", { count: selectedIds.size })}</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleBulkBackup}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer shadow-md shadow-orange-600/20"
                 title={t("admin_places.bulk_backup_title")}
@@ -409,7 +689,7 @@ export function PlacesTableManager({
       {/* Vista Móvil: Tarjetas Responsive (< md) */}
       <div className="block md:hidden space-y-2.5">
         {paginatedPlaces.length > 0 && (
-          <div className="flex items-center justify-between px-2 py-1 text-xs text-slate-600 dark:text-slate-400 font-semibold">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1 text-xs text-slate-600 dark:text-slate-400 font-semibold">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -419,7 +699,36 @@ export function PlacesTableManager({
               />
               <span>{t("admin_places.col_select_all")}</span>
             </label>
-            <span>{paginatedPlaces.length} {t("pagination.places")}</span>
+            <div className="flex items-center gap-1.5">
+              <select
+                value={sortField}
+                onChange={(e) => {
+                  const next = e.target.value as PlaceSortField;
+                  setSortField(next);
+                  setSortDir(next === "createdAt" ? "desc" : "asc");
+                  setCurrentPage(1);
+                }}
+                aria-label={t("common.sort_by")}
+                className="px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+              >
+                <option value="createdAt">{t("common.sort_date")}</option>
+                <option value="name">{t("admin_places.col_place")}</option>
+                {showSpaceColumn && <option value="space">{t("spaces.belonging_space")}</option>}
+                <option value="city">{t("admin_places.col_city")}</option>
+                <option value="price">{t("admin_places.col_price")}</option>
+                <option value="author">{t("admin_places.col_author")}</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => setSortDir((prev) => (prev === "asc" ? "desc" : "asc"))}
+                className="p-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 cursor-pointer"
+                aria-label={t("common.sort_by")}
+              >
+                <span className="material-symbols-outlined text-sm leading-none block">
+                  {sortDir === "asc" ? "arrow_upward" : "arrow_downward"}
+                </span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -552,19 +861,142 @@ export function PlacesTableManager({
                     title={t("admin_places.col_select_all")}
                   />
                 </th>
-                <th className="p-3">{t("admin_places.col_place")}</th>
-                <th className="p-3">{t("admin_places.col_city")}</th>
-                <th className="p-3">{t("admin_places.col_price")}</th>
-                <th className="p-3">{t("admin_places.col_occasions")}</th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("name")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "name" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_place")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "name"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                {showSpaceColumn && (
+                  <th className="p-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleSort("space")}
+                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                        sortField === "space" ? "text-orange-600 dark:text-orange-400" : ""
+                      }`}
+                    >
+                      <span>{t("admin_places.col_space")}</span>
+                      <span className="material-symbols-outlined text-[14px] leading-none">
+                        {sortField === "space"
+                          ? sortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                  </th>
+                )}
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("city")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "city" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_city")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "city"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("price")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "price" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_price")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "price"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("occasions")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "occasions" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_occasions")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "occasions"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
                 <th className="p-3">{t("admin_places.col_gps")}</th>
-                <th className="p-3">{t("admin_places.col_author")}</th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("author")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "author" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_author")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "author"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("createdAt")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "createdAt" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("common.sort_date")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "createdAt"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
                 <th className="p-3 text-right">{t("admin_places.col_action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {paginatedPlaces.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-500 text-xs">
+                  <td colSpan={showSpaceColumn ? 10 : 9} className="p-8 text-center text-slate-500 text-xs">
                     {t("admin_places.empty_search")}
                   </td>
                 </tr>
@@ -594,6 +1026,17 @@ export function PlacesTableManager({
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{place.address}</div>
                         )}
                       </td>
+
+                      {showSpaceColumn && (
+                        <td className="p-3 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-900/50">
+                            <span>{place.groupId ? place.groupIcon || "🍻" : "🏠"}</span>
+                            <span className="truncate max-w-[110px]">
+                              {place.groupId ? place.groupName || t("nav.my_groups") : t("spaces.personal_short")}
+                            </span>
+                          </span>
+                        </td>
+                      )}
 
                       <td className="p-3 whitespace-nowrap text-slate-700 dark:text-slate-300">
                         {place.city || <span className="text-slate-400 dark:text-slate-600">—</span>}
@@ -631,6 +1074,13 @@ export function PlacesTableManager({
 
                       <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
                         @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
+                        {new Date(place.createdAt).toLocaleDateString(
+                          locale === "en" ? "en-GB" : "es-ES",
+                          { day: "2-digit", month: "short", year: "numeric" }
+                        )}
                       </td>
 
                       <td className="p-3 text-right whitespace-nowrap">
@@ -803,6 +1253,28 @@ export function PlacesTableManager({
           isOpen={true}
           onClose={() => setEditingPlace(null)}
         />
+      )}
+
+      {/* Modal de copia masiva a otro espacio */}
+      <BulkCopyPlacesModal
+        isOpen={showBulkCopyModal}
+        placeIds={Array.from(selectedIds)}
+        onClose={() => setShowBulkCopyModal(false)}
+        onCompleted={(res) => {
+          setLastCopyBatch(res);
+          setSelectedIds(new Set());
+          toast(
+            t("bulk_copy.result_banner", {
+              copied: res.copiedCount,
+              replaced: res.replacedCount,
+              skipped: res.skippedCount,
+              target: res.targetLabel,
+            }),
+            { kind: "success" }
+          );
+        }}
+      />
+      </div>
       )}
     </div>
   );

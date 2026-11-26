@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import {
   createPlaceAction,
   parseUrlAction,
   findPotentialDuplicatesAction,
+  checkPlaceAcrossSpacesAction,
   type PotentialDuplicate,
+  type CrossSpaceMatch,
 } from "@/lib/actions/places";
 import { TagInput } from "@/components/places/TagInput";
 import { OccasionPicker } from "@/components/places/OccasionPicker";
@@ -15,6 +18,7 @@ import type { Occasion } from "@/db/schema";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { formatCityCountry } from "@/lib/location";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 
 const PRICE_OPTIONS = [
   { id: "???", hint: "Sin estimación" },
@@ -29,7 +33,8 @@ interface NewPlaceFormProps {
   initialTitle?: string;
   availableOccasions: Occasion[];
   popularTags?: string[];
-  availableGroups?: Array<{ id: string; name: string }>;
+  availableGroups?: Array<{ id: string; name: string; icon?: string }>;
+  defaultTargetSpace?: string;
 }
 
 export function NewPlaceForm({
@@ -38,6 +43,7 @@ export function NewPlaceForm({
   availableOccasions,
   popularTags = [],
   availableGroups = [],
+  defaultTargetSpace = "personal",
 }: NewPlaceFormProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -52,42 +58,83 @@ export function NewPlaceForm({
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
-  const [isCommunityPublished, setIsCommunityPublished] = useState(true);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [targetSpace, setTargetSpace] = useState<string>(defaultTargetSpace ?? "personal");
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [duplicates, setDuplicates] = useState<PotentialDuplicate[]>([]);
   const [dismissedDuplicates, setDismissedDuplicates] = useState(false);
+  const [crossSpaceMatches, setCrossSpaceMatches] = useState<CrossSpaceMatch[]>([]);
+  const [dismissedCrossSpace, setDismissedCrossSpace] = useState(false);
+  const [allowNonMapsUrl, setAllowNonMapsUrl] = useState(false);
 
-  // Detección automática en vivo de posibles establecimientos duplicados
+  const isNonMapsUrl = Boolean(url.trim()) && !isValidGoogleMapsUrl(url);
+  const hasUnresolvedNonMapsUrl = isNonMapsUrl && !allowNonMapsUrl;
+  const activeGroupInfo = availableGroups.find((g) => g.id === targetSpace);
+
+  const spaceSelectOptions = useMemo(
+    () => [
+      ...[...availableGroups]
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .map((g) => ({
+          value: g.id,
+          label: g.name,
+          icon: g.icon || "🍻",
+          subtitle: t("spaces.group_destination_sub"),
+        })),
+      {
+        value: "personal",
+        label: t("spaces.personal_map"),
+        icon: "🏠",
+        subtitle: t("spaces.personal_subtitle"),
+      },
+    ],
+    [availableGroups, t]
+  );
+
+  // Detección automática en vivo de posibles establecimientos duplicados dentro del espacio destino
   useEffect(() => {
     const parsedLat = lat ? parseFloat(lat) : null;
     const parsedLng = lng ? parseFloat(lng) : null;
     const hasCoords =
       parsedLat !== null && !isNaN(parsedLat) && parsedLng !== null && !isNaN(parsedLng);
 
-    if (name.trim().length < 3 && !hasCoords) {
+    if (name.trim().length < 3 && !hasCoords && !url.trim()) {
       setDuplicates([]);
+      setCrossSpaceMatches([]);
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
-        const found = await findPotentialDuplicatesAction({
-          name: name.trim(),
-          latitude: hasCoords ? parsedLat : null,
-          longitude: hasCoords ? parsedLng : null,
-        });
+        const [found, cross] = await Promise.all([
+          name.trim().length >= 3 || hasCoords
+            ? findPotentialDuplicatesAction({
+                name: name.trim(),
+                latitude: hasCoords ? parsedLat : null,
+                longitude: hasCoords ? parsedLng : null,
+                targetSpace,
+              })
+            : Promise.resolve([]),
+          checkPlaceAcrossSpacesAction({
+            name: name.trim(),
+            latitude: hasCoords ? parsedLat : null,
+            longitude: hasCoords ? parsedLng : null,
+            googleMapsUrl: url.trim() || null,
+            targetSpace,
+          }),
+        ]);
         setDuplicates(found);
         setDismissedDuplicates(false);
+        setCrossSpaceMatches(cross.inOtherSpaces);
+        setDismissedCrossSpace(false);
       } catch {
         // Silenciar error de comprobación no bloqueante
       }
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [name, lat, lng]);
+  }, [name, lat, lng, url, targetSpace]);
 
   async function handleAutoResolve(rawUrl?: string) {
     const target = (rawUrl ?? url).trim();
@@ -102,7 +149,10 @@ export function NewPlaceForm({
     setResolving(true);
     setError(null);
     try {
-      const parsed = await parseUrlAction(target);
+      const parsed = await parseUrlAction(target, targetSpace);
+      if (parsed.quotaExceeded) {
+        toast(t("form.places_api_quota_exceeded"), { kind: "info" });
+      }
       if (!parsed.latitude && !parsed.name) {
         toast(t("form.import_nothing"), { kind: "info" });
       } else {
@@ -184,6 +234,39 @@ export function NewPlaceForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 text-left">
+      {/* Banner de espacio activo de destino */}
+      <div
+        className={`p-3 sm:px-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 text-xs ${
+          !targetSpace
+            ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800/70 text-amber-900 dark:text-amber-200"
+            : "bg-[#f2f3ff] dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-200"
+        }`}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-base leading-none shrink-0">
+            {!targetSpace ? "🌍" : activeGroupInfo ? activeGroupInfo.icon || "🍻" : "🏠"}
+          </span>
+          <span className="font-bold truncate">
+            {!targetSpace
+              ? t("form.select_space_required")
+              : t("form.adding_to_space", {
+                  space: activeGroupInfo ? activeGroupInfo.name : t("spaces.personal_map"),
+                })}
+          </span>
+        </div>
+
+        <SearchableSelect
+          value={targetSpace}
+          onChange={setTargetSpace}
+          options={spaceSelectOptions}
+          placeholder={t("form.choose_space_placeholder")}
+          searchPlaceholder={t("admin_places.search_space_placeholder")}
+          ariaLabel={t("spaces.destination_space_title")}
+          className="w-full sm:w-auto sm:min-w-[230px] shrink-0"
+          buttonClassName="w-full sm:w-auto bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-orange-400"
+        />
+      </div>
+
       {error && (
         <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
           <span className="material-symbols-outlined text-base shrink-0">error</span>
@@ -219,12 +302,16 @@ export function NewPlaceForm({
               type="url"
               name="googleMapsUrl"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                setAllowNonMapsUrl(false);
+              }}
               onPaste={(e) => {
                 const pasted = e.clipboardData.getData("text").trim();
                 if (/https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
                   e.preventDefault();
                   setUrl(pasted);
+                  setAllowNonMapsUrl(false);
                   setTimeout(() => handleAutoResolve(pasted), 0);
                 }
               }}
@@ -245,13 +332,35 @@ export function NewPlaceForm({
           </button>
         </div>
 
-        {/^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(url.trim()) &&
-        !/\/maps\b/i.test(url.trim()) ? (
-          <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 font-semibold leading-snug">
-            <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
-              warning
-            </span>
-            <span>{t("form.google_search_url_warning")}</span>
+        {isNonMapsUrl ? (
+          <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 space-y-2">
+            <div className="flex items-start gap-2 font-semibold leading-snug">
+              <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
+                warning
+              </span>
+              <span>{t("form.non_maps_url_warning")}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setUrl("");
+                  setAllowNonMapsUrl(false);
+                }}
+                className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 cursor-pointer transition"
+              >
+                {t("form.remove_url_btn")}
+              </button>
+              {!allowNonMapsUrl && (
+                <button
+                  type="button"
+                  onClick={() => setAllowNonMapsUrl(true)}
+                  className="px-2.5 py-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold cursor-pointer transition"
+                >
+                  {t("form.keep_url_anyway_btn")}
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
@@ -282,7 +391,66 @@ export function NewPlaceForm({
           className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-base sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-bold transition"
         />
 
-        {/* Aviso no bloqueante de posibles duplicados */}
+          {/* Aviso de local existente en otro espacio (Punto 4A: Detectar e importar) */}
+          {crossSpaceMatches.length > 0 && !dismissedCrossSpace && (
+            <div className="mt-2 p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-800/60 space-y-2 gm-tab-in">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-extrabold text-sky-900 dark:text-sky-200 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-sky-600 leading-none">
+                    content_paste_go
+                  </span>
+                  <span>{t("form.cross_space_found_title")}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDismissedCrossSpace(true)}
+                  className="text-xs text-sky-700 dark:text-sky-300 opacity-70 hover:opacity-100 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                {crossSpaceMatches.map((m) => (
+                  <div
+                    key={m.id}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-900/80 border border-sky-200/70 dark:border-sky-800/50 flex items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {m.name} · {m.spaceIcon} {m.spaceName}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {[m.city, m.address].filter(Boolean).join(" — ")}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(m.name);
+                        if (m.address) setAddress(m.address);
+                        if (m.city) setCity(m.city);
+                        if (m.latitude != null) setLat(String(m.latitude));
+                        if (m.longitude != null) setLng(String(m.longitude));
+                        if (m.googleMapsUrl) {
+                          setUrl(m.googleMapsUrl);
+                          setAllowNonMapsUrl(false);
+                        }
+                        setDismissedCrossSpace(true);
+                        toast(t("form.cross_space_imported_toast", { space: m.spaceName }), {
+                          kind: "success",
+                        });
+                      }}
+                      className="px-3 py-1 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold shrink-0 cursor-pointer transition"
+                    >
+                      {t("form.cross_space_import_btn")}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Aviso no bloqueante de posibles duplicados */}
         {duplicates.length > 0 && !dismissedDuplicates && (
           <div className="mt-2 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800/60 space-y-2 animate-in fade-in duration-150">
             <div className="flex items-start justify-between gap-2">
@@ -456,134 +624,8 @@ export function NewPlaceForm({
         />
       </section>
 
-      {/* 8. Tarjeta: Visibilidad de la ficha */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs space-y-3">
-        <div>
-          <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-            {t("form.visibility_label")}
-          </h2>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            {t("form.visibility_hint")}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              setIsCommunityPublished(true);
-              setSelectedGroupIds([]);
-            }}
-            className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-              isCommunityPublished
-                ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
-                : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-950/60 flex items-center justify-center text-base shrink-0">
-                🌍
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                  {t("form.visibility_community")}
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Visible en el mapa global y listas colaborativas
-                </div>
-              </div>
-            </div>
-            <span
-              className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                isCommunityPublished
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "border-slate-300 dark:border-slate-600"
-              }`}
-            >
-              {isCommunityPublished && (
-                <span className="material-symbols-outlined text-xs leading-none">check</span>
-              )}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsCommunityPublished(false)}
-            className={`p-3.5 rounded-2xl border text-left flex items-center justify-between gap-3 transition cursor-pointer ${
-              !isCommunityPublished
-                ? "bg-orange-50/80 dark:bg-orange-950/30 border-orange-500 shadow-xs"
-                : "bg-[#f8f9ff] dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
-            }`}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-slate-200/80 dark:bg-slate-700 flex items-center justify-center text-base shrink-0">
-                🔒
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
-                  {t("form.visibility_private")}
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Solo visible para ti y tus grupos cerrados
-                </div>
-              </div>
-            </div>
-            <span
-              className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border ${
-                !isCommunityPublished
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "border-slate-300 dark:border-slate-600"
-              }`}
-            >
-              {!isCommunityPublished && (
-                <span className="material-symbols-outlined text-xs leading-none">check</span>
-              )}
-            </span>
-          </button>
-        </div>
-
-        <input
-          type="hidden"
-          name="communityPublished"
-          value={isCommunityPublished ? "true" : "false"}
-        />
-
-        {/* Compartición con grupos privados */}
-        {!isCommunityPublished && availableGroups.length > 0 && (
-          <div className="pt-2 space-y-2 border-t border-slate-100 dark:border-slate-800">
-            <span className="block text-[11px] font-bold text-slate-500 dark:text-slate-400">
-              {t("form.share_groups_title")}
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {availableGroups.map((g) => {
-                const active = selectedGroupIds.includes(g.id);
-                return (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() =>
-                      setSelectedGroupIds((prev) =>
-                        prev.includes(g.id) ? prev.filter((id) => id !== g.id) : [...prev, g.id]
-                      )
-                    }
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition cursor-pointer flex items-center gap-1.5 ${
-                      active
-                        ? "bg-orange-600 border-orange-600 text-white shadow-xs"
-                        : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                    }`}
-                  >
-                    <span>👥 {g.name}</span>
-                    {active && <span className="text-[10px]">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-            {selectedGroupIds.map((gid) => (
-              <input key={gid} type="hidden" name="sharedGroups" value={gid} />
-            ))}
-          </div>
-        )}
-      </section>
+      {/* 8. Campo oculto del espacio destino (gestionado desde el banner superior) */}
+      <input type="hidden" name="targetSpace" value={targetSpace} />
 
       {/* Botones finales */}
       <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
@@ -595,7 +637,7 @@ export function NewPlaceForm({
         </Link>
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || hasUnresolvedNonMapsUrl || !targetSpace}
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-orange-600/25 transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
         >
           <span className="material-symbols-outlined text-base leading-none">add_location_alt</span>

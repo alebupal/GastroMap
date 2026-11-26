@@ -22,6 +22,19 @@ import {
   invalidateSession,
 } from "@/lib/auth";
 import { LOCALE_COOKIE, isLocale } from "@/lib/i18n/config";
+import { isPublicRegistrationEnabled } from "@/lib/actions/settings";
+import {
+  ACTIVE_SPACE_COOKIE,
+  buildScopeKey,
+  ensureDefaultOccasionsForScope,
+} from "@/lib/workspace";
+
+function sanitizeCallbackUrl(raw: unknown): string {
+  if (typeof raw !== "string") return "/";
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//")) return "/";
+  return trimmed;
+}
 
 export interface ActionResult {
   success?: boolean;
@@ -77,10 +90,106 @@ export async function setupAdminAction(formData: FormData): Promise<ActionResult
     })
     .returning();
 
+  await ensureDefaultOccasionsForScope(buildScopeKey(null, newUser.id));
+
   const session = await createSession(newUser.id);
   await setSessionCookie(session.id, session.expiresAt);
 
   redirect("/");
+}
+
+/**
+ * Registro público abierto (/register) cuando allow_public_registration !== 'false'.
+ * Crea al usuario con su «Mapa Personal» inicializado y redirige a callbackUrl o '/'.
+ */
+export async function registerPublicAction(formData: FormData): Promise<ActionResult> {
+  const enabled = await isPublicRegistrationEnabled();
+  if (!enabled) {
+    return {
+      error: "El registro público está desactivado en este momento. Solicita una invitación.",
+    };
+  }
+
+  const reg = await rateLimit("public-register", 6, 15 * 60 * 1000);
+  if (!reg.allowed) {
+    const mins = Math.max(1, Math.ceil(reg.retryAfterSec / 60));
+    return { error: `Demasiados intentos de registro. Espera ${mins} min.` };
+  }
+
+  const name = (formData.get("name") as string)?.trim();
+  const rawUsername = (formData.get("username") as string)?.trim().toLowerCase().replace(/^@/, "");
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+  const callbackUrl = sanitizeCallbackUrl(formData.get("callbackUrl"));
+
+  if (!name || name.length < 2) {
+    return { error: "El nombre debe tener al menos 2 caracteres." };
+  }
+  const username = rawUsername || email?.split("@")[0]?.replace(/[^a-z0-9_-]/g, "");
+  if (!username || username.length < 3) {
+    return { error: "El nombre de usuario (@username) debe tener al menos 3 caracteres." };
+  }
+  if (!/^[a-z0-9_-]+$/.test(username)) {
+    return {
+      error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.",
+    };
+  }
+  if (!email || !email.includes("@")) {
+    return { error: "Introduce un correo electrónico válido." };
+  }
+  if (!password || password.length < 8) {
+    return { error: "La contraseña debe tener al menos 8 caracteres." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "Las contraseñas no coinciden." };
+  }
+
+  const [existingUser] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(or(eq(users.email, email), eq(users.username, username)))
+    .limit(1);
+
+  if (existingUser) {
+    return { error: "Ya existe una cuenta con este correo o nombre de usuario." };
+  }
+
+  const passwordHash = await hashPassword(password);
+
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      name,
+      username,
+      email,
+      passwordHash,
+      role: "user",
+    })
+    .returning();
+
+  // Inicializar los 8 planes base de su Mapa Personal
+  await ensureDefaultOccasionsForScope(buildScopeKey(null, newUser.id));
+
+  const cookieStore = await (await import("next/headers")).cookies();
+  cookieStore.set(ACTIVE_SPACE_COOKIE, "personal", {
+    path: "/",
+    maxAge: 31536000,
+    sameSite: "lax",
+  });
+
+  await logAudit({
+    actorUserId: newUser.id,
+    entityType: "user",
+    entityId: newUser.id,
+    action: "user_registered_public",
+    metadata: { username },
+  });
+
+  const session = await createSession(newUser.id);
+  await setSessionCookie(session.id, session.expiresAt);
+
+  redirect(callbackUrl);
 }
 
 /**
@@ -136,7 +245,8 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     });
   }
 
-  redirect("/");
+  const callbackUrl = sanitizeCallbackUrl(formData.get("callbackUrl"));
+  redirect(callbackUrl);
 }
 
 /**

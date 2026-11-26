@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { updatePlaceAction, parseUrlAction, type PlaceWithDetails } from "@/lib/actions/places";
-import { getMyGroupsAction } from "@/lib/actions/groups";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { TagInput } from "./TagInput";
 import { OccasionPicker } from "./OccasionPicker";
 import { LocationPicker } from "./LocationPicker";
 import { formatCityCountry } from "@/lib/location";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 
 const PRICE_OPTIONS = [
@@ -47,13 +47,14 @@ export function EditPlaceModal({
   const [priceRange, setPriceRange] = useState(place.priceRange || "???");
   const [selectedOccasions, setSelectedOccasions] = useState<string[]>(place.occasions || []);
   const [notes, setNotes] = useState(place.notes || "");
-  const [communityPublished, setCommunityPublished] = useState<boolean>(place.communityPublished);
-  const [availableGroups, setAvailableGroups] = useState<Array<{ id: string; name: string }>>([]);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(place.sharedGroupIds || []);
 
   const [resolving, setResolving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allowNonMapsUrl, setAllowNonMapsUrl] = useState(false);
+
+  const isNonMapsUrl = Boolean(googleMapsUrl.trim()) && !isValidGoogleMapsUrl(googleMapsUrl);
+  const hasUnresolvedNonMapsUrl = isNonMapsUrl && !allowNonMapsUrl;
 
   // Asegurar que las ocasiones de la ficha se muestren aunque la lista externa viniera parcial
   const mergedOccasions = useMemo(() => {
@@ -69,9 +70,6 @@ export function EditPlaceModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    getMyGroupsAction()
-      .then((groups) => setAvailableGroups(groups.map((g) => ({ id: g.id, name: g.name }))))
-      .catch(() => { });
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
@@ -156,13 +154,9 @@ export function EditPlaceModal({
     formData.set("longitude", lng);
     formData.set("priceRange", priceRange);
     formData.set("notes", notes);
-    formData.set("communityPublished", communityPublished ? "true" : "false");
 
     formData.delete("occasions");
     selectedOccasions.forEach((occ) => formData.append("occasions", occ));
-
-    formData.delete("sharedGroups");
-    selectedGroupIds.forEach((gid) => formData.append("sharedGroups", gid));
 
     const res = await updatePlaceAction(place.id, formData);
     setSaving(false);
@@ -264,12 +258,16 @@ export function EditPlaceModal({
               <input
                 type="url"
                 value={googleMapsUrl}
-                onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                onChange={(e) => {
+                  setGoogleMapsUrl(e.target.value);
+                  setAllowNonMapsUrl(false);
+                }}
                 onPaste={(e) => {
                   const pasted = e.clipboardData.getData("text").trim();
                   if (/https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
                     e.preventDefault();
                     setGoogleMapsUrl(pasted);
+                    setAllowNonMapsUrl(false);
                     setTimeout(() => handleAutoResolve(pasted), 0);
                   }
                 }}
@@ -288,15 +286,37 @@ export function EditPlaceModal({
                 <span>{resolving ? t("form.analyzing") : t("form.analyze_button")}</span>
               </button>
             </div>
-            {/^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(googleMapsUrl.trim()) &&
-              !/\/maps\b/i.test(googleMapsUrl.trim()) && (
-                <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 font-semibold leading-snug">
+            {isNonMapsUrl && (
+              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-200 space-y-2">
+                <div className="flex items-start gap-2 font-semibold leading-snug">
                   <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
                     warning
                   </span>
-                  <span>{t("form.google_search_url_warning")}</span>
+                  <span>{t("form.non_maps_url_warning")}</span>
                 </div>
-              )}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGoogleMapsUrl("");
+                      setAllowNonMapsUrl(false);
+                    }}
+                    className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-[11px] font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-100 cursor-pointer transition"
+                  >
+                    {t("form.remove_url_btn")}
+                  </button>
+                  {!allowNonMapsUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setAllowNonMapsUrl(true)}
+                      className="px-2.5 py-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold cursor-pointer transition"
+                    >
+                      {t("form.keep_url_anyway_btn")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Ubicación */}
@@ -363,74 +383,19 @@ export function EditPlaceModal({
             />
           </div>
 
-          {/* Visibilidad */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              {t("form.visibility_label")}
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setCommunityPublished(true);
-                  setSelectedGroupIds([]);
-                }}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${communityPublished
-                  ? "bg-orange-500/10 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
-                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                  }`}
-              >
-                <span>🌍</span>
-                <span>{t("form.visibility_community")}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setCommunityPublished(false)}
-                className={`py-2 px-3 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition cursor-pointer ${!communityPublished
-                  ? "bg-orange-500/10 border-orange-600 text-orange-700 dark:text-orange-400 font-bold"
-                  : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400"
-                  }`}
-              >
-                <span>🔒</span>
-                <span>{t("form.visibility_private")}</span>
-              </button>
-            </div>
-
-            {!communityPublished && availableGroups.length > 0 && (
-              <div className="mt-2.5 space-y-1.5">
-                <span className="block text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                  {t("form.share_groups_title")}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {availableGroups.map((g) => {
-                    const active = selectedGroupIds.includes(g.id);
-                    return (
-                      <button
-                        key={g.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedGroupIds((prev) =>
-                            prev.includes(g.id)
-                              ? prev.filter((id) => id !== g.id)
-                              : [...prev, g.id]
-                          )
-                        }
-                        className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition cursor-pointer flex items-center gap-1 ${active
-                          ? "bg-blue-600 border-blue-600 text-white shadow-xs"
-                          : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                          }`}
-                      >
-                        <span className="inline-flex items-center gap-1">
-                          <span className="material-symbols-outlined text-xs leading-none">group</span>
-                          <span>{g.name}</span>
-                        </span>
-                        {active && <span className="text-[10px]">✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {/* Espacio actual del sitio (aislado en v2) */}
+          <div className="p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+            <span className="font-semibold text-slate-500 dark:text-slate-400">
+              {t("spaces.belonging_space")}
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 border border-orange-200/70 dark:border-orange-800/60 font-bold">
+              <span>{place.groupId ? "🍻" : "🏠"}</span>
+              <span>
+                {place.groupId
+                  ? (place as { groupName?: string | null }).groupName || t("nav.my_groups")
+                  : t("spaces.personal_map")}
+              </span>
+            </span>
           </div>
 
           {/* Acciones */}
@@ -444,7 +409,7 @@ export function EditPlaceModal({
             </button>
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || hasUnresolvedNonMapsUrl}
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs shadow-sm transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               <span className="material-symbols-outlined text-sm leading-none">save</span>

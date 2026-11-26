@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
 import { parseCityCountry } from "@/lib/location";
+import { buildScopeKey, getActiveWorkspace, getGroupMembership } from "@/lib/workspace";
 
 export interface ImportPlacePayload {
   name: string;
@@ -28,7 +29,8 @@ export interface ImportPlacePayload {
 
 export async function importPlacesAction(
   items: ImportPlacePayload[],
-  communityPublished: boolean = true
+  communityPublished: boolean = true,
+  explicitTargetSpace?: string | null
 ): Promise<{ success?: boolean; importedCount?: number; skippedCount?: number; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser) {
@@ -38,6 +40,29 @@ export async function importPlacesAction(
   if (!Array.isArray(items) || items.length === 0) {
     return { error: "No hay establecimientos válidos para importar." };
   }
+
+  let targetGroupId: string | null = null;
+  if (explicitTargetSpace !== undefined && explicitTargetSpace !== null) {
+    if (explicitTargetSpace === "personal") {
+      targetGroupId = null;
+    } else {
+      const gid = explicitTargetSpace.startsWith("group:")
+        ? explicitTargetSpace.slice("group:".length)
+        : explicitTargetSpace;
+      const membership = await getGroupMembership(currentUser.id, gid);
+      if (!membership.isMember && currentUser.role !== "admin") {
+        return { error: "No perteneces al grupo destino." };
+      }
+      targetGroupId = gid;
+    }
+  } else if (!communityPublished) {
+    targetGroupId = null;
+  } else {
+    const ws = await getActiveWorkspace();
+    targetGroupId = ws?.mode === "group" ? ws.groupId : null;
+  }
+
+  const scopeKey = buildScopeKey(targetGroupId, currentUser.id);
 
   const maxBatch = 300;
   const toProcess = items.slice(0, maxBatch);
@@ -67,6 +92,7 @@ export async function importPlacesAction(
     const [created] = await db
       .insert(places)
       .values({
+        groupId: targetGroupId,
         name: cleanName.slice(0, 255),
         city: cleanCity,
         country: inferredCountry,
@@ -78,7 +104,7 @@ export async function importPlacesAction(
         website: raw.website?.trim() || null,
         phone: raw.phone?.trim()?.slice(0, 50) || null,
         notes: raw.notes?.trim() || null,
-        communityPublished,
+        communityPublished: targetGroupId !== null,
         createdById: currentUser.id,
       })
       .returning();
@@ -97,6 +123,7 @@ export async function importPlacesAction(
           occs.map((occId) => {
             const known = KNOWN_OCCASIONS[occId];
             return {
+              scopeKey,
               id: occId,
               name: known
                 ? known.name
@@ -122,7 +149,7 @@ export async function importPlacesAction(
     if (cleanTags.length > 0) {
       await db
         .insert(tags)
-        .values(cleanTags.map((t) => ({ id: t, name: t })))
+        .values(cleanTags.map((t) => ({ scopeKey, id: t, name: t })))
         .onConflictDoNothing();
       await db.insert(placeTags).values(
         cleanTags.map((t) => ({ placeId: created.id, tag: t }))
@@ -172,7 +199,7 @@ export async function importPlacesAction(
     entityType: "place",
     entityId: "bulk_import",
     action: "places_imported",
-    metadata: { importedCount, skippedCount, communityPublished },
+    metadata: { importedCount, skippedCount, groupId: targetGroupId },
   });
 
   revalidatePath("/");

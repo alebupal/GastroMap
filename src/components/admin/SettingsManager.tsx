@@ -5,6 +5,7 @@ import {
   saveSettingAction,
   resetApplicationAction,
   testGooglePlacesApiKeyAction,
+  getGlobalApiUsageAction,
 } from "@/lib/actions/settings";
 import { clearAppOfflineCache, getBrowserCacheEstimate } from "@/lib/cache";
 import { APP_VERSION } from "@/lib/version";
@@ -13,16 +14,30 @@ import { useToast } from "@/components/ui/Toast";
 
 interface SettingsManagerProps {
   initialGooglePlacesApiKey?: string | null;
+  initialPublicRegistrationEnabled?: boolean;
   totalPlacesCount?: number;
 }
 
 export function SettingsManager({
   initialGooglePlacesApiKey = "",
+  initialPublicRegistrationEnabled = true,
   totalPlacesCount = 0,
 }: SettingsManagerProps) {
   const { t } = useT();
   const { toast } = useToast();
   const [googlePlacesApiKey, setGooglePlacesApiKey] = useState(initialGooglePlacesApiKey || "");
+  const [globalApiLimit, setGlobalApiLimit] = useState("900");
+  const [groupDefaultQuota, setGroupDefaultQuota] = useState("50");
+  const [apiUsage, setApiUsage] = useState<{
+    period: string;
+    projectRequests: number;
+    projectCacheHits: number;
+    projectBlocked: number;
+    globalLimit: number;
+    groupDefaultLimit: number;
+  } | null>(null);
+  const [publicRegEnabled, setPublicRegEnabled] = useState(initialPublicRegistrationEnabled);
+  const [savingRegMode, setSavingRegMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testingKey, setTestingKey] = useState(false);
@@ -113,16 +128,44 @@ export function SettingsManager({
     }
   }
 
+  async function handleToggleRegistrationMode(nextValue: boolean) {
+    setSavingRegMode(true);
+    setPublicRegEnabled(nextValue);
+    const res = await saveSettingAction(
+      "allow_public_registration",
+      nextValue ? "true" : "false"
+    );
+    setSavingRegMode(false);
+    if (res?.error) {
+      setPublicRegEnabled(!nextValue);
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(
+        nextValue
+          ? t("admin.registration_mode.enabled_toast")
+          : t("admin.registration_mode.disabled_toast"),
+        { kind: "success" }
+      );
+    }
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setSaved(false);
 
-    await saveSettingAction("google_places_api_key", googlePlacesApiKey);
+    await Promise.all([
+      saveSettingAction("google_places_api_key", googlePlacesApiKey),
+      saveSettingAction("places_api_project_monthly_limit", globalApiLimit),
+      saveSettingAction("places_api_group_default_quota", groupDefaultQuota),
+    ]);
 
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+    getGlobalApiUsageAction().then((u) => {
+      if (u) setApiUsage(u);
+    });
   }
 
   async function handleTestApiKey() {
@@ -224,6 +267,77 @@ export function SettingsManager({
 
       {/* Contenedor principal de tarjetas de configuración */}
       <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-4">
+        {/* 0. Modo de Registro Público vs Solo Invitación (v2) */}
+        <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-950/60 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div
+                className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
+                  publicRegEnabled
+                    ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200/70 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400"
+                    : "bg-amber-50 dark:bg-amber-950/50 border-amber-200/70 dark:border-amber-900/50 text-amber-600 dark:text-amber-400"
+                }`}
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {publicRegEnabled ? "public" : "lock"}
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {t("admin.registration_mode.title")}
+                  </h3>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      publicRegEnabled
+                        ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300"
+                        : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300"
+                    }`}
+                  >
+                    {publicRegEnabled
+                      ? t("admin.registration_mode.open_badge")
+                      : t("admin.registration_mode.invite_only_badge")}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
+                  {publicRegEnabled
+                    ? t("admin.registration_mode.open_desc")
+                    : t("admin.registration_mode.invite_only_desc")}
+                </p>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center p-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shrink-0 self-start sm:self-center">
+              <button
+                type="button"
+                disabled={savingRegMode}
+                onClick={() => !publicRegEnabled && handleToggleRegistrationMode(true)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                  publicRegEnabled
+                    ? "bg-orange-600 text-white shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">public</span>
+                <span>{t("admin.registration_mode.open_btn")}</span>
+              </button>
+              <button
+                type="button"
+                disabled={savingRegMode}
+                onClick={() => publicRegEnabled && handleToggleRegistrationMode(false)}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                  !publicRegEnabled
+                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-950 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                }`}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">lock</span>
+                <span>{t("admin.registration_mode.invite_btn")}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* 1. Configuración y Mapas */}
         <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-950/60 p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
@@ -243,7 +357,19 @@ export function SettingsManager({
 
             <button
               type="button"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                const next = !isOpen;
+                setIsOpen(next);
+                if (next && !apiUsage) {
+                  getGlobalApiUsageAction().then((u) => {
+                    if (u) {
+                      setApiUsage(u);
+                      setGlobalApiLimit(String(u.globalLimit));
+                      setGroupDefaultQuota(String(u.groupDefaultLimit));
+                    }
+                  });
+                }
+              }}
               className="px-4 py-2 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
             >
               {isOpen ? t("common.collapse") : `${t("common.manage")} ›`}
@@ -284,6 +410,57 @@ export function SettingsManager({
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
                   {t("admin.settings.google_places_hint")}
                 </p>
+
+                {/* Cupos mensuales y consumo de la API global */}
+                <div className="mt-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        {t("api_usage.global_limit_label")}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={globalApiLimit}
+                        onChange={(e) => setGlobalApiLimit(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-950 text-xs font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
+                        {t("api_usage.group_quota_label")}
+                      </label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={groupDefaultQuota}
+                        onChange={(e) => setGroupDefaultQuota(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-950 text-xs font-semibold"
+                      />
+                    </div>
+                  </div>
+                  {apiUsage && (
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
+                      <span className="px-2 py-0.5 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 font-bold">
+                        {t("api_usage.requests_badge", {
+                          used: apiUsage.projectRequests,
+                          limit: apiUsage.globalLimit,
+                        })}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-bold">
+                        {t("api_usage.cache_hits_badge", { count: apiUsage.projectCacheHits })}
+                      </span>
+                      {apiUsage.projectBlocked > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-bold">
+                          {t("api_usage.blocked_badge", { count: apiUsage.projectBlocked })}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    {t("api_usage.google_tier_hint")}
+                  </p>
+                </div>
 
                 <details className="mt-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/70 px-3.5 py-2.5 text-[11px] text-slate-600 dark:text-slate-300 group">
                   <summary className="flex items-center justify-between gap-2 cursor-pointer select-none font-bold text-slate-700 dark:text-slate-200 list-none [&::-webkit-details-marker]:hidden">

@@ -2,7 +2,7 @@
 
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   placeLists,
@@ -15,9 +15,11 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { buildScopeKey, getActiveWorkspace, getGroupMembership } from "@/lib/workspace";
 
 export interface UserPlaceListSummary {
   id: string;
+  groupId: string | null;
   name: string;
   description: string | null;
   icon: string;
@@ -25,6 +27,7 @@ export interface UserPlaceListSummary {
   shareSlug: string | null;
   placesCount: number;
   placeIds: string[];
+  canManage: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,14 +74,63 @@ function buildShareSlug(name: string): string {
   return base ? `${base}-${suffix}` : `guia-${suffix}`;
 }
 
+async function canManageList(
+  userId: string,
+  userRole: string,
+  list: { ownerId: string; groupId: string | null }
+): Promise<boolean> {
+  if (list.ownerId === userId || userRole === "admin") return true;
+  if (list.groupId) {
+    const membership = await getGroupMembership(userId, list.groupId);
+    return membership.isGroupAdmin;
+  }
+  return false;
+}
+
+async function canReadList(
+  userId: string,
+  userRole: string,
+  list: { ownerId: string; groupId: string | null }
+): Promise<boolean> {
+  if (list.ownerId === userId || userRole === "admin") return true;
+  if (list.groupId) {
+    const membership = await getGroupMembership(userId, list.groupId);
+    return membership.isMember;
+  }
+  return false;
+}
+
 export async function getMyListsAction(): Promise<UserPlaceListSummary[]> {
   const currentUser = await getCurrentUser();
   if (!currentUser) return [];
 
+  const ws = await getActiveWorkspace();
+  if (!ws) return [];
+
+  const adminGroupIds = new Set(
+    ws.myGroups.filter((g) => g.isOwner || g.myRole === "admin").map((g) => g.id)
+  );
+
+  let whereCond;
+  if (ws.mode === "personal") {
+    whereCond = and(isNull(placeLists.groupId), eq(placeLists.ownerId, currentUser.id));
+  } else if (ws.mode === "group" && ws.groupId) {
+    whereCond = eq(placeLists.groupId, ws.groupId);
+  } else {
+    const myGroupIds = ws.myGroups.map((g) => g.id);
+    whereCond =
+      myGroupIds.length > 0
+        ? or(
+            and(isNull(placeLists.groupId), eq(placeLists.ownerId, currentUser.id)),
+            inArray(placeLists.groupId, myGroupIds)
+          )
+        : and(isNull(placeLists.groupId), eq(placeLists.ownerId, currentUser.id));
+  }
+
   const lists = await db
     .select()
     .from(placeLists)
-    .where(eq(placeLists.ownerId, currentUser.id))
+    .where(whereCond)
     .orderBy(desc(placeLists.updatedAt), desc(placeLists.createdAt));
 
   if (lists.length === 0) return [];
@@ -102,8 +154,13 @@ export async function getMyListsAction(): Promise<UserPlaceListSummary[]> {
 
   return lists.map((l) => {
     const ids = map.get(l.id) || [];
+    const canManage =
+      l.ownerId === currentUser.id ||
+      currentUser.role === "admin" ||
+      Boolean(l.groupId && adminGroupIds.has(l.groupId));
     return {
       id: l.id,
+      groupId: l.groupId ?? null,
       name: l.name,
       description: l.description,
       icon: l.icon,
@@ -111,6 +168,7 @@ export async function getMyListsAction(): Promise<UserPlaceListSummary[]> {
       shareSlug: l.shareSlug,
       placesCount: ids.length,
       placeIds: ids,
+      canManage,
       createdAt: l.createdAt,
       updatedAt: l.updatedAt,
     };
@@ -124,10 +182,11 @@ export async function getListItemsAction(listId: string): Promise<ListPlaceItemD
   const [list] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
   if (!list) return [];
+  if (!(await canReadList(currentUser.id, currentUser.role, list))) return [];
 
   return loadListItemsWithMeta(list.id);
 }
@@ -210,10 +269,24 @@ export async function createListAction(input: {
   const isPublic = Boolean(input.isPublic);
   const shareSlug = isPublic ? buildShareSlug(cleanName) : null;
 
+  let targetGroupId: string | null = null;
+  if (input.initialPlaceId) {
+    const [initPlace] = await db
+      .select({ groupId: places.groupId })
+      .from(places)
+      .where(eq(places.id, input.initialPlaceId))
+      .limit(1);
+    targetGroupId = initPlace?.groupId ?? null;
+  } else {
+    const ws = await getActiveWorkspace();
+    targetGroupId = ws?.mode === "group" ? ws.groupId : null;
+  }
+
   const [created] = await db
     .insert(placeLists)
     .values({
       ownerId: currentUser.id,
+      groupId: targetGroupId,
       name: cleanName.slice(0, 120),
       description: cleanDesc,
       icon: cleanIcon,
@@ -260,10 +333,12 @@ export async function updateListAction(
   const [existing] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
-  if (!existing) return { error: "Lista no encontrada." };
+  if (!existing || !(await canManageList(currentUser.id, currentUser.role, existing))) {
+    return { error: "Lista no encontrada o sin permisos." };
+  }
 
   const nextName =
     input.name !== undefined ? input.name.trim().slice(0, 120) : existing.name;
@@ -317,10 +392,12 @@ export async function regenerateListSlugAction(listId: string) {
   const [existing] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
-  if (!existing) return { error: "Lista no encontrada." };
+  if (!existing || !(await canManageList(currentUser.id, currentUser.role, existing))) {
+    return { error: "Lista no encontrada o sin permisos." };
+  }
 
   const newSlug = buildShareSlug(existing.name);
   const [updated] = await db
@@ -353,10 +430,12 @@ export async function deleteListAction(listId: string) {
   const [existing] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
-  if (!existing) return { error: "Lista no encontrada." };
+  if (!existing || !(await canManageList(currentUser.id, currentUser.role, existing))) {
+    return { error: "Lista no encontrada o sin permisos." };
+  }
 
   await db.delete(placeLists).where(eq(placeLists.id, listId));
 
@@ -380,10 +459,12 @@ export async function togglePlaceInListAction(listId: string, placeId: string) {
   const [list] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
-  if (!list) return { error: "Lista no encontrada." };
+  if (!list || !(await canReadList(currentUser.id, currentUser.role, list))) {
+    return { error: "Lista no encontrada." };
+  }
 
   const [existing] = await db
     .select()
@@ -429,10 +510,12 @@ export async function reorderListItemsAction(listId: string, orderedPlaceIds: st
   const [list] = await db
     .select()
     .from(placeLists)
-    .where(and(eq(placeLists.id, listId), eq(placeLists.ownerId, currentUser.id)))
+    .where(eq(placeLists.id, listId))
     .limit(1);
 
-  if (!list) return { error: "Lista no encontrada." };
+  if (!list || !(await canReadList(currentUser.id, currentUser.role, list))) {
+    return { error: "Lista no encontrada." };
+  }
 
   await Promise.all(
     orderedPlaceIds.map((pid, idx) =>
@@ -463,6 +546,8 @@ export async function getPublicGuideBySlug(slug: string): Promise<PublicGuideDat
   const [row] = await db
     .select({
       id: placeLists.id,
+      ownerId: placeLists.ownerId,
+      groupId: placeLists.groupId,
       name: placeLists.name,
       description: placeLists.description,
       icon: placeLists.icon,
@@ -479,9 +564,10 @@ export async function getPublicGuideBySlug(slug: string): Promise<PublicGuideDat
 
   if (!row || !row.shareSlug) return null;
 
+  const listScopeKey = buildScopeKey(row.groupId, row.ownerId);
   const [items, allOccasions] = await Promise.all([
     loadListItemsWithMeta(row.id),
-    db.select().from(occasions),
+    db.select().from(occasions).where(eq(occasions.scopeKey, listScopeKey)),
   ]);
 
   const occasionMap: Record<string, { name: string; icon: string }> = {};

@@ -4,15 +4,14 @@ import { revalidatePath } from "next/cache";
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/db";
 import {
+  places,
   userPlaces,
   placeComments,
-  sharingGroups,
-  sharingGroupMembers,
   users,
-  type PlaceComment,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { getPlacePermissions } from "@/lib/workspace";
 
 export interface CommentWithAuthor {
   id: string;
@@ -158,6 +157,15 @@ export async function savePrivateNotesAction(
 export async function getPlaceCommentsAction(
   placeId: string
 ): Promise<CommentWithAuthor[]> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const [place] = await db.select().from(places).where(eq(places.id, placeId)).limit(1);
+  if (!place) return [];
+
+  const perms = await getPlacePermissions(user, place);
+  if (!perms.canRead) return [];
+
   const rows = await db
     .select({
       id: placeComments.id,
@@ -183,7 +191,7 @@ export async function getPlaceCommentsAction(
 }
 
 /**
- * Publica un nuevo comentario colaborativo
+ * Publica un nuevo comentario colaborativo (solo miembros con acceso al espacio del sitio)
  */
 export async function addCommentAction(placeId: string, content: string) {
   const user = await getCurrentUser();
@@ -191,6 +199,12 @@ export async function addCommentAction(placeId: string, content: string) {
 
   const trimmed = content.trim();
   if (!trimmed) return { error: "El comentario no puede estar vacío." };
+
+  const [place] = await db.select().from(places).where(eq(places.id, placeId)).limit(1);
+  if (!place) return { error: "Establecimiento no encontrado." };
+
+  const perms = await getPlacePermissions(user, place);
+  if (!perms.canRead) return { error: "No tienes acceso a este establecimiento." };
 
   const [created] = await db
     .insert(placeComments)
@@ -225,7 +239,7 @@ export async function addCommentAction(placeId: string, content: string) {
 }
 
 /**
- * Elimina un comentario (solo el autor o admin)
+ * Elimina un comentario (el autor, Admin del grupo o Superadmin)
  */
 export async function deleteCommentAction(commentId: string) {
   const user = await getCurrentUser();
@@ -238,7 +252,21 @@ export async function deleteCommentAction(commentId: string) {
     .limit(1);
 
   if (!comment) return { error: "Comentario no encontrado." };
-  if (comment.userId !== user.id && user.role !== "admin") {
+
+  let canModerate = comment.userId === user.id || user.role === "admin";
+  if (!canModerate) {
+    const [place] = await db
+      .select()
+      .from(places)
+      .where(eq(places.id, comment.placeId))
+      .limit(1);
+    if (place) {
+      const perms = await getPlacePermissions(user, place);
+      canModerate = perms.isGroupAdmin;
+    }
+  }
+
+  if (!canModerate) {
     return { error: "No tienes permiso para eliminar este comentario." };
   }
 
@@ -258,7 +286,7 @@ export async function deleteCommentAction(commentId: string) {
 }
 
 /**
- * Edita el contenido de un comentario (el autor o un administrador)
+ * Edita el contenido de un comentario (el autor, Admin del grupo o Superadmin)
  */
 export async function updateCommentAction(commentId: string, content: string) {
   const user = await getCurrentUser();
@@ -274,7 +302,21 @@ export async function updateCommentAction(commentId: string, content: string) {
     .limit(1);
 
   if (!comment) return { error: "Comentario no encontrado." };
-  if (comment.userId !== user.id && user.role !== "admin") {
+
+  let canModerate = comment.userId === user.id || user.role === "admin";
+  if (!canModerate) {
+    const [place] = await db
+      .select()
+      .from(places)
+      .where(eq(places.id, comment.placeId))
+      .limit(1);
+    if (place) {
+      const perms = await getPlacePermissions(user, place);
+      canModerate = perms.isGroupAdmin;
+    }
+  }
+
+  if (!canModerate) {
     return { error: "No tienes permiso para editar este comentario." };
   }
 
@@ -300,47 +342,4 @@ export async function updateCommentAction(commentId: string, content: string) {
 
   revalidatePath("/");
   return { success: true, content: trimmed };
-}
-
-/**
- * Grupos de compartición (Fase 5)
- */
-export async function getSharingGroupsAction() {
-  const user = await getCurrentUser();
-  if (!user) return [];
-
-  // Grupos creados o pertenecientes al usuario
-  const groups = await db
-    .select({
-      group: sharingGroups,
-    })
-    .from(sharingGroups)
-    .where(eq(sharingGroups.ownerUserId, user.id));
-
-  return groups.map((g) => g.group);
-}
-
-export async function createSharingGroupAction(name: string) {
-  const user = await getCurrentUser();
-  if (!user) return { error: "No autenticado" };
-
-  const trimmed = name.trim();
-  if (!trimmed) return { error: "El nombre del grupo es obligatorio." };
-
-  const [group] = await db
-    .insert(sharingGroups)
-    .values({
-      name: trimmed,
-      ownerUserId: user.id,
-    })
-    .returning();
-
-  // Añadir al propio dueño como miembro
-  await db.insert(sharingGroupMembers).values({
-    groupId: group.id,
-    userId: user.id,
-  });
-
-  revalidatePath("/");
-  return { success: true, group };
 }

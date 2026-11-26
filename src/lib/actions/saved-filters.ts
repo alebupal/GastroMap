@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { savedFilters } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { getActiveWorkspace } from "@/lib/workspace";
 
 export interface SavedFilterCriteria {
   textSearch?: string;
@@ -33,10 +34,18 @@ export async function getSavedFiltersAction(): Promise<SavedFilterItem[]> {
   const user = await getCurrentUser();
   if (!user) return [];
 
+  const ws = await getActiveWorkspace();
+  const whereCond =
+    ws?.mode === "group" && ws.groupId
+      ? and(eq(savedFilters.userId, user.id), eq(savedFilters.groupId, ws.groupId))
+      : ws?.mode === "personal"
+        ? and(eq(savedFilters.userId, user.id), isNull(savedFilters.groupId))
+        : eq(savedFilters.userId, user.id);
+
   const rows = await db
     .select()
     .from(savedFilters)
-    .where(eq(savedFilters.userId, user.id))
+    .where(whereCond)
     .orderBy(desc(savedFilters.createdAt));
 
   return rows.map((r) => ({
@@ -59,10 +68,14 @@ export async function createSavedFilterAction(
     return { error: "El nombre del filtro debe tener al menos 2 caracteres." };
   }
 
+  const ws = await getActiveWorkspace();
+  const groupId = ws?.mode === "group" ? ws.groupId : null;
+
   const [created] = await db
     .insert(savedFilters)
     .values({
       userId: user.id,
+      groupId,
       name: cleanName.slice(0, 100),
       criteria,
     })

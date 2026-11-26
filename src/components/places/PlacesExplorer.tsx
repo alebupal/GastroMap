@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef, useCallback, useDeferredValue } f
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { PlaceCard } from "./PlaceCard";
+import type { CopyTargetSpaceOption } from "./CopyPlaceModal";
 import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
@@ -14,7 +15,6 @@ import {
   deleteSavedFilterAction,
   type SavedFilterItem,
 } from "@/lib/actions/saved-filters";
-import { getMyGroupsAction } from "@/lib/actions/groups";
 import { parseCityCountry, findCountry, resolveFilterCity } from "@/lib/location";
 import { MultiSearchableSelect } from "@/components/ui/MultiSearchableSelect";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
@@ -51,6 +51,9 @@ interface PlacesExplorerProps {
   occasionMap: Record<string, { name: string; icon: string }>;
   initialSavedFilters?: SavedFilterItem[];
   communityUsers?: CommunityUserSummary[];
+  workspaceMode?: "group" | "personal" | "all";
+  isSpaceAdmin?: boolean;
+  availableSpaces?: CopyTargetSpaceOption[];
 }
 
 /**
@@ -85,6 +88,9 @@ export function PlacesExplorer({
   occasionMap,
   initialSavedFilters = [],
   communityUsers = [],
+  workspaceMode = "group",
+  isSpaceAdmin = false,
+  availableSpaces = [],
 }: PlacesExplorerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
@@ -163,11 +169,10 @@ export function PlacesExplorer({
     [currentUserId]
   );
 
-  // Grupos privados
-  const [myGroups, setMyGroups] = useState<Array<{ id: string; name: string }>>([]);
+  // Filtro por espacio (solo aplicable en vista combinada «Todos mis sitios»)
   const [mounted, setMounted] = useState(false);
-  const [selectedGroupFilterIds, setSelectedGroupFilterIds] = useState<string[]>([]);
-  const [isGroupFilterOpen, setIsGroupFilterOpen] = useState(false);
+  const [selectedSpaceFilterIds, setSelectedSpaceFilterIds] = useState<string[]>([]);
+  const [isSpaceFilterOpen, setIsSpaceFilterOpen] = useState(false);
   const groupBtnRef = useRef<HTMLButtonElement>(null);
   const groupMenuRef = useRef<HTMLDivElement>(null);
   const [groupCoords, setGroupCoords] = useState<{ top: number; left: number } | null>(null);
@@ -176,7 +181,7 @@ export function PlacesExplorer({
     setMounted(true);
   }, []);
 
-  // Posicionar menú emergente de grupos con coordenadas fijas (evita cortes de overflow-x)
+  // Posicionar menú emergente de espacios con coordenadas fijas (evita cortes de overflow-x)
   const updateGroupCoords = () => {
     if (groupBtnRef.current) {
       const rect = groupBtnRef.current.getBoundingClientRect();
@@ -201,7 +206,7 @@ export function PlacesExplorer({
   };
 
   useEffect(() => {
-    if (!isGroupFilterOpen) return;
+    if (!isSpaceFilterOpen) return;
 
     updateGroupCoords();
     window.addEventListener("scroll", updateGroupCoords, true);
@@ -210,9 +215,9 @@ export function PlacesExplorer({
       window.removeEventListener("scroll", updateGroupCoords, true);
       window.removeEventListener("resize", updateGroupCoords);
     };
-  }, [isGroupFilterOpen]);
+  }, [isSpaceFilterOpen]);
 
-  // Cerrar popover de grupos al hacer clic fuera o pulsar Escape
+  // Cerrar popover de espacios al hacer clic fuera o pulsar Escape
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       const target = e.target as Node;
@@ -222,15 +227,15 @@ export function PlacesExplorer({
         groupMenuRef.current &&
         !groupMenuRef.current.contains(target)
       ) {
-        setIsGroupFilterOpen(false);
+        setIsSpaceFilterOpen(false);
       }
     }
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setIsGroupFilterOpen(false);
+        setIsSpaceFilterOpen(false);
       }
     }
-    if (isGroupFilterOpen) {
+    if (isSpaceFilterOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
     }
@@ -238,7 +243,7 @@ export function PlacesExplorer({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isGroupFilterOpen]);
+  }, [isSpaceFilterOpen]);
 
   // Paginación en modo lista
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -443,13 +448,6 @@ export function PlacesExplorer({
     }
   }, [placesData]);
 
-  // Cargar grupos privados del usuario para el filtro rápido
-  useEffect(() => {
-    getMyGroupsAction()
-      .then((list) => setMyGroups(list.map((g) => ({ id: g.id, name: g.name }))))
-      .catch(() => { });
-  }, []);
-
   const toggleComparePlace = useCallback((placeId: string) => {
     setCompareIds((prev) => {
       if (prev.includes(placeId)) return prev.filter((id) => id !== placeId);
@@ -602,6 +600,7 @@ export function PlacesExplorer({
     setSelectedFriendIds([]);
     setFriendsFilterMode("untried_or_pending");
     setIncludeMeWithFriends(true);
+    setSelectedSpaceFilterIds([]);
     setTextSearch("");
     setUserLocation(null);
     setRadiusKm(null);
@@ -715,7 +714,7 @@ export function PlacesExplorer({
             ...p.occasions,
             ...(p.commentsTexts || []),
             ...(p.commentAuthors || []),
-            ...(p.sharedGroupNames || []),
+            p.groupName || "",
           ].join(" ")
         )
       );
@@ -805,13 +804,12 @@ export function PlacesExplorer({
       );
     }
 
-    // 6. Filtro por Grupos Privados (si se seleccionaron grupos específicos)
-    if (selectedGroupFilterIds.length > 0) {
-      result = result.filter(
-        (p) =>
-          p.sharedGroupIds &&
-          p.sharedGroupIds.some((gid) => selectedGroupFilterIds.includes(gid))
-      );
+    // 6. Filtro por Espacio (solo aplicable en vista combinada «Todos mis sitios»)
+    if (workspaceMode === "all" && selectedSpaceFilterIds.length > 0) {
+      result = result.filter((p) => {
+        const spaceId = p.groupId || "personal";
+        return selectedSpaceFilterIds.includes(spaceId);
+      });
     }
 
     // 7. Filtro multiselección por País
@@ -945,7 +943,8 @@ export function PlacesExplorer({
     selectedCountries,
     selectedCities,
     selectedTowns,
-    selectedGroupFilterIds,
+    workspaceMode,
+    selectedSpaceFilterIds,
     experienceFilter,
     minRating,
     selectedFriendIds,
@@ -968,7 +967,8 @@ export function PlacesExplorer({
     selectedCountries,
     selectedCities,
     selectedTowns,
-    selectedGroupFilterIds,
+    workspaceMode,
+    selectedSpaceFilterIds,
     experienceFilter,
     minRating,
     selectedFriendIds,
@@ -1159,7 +1159,10 @@ export function PlacesExplorer({
     [otherCommunityUsers]
   );
 
-  const isFiltered = activeFiltersCount > 0 || selectedGroupFilterIds.length > 0 || radiusKm != null;
+  const isFiltered =
+    activeFiltersCount > 0 ||
+    (workspaceMode === "all" && selectedSpaceFilterIds.length > 0) ||
+    radiusKm != null;
 
   return (
     <div className="w-full space-y-4">
@@ -1396,7 +1399,7 @@ export function PlacesExplorer({
                 >
                   {item.icon && (
                     <span
-                      className={`material-symbols-outlined text-[15px] leading-none ${active && !isUntried ? "text-current" : item.iconClass
+                      className={`material-symbols-outlined ${isUntried ? "text-[14px]" : "text-[15px]"} leading-none ${active && !isUntried ? "text-current" : item.iconClass
                         }`}
                     >
                       {item.icon}
@@ -1499,39 +1502,39 @@ export function PlacesExplorer({
         {/* Fila 2: Segmentación por Grupos, Ubicación, Precios, Categorías y Tags */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
-            {/* Filtro por Grupos Privados */}
-            {myGroups.length > 0 && (
+            {/* Filtro por Espacio (solo en vista combinada 'all') */}
+            {workspaceMode === "all" && availableSpaces.length > 1 && (
               <div className="relative shrink-0">
                 <button
                   ref={groupBtnRef}
                   type="button"
                   onClick={() => {
-                    if (!isGroupFilterOpen) {
+                    if (!isSpaceFilterOpen) {
                       updateGroupCoords();
-                      setIsGroupFilterOpen(true);
+                      setIsSpaceFilterOpen(true);
                     } else {
-                      setIsGroupFilterOpen(false);
+                      setIsSpaceFilterOpen(false);
                     }
                   }}
-                  className={`px-3 py-1 rounded-full font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedGroupFilterIds.length > 0
-                    ? "bg-blue-600 border-blue-600 text-white shadow-xs"
+                  className={`px-3 py-1 rounded-full font-bold shrink-0 transition flex items-center gap-1.5 cursor-pointer text-xs border ${selectedSpaceFilterIds.length > 0
+                    ? "bg-orange-600 border-orange-600 text-white shadow-xs"
                     : "bg-[#f2f3ff] dark:bg-slate-800 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                     }`}
                 >
                   <span className="material-symbols-outlined text-[15px] leading-none text-orange-600">
-                    group
+                    workspaces
                   </span>
                   <span>
-                    {selectedGroupFilterIds.length === 0
-                      ? t("places.groups_filter")
-                      : selectedGroupFilterIds.length === 1
-                        ? myGroups.find((g) => g.id === selectedGroupFilterIds[0])?.name || t("places.group_count_single")
-                        : t("places.group_count_multiple", { count: selectedGroupFilterIds.length })}
+                    {selectedSpaceFilterIds.length === 0
+                      ? t("spaces.filter_by_space")
+                      : selectedSpaceFilterIds.length === 1
+                        ? availableSpaces.find((sp) => sp.id === selectedSpaceFilterIds[0])?.name || t("spaces.filter_by_space")
+                        : `${selectedSpaceFilterIds.length} ${t("spaces.spaces_count_label")}`}
                   </span>
-                  <span className="text-[10px]">{isGroupFilterOpen ? "▲" : "▼"}</span>
+                  <span className="text-[10px]">{isSpaceFilterOpen ? "▲" : "▼"}</span>
                 </button>
 
-                {mounted && isGroupFilterOpen && groupCoords &&
+                {mounted && isSpaceFilterOpen && groupCoords &&
                   createPortal(
                     <div
                       ref={groupMenuRef}
@@ -1544,12 +1547,12 @@ export function PlacesExplorer({
                     >
                       <div className="flex items-center justify-between pb-1.5 border-b border-slate-100 dark:border-slate-800">
                         <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                          {t("places.filter_by_group")}
+                          {t("spaces.filter_by_space")}
                         </span>
-                        {selectedGroupFilterIds.length > 0 && (
+                        {selectedSpaceFilterIds.length > 0 && (
                           <button
                             type="button"
-                            onClick={() => setSelectedGroupFilterIds([])}
+                            onClick={() => setSelectedSpaceFilterIds([])}
                             className="text-[10px] text-amber-500 font-semibold hover:underline cursor-pointer"
                           >
                             {t("places.clear_filter")}
@@ -1558,27 +1561,27 @@ export function PlacesExplorer({
                       </div>
 
                       <div className="space-y-1">
-                        {myGroups.map((g) => {
-                          const isSelected = selectedGroupFilterIds.includes(g.id);
+                        {availableSpaces.map((sp) => {
+                          const isSelected = selectedSpaceFilterIds.includes(sp.id);
                           return (
                             <button
-                              key={g.id}
+                              key={sp.id}
                               type="button"
                               onClick={() => {
-                                setSelectedGroupFilterIds((prev) =>
-                                  prev.includes(g.id)
-                                    ? prev.filter((id) => id !== g.id)
-                                    : [...prev, g.id]
+                                setSelectedSpaceFilterIds((prev) =>
+                                  prev.includes(sp.id)
+                                    ? prev.filter((id) => id !== sp.id)
+                                    : [...prev, sp.id]
                                 );
                               }}
                               className={`w-full px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition cursor-pointer ${isSelected
-                                ? "bg-blue-600 text-white font-bold"
+                                ? "bg-orange-600 text-white font-bold"
                                 : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                                 }`}
                             >
                               <span className="inline-flex items-center gap-1.5 truncate">
-                                <span className="material-symbols-outlined text-xs leading-none shrink-0">group</span>
-                                <span className="truncate">{g.name}</span>
+                                <span className="shrink-0">{sp.icon || "🍻"}</span>
+                                <span className="truncate">{sp.name}</span>
                               </span>
                               {isSelected && <span className="text-xs">✓</span>}
                             </button>
@@ -1913,24 +1916,24 @@ export function PlacesExplorer({
               </div>
             </div>
 
-            {/* 3. Grupos privados (solo si tiene grupos) */}
-            {myGroups.length > 0 && (
+            {/* 3. Espacio (solo en vista combinada «Todos mis sitios») */}
+            {workspaceMode === "all" && availableSpaces.length > 1 && (
               <div className="space-y-1.5">
                 <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-0.5">
-                  {t("places.groups_filter")}
+                  {t("spaces.filter_by_space")}
                 </span>
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {myGroups.map((g) => {
-                    const active = selectedGroupFilterIds.includes(g.id);
+                  {availableSpaces.map((sp) => {
+                    const active = selectedSpaceFilterIds.includes(sp.id);
                     return (
                       <button
-                        key={g.id}
+                        key={sp.id}
                         type="button"
                         onClick={() =>
-                          setSelectedGroupFilterIds((prev) =>
-                            prev.includes(g.id)
-                              ? prev.filter((id) => id !== g.id)
-                              : [...prev, g.id]
+                          setSelectedSpaceFilterIds((prev) =>
+                            prev.includes(sp.id)
+                              ? prev.filter((id) => id !== sp.id)
+                              : [...prev, sp.id]
                           )
                         }
                         className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition cursor-pointer border ${active
@@ -1938,10 +1941,8 @@ export function PlacesExplorer({
                           : "bg-[#f8f9ff] dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-300"
                           }`}
                       >
-                        <span className="material-symbols-outlined text-sm leading-none">
-                          group
-                        </span>
-                        <span>{g.name}</span>
+                        <span>{sp.icon || "🍻"}</span>
+                        <span>{sp.name}</span>
                       </button>
                     );
                   })}
@@ -2840,6 +2841,9 @@ export function PlacesExplorer({
                     place={place}
                     currentUserId={currentUserId}
                     isAdmin={isAdmin}
+                    isSpaceAdmin={isSpaceAdmin}
+                    availableSpaces={availableSpaces}
+                    showSpaceBadge={workspaceMode === "all"}
                     occasionMap={occasionMap}
                     occasionsList={occasionsList}
                     availableTags={availableTagNames}
@@ -3005,11 +3009,11 @@ export function PlacesExplorer({
           onChangeFriendsFilterMode={setFriendsFilterMode}
           includeMeWithFriends={includeMeWithFriends}
           onToggleIncludeMeWithFriends={setIncludeMeWithFriends}
-          groups={myGroups}
-          selectedGroupIds={selectedGroupFilterIds}
-          onToggleGroup={(gid) =>
-            setSelectedGroupFilterIds((prev) =>
-              prev.includes(gid) ? prev.filter((id) => id !== gid) : [...prev, gid]
+          spaces={workspaceMode === "all" ? availableSpaces : []}
+          selectedSpaceIds={selectedSpaceFilterIds}
+          onToggleSpace={(sid) =>
+            setSelectedSpaceFilterIds((prev) =>
+              prev.includes(sid) ? prev.filter((id) => id !== sid) : [...prev, sid]
             )
           }
           matchingCount={filteredPlaces.length}

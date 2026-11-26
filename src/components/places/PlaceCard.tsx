@@ -12,6 +12,7 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
+import { getGoogleSearchHref, getMapsHref } from "@/lib/maps";
 
 const PlaceCommentsThread = dynamic(() =>
   import("./PlaceCommentsThread").then((m) => m.PlaceCommentsThread)
@@ -25,6 +26,10 @@ const EditPlaceModal = dynamic(() =>
 const AddToListModal = dynamic(() =>
   import("./AddToListModal").then((m) => m.AddToListModal)
 );
+const CopyPlaceModal = dynamic(() =>
+  import("./CopyPlaceModal").then((m) => m.CopyPlaceModal)
+);
+import type { CopyTargetSpaceOption } from "./CopyPlaceModal";
 
 const PRICE_RANGE_LABELS: Record<string, string> = {
   "€": "< 20 €",
@@ -50,6 +55,9 @@ interface PlaceCardProps {
     placeId: string,
     patch: Partial<Pick<PlaceWithDetails, "isFavorite" | "personalStatus" | "rating" | "privateNotes">>
   ) => void;
+  availableSpaces?: CopyTargetSpaceOption[];
+  showSpaceBadge?: boolean;
+  isSpaceAdmin?: boolean;
   isSelected?: boolean;
 }
 
@@ -66,6 +74,9 @@ function PlaceCardComponent({
   onToggleCompare,
   onToggleCompareId,
   onPersonalUpdate,
+  availableSpaces = [],
+  showSpaceBadge = false,
+  isSpaceAdmin = false,
   isSelected = false,
 }: PlaceCardProps) {
   const { t } = useT();
@@ -82,9 +93,11 @@ function PlaceCardComponent({
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
   const [copiedPlace, setCopiedPlace] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   // Sincronizar estado local si cambian los datos externos (ej. importación o edición)
   useEffect(() => {
@@ -106,11 +119,7 @@ function PlaceCardComponent({
     if (place.address || place.city) {
       parts.push([place.address, place.city].filter(Boolean).join(", "));
     }
-    const mapsLink =
-      place.googleMapsUrl ||
-      (place.latitude != null && place.longitude != null
-        ? `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`
-        : "");
+    const mapsLink = getMapsHref(place) || "";
     if (mapsLink) parts.push(mapsLink);
     return { text: parts.join(" — "), mapsLink };
   }
@@ -162,8 +171,11 @@ function PlaceCardComponent({
     window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
   }
 
-  const canDelete = isAdmin;
-  const canEdit = isAdmin || place.createdById === currentUserId;
+  const canDelete = place.canDelete ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
+  const canEdit = place.canEdit ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
+  const canCopyToOtherSpace = availableSpaces.some((s) =>
+    s.isPersonal ? place.groupId !== null : s.id !== place.groupId
+  );
 
   async function handleDelete() {
     if (!confirm(t("places.delete_confirm", { name: place.name }))) return;
@@ -312,7 +324,7 @@ function PlaceCardComponent({
                     className="fixed inset-0 z-40"
                     onClick={() => setShowActionsMenu(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-44 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
+                  <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 shadow-xl z-50 p-1.5 space-y-0.5 gm-popover-in">
                     <button
                       type="button"
                       onClick={() => {
@@ -324,6 +336,29 @@ function PlaceCardComponent({
                       <span className="material-symbols-outlined text-base leading-none text-orange-600">bookmark_add</span>
                       <span>{t("lists.save_to_list_action")}</span>
                     </button>
+                    {canCopyToOtherSpace && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowActionsMenu(false);
+                          setShowCopyModal(true);
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                      >
+                        <span className="material-symbols-outlined text-base leading-none text-orange-600">library_add</span>
+                        <span>{t("spaces.copy_to_space_menu")}</span>
+                      </button>
+                    )}
+                    <a
+                      href={getGoogleSearchHref(place.name, place.city)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowActionsMenu(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-[#f2f3ff] dark:hover:bg-slate-800 transition cursor-pointer text-left"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-orange-600">travel_explore</span>
+                      <span>{t("cards.search_google")}</span>
+                    </a>
                     {canEdit && (
                       <button
                         type="button"
@@ -370,49 +405,64 @@ function PlaceCardComponent({
           </p>
         )}
 
-        {/* Fila de Insignia de Estado Personal + Ocasiones / Categorías + Etiquetas */}
-        <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-          {personalStatus === "visited" ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold text-[11px]">
-              <span className="material-symbols-outlined text-[13px] leading-none">check_circle</span>
-              <span>{t("cards.visited")}</span>
-            </span>
-          ) : personalStatus === "pending" ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-950 dark:text-amber-100 font-bold text-[11px]">
-              <span className="material-symbols-outlined text-[13px] leading-none">schedule</span>
-              <span>{t("places.want_to_go")}</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
-              <span className="material-symbols-outlined text-[13px] leading-none">auto_awesome</span>
-              <span>{t("places.unexplored")}</span>
-            </span>
-          )}
-
-          {/* Ocasiones / Categorías */}
-          {place.occasions.map((occId) => {
-            const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
-            return (
-              <span
-                key={occId}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
-              >
-                <OccasionIcon icon={info.icon} msClassName="text-[13px]" />
-                <span>{info.name}</span>
+        {/* Fila única compacta: Contexto (Grupo / Por descubrir) | Categorías + Etiquetas */}
+        {(showSpaceBadge || !personalStatus || place.occasions.length > 0 || place.tags.length > 0) && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+            {showSpaceBadge && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700 font-extrabold text-[10px] shadow-2xs">
+                <span>{place.groupId ? place.groupIcon || "🍻" : "🏠"}</span>
+                <span>{place.groupId ? place.groupName || "Grupo" : t("spaces.personal_map")}</span>
               </span>
-            );
-          })}
-
-          {/* Etiquetas gastronómicas */}
-          {place.tags.map((tg) => (
-            <span
-              key={tg}
-              className="px-1.5 py-0.5 rounded bg-[#f2f3ff] dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-[11px]"
-            >
-              #{tg}
-            </span>
-          ))}
-        </div>
+            )}
+            {!personalStatus && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-dashed border-indigo-300 dark:border-indigo-700/80 font-bold text-[11px]">
+                <span className="material-symbols-outlined text-[12px] leading-none">auto_awesome</span>
+                <span>{t("places.unexplored")}</span>
+              </span>
+            )}
+            {(showSpaceBadge || !personalStatus) &&
+              (place.occasions.length > 0 || place.tags.length > 0) && (
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0"
+                />
+              )}
+            {place.occasions.map((occId) => {
+              const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
+              return (
+                <span
+                  key={occId}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]"
+                >
+                  <OccasionIcon icon={info.icon} msClassName="text-[13px]" />
+                  <span>{info.name}</span>
+                </span>
+              );
+            })}
+            {(showAllTags ? place.tags : place.tags.slice(0, 5)).map((tg) => (
+              <span
+                key={tg}
+                className="px-1.5 py-0.5 rounded-md bg-slate-100/80 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-[11px] font-medium"
+              >
+                #{tg}
+              </span>
+            ))}
+            {place.tags.length > 5 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAllTags((prev) => !prev);
+                }}
+                className="px-2 py-0.5 rounded-md bg-orange-50/80 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-950/70 text-[11px] font-bold transition cursor-pointer"
+              >
+                {showAllTags
+                  ? t("assistant.show_less")
+                  : t("assistant.more_tags", { count: place.tags.length - 5 })}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Notas públicas del creador */}
         {place.notes && (
@@ -579,22 +629,26 @@ function PlaceCardComponent({
             </button>
           )}
 
-          {place.googleMapsUrl && (
-            <a
-              href={place.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`Maps: ${place.name}`}
-              className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
-              title="Abrir en Google Maps"
-            >
-              <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
-              <span className="text-[9.5px] sm:text-[11px] leading-tight">
-                <span className="sm:hidden">Maps</span>
-                <span className="hidden sm:inline">Google Maps</span>
-              </span>
-            </a>
-          )}
+          {(() => {
+            const effectiveMapsHref = getMapsHref(place);
+            if (!effectiveMapsHref) return null;
+            return (
+              <a
+                href={effectiveMapsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Maps: ${place.name}`}
+                className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 hover:text-orange-600 hover:bg-[#f2f3ff] dark:hover:bg-slate-800/80 sm:hover:bg-transparent font-medium transition py-1.5 sm:py-0.5 px-0.5 sm:px-1 rounded-xl whitespace-nowrap"
+                title="Abrir en Google Maps"
+              >
+                <span className="material-symbols-outlined text-[16px] sm:text-sm leading-none">open_in_new</span>
+                <span className="text-[9.5px] sm:text-[11px] leading-tight">
+                  <span className="sm:hidden">Maps</span>
+                  <span className="hidden sm:inline">Google Maps</span>
+                </span>
+              </a>
+            );
+          })()}
 
           <div className="relative">
             <button
@@ -678,7 +732,7 @@ function PlaceCardComponent({
           privateNotes={privateNotes}
           personalRating={rating}
           currentUserId={currentUserId}
-          isAdmin={isAdmin}
+          isAdmin={isAdmin || isSpaceAdmin}
           isOpen={showComments}
           onClose={() => setShowComments(false)}
           onCommentsCountChange={(count) => setCommentsCount(count)}
@@ -711,6 +765,17 @@ function PlaceCardComponent({
           placeName={place.name}
           isOpen={showAddToListModal}
           onClose={() => setShowAddToListModal(false)}
+        />
+      )}
+
+      {showCopyModal && (
+        <CopyPlaceModal
+          placeId={place.id}
+          placeName={place.name}
+          currentGroupId={place.groupId ?? null}
+          availableSpaces={availableSpaces}
+          isOpen={showCopyModal}
+          onClose={() => setShowCopyModal(false)}
         />
       )}
 

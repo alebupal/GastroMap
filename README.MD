@@ -2,7 +2,7 @@
 
 [Versión en Español](README_ES.MD)
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -17,7 +17,8 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **➕ Ultra-Fast Place Ingestion:**
   * Compatible with the **Web Share Target API**: Share a link directly from Google Maps or social networks and open the place card instantly on your phone.
-  * Automatic coordinate and link normalization.
+  * Top banner showing the destination space (*«Adding to…»*), automatic cross-space detection to **import basic venue details**, Maps URL validation with coordinate-based mobile fallback, and a **Search on Google** shortcut on every card.
+  * Optional **Google Places API (New)** enrichment with **per-group encrypted API keys**, configurable monthly quotas (`900/mo` global, `50/mo` per group), 30-day shared cache, and free OpenStreetMap + Open Graph fallback.
   * Fast classification across 8 default plans (*Breakfast / Brunch, Tapas / Drinks, Lunch / Dinner, Casual / Quick, Coffee / Dessert, Cocktails / Drinks, Date / Special, Groups / Celebration*) customizable with emojis or **Material Symbols** icons, plus price range (`€` to `€€€€` or `???` so unknown places aren't left out).
 
 * **🔍 Main Explorer & Universal Search (Stitch UI/UX Design):**
@@ -31,15 +32,15 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * Free, lightweight OpenStreetMap / CartoDB tiles (zero Google Maps API billing or quotas).
   * Dynamic marker clustering and color-coded status badges.
 
-* **🔒 Privacy, Community & Shareable Guides:**
-  * Self-hosted on your own infrastructure (Docker).
-  * Invitation-only access for your inner circle and **private sharing groups** (`👥 Groups`) with cumulative server-side permissions.
+* **🌍 Independent Spaces, Friend Groups, Personal Map & Guides:**
+  * Self-hosted on your own infrastructure (Docker), with **open public registration** (`/register`) or **invite-only mode** configurable in `/admin > System & Audit`.
+  * **100% Isolated Multi-Space Architecture**: Every user gets **🏠 My Personal Map** (strictly private) and can create (empty, with 8 default plans, or cloning taxonomy from another group) or join unlimited **🍻 Friend Groups** via magic links (`/groups/join/[token]`) with optional admin approval. Each group operates like its own independent app with its own places, plans, tags, lists, **per-group admin panel (`/group-admin`)**, bulk copy/move across spaces with duplicate detection and **Undo**, **30-day Trash**, and a **Data health** tab—plus a combined **🌍 All my places** view and searchable header switcher.
   * **Shareable Lists & Personal Guides**: Curate themed collections (trips, tapas routes, special dinners), reorder stops manually, and toggle a **read-only public link** (`/guide/[slug]`) with an interactive map and Google Maps route that friends can browse without signing up.
-  * Private personal notes and collaborative comments on each place. Deletion is restricted to administrators.
+  * Private personal notes and collaborative comments on each place, moderated by place authors and group administrators.
 
-* **📊 Personal Statistics, Annual «Wrapped» & Dedicated Admin Panel (`/admin`):**
-  * Personal stats dashboard (`📊 Stats`) for every user plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
-  * **Dedicated Admin Panel (`/admin`)** with Stitch sidebar navigation: real-time global analytics, places table, user management, taxonomy, invitations, audit log, system settings, backups, and demo seeder.
+* **📊 Personal Statistics, Annual «Wrapped» & Scalable 5-Section Admin Panel (`/admin`):**
+  * Personal stats dashboard (`📊 Stats`) with **space filtering**, **exploration progress** (*To discover* / `% visited`), and collapsible **My groups** breakdown, plus an interactive annual **«Wrapped»** summary focused on places tried, favorites saved, catalog contributions, and reviews.
+  * **Scalable 5-Section Superadmin Panel (`/admin`)** with Stitch sidebar navigation: **Overview** (KPIs + Top groups), **Groups** (paginated directory linking to `/group-admin`), **Users** (*«Groups & roles»* modal, permissions legend, safe user deletion with reassignment, and platform invites), **Places** (global moderation, bulk copy/move, **Data health**, and **Trash**), and **System & Audit** (API quotas, `v0.1.x`-compatible backups, demo seeder, and audit log).
 
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.

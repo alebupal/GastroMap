@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { UsersManager } from "./UsersManager";
-import { TaxonomyManager } from "./TaxonomyManager";
-import { InviteManager } from "@/components/InviteManager";
+import { AdminGroupsManager } from "./AdminGroupsManager";
 import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
 import { PlacesTableManager } from "./PlacesTableManager";
@@ -13,38 +12,53 @@ import { AuditLogViewer } from "./AuditLogViewer";
 import { AdminStatsPanel } from "./AdminStatsPanel";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
+import type { AdminGroupOverviewItem } from "@/lib/actions/groups";
 
-type AdminTab =
-  | "stats"
-  | "places"
-  | "users"
-  | "taxonomy"
-  | "invites"
-  | "audit"
-  | "settings"
-  | "demo";
+type AdminTab = "stats" | "groups" | "users" | "places" | "system";
+type SystemSubTab = "general" | "demo" | "audit";
 
-const VALID_TABS: AdminTab[] = [
-  "stats",
-  "places",
-  "users",
-  "taxonomy",
-  "invites",
-  "audit",
-  "settings",
-  "demo",
-];
+function resolveInitialNavigation(rawTab?: string): {
+  tab: AdminTab;
+  usersSubTab: "users" | "invites";
+  systemSubTab: SystemSubTab;
+} {
+  switch (rawTab) {
+    case "stats":
+      return { tab: "stats", usersSubTab: "users", systemSubTab: "general" };
+    case "groups":
+    case "taxonomy":
+      return { tab: "groups", usersSubTab: "users", systemSubTab: "general" };
+    case "users":
+      return { tab: "users", usersSubTab: "users", systemSubTab: "general" };
+    case "invites":
+      return { tab: "users", usersSubTab: "invites", systemSubTab: "general" };
+    case "places":
+      return { tab: "places", usersSubTab: "users", systemSubTab: "general" };
+    case "system":
+    case "settings":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "general" };
+    case "demo":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "demo" };
+    case "audit":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "audit" };
+    default:
+      return { tab: "stats", usersSubTab: "users", systemSubTab: "general" };
+  }
+}
 
 interface AdminDashboardProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: { id: string; name: string; placesCount: number }[];
+  allGroups?: AdminGroupOverviewItem[];
   allPlaces?: PlaceWithDetails[];
   googlePlacesApiKey?: string | null;
+  publicRegistrationEnabled?: boolean;
   currentUser: {
     id: string;
     username: string | null;
@@ -58,18 +72,19 @@ interface AdminDashboardProps {
 export function AdminDashboard({
   initialOccasions,
   initialTags,
+  allGroups = [],
   allPlaces = [],
   googlePlacesApiKey,
+  publicRegistrationEnabled = true,
   currentUser,
   initialTab,
 }: AdminDashboardProps) {
   const { t } = useT();
-  const resolvedInitialTab: AdminTab =
-    initialTab && VALID_TABS.includes(initialTab as AdminTab)
-      ? (initialTab as AdminTab)
-      : "places";
+  const initialNav = resolveInitialNavigation(initialTab);
 
-  const [activeTab, setActiveTab] = useState<AdminTab>(resolvedInitialTab);
+  const [activeTab, setActiveTab] = useState<AdminTab>(initialNav.tab);
+  const [usersInitialSubTab] = useState<"users" | "invites">(initialNav.usersSubTab);
+  const [systemSubTab, setSystemSubTab] = useState<SystemSubTab>(initialNav.systemSubTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -111,7 +126,14 @@ export function AdminDashboard({
     icon: string;
     badge?: number;
   }> = [
-      { id: "stats", label: t("admin.tab_stats").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "bar_chart" },
+      { id: "stats", label: t("admin.tab_overview"), icon: "bar_chart" },
+      {
+        id: "groups",
+        label: t("admin.tab_groups"),
+        icon: "diversity_3",
+        badge: allGroups.length,
+      },
+      { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
       {
         id: "places",
         label: t("admin.tab_places", { count: allPlaces.length })
@@ -120,12 +142,7 @@ export function AdminDashboard({
         icon: "storefront",
         badge: allPlaces.length,
       },
-      { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
-      { id: "taxonomy", label: t("admin.tab_taxonomy").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "sell" },
-      { id: "invites", label: t("admin.tab_invites").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "confirmation_number" },
-      { id: "audit", label: t("admin.tab_audit").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "receipt_long" },
-      { id: "settings", label: t("admin.tab_settings").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "settings" },
-      { id: "demo", label: t("admin.tab_demo").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "science" },
+      { id: "system", label: t("admin.tab_system"), icon: "settings" },
     ];
 
   const sidebarContent = (
@@ -135,8 +152,8 @@ export function AdminDashboard({
         <div className="flex items-center justify-between gap-2 px-1 pt-1">
           <Link href="/" className="flex items-center gap-2 group">
             <GastroMapLogo iconClassName="w-8 h-8" textClassName="text-base" />
-            <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-bold tracking-wide">
-              Admin
+            <span className="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/70 text-violet-800 dark:text-violet-300 text-[10px] font-bold tracking-wide">
+              Superadmin
             </span>
           </Link>
           <button
@@ -258,8 +275,8 @@ export function AdminDashboard({
                   <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center shadow-xs border border-orange-200 dark:border-orange-800">
                     {displayUsername.charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
-                    Admin
+                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-violet-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                    Super
                   </span>
                 </div>
                 <span className="material-symbols-outlined text-sm text-slate-400">
@@ -274,8 +291,8 @@ export function AdminDashboard({
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
                         @{displayUsername}
                       </span>
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
-                        ADMIN
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-violet-600 text-white uppercase tracking-wider">
+                        SUPERADMIN
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">
@@ -338,58 +355,66 @@ export function AdminDashboard({
         >
           {activeTab === "stats" && <AdminStatsPanel />}
 
+          {activeTab === "groups" && <AdminGroupsManager />}
+
+          {activeTab === "users" && (
+            <UsersManager
+              currentUserId={currentUser.id}
+              allGroups={allGroups}
+              initialSubTab={usersInitialSubTab}
+            />
+          )}
+
           {activeTab === "places" && (
             <PlacesTableManager places={allPlaces} occasionsList={initialOccasions} />
           )}
 
-          {activeTab === "users" && <UsersManager currentUserId={currentUser.id} />}
+          {activeTab === "system" && (
+            <div className="space-y-4">
+              {/* Sub-pestañas de Sistema y Auditoría */}
+              <SegmentedTabs
+                value={systemSubTab}
+                onChange={setSystemSubTab}
+                ariaLabel={t("admin.tab_system")}
+                items={[
+                  { id: "general", label: t("admin.system_tab_general"), icon: "tune" },
+                  { id: "demo", label: t("admin.system_tab_demo"), icon: "science" },
+                  { id: "audit", label: t("admin.system_tab_audit"), icon: "receipt_long" },
+                ]}
+              />
 
-          {activeTab === "taxonomy" && (
-            <div className="space-y-5">
-              <TaxonomyManager
-                key="occasions"
-                section="occasions"
-                initialOccasions={initialOccasions}
-                initialTags={initialTags}
-              />
-              <TaxonomyManager
-                key="tags"
-                section="tags"
-                initialOccasions={initialOccasions}
-                initialTags={initialTags}
-              />
+              <div key={systemSubTab} className="gm-tab-in">
+                {systemSubTab === "general" && (
+                  <SettingsManager
+                    initialGooglePlacesApiKey={googlePlacesApiKey}
+                    initialPublicRegistrationEnabled={publicRegistrationEnabled}
+                    totalPlacesCount={allPlaces.length}
+                  />
+                )}
+
+                {systemSubTab === "demo" && (
+                  <DemoPlacesSeeder
+                    totalPlacesCount={allPlaces.length}
+                    totalOccasionsCount={initialOccasions.length}
+                    totalTagsCount={initialTags.length}
+                  />
+                )}
+
+                {systemSubTab === "audit" && <AuditLogViewer />}
+              </div>
             </div>
-          )}
-
-          {activeTab === "invites" && <InviteManager />}
-
-          {activeTab === "audit" && <AuditLogViewer />}
-
-          {activeTab === "settings" && (
-            <SettingsManager
-              initialGooglePlacesApiKey={googlePlacesApiKey}
-              totalPlacesCount={allPlaces.length}
-            />
-          )}
-
-          {activeTab === "demo" && (
-            <DemoPlacesSeeder
-              totalPlacesCount={allPlaces.length}
-              totalOccasionsCount={initialOccasions.length}
-              totalTagsCount={initialTags.length}
-            />
           )}
         </main>
 
-        {/* Footer estilo Stitch */}
-        <footer className="w-full border-t border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/40 py-4 px-4 sm:px-6 lg:px-8 mt-auto">
-          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        {/* Footer estilo Stitch idéntico al de la web principal */}
+        <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 mt-auto">
+          <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <GastroMapIcon className="w-5 h-5 rounded-[28%] shrink-0" />
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+              <GastroMapIcon className="w-6 h-6 shrink-0 shadow-xs rounded-[28%]" />
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 Gastro<span className="text-[#ea580c]">Map</span>
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 v{APP_VERSION}
               </span>
             </div>
@@ -407,7 +432,7 @@ export function AdminDashboard({
                 href="https://www.paypal.me/alebupal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 font-bold transition"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 font-bold transition shadow-xs"
               >
                 <span className="material-symbols-outlined text-sm leading-none">favorite</span>
                 <span>{t("nav.donate")}</span>

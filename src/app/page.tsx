@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { countUsers, getCurrentUser } from "@/lib/auth";
+import { getActiveWorkspace } from "@/lib/workspace";
 import { getAllPlaces, getCommunityUsers } from "@/lib/actions/places";
 import { getOccasions, getTagsWithCount } from "@/lib/actions/taxonomy";
 import { getSavedFiltersAction } from "@/lib/actions/saved-filters";
-import { versionService } from "@/services/versionService";
 import { UserHeader } from "@/components/profile/UserHeader";
 import { PlacesExplorer } from "@/components/places/PlacesExplorer";
+import type { CopyTargetSpaceOption } from "@/components/places/CopyPlaceModal";
 import { GastroMapIcon } from "@/components/ui/GastroMapLogo";
 import { APP_VERSION } from "@/lib/version";
 import { getT } from "@/lib/i18n/server";
@@ -24,14 +25,30 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const [places, occasionsList, tagsList, savedFiltersList, communityUsers, t] = await Promise.all([
-    getAllPlaces(),
-    getOccasions(),
-    getTagsWithCount(),
-    getSavedFiltersAction(),
-    getCommunityUsers(),
-    getT(),
-  ]);
+  const [workspace, places, occasionsList, tagsList, savedFiltersList, communityUsers, t] =
+    await Promise.all([
+      getActiveWorkspace(),
+      getAllPlaces(),
+      getOccasions(),
+      getTagsWithCount(),
+      getSavedFiltersAction(),
+      getCommunityUsers(),
+      getT(),
+    ]);
+
+  const availableSpaces: CopyTargetSpaceOption[] = [
+    ...(workspace?.myGroups || []).map((g) => ({
+      id: g.id,
+      name: g.name,
+      icon: g.icon || "🍻",
+    })),
+    {
+      id: "personal",
+      name: t("spaces.personal_map"),
+      icon: "🏠",
+      isPersonal: true,
+    },
+  ];
 
   // Mapa rápido de ID de ocasión a su objeto { name, icon }
   const occasionMap = occasionsList.reduce<Record<string, { name: string; icon: string }>>(
@@ -46,8 +63,8 @@ export default async function Home() {
     <div className="min-h-screen bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
       {/* Contenedor principal responsive ancho completo Stitch */}
       <div className="max-w-[1720px] mx-auto w-full px-4 sm:px-6 lg:px-8 py-3 flex-1 flex flex-col gap-3">
-        {/* 1. Barra de navegación y usuario */}
-        <UserHeader currentUser={currentUser} />
+        {/* 1. Barra de navegación, selector de espacio y usuario */}
+        <UserHeader currentUser={currentUser} workspace={workspace} />
 
         {/* 2. Explorador Gastronómico (Buscador en vivo, Filtros, Lista y Mapa) */}
         <section id="catalogo" className="w-full">
@@ -57,6 +74,9 @@ export default async function Home() {
             tagsList={tagsList}
             currentUserId={currentUser.id}
             isAdmin={currentUser.role === "admin"}
+            isSpaceAdmin={Boolean(workspace?.isSpaceAdmin)}
+            workspaceMode={workspace?.mode || "group"}
+            availableSpaces={availableSpaces}
             occasionMap={occasionMap}
             initialSavedFilters={savedFiltersList}
             communityUsers={communityUsers}

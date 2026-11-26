@@ -18,6 +18,7 @@ import {
 } from "@/lib/actions/taxonomy";
 import type { Occasion } from "@/db/schema";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import {
   OccasionIcon,
   OccasionIconPicker,
@@ -31,6 +32,8 @@ interface TaxonomyManagerProps {
   initialTags: Array<{ id: string; name: string; placesCount: number }>;
   section?: "occasions" | "tags";
   defaultOpen?: boolean;
+  explicitGroupId?: string | null;
+  onChanged?: () => void;
 }
 
 export function TaxonomyManager({
@@ -38,12 +41,37 @@ export function TaxonomyManager({
   initialTags,
   section,
   defaultOpen = false,
+  explicitGroupId,
+  onChanged,
 }: TaxonomyManagerProps) {
   const { t } = useT();
   const { toast } = useToast();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"occasions" | "tags">(section || "occasions");
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const storageKey = `gm_tax_open_${explicitGroupId || "global"}_${section || "all"}`;
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === "undefined") return defaultOpen;
+    try {
+      const saved = window.sessionStorage.getItem(storageKey);
+      if (saved === "1") return true;
+      if (saved === "0") return false;
+    } catch {
+      // Ignorar si sessionStorage no está disponible
+    }
+    return defaultOpen;
+  });
+
+  function toggleOpen() {
+    setIsOpen((prev) => {
+      const next = !prev;
+      try {
+        window.sessionStorage.setItem(storageKey, next ? "1" : "0");
+      } catch {
+        // Ignorar
+      }
+      return next;
+    });
+  }
   const currentTab = section ?? activeTab;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,13 +89,37 @@ export function TaxonomyManager({
     setTagsList(initialTags);
   }, [initialTags]);
 
-  // Filtros de búsqueda y paginación en el panel admin
+  // Filtros de búsqueda, ordenación y paginación en el panel admin
   const [occasionSearch, setOccasionSearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
+  const [occSortField, setOccSortField] = useState<"name" | "count">("name");
+  const [occSortDir, setOccSortDir] = useState<"asc" | "desc">("asc");
+  const [tagSortField, setTagSortField] = useState<"name" | "count">("name");
+  const [tagSortDir, setTagSortDir] = useState<"asc" | "desc">("asc");
   const [occPage, setOccPage] = useState(1);
   const [occPageSize, setOccPageSize] = useState(10);
   const [tagPage, setTagPage] = useState(1);
   const [tagPageSize, setTagPageSize] = useState(15);
+
+  function toggleOccSort(field: "name" | "count") {
+    if (occSortField === field) {
+      setOccSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setOccSortField(field);
+      setOccSortDir(field === "count" ? "desc" : "asc");
+    }
+    setOccPage(1);
+  }
+
+  function toggleTagSort(field: "name" | "count") {
+    if (tagSortField === field) {
+      setTagSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setTagSortField(field);
+      setTagSortDir(field === "count" ? "desc" : "asc");
+    }
+    setTagPage(1);
+  }
 
   // Selección múltiple
   const [selectedOccasionIds, setSelectedOccasionIds] = useState<Set<string>>(new Set());
@@ -116,25 +168,56 @@ export function TaxonomyManager({
     items: Array<{ id: string; name: string; icon?: string; count: number }>;
   } | null>(null);
 
-  // Lista filtrada de ocasiones
+  // Listas ordenadas alfabéticamente para selectores de fusión y reasignación
+  const alphabeticalOccasions = useMemo(() => {
+    return [...occasionsList].sort((a, b) =>
+      a.name.localeCompare(b.name, "es", { sensitivity: "base" })
+    );
+  }, [occasionsList]);
+
+  const alphabeticalTags = useMemo(() => {
+    return [...tagsList].sort((a, b) =>
+      a.name.localeCompare(b.name, "es", { sensitivity: "base" })
+    );
+  }, [tagsList]);
+
+  // Lista filtrada y ordenada de ocasiones
   const filteredOccasions = useMemo(() => {
     const q = normalizeSearchText(occasionSearch);
-    if (!q) return occasionsList;
-    return occasionsList.filter(
-      (occ) =>
-        normalizeSearchText(occ.name).includes(q) || normalizeSearchText(occ.id).includes(q)
-    );
-  }, [occasionsList, occasionSearch]);
+    const base = !q
+      ? [...occasionsList]
+      : occasionsList.filter(
+          (occ) =>
+            normalizeSearchText(occ.name).includes(q) || normalizeSearchText(occ.id).includes(q)
+        );
+    const dir = occSortDir === "asc" ? 1 : -1;
+    return base.sort((a, b) => {
+      if (occSortField === "count") {
+        const diff = (a.placesCount - b.placesCount) * dir;
+        if (diff !== 0) return diff;
+      }
+      return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+    });
+  }, [occasionsList, occasionSearch, occSortField, occSortDir]);
 
-  // Lista filtrada de tags
+  // Lista filtrada y ordenada de tags
   const filteredTags = useMemo(() => {
     const q = normalizeSearchText(tagSearch);
-    if (!q) return tagsList;
-    return tagsList.filter(
-      (tag) =>
-        normalizeSearchText(tag.name).includes(q) || normalizeSearchText(tag.id).includes(q)
-    );
-  }, [tagsList, tagSearch]);
+    const base = !q
+      ? [...tagsList]
+      : tagsList.filter(
+          (tag) =>
+            normalizeSearchText(tag.name).includes(q) || normalizeSearchText(tag.id).includes(q)
+        );
+    const dir = tagSortDir === "asc" ? 1 : -1;
+    return base.sort((a, b) => {
+      if (tagSortField === "count") {
+        const diff = (a.placesCount - b.placesCount) * dir;
+        if (diff !== 0) return diff;
+      }
+      return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+    });
+  }, [tagsList, tagSearch, tagSortField, tagSortDir]);
 
   // Paginación de ocasiones
   const occTotalPages = Math.max(1, Math.ceil(filteredOccasions.length / occPageSize));
@@ -216,13 +299,14 @@ export function TaxonomyManager({
     setError(null);
     setSuccessMessage(null);
     const formData = new FormData(e.currentTarget);
-    const res = await createOccasionAction(formData);
+    const res = await createOccasionAction(formData, explicitGroupId);
     setLoading(false);
     if (res.error) {
       setError(res.error);
     } else {
       setNewOccasionName("");
       setSuccessMessage(t("admin_taxonomy.created_success_occasion"));
+      onChanged?.();
       router.refresh();
       setTimeout(() => setSuccessMessage(null), 3500);
     }
@@ -234,7 +318,12 @@ export function TaxonomyManager({
     setLoading(true);
     setError(null);
     if (editingItem.type === "occasion") {
-      await renameOccasionAction(editingItem.id, editingItem.name, editingItem.icon);
+      await renameOccasionAction(
+        editingItem.id,
+        editingItem.name,
+        editingItem.icon,
+        explicitGroupId
+      );
       setOccasionsList((prev) =>
         prev.map((o) =>
           o.id === editingItem.id
@@ -243,13 +332,14 @@ export function TaxonomyManager({
         )
       );
     } else {
-      await renameTagAction(editingItem.id, editingItem.name);
+      await renameTagAction(editingItem.id, editingItem.name, explicitGroupId);
       setTagsList((prev) =>
         prev.map((t) =>
           t.id === editingItem.id ? { ...t, name: editingItem.name } : t
         )
       );
     }
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setEditingItem(null);
@@ -265,7 +355,7 @@ export function TaxonomyManager({
     const deletedName = itemToDelete.name;
 
     if (itemToDelete.type === "occasion") {
-      const res = await deleteOccasionAction(deletedId, replacement);
+      const res = await deleteOccasionAction(deletedId, replacement, explicitGroupId);
       if (res?.error) {
         setError(res.error);
         toast(res.error, { kind: "error" });
@@ -282,7 +372,7 @@ export function TaxonomyManager({
         setTimeout(() => setSuccessMessage(null), 4000);
       }
     } else {
-      const res = await deleteTagAction(deletedId, replacement);
+      const res = await deleteTagAction(deletedId, replacement, explicitGroupId);
       if (res?.error) {
         setError(res.error);
         toast(res.error, { kind: "error" });
@@ -300,6 +390,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setItemToDelete(null);
@@ -313,7 +404,7 @@ export function TaxonomyManager({
 
     if (itemToMerge.type === "occasion") {
       const sourceId = itemToMerge.id;
-      await mergeOccasionsAction(sourceId, mergeTarget);
+      await mergeOccasionsAction(sourceId, mergeTarget, explicitGroupId);
       setOccasionsList((prev) => prev.filter((o) => o.id !== sourceId));
       setSelectedOccasionIds((prev) => {
         const next = new Set(prev);
@@ -322,7 +413,7 @@ export function TaxonomyManager({
       });
     } else {
       const sourceId = itemToMerge.id;
-      await mergeTagsAction(sourceId, mergeTarget);
+      await mergeTagsAction(sourceId, mergeTarget, explicitGroupId);
       setTagsList((prev) => prev.filter((t) => t.id !== sourceId));
       setSelectedTagIds((prev) => {
         const next = new Set(prev);
@@ -331,6 +422,7 @@ export function TaxonomyManager({
       });
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setItemToMerge(null);
@@ -361,7 +453,7 @@ export function TaxonomyManager({
 
     if (emptyConfirmModal.type === "occasions") {
       const idsToDelete = emptyConfirmModal.items.map((i) => i.id);
-      const res = await deleteEmptyOccasionsAction(idsToDelete);
+      const res = await deleteEmptyOccasionsAction(idsToDelete, explicitGroupId);
       if (res.error) {
         setError(res.error);
       } else {
@@ -378,7 +470,7 @@ export function TaxonomyManager({
       }
     } else {
       const tagsToDelete = emptyConfirmModal.items.map((i) => i.id);
-      const res = await deleteEmptyTagsAction(tagsToDelete);
+      const res = await deleteEmptyTagsAction(tagsToDelete, explicitGroupId);
       if (res.error) {
         setError(res.error);
         toast(res.error, { kind: "error" });
@@ -396,6 +488,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setEmptyConfirmModal(null);
@@ -427,7 +520,7 @@ export function TaxonomyManager({
     setError(null);
 
     if (bulkDeleteModal.type === "occasions") {
-      const res = await deleteMultipleOccasionsAction(bulkDeleteModal.ids);
+      const res = await deleteMultipleOccasionsAction(bulkDeleteModal.ids, explicitGroupId);
       if (res.error) {
         setError(res.error);
       } else {
@@ -439,7 +532,7 @@ export function TaxonomyManager({
         setTimeout(() => setSuccessMessage(null), 3500);
       }
     } else {
-      const res = await deleteMultipleTagsAction(bulkDeleteModal.ids);
+      const res = await deleteMultipleTagsAction(bulkDeleteModal.ids, explicitGroupId);
       if (res.error) {
         setError(res.error);
         toast(res.error, { kind: "error" });
@@ -453,6 +546,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setBulkDeleteModal(null);
@@ -491,7 +585,7 @@ export function TaxonomyManager({
         </div>
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           className="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition active:scale-95 cursor-pointer shrink-0"
         >
           {isOpen ? t("common.collapse") : t("common.manage")}
@@ -499,7 +593,7 @@ export function TaxonomyManager({
       </div>
 
       {isOpen && (
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4 gm-tab-in">
           {/* Mensajes de feedback */}
           {error && (
             <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs">
@@ -514,28 +608,24 @@ export function TaxonomyManager({
 
           {/* Selector de Pestañas (solo si no se ha fijado una sección específica) */}
           {!section && (
-            <div className="flex rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
-              <button
-                onClick={() => setActiveTab("occasions")}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                  currentTab === "occasions"
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                {t("admin_taxonomy.title_occasions")} ({occasionsList.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("tags")}
-                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition cursor-pointer ${
-                  currentTab === "tags"
-                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
-                    : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                }`}
-              >
-                {t("admin_taxonomy.title_tags")} ({tagsList.length})
-              </button>
-            </div>
+            <SegmentedTabs
+              value={currentTab}
+              onChange={(val) => setActiveTab(val)}
+              variant="neutral"
+              fullWidth
+              items={[
+                {
+                  id: "occasions",
+                  label: t("admin_taxonomy.title_occasions"),
+                  badge: occasionsList.length,
+                },
+                {
+                  id: "tags",
+                  label: t("admin_taxonomy.title_tags"),
+                  badge: tagsList.length,
+                },
+              ]}
+            />
           )}
 
           {/* ==================== PESTAÑA 1: CATEGORÍAS ==================== */}
@@ -595,9 +685,9 @@ export function TaxonomyManager({
                 </div>
               </div>
 
-              {/* Barra de selección masiva */}
+              {/* Barra de selección masiva y ordenación */}
               {filteredOccasions.length > 0 && (
-                <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px] text-slate-500 font-medium border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px] text-slate-500 font-medium border border-slate-200 dark:border-slate-800">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -610,11 +700,49 @@ export function TaxonomyManager({
                     />
                     <span>{t("admin_taxonomy.select_all_visible", { count: String(filteredOccasions.length) })}</span>
                   </label>
-                  {selectedOccasionIds.size > 0 && (
-                    <span className="font-semibold text-amber-600 dark:text-amber-400">
-                      {selectedOccasionIds.size}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <button
+                      type="button"
+                      onClick={() => toggleOccSort("name")}
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md font-bold transition cursor-pointer ${
+                        occSortField === "name"
+                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300"
+                          : "hover:bg-slate-200/70 dark:hover:bg-slate-700/60 text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span>{t("common.sort_title")}</span>
+                      <span className="material-symbols-outlined text-[13px] leading-none">
+                        {occSortField === "name"
+                          ? occSortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleOccSort("count")}
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md font-bold transition cursor-pointer ${
+                        occSortField === "count"
+                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300"
+                          : "hover:bg-slate-200/70 dark:hover:bg-slate-700/60 text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span>{t("common.sort_count")}</span>
+                      <span className="material-symbols-outlined text-[13px] leading-none">
+                        {occSortField === "count"
+                          ? occSortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                    {selectedOccasionIds.size > 0 && (
+                      <span className="font-semibold text-amber-600 dark:text-amber-400 pl-1">
+                        ({selectedOccasionIds.size})
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -682,7 +810,7 @@ export function TaxonomyManager({
                           <button
                             onClick={() => {
                               setItemToMerge({ type: "occasion", id: occ.id, name: occ.name });
-                              const other = occasionsList.find((o) => o.id !== occ.id);
+                              const other = alphabeticalOccasions.find((o) => o.id !== occ.id);
                               setMergeTarget(other?.id || "");
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
@@ -699,7 +827,7 @@ export function TaxonomyManager({
                                 name: occ.name,
                                 count: occ.placesCount,
                               });
-                              const other = occasionsList.find((o) => o.id !== occ.id);
+                              const other = alphabeticalOccasions.find((o) => o.id !== occ.id);
                               setReplacementTarget(other?.id || "");
                               setDeleteMode(occ.placesCount > 0 ? "reassign" : "detach");
                             }}
@@ -822,9 +950,9 @@ export function TaxonomyManager({
                 </div>
               </div>
 
-              {/* Barra de selección masiva */}
+              {/* Barra de selección masiva y ordenación */}
               {filteredTags.length > 0 && (
-                <div className="flex items-center justify-between px-2 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px] text-slate-500 font-medium border border-slate-200 dark:border-slate-800">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-[11px] text-slate-500 font-medium border border-slate-200 dark:border-slate-800">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -837,11 +965,49 @@ export function TaxonomyManager({
                     />
                     <span>{t("admin_taxonomy.select_all_visible", { count: String(filteredTags.length) })}</span>
                   </label>
-                  {selectedTagIds.size > 0 && (
-                    <span className="font-semibold text-amber-600 dark:text-amber-400">
-                      {selectedTagIds.size}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 ml-auto">
+                    <button
+                      type="button"
+                      onClick={() => toggleTagSort("name")}
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md font-bold transition cursor-pointer ${
+                        tagSortField === "name"
+                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300"
+                          : "hover:bg-slate-200/70 dark:hover:bg-slate-700/60 text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span>{t("common.sort_title")}</span>
+                      <span className="material-symbols-outlined text-[13px] leading-none">
+                        {tagSortField === "name"
+                          ? tagSortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleTagSort("count")}
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md font-bold transition cursor-pointer ${
+                        tagSortField === "count"
+                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300"
+                          : "hover:bg-slate-200/70 dark:hover:bg-slate-700/60 text-slate-500 dark:text-slate-400"
+                      }`}
+                    >
+                      <span>{t("common.sort_count")}</span>
+                      <span className="material-symbols-outlined text-[13px] leading-none">
+                        {tagSortField === "count"
+                          ? tagSortDir === "asc"
+                            ? "arrow_upward"
+                            : "arrow_downward"
+                          : "unfold_more"}
+                      </span>
+                    </button>
+                    {selectedTagIds.size > 0 && (
+                      <span className="font-semibold text-amber-600 dark:text-amber-400 pl-1">
+                        ({selectedTagIds.size})
+                      </span>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -901,7 +1067,7 @@ export function TaxonomyManager({
                           <button
                             onClick={() => {
                               setItemToMerge({ type: "tag", id: tag.id, name: tag.name });
-                              const other = tagsList.find((t) => t.id !== tag.id);
+                              const other = alphabeticalTags.find((t) => t.id !== tag.id);
                               setMergeTarget(other?.id || "");
                             }}
                             className="px-2 py-1 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[11px] hover:bg-amber-200 transition cursor-pointer"
@@ -918,7 +1084,7 @@ export function TaxonomyManager({
                                 name: tag.name,
                                 count: tag.placesCount,
                               });
-                              const other = tagsList.find((t) => t.id !== tag.id);
+                              const other = alphabeticalTags.find((t) => t.id !== tag.id);
                               setReplacementTarget(other?.id || "");
                               setDeleteMode(tag.placesCount > 0 ? "reassign" : "detach");
                             }}
@@ -1134,18 +1300,18 @@ export function TaxonomyManager({
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
                       >
                         {itemToDelete.type === "occasion"
-                          ? occasionsList
+                          ? alphabeticalOccasions
                               .filter((o) => o.id !== itemToDelete.id)
                               .map((o) => (
                                 <option key={o.id} value={o.id}>
-                                  {formatOccasionOptionLabel(o.icon, o.name)}
+                                  {formatOccasionOptionLabel(o.icon, o.name)} ({o.placesCount})
                                 </option>
                               ))
-                          : tagsList
+                          : alphabeticalTags
                               .filter((t) => t.id !== itemToDelete.id)
                               .map((t) => (
                                 <option key={t.id} value={t.id}>
-                                  #{t.name}
+                                  #{t.name} ({t.placesCount})
                                 </option>
                               ))}
                       </select>
@@ -1222,18 +1388,18 @@ export function TaxonomyManager({
                 className="w-full px-2.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
               >
                 {itemToMerge.type === "occasion"
-                  ? occasionsList
+                  ? alphabeticalOccasions
                       .filter((o) => o.id !== itemToMerge.id)
                       .map((o) => (
                         <option key={o.id} value={o.id}>
-                          {formatOccasionOptionLabel(o.icon, o.name)}
+                          {formatOccasionOptionLabel(o.icon, o.name)} ({o.placesCount})
                         </option>
                       ))
-                  : tagsList
+                  : alphabeticalTags
                       .filter((t) => t.id !== itemToMerge.id)
                       .map((t) => (
                         <option key={t.id} value={t.id}>
-                          #{t.name}
+                          #{t.name} ({t.placesCount})
                         </option>
                       ))}
               </select>

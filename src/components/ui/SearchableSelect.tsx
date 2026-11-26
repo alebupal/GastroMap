@@ -42,7 +42,12 @@ export function SearchableSelect({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const [coords, setCoords] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -79,7 +84,7 @@ export function SearchableSelect({
   const updateCoords = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const popupWidth = window.innerWidth < 640 ? 256 : 288;
+      const popupWidth = Math.min(rect.width, window.innerWidth - 24);
       let left = rect.left;
       if (left + popupWidth > window.innerWidth - 12) {
         left = window.innerWidth - popupWidth - 12;
@@ -87,15 +92,14 @@ export function SearchableSelect({
       if (left < 12) left = 12;
 
       const estimatedHeight = 280;
-      let top = rect.bottom + 6;
-      if (top + estimatedHeight > window.innerHeight - 12 && rect.top > estimatedHeight + 12) {
-        top = rect.top - estimatedHeight - 6;
-      }
+      const spaceBelow = window.innerHeight - rect.bottom - 12;
+      const openUpward = spaceBelow < estimatedHeight && rect.top > spaceBelow;
 
-      setCoords({
-        top,
-        left,
-      });
+      setCoords(
+        openUpward
+          ? { bottom: window.innerHeight - rect.top + 6, left, width: popupWidth }
+          : { top: rect.bottom + 6, left, width: popupWidth }
+      );
     }
   };
 
@@ -173,7 +177,7 @@ export function SearchableSelect({
       >
         <span className="flex items-center gap-1.5 truncate">
           {displayIcon && <span className="text-base shrink-0">{displayIcon}</span>}
-          <span className="truncate max-w-[140px] sm:max-w-[180px]">{displayLabel}</span>
+          <span className="truncate max-w-[200px] sm:max-w-[260px]">{displayLabel}</span>
         </span>
         <span className="text-slate-400 text-[10px] shrink-0 ml-1">
           {isOpen ? "▲" : "▼"}
@@ -187,10 +191,12 @@ export function SearchableSelect({
             ref={menuRef}
             style={{
               position: "fixed",
-              top: `${coords.top}px`,
+              ...(coords.top !== undefined ? { top: `${coords.top}px` } : {}),
+              ...(coords.bottom !== undefined ? { bottom: `${coords.bottom}px` } : {}),
               left: `${coords.left}px`,
+              width: `${coords.width}px`,
             }}
-            className="z-[9999] w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
+            className="z-[9999] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
           >
             {/* Buscador superior sin anillo naranja invasivo */}
             <div className="relative shrink-0">
@@ -255,17 +261,19 @@ export function SearchableSelect({
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                         }`}
                     >
-                      <div className="flex items-center gap-2 truncate">
+                      <div className="flex items-center gap-2.5 min-w-0 text-left">
                         {opt.icon && <span className="text-base shrink-0">{opt.icon}</span>}
-                        <span className="truncate">{opt.label}</span>
-                        {opt.subtitle && (
-                          <span className="text-[10px] text-slate-400 truncate">
-                            ({opt.subtitle})
-                          </span>
-                        )}
+                        <div className="min-w-0 flex flex-col">
+                          <span className="truncate font-semibold">{opt.label}</span>
+                          {opt.subtitle && (
+                            <span className="text-[10px] text-slate-400 font-normal truncate">
+                              {opt.subtitle}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {isSelected && (
-                        <span className="text-amber-500 text-xs font-black">✓</span>
+                        <span className="text-amber-500 text-xs font-black shrink-0 ml-2">✓</span>
                       )}
                     </button>
                   );

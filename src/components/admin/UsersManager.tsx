@@ -8,12 +8,24 @@ import {
   resetUserPasswordAction,
   deleteUserAction,
   deleteMultipleUsersAction,
+  getUserDeletionImpactAction,
   createUserDirectlyAction,
   updateUserByAdminAction,
   type SafeUser,
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { impersonateUserAction } from "@/lib/actions/auth";
+import {
+  addGroupMemberAction,
+  getAllGroupsAdminAction,
+  removeGroupMemberAction,
+  setGroupMemberRoleAction,
+  type AdminGroupOverviewItem,
+} from "@/lib/actions/groups";
+import { InviteManager } from "@/components/InviteManager";
+import { RoleLegendCard } from "./RoleLegendCard";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
@@ -22,20 +34,48 @@ import type { Locale } from "@/lib/i18n/config";
 
 interface UsersManagerProps {
   currentUserId?: string;
+  allGroups?: AdminGroupOverviewItem[];
+  initialSubTab?: "users" | "invites";
 }
 
-export function UsersManager({ currentUserId }: UsersManagerProps) {
+export function UsersManager({
+  currentUserId,
+  allGroups: initialAllGroups,
+  initialSubTab = "users",
+}: UsersManagerProps) {
   const { t } = useT();
   const { toast } = useToast();
+  const [subTab, setSubTab] = useState<"users" | "invites">(initialSubTab);
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
+  const [allGroupsList, setAllGroupsList] = useState<AdminGroupOverviewItem[]>(
+    initialAllGroups || []
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Búsqueda, paginación y selección múltiple
+  // Modal de gestión de grupos y roles de un usuario
+  const [managingGroupsUserId, setManagingGroupsUserId] = useState<string | null>(null);
+  const [groupModalSearch, setGroupModalSearch] = useState("");
+  const [selectedNewGroupId, setSelectedNewGroupId] = useState("");
+  const [busyGroupAction, setBusyGroupAction] = useState<string | null>(null);
+
+  // Búsqueda, ordenación, paginación y selección múltiple
   const [filterQuery, setFilterQuery] = useState("");
+  const [sortField, setSortField] = useState<"username" | "name" | "email" | "role" | "status" | "createdAt">("username");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  function toggleSort(field: "username" | "name" | "email" | "role" | "status" | "createdAt") {
+    if (sortField === field) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDir(field === "createdAt" ? "desc" : "asc");
+    }
+    setCurrentPage(1);
+  }
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [deletingMultiple, setDeletingMultiple] = useState(false);
   const [impersonatingUserId, setImpersonatingUserId] = useState<string | null>(null);
@@ -125,8 +165,12 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   async function loadUsers() {
     setLoading(true);
     try {
-      const data = await getAllUsersAction();
+      const [data, groupsData] = await Promise.all([
+        getAllUsersAction(),
+        allGroupsList.length === 0 ? getAllGroupsAdminAction() : Promise.resolve(null),
+      ]);
       setUsersList(data);
+      if (groupsData) setAllGroupsList(groupsData);
     } catch {
       setError("No se pudieron cargar los usuarios.");
     } finally {
@@ -136,20 +180,103 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Filtrar lista de usuarios reactivamente por nombre, email o username (sin distinguir tildes)
+  const managingGroupsUser = useMemo(
+    () => (managingGroupsUserId ? usersList.find((u) => u.id === managingGroupsUserId) || null : null),
+    [managingGroupsUserId, usersList]
+  );
+
+  const availableGroupsForModalUser = useMemo(() => {
+    if (!managingGroupsUser) return [];
+    const memberGroupIds = new Set((managingGroupsUser.groups || []).map((g) => g.groupId));
+    return allGroupsList
+      .filter((g) => !memberGroupIds.has(g.id))
+      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+  }, [managingGroupsUser, allGroupsList]);
+
+  const filteredModalUserGroups = useMemo(() => {
+    if (!managingGroupsUser?.groups) return [];
+    const q = normalizeSearchText(groupModalSearch);
+    const list = [...managingGroupsUser.groups].sort((a, b) =>
+      a.groupName.localeCompare(b.groupName, "es", { sensitivity: "base" })
+    );
+    if (!q) return list;
+    return list.filter((g) => normalizeSearchText(g.groupName).includes(q));
+  }, [managingGroupsUser, groupModalSearch]);
+
+  async function handleAddUserToGroup() {
+    if (!managingGroupsUser || !selectedNewGroupId) return;
+    setBusyGroupAction(`add:${selectedNewGroupId}`);
+    const res = await addGroupMemberAction(selectedNewGroupId, managingGroupsUser.id);
+    setBusyGroupAction(null);
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.member_added_toast"), { kind: "success" });
+      setSelectedNewGroupId("");
+      await loadUsers();
+    }
+  }
+
+  async function handleRemoveUserFromGroup(userId: string, groupId: string, groupName: string) {
+    if (!confirm(t("admin_users.confirm_remove_from_group", { group: groupName }))) return;
+    setBusyGroupAction(`rm:${groupId}`);
+    const res = await removeGroupMemberAction(groupId, userId);
+    setBusyGroupAction(null);
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.member_removed_toast"), { kind: "success" });
+      await loadUsers();
+    }
+  }
+
+  // Filtrar y ordenar lista de usuarios reactivamente por nombre, email, username, rol o estado
   const filteredUsers = useMemo(() => {
     const q = normalizeSearchText(filterQuery);
-    if (!q) return usersList;
-    return usersList.filter(
-      (u) =>
-        normalizeSearchText(u.name).includes(q) ||
-        normalizeSearchText(u.email).includes(q) ||
-        (u.username && normalizeSearchText(u.username).includes(q)) ||
-        normalizeSearchText(u.role).includes(q)
-    );
-  }, [usersList, filterQuery]);
+    const base = !q
+      ? [...usersList]
+      : usersList.filter(
+          (u) =>
+            normalizeSearchText(u.name).includes(q) ||
+            normalizeSearchText(u.email).includes(q) ||
+            (u.username && normalizeSearchText(u.username).includes(q)) ||
+            normalizeSearchText(u.role).includes(q)
+        );
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    return base.sort((a, b) => {
+      switch (sortField) {
+        case "username":
+          return (
+            (a.username || a.name).localeCompare(b.username || b.name, "es", {
+              sensitivity: "base",
+            }) * dir
+          );
+        case "name":
+          return a.name.localeCompare(b.name, "es", { sensitivity: "base" }) * dir;
+        case "email":
+          return a.email.localeCompare(b.email, "es", { sensitivity: "base" }) * dir;
+        case "role": {
+          const cmp = a.role.localeCompare(b.role) * dir;
+          return cmp !== 0
+            ? cmp
+            : (a.username || a.name).localeCompare(b.username || b.name, "es");
+        }
+        case "status": {
+          const cmp = a.status.localeCompare(b.status) * dir;
+          return cmp !== 0
+            ? cmp
+            : (a.username || a.name).localeCompare(b.username || b.name, "es");
+        }
+        case "createdAt":
+        default:
+          return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
+      }
+    });
+  }, [usersList, filterQuery, sortField, sortDir]);
 
   // Paginación de usuarios
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
@@ -252,7 +379,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const newRole = user.role === "admin" ? "user" : "admin";
     if (
       !confirm(
-        `¿Cambiar el rol de @${user.username || user.name} a ${newRole === "admin" ? "Administrador" : "Usuario"
+        `¿Cambiar el rol global de @${user.username || user.name} a ${
+          newRole === "admin" ? "Superadministrador" : "Usuario"
         }?`
       )
     )
@@ -263,8 +391,28 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     const res = await updateUserRoleAction(user.id, newRole);
     if (res.error) {
       setError(res.error);
+      toast(res.error, { kind: "error" });
     } else {
-      setSuccess(`Rol de @${user.username || user.name} actualizado.`);
+      const msg = `Rol global de @${user.username || user.name} actualizado.`;
+      setSuccess(msg);
+      toast(msg, { kind: "success" });
+      loadUsers();
+    }
+  }
+
+  async function handleChangeUserGroupRole(
+    userId: string,
+    groupId: string,
+    newRole: "owner" | "admin" | "member"
+  ) {
+    setError(null);
+    setSuccess(null);
+    const res = await setGroupMemberRoleAction(groupId, userId, newRole);
+    if (res.error) {
+      setError(res.error);
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.role_updated_toast"), { kind: "success" });
       loadUsers();
     }
   }
@@ -286,13 +434,43 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
     setSavingPassword(false);
   }
 
+  // Modal de baja segura de usuario (Punto 13)
+  const [deleteImpactUser, setDeleteImpactUser] = useState<{
+    user: SafeUser;
+    ownedGroups: Array<{ id: string; name: string; icon: string }>;
+    groupPlacesCount: number;
+    groupCommentsCount: number;
+    personalPlacesCount: number;
+  } | null>(null);
+  const [deletingWithStrategy, setDeletingWithStrategy] = useState(false);
+
   async function handleDeleteUser(user: SafeUser) {
+    const impact = await getUserDeletionImpactAction(user.id);
+    if (
+      impact &&
+      (impact.ownedGroups.length > 0 ||
+        impact.groupPlacesCount > 0 ||
+        impact.groupCommentsCount > 0)
+    ) {
+      setDeleteImpactUser({ user, ...impact });
+      return;
+    }
+
     if (!confirm(`¿Eliminar definitivamente al usuario @${user.username || user.name}?`))
       return;
 
+    await executeUserDeletion(user, "reassign_owner");
+  }
+
+  async function executeUserDeletion(
+    user: SafeUser,
+    strategy: "reassign_owner" | "delete"
+  ) {
+    setDeletingWithStrategy(true);
     setError(null);
     setSuccess(null);
-    const res = await deleteUserAction(user.id);
+    const res = await deleteUserAction(user.id, { groupDataStrategy: strategy });
+    setDeletingWithStrategy(false);
     if (res.error) {
       setError(res.error);
       toast(res.error, { kind: "error" });
@@ -300,6 +478,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
       const msg = `Usuario @${user.username || user.name} eliminado.`;
       setSuccess(msg);
       toast(msg, { kind: "success" });
+      setDeleteImpactUser(null);
       setSelectedUserIds((prev) => {
         const next = new Set(prev);
         next.delete(user.id);
@@ -341,24 +520,50 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   }
 
   return (
-    <div className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm text-left">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-xl leading-none">group</span>
-          </div>
-          <div>
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-              {t("admin_users.title")}
-            </h3>
-            <p className="text-xs text-slate-500">
-              {t("admin_users.subtitle")}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-4 text-left">
+      {/* Sub-pestañas: Usuarios | Invitaciones de plataforma */}
+      <SegmentedTabs
+        value={subTab}
+        onChange={setSubTab}
+        ariaLabel={t("admin_users.title")}
+        items={[
+          {
+            id: "users",
+            label: t("admin_users.tab_users"),
+            icon: "group",
+            badge: usersList.length,
+          },
+          {
+            id: "invites",
+            label: t("admin_users.tab_invites"),
+            icon: "confirmation_number",
+          },
+        ]}
+      />
 
-      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+      <div key={subTab} className="gm-tab-in">
+      {subTab === "invites" ? (
+        <InviteManager />
+      ) : (
+        <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm text-left">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-xl leading-none">group</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                  {t("admin_users.title")}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {t("admin_users.subtitle")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+            <RoleLegendCard scope="all" />
           {error && (
             <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1.5">
               <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
@@ -488,8 +693,8 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                     onChange={(e) => setAddRole(e.target.value as "user" | "admin")}
                     className="w-full px-3 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-700 text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
-                    <option value="user">Usuario estándar (puede ver y añadir sitios)</option>
-                    <option value="admin">Administrador (acceso total a configuración y gestión)</option>
+                    <option value="user">Usuario estándar (acceso a su mapa personal y sus grupos)</option>
+                    <option value="admin">Superadministrador (acceso global a toda la plataforma)</option>
                   </select>
                 </div>
 
@@ -526,7 +731,7 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
           {/* Barra de acción para selección múltiple */}
           <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
@@ -545,6 +750,38 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   {selectedUserIds.size} {t("admin_places.delete_selected")}
                 </span>
               )}
+            </div>
+
+            <div className="flex items-center gap-1 flex-wrap text-[11px]">
+              {(
+                [
+                  { id: "username", label: "@Usuario" },
+                  { id: "name", label: t("common.sort_title") },
+                  { id: "email", label: "Email" },
+                  { id: "role", label: t("admin_users.role") },
+                  { id: "status", label: t("common.sort_status") },
+                  { id: "createdAt", label: t("common.sort_date") },
+                ] as const
+              ).map((col) => {
+                const active = sortField === col.id;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    onClick={() => toggleSort(col.id)}
+                    className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg font-bold transition cursor-pointer ${
+                      active
+                        ? "bg-orange-600 text-white shadow-xs"
+                        : "bg-white dark:bg-slate-900/70 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:border-orange-400"
+                    }`}
+                  >
+                    <span>{col.label}</span>
+                    <span className="material-symbols-outlined text-[13px] leading-none">
+                      {active ? (sortDir === "asc" ? "arrow_upward" : "arrow_downward") : "unfold_more"}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {selectedUserIds.size > 0 && (
@@ -618,12 +855,13 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                             </span>
                           )}
                           <span
-                            className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap ${u.role === "admin"
-                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                              : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                              }`}
+                            className={`px-1.5 py-0.5 rounded-md text-[10px] font-extrabold whitespace-nowrap border ${
+                              u.role === "admin"
+                                ? "bg-violet-500/15 text-violet-700 dark:text-violet-300 border-violet-500/30"
+                                : "bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-300/60 dark:border-slate-600"
+                            }`}
                           >
-                            {u.role.toUpperCase()}
+                            {u.role === "admin" ? "SUPERADMIN" : t("admin_users.role_user").toUpperCase()}
                           </span>
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 whitespace-nowrap">
                             {u.locale === "en" ? "🇬🇧 EN" : "🇪🇸 ES"}
@@ -636,6 +874,36 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                         </div>
                         <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           {u.name} • {u.email}
+                        </div>
+
+                        {/* Resumen compacto escalable: botón para gestionar grupos y contador de sitios */}
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setManagingGroupsUserId(u.id);
+                              setGroupModalSearch("");
+                              setSelectedNewGroupId("");
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-xs leading-none text-orange-600">
+                              diversity_3
+                            </span>
+                            <span>
+                              {t("admin_users.groups_btn", { count: u.groups?.length ?? 0 })}
+                            </span>
+                            <span className="material-symbols-outlined text-xs leading-none text-slate-400">
+                              chevron_right
+                            </span>
+                          </button>
+
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 text-slate-500 dark:text-slate-400">
+                            <span className="material-symbols-outlined text-xs leading-none">
+                              storefront
+                            </span>
+                            <span>{t("admin_users.places_badge", { count: u.placesCount ?? 0 })}</span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -661,12 +929,15 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                       <button
                         type="button"
                         onClick={() => handleToggleRole(u)}
-                        disabled={isMe}
-                        className={`px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] font-semibold transition ${isMe
-                          ? "opacity-40 cursor-not-allowed text-slate-500"
-                          : "hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
-                          }`}
-                        title={isMe ? t("admin_users.role") : t("admin_users.role")}
+                        disabled={isMe && usersList.filter((x) => x.role === "admin").length <= 1}
+                        className={`px-2 py-1 rounded-lg border text-[11px] font-bold transition ${
+                          isMe && usersList.filter((x) => x.role === "admin").length <= 1
+                            ? "opacity-40 cursor-not-allowed border-slate-300 dark:border-slate-700 text-slate-500"
+                            : u.role === "admin"
+                              ? "border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
+                              : "border-violet-300 dark:border-violet-800 bg-violet-50/70 dark:bg-violet-950/40 hover:bg-violet-100 dark:hover:bg-violet-900/50 text-violet-700 dark:text-violet-300 cursor-pointer"
+                        }`}
+                        title={t("admin_users.role")}
                       >
                         {u.role === "admin" ? t("admin_users.make_user") : t("admin_users.make_admin")}
                       </button>
@@ -739,7 +1010,278 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               />
             </div>
           )}
+          </div>
+        </div>
+      )}
       </div>
+
+      {/* Modal para gestionar los grupos y roles de un usuario */}
+      {managingGroupsUser && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
+          <div className="w-full max-w-lg max-h-[92dvh] sm:max-h-[86dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col text-left overflow-hidden gm-modal-in">
+            <div className="px-5 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-xl leading-none">diversity_3</span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
+                    {t("admin_users.groups_modal_title", {
+                      username: `@${managingGroupsUser.username || managingGroupsUser.name}`,
+                    })}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {t("admin_users.groups_modal_subtitle")}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setManagingGroupsUserId(null)}
+                className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center shrink-0 cursor-pointer"
+                aria-label={t("common.close")}
+              >
+                <span className="material-symbols-outlined text-lg leading-none">close</span>
+              </button>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+              {/* Buscador si pertenece a varios grupos */}
+              {(managingGroupsUser.groups?.length ?? 0) > 4 && (
+                <div className="relative">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={groupModalSearch}
+                    onChange={(e) => setGroupModalSearch(e.target.value)}
+                    placeholder={t("admin_groups.search_placeholder")}
+                    className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+              )}
+
+              {/* Lista de grupos actuales del usuario */}
+              {filteredModalUserGroups.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-500 text-center italic">
+                  {t("admin_users.groups_modal_empty")}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredModalUserGroups.map((gm) => (
+                    <div
+                      key={gm.groupId}
+                      className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-800/40 flex items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-base shrink-0">{gm.groupIcon}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                          {gm.groupName}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <select
+                          value={gm.role}
+                          onChange={(e) =>
+                            handleChangeUserGroupRole(
+                              managingGroupsUser.id,
+                              gm.groupId,
+                              e.target.value as "owner" | "admin" | "member"
+                            )
+                          }
+                          aria-label={`${gm.groupName} role`}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold border focus:outline-none cursor-pointer ${
+                            gm.role === "owner"
+                              ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-800 dark:text-orange-200"
+                              : gm.role === "admin"
+                                ? "bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                          }`}
+                        >
+                          <option value="member" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("group_admin.member_badge")}
+                          </option>
+                          <option value="admin" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("spaces.group_admin_badge")}
+                          </option>
+                          <option value="owner" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("group_admin.owner_badge")}
+                          </option>
+                        </select>
+
+                        {gm.role !== "owner" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveUserFromGroup(
+                                managingGroupsUser.id,
+                                gm.groupId,
+                                gm.groupName
+                              )
+                            }
+                            disabled={busyGroupAction === `rm:${gm.groupId}`}
+                            className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/70 transition cursor-pointer disabled:opacity-40"
+                            title={t("admin_users.remove_from_group")}
+                            aria-label={t("admin_users.remove_from_group")}
+                          >
+                            <span className="material-symbols-outlined text-sm leading-none">
+                              person_remove
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Añadir a otro grupo existente */}
+              {availableGroupsForModalUser.length > 0 && (
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                    {t("admin_users.add_to_group_label")}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <SearchableSelect
+                      value={selectedNewGroupId}
+                      onChange={setSelectedNewGroupId}
+                      options={availableGroupsForModalUser
+                        .slice()
+                        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                        .map((g) => ({
+                          value: g.id,
+                          label: g.name,
+                          icon: <span>{g.icon}</span>,
+                        }))}
+                      placeholder={t("admin_users.add_to_group_placeholder")}
+                      searchPlaceholder={t("admin_groups.search_placeholder")}
+                      ariaLabel={t("admin_users.add_to_group_label")}
+                      className="flex-1 min-w-0"
+                      buttonClassName="w-full justify-between !rounded-xl !px-3 !py-2 !text-xs bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddUserToGroup}
+                      disabled={!selectedNewGroupId || busyGroupAction !== null}
+                      className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-sm leading-none">add</span>
+                      <span>{t("admin_users.add_to_group_btn")}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Leyenda explicativa de roles dentro de grupos */}
+              <RoleLegendCard scope="group" variant="compact" />
+            </div>
+
+            <div className="px-5 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 flex justify-end border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
+              <button
+                type="button"
+                onClick={() => setManagingGroupsUserId(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación segura al eliminar usuario con datos en grupos */}
+      {deleteImpactUser && (
+        <div className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 p-5 sm:p-6 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:pb-6 space-y-4 text-left gm-modal-in">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 text-rose-600 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-xl leading-none">person_off</span>
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-100">
+                    {t("admin_users.safe_delete_title", {
+                      username: `@${deleteImpactUser.user.username || deleteImpactUser.user.name}`,
+                    })}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    {t("admin_users.safe_delete_subtitle")}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteImpactUser(null)}
+                className="w-8 h-8 rounded-full bg-[#f2f3ff] dark:bg-slate-800 flex items-center justify-center text-slate-500 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-base leading-none">close</span>
+              </button>
+            </div>
+
+            {deleteImpactUser.ownedGroups.length > 0 ? (
+              <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                <p className="font-bold">{t("admin_users.safe_delete_owner_block")}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {deleteImpactUser.ownedGroups.map((g) => (
+                    <span
+                      key={g.id}
+                      className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-[11px] font-bold"
+                    >
+                      {g.icon} {g.name}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const uId = deleteImpactUser.user.id;
+                    setDeleteImpactUser(null);
+                    setManagingGroupsUserId(uId);
+                  }}
+                  className="px-3.5 py-1.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold cursor-pointer transition"
+                >
+                  {t("admin_users.safe_delete_transfer_btn")}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3 text-xs">
+                <div className="p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 space-y-1">
+                  <div>
+                    • {t("admin_users.safe_delete_group_places", { count: deleteImpactUser.groupPlacesCount })}
+                  </div>
+                  <div>
+                    • {t("admin_users.safe_delete_group_comments", { count: deleteImpactUser.groupCommentsCount })}
+                  </div>
+                  <div>
+                    • {t("admin_users.safe_delete_personal_places", { count: deleteImpactUser.personalPlacesCount })}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    disabled={deletingWithStrategy}
+                    onClick={() => executeUserDeletion(deleteImpactUser.user, "reassign_owner")}
+                    className="w-full py-2.5 px-4 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold transition cursor-pointer disabled:opacity-50"
+                  >
+                    {t("admin_users.safe_delete_reassign_btn")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deletingWithStrategy}
+                    onClick={() => executeUserDeletion(deleteImpactUser.user, "delete")}
+                    className="w-full py-2.5 px-4 rounded-full bg-rose-100 hover:bg-rose-200 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 text-rose-700 dark:text-rose-300 font-bold transition cursor-pointer disabled:opacity-50"
+                  >
+                    {t("admin_users.safe_delete_purge_btn")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Modal para resetear contraseña */}
       {passwordUserId && (
@@ -870,7 +1412,10 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                   <select
                     value={editRole}
                     onChange={(e) => setEditRole(e.target.value as "user" | "admin")}
-                    disabled={editingUser.id === currentUserId}
+                    disabled={
+                      editingUser.id === currentUserId &&
+                      usersList.filter((x) => x.role === "admin").length <= 1
+                    }
                     className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50"
                   >
                     <option value="user">{t("admin_users.role_user_option")}</option>

@@ -5,6 +5,49 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-11-26
+
+Evolución multi-espacio de **GastroMap**: registro público configurable, **Mapa Personal privado** para cada cuenta y **grupos de amigos 100 % aislados** donde cada grupo funciona como su propia app independiente con sus sitios, categorías, etiquetas, listas y administradores propios.
+
+### 🌍 Espacios Independientes, Grupos de Amigos y Mapa Personal
+- **Arquitectura Multi-Espacio con Aislamiento Total**:
+  - **🏠 Mi Mapa Personal**: Espacio estrictamente privado (`group_id = NULL`) para guardar sitios, notas y planes propios sin compartirlos con nadie.
+  - **🍻 Grupos de Amigos Aislados**: Cualquier usuario puede crear tantos grupos como quiera (con nombre, emoji y descripción) e invitar amigos mediante enlaces mágicos (`/groups/join/[token]`). Cada grupo mantiene su propio catálogo, sus 8 planes base personalizables, sus etiquetas (`scope_key`), listas y filtros guardados sin mezclar datos ni miembros entre grupos.
+  - **🌍 Todos mis sitios**: Vista combinada de lectura para consultar de un vistazo tu Mapa Personal junto con todos tus grupos, con insignia del espacio en cada tarjeta y filtro exclusivo por espacio.
+- **Selector Rápido de Espacio (Workspace Switcher)**: Conmutador en la cabecera estilo Slack/Notion para saltar en un clic entre cualquiera de tus grupos, tu Mapa Personal o la vista combinada *Todos mis sitios*.
+- **Copiar Sitio a Otro Espacio (`📋 Copiar a otro espacio…`)**: Crea una copia independiente de cualquier restaurante en otro grupo o en tu Mapa Personal conservando tu valoración personal, sin vincular ni exponer comentarios de otros grupos.
+- **Migración Automática al Grupo «Pinono»**: Migración transparente de todos los usuarios, establecimientos, ocasiones, etiquetas, listas y filtros previos de `v0.1.0` dentro del grupo **«Pinono»**.
+- **Eliminación de «Grupos Privados» Heredados v1**: Retiradas las antiguas tablas de compartición cruzada por ficha (`place_group_access` y `place_user_access`) y simplificada `getAllPlaces` a 4 consultas paralelas en bloque.
+
+### 🔓 Registro Público Abierto (`/register`) y Control en `/admin`
+- **Página de Registro Público (`/register`)**: Alta abierta con validación, *rate limiting*, soporte de redirección directa a invitaciones de grupo (`callbackUrl`) e inicialización automática del Mapa Personal.
+- **Modo de Registro Configurable por Superadmin**: Conmutador instantáneo en `/admin > Configuración` para alternar entre **Registro Abierto** y **Solo por Invitación**.
+
+### 🛡️ Administración por Grupo (`/group-admin`) y Panel `/admin` Escalable en 5 Secciones
+- **Panel Dedicado `/group-admin` para Administradores de Grupo**: El creador del grupo y los co-administradores designados cuentan con su propio panel para consultar estadísticas del grupo, editar/fusionar duplicados, gestionar miembros/roles (`Creador` / `Admin grupo` / `Miembro`), aprobar solicitudes de unión, configurar enlaces de invitación revocables, gestionar la **Papelera de sitios (30 días)**, **Exportar el grupo completo**, configurar una **clave propia de Google Places API** y administrar planes/etiquetas propios del grupo (plegados por defecto).
+- **Copia Masiva entre Espacios con Detección de Duplicados, Mover y Deshacer**: Desde `/admin > Sitios` y `/group-admin > Sitios` (y al copiar una tarjeta individual) puedes copiar o **mover** varios sitios a otro grupo o Mapa Personal eligiendo entre *Conservar ambos* (`(copia)`), *Reemplazar existente* o *Omitir*, con opción **Deshacer** durante 10 minutos, además de una pestaña **Salud de datos** para corregir enlaces no válidos, coordenadas o campos vacíos.
+- **Detectar e Importar al Añadir Locales**: Si el establecimiento ya existe en otro de tus espacios, el formulario `/new` ofrece importar sus datos básicos (nombre, dirección, ciudad, coordenadas y enlace) conservando independientes los planes, etiquetas y comentarios de cada grupo, además de un banner superior con el espacio destino.
+- **Baja Segura de Usuarios**: Al eliminar una cuenta con aportaciones en grupos compartidos, el administrador elige si reasignar sus sitios y comentarios al creador de cada grupo o eliminarlos, impidiendo borrar creadores de grupo sin transferir antes la propiedad.
+- **API de Google Places por Grupo, Cupos y Caché**: Cada grupo puede usar su propia clave cifrada; sin ella, comparte la clave del proyecto con cupo mensual configurable (`900/mes` global de margen seguro bajo el tope gratuito de 1.000, `50/mes` por grupo), caché global de 30 días y respaldo automático en OpenStreetMap.
+- **Compatibilidad de Backups `v0.1.x` y Escalabilidad**: La restauración de copias de seguridad antiguas migra automáticamente los sitios comunitarios a un «Grupo Principal» y filtra columnas eliminadas; además, el selector de espacios en cabecera incluye buscador automático cuando perteneces a más de 5 grupos.
+- **Validación de Enlaces Maps y «Buscar en Google»**: Validación en `/new` y edición con opciones *Quitar enlace* / *Mantener igualmente*, enlace efectivo por coordenadas en móvil y acción **Buscar en Google** en el menú `⋮` de cada tarjeta.
+- **Estadísticas Personales por Espacio y `SegmentedTabs` Animado**: Selector de espacio y desglose *Mis grupos* en `StatsModal`, leyenda compacta de roles y componente unificado `SegmentedTabs` en todas las pestañas de la app.
+- **Reestructuración Escalable de `/admin` en 5 Secciones**:
+  - **📊 Resumen** (vista por defecto): KPIs globales, insignia del modo de registro y tarjeta **Top grupos activos** con acceso directo a `/group-admin`.
+  - **🍻 Grupos**: Directorio paginado, buscable y ordenable con filtros rápidos (`Todos`, `Con sitios`, `Vacíos`), contador de planes/etiquetas, creación inline de grupos y botón `Administrar →` para gestionar cada grupo y su taxonomía de forma aislada.
+  - **👥 Usuarios**: Sub-pestañas **Usuarios** e **Invitaciones de plataforma**, filas compactas con botón **`🍻 N grupos`** que abre el modal **«Grupos y roles de @usuario»** (cambiar rol, expulsar o añadir a grupos) y **leyenda desplegable de permisos** (`SUPERADMIN`, `USUARIO`, `CREADOR`, `ADMIN GRUPO`, `MIEMBRO`).
+  - **📍 Sitios**: Moderación global con filtro buscable de **Espacio / Grupo**, país y ciudad, más columna dedicada y ordenable de **Fecha**.
+  - **⚙️ Sistema y Auditoría**: Sub-pestañas unificadas para **General y Acceso**, **Datos Demo** y **Auditoría**.
+- **Ordenación Alfabética y Columnas Ordenables en Admin**:
+  - Selector de **fusionar y reasignar etiquetas/categorías** ordenado estrictamente por orden alfabético (`A-Z`) con contador de sitios.
+  - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración.
+- **Mejoras de Usabilidad Multi-Grupo y Tarjetas**:
+  - **Selectores buscables (`SearchableSelect`)** ordenados alfabéticamente y ajustados al ancho del selector en `/new`, `GroupsModal`, `/group-admin`, `/admin`, `StatsModal`, cabecera y copia individual/masiva (`CopyPlaceModal` / `BulkCopyPlacesModal`).
+  - **Modal de Grupos en Acordeón (`GroupsModal`)**: Formulario de creación colapsable, buscador en vivo y tarjetas plegadas por defecto para gestionar decenas de grupos sin scroll interminable.
+  - **Tarjetas (`PlaceCard`) Compactas**: Chips de contexto (insignia de grupo y estado *Por descubrir* con borde discontinuo) unificados en la misma fila que categorías y `#tags` con separador vertical, y límite de 5 etiquetas visibles con botón **`+N más` / `Ver menos`**.
+  - **Estadísticas Mejoradas en los 3 Niveles**: Progreso de exploración (*Por descubrir* y `% visitado`), desglose colapsable *Mis grupos* y filtro estricto por espacio en `StatsModal`; pulso de 30 días, salud del grupo y distribuciones en `/group-admin`; consumo de Google Places API y grupos activos/vacíos en `/admin`.
+  - **Ancho Completo en `/docs` y `/new`**, y pie de página unificado en `/admin` y `/group-admin` con la web principal.
+
 ## [0.1.0] - 2026-11-25
 
 Lanzamiento inicial completo de **GastroMap**, plataforma web privada y autohospedada para guardar, organizar, descubrir y decidir sitios donde comer, tapear o tomar algo.

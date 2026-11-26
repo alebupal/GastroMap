@@ -2,14 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { logoutAction } from "@/lib/actions/auth";
+import { switchActiveSpaceAction } from "@/lib/actions/groups";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { MOBILE_NAV_EVENTS } from "@/components/layout/MobileBottomNav";
 import { clearAppOfflineCache } from "@/lib/cache";
 import { useT } from "@/lib/i18n/client";
+import type { ActiveWorkspace } from "@/lib/workspace";
 
 const EditProfileModal = dynamic(() =>
   import("./EditProfileModal").then((m) => m.EditProfileModal)
@@ -38,15 +41,20 @@ interface UserHeaderProps {
     role: string;
     locale?: string | null;
   };
+  workspace?: ActiveWorkspace | null;
 }
 
-export function UserHeader({ currentUser }: UserHeaderProps) {
+export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
   const { t } = useT();
+  const router = useRouter();
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
   const [isListsOpen, setIsListsOpen] = useState(false);
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSpaceMenuOpen, setIsSpaceMenuOpen] = useState(false);
+  const [spaceSearch, setSpaceSearch] = useState("");
+  const [switchingSpace, setSwitchingSpace] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [updateInfo, setUpdateInfo] = useState<{
@@ -55,6 +63,7 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
     releaseUrl: string;
   } | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const spaceMenuRef = useRef<HTMLDivElement>(null);
 
   // Comprobar si hay nueva versión publicada en GitHub (caché de 30 min en servidor)
   useEffect(() => {
@@ -139,13 +148,17 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
       }
+      if (spaceMenuRef.current && !spaceMenuRef.current.contains(event.target as Node)) {
+        setIsSpaceMenuOpen(false);
+      }
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setIsMenuOpen(false);
+        setIsSpaceMenuOpen(false);
       }
     }
-    if (isMenuOpen) {
+    if (isMenuOpen || isSpaceMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
     }
@@ -153,7 +166,15 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isSpaceMenuOpen]);
+
+  async function handleSelectSpace(target: string) {
+    setIsSpaceMenuOpen(false);
+    setSwitchingSpace(true);
+    await switchActiveSpaceAction(target);
+    setSwitchingSpace(false);
+    router.refresh();
+  }
 
   return (
     <>
@@ -173,14 +194,220 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
       )}
 
       <header className="w-full flex items-center justify-between py-2 sm:py-2.5 mb-1.5 lg:mb-4 border-b border-slate-200/60 dark:border-slate-800/80 gap-2 sm:gap-3">
-        {/* Brand / Logo */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        {/* Brand / Logo + Selector rápido de Espacio / Grupo (v2) */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <Link href="/" className="flex items-center group shrink-0">
             <GastroMapLogo
               iconClassName="w-8 h-8 sm:w-9 sm:h-9 group-hover:scale-105 transition-transform"
-              textClassName="text-lg sm:text-xl"
+              textClassName="hidden xs:inline sm:inline text-base sm:text-xl"
             />
           </Link>
+
+          {workspace && (
+            <div className="relative min-w-0" ref={spaceMenuRef}>
+              <button
+                type="button"
+                disabled={switchingSpace}
+                onClick={() => setIsSpaceMenuOpen((prev) => !prev)}
+                aria-expanded={isSpaceMenuOpen}
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#f2f3ff] hover:bg-slate-200/80 dark:bg-slate-800/90 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-xs font-extrabold text-slate-800 dark:text-slate-100 transition cursor-pointer max-w-[175px] sm:max-w-[240px] shadow-2xs"
+                title={t("spaces.switcher_tooltip")}
+              >
+                <span className="text-sm leading-none shrink-0">
+                  {workspace.mode === "group" && workspace.group
+                    ? workspace.group.icon
+                    : workspace.mode === "all"
+                      ? "🌍"
+                      : "🏠"}
+                </span>
+                <span className="truncate">
+                  {workspace.mode === "group" && workspace.group
+                    ? workspace.group.name
+                    : workspace.mode === "all"
+                      ? t("spaces.all_my_places")
+                      : t("spaces.personal_map")}
+                </span>
+                <span className="material-symbols-outlined text-sm text-slate-400 shrink-0 leading-none">
+                  {isSpaceMenuOpen ? "expand_less" : "expand_more"}
+                </span>
+              </button>
+
+              {isSpaceMenuOpen && (
+                <div className="absolute left-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-1.5rem)] rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 p-2 space-y-1.5 gm-popover-in">
+                  {/* Grupos de amigos */}
+                  {workspace.myGroups.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="px-2.5 pt-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                        <span>{t("spaces.my_groups_section")}</span>
+                        <span>{workspace.myGroups.length}</span>
+                      </div>
+                      {workspace.myGroups.length > 3 && (
+                        <div className="px-1 pb-1">
+                          <input
+                            type="text"
+                            value={spaceSearch}
+                            onChange={(e) => setSpaceSearch(e.target.value)}
+                            placeholder={t("admin_groups.search_placeholder")}
+                            className="w-full px-3 py-1.5 rounded-full text-xs bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          />
+                        </div>
+                      )}
+                      <div className="max-h-52 overflow-y-auto space-y-0.5">
+                        {[...workspace.myGroups]
+                          .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                          .filter((g) =>
+                            !spaceSearch.trim()
+                              ? true
+                              : g.name.toLowerCase().includes(spaceSearch.trim().toLowerCase())
+                          )
+                          .map((g) => {
+                          const isCurrent =
+                            workspace.mode === "group" && workspace.groupId === g.id;
+                          return (
+                            <div
+                              key={g.id}
+                              className={`flex items-center justify-between gap-1 rounded-xl p-1 ${
+                                isCurrent
+                                  ? "bg-orange-50 dark:bg-orange-950/40 border border-orange-200/80 dark:border-orange-800/60"
+                                  : "hover:bg-[#f2f3ff] dark:hover:bg-slate-800/70"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleSelectSpace(`group:${g.id}`)}
+                                className="flex-1 flex items-center gap-2.5 px-2 py-1.5 text-left min-w-0 cursor-pointer"
+                              >
+                                <span className="text-base leading-none shrink-0">{g.icon}</span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                                      {g.name}
+                                    </span>
+                                    {(g.isOwner || g.myRole === "admin") && (
+                                      <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase">
+                                        {g.isOwner ? t("groups.owner_badge") : t("spaces.group_admin_badge")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    {g.placesCount} {t("places.locales_count")} • {g.membersCount}{" "}
+                                    {t("spaces.members_short")}
+                                  </div>
+                                </div>
+                              </button>
+                              {(g.isOwner || g.myRole === "admin") && (
+                                <Link
+                                  href={`/group-admin?groupId=${g.id}`}
+                                  onClick={() => setIsSpaceMenuOpen(false)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-900 transition shrink-0"
+                                  title={t("spaces.manage_group_btn")}
+                                >
+                                  <span className="material-symbols-outlined text-base leading-none">
+                                    settings
+                                  </span>
+                                </Link>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Espacio personal y Vista Todo junto */}
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-0.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectSpace("personal")}
+                      className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl text-left transition cursor-pointer ${
+                        workspace.mode === "personal"
+                          ? "bg-orange-50 dark:bg-orange-950/40 border border-orange-200/80 dark:border-orange-800/60"
+                          : "hover:bg-[#f2f3ff] dark:hover:bg-slate-800/70"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-base leading-none">🏠</span>
+                        <div className="min-w-0">
+                          <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
+                            {t("spaces.personal_map")}
+                          </div>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                            {t("spaces.personal_subtitle")} ({workspace.personalPlacesCount})
+                          </div>
+                        </div>
+                      </div>
+                      {workspace.mode === "personal" && (
+                        <span className="material-symbols-outlined text-sm text-orange-600">
+                          check
+                        </span>
+                      )}
+                    </button>
+
+                    {workspace.myGroups.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectSpace("all")}
+                        className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl text-left transition cursor-pointer ${
+                          workspace.mode === "all"
+                            ? "bg-orange-50 dark:bg-orange-950/40 border border-orange-200/80 dark:border-orange-800/60"
+                            : "hover:bg-[#f2f3ff] dark:hover:bg-slate-800/70"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-base leading-none">🌍</span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
+                              {t("spaces.all_my_places")}
+                            </div>
+                            <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                              {t("spaces.all_my_places_desc")}
+                            </div>
+                          </div>
+                        </div>
+                        {workspace.mode === "all" && (
+                          <span className="material-symbols-outlined text-sm text-orange-600">
+                            check
+                          </span>
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Acciones rápidas de grupo */}
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-1">
+                    {workspace.mode === "group" && workspace.group && workspace.isSpaceAdmin && (
+                      <Link
+                        href={`/group-admin?groupId=${workspace.group.id}`}
+                        onClick={() => setIsSpaceMenuOpen(false)}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-300 text-xs font-extrabold transition"
+                      >
+                        <span className="material-symbols-outlined text-base leading-none">
+                          tune
+                        </span>
+                        <span className="truncate">
+                          {t("spaces.manage_active_group", { name: workspace.group.name })}
+                        </span>
+                      </Link>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSpaceMenuOpen(false);
+                        setIsGroupsOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#f2f3ff] dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                        group_add
+                      </span>
+                      <span>{t("spaces.create_or_manage_groups")}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* User profile pill & controls */}
@@ -247,8 +474,8 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                   {displayUsername.charAt(0).toUpperCase()}
                 </div>
                 {currentUser.role === "admin" && (
-                  <span className="absolute -bottom-1 right-0 px-1 rounded-full bg-slate-900 dark:bg-orange-600 sm:bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
-                    Admin
+                  <span className="absolute -bottom-1 right-0 px-1 rounded-full bg-violet-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                    Super
                   </span>
                 )}
               </div>
@@ -267,8 +494,8 @@ export function UserHeader({ currentUser }: UserHeaderProps) {
                       @{displayUsername}
                     </span>
                     {currentUser.role === "admin" && (
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
-                        ADMIN
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-violet-600 text-white uppercase tracking-wider">
+                        SUPERADMIN
                       </span>
                     )}
                   </div>

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, ne, getTableName, is } from "drizzle-orm";
+import { eq, ne, and, isNull, sql, getTableName, getTableColumns, is } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { normalizeMapsUrlKey } from "@/lib/place-identity";
 import { versionService } from "@/services/versionService";
 import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
 
@@ -13,9 +14,13 @@ export const dynamic = "force-dynamic";
 // Tablas que no tiene sentido respaldar (sesiones activas)
 const EXCLUDED = new Set(["sessions"]);
 
-function sanitizeRow(row: Record<string, unknown>): Record<string, unknown> {
+function sanitizeRow(
+  row: Record<string, unknown>,
+  allowedCols?: Set<string>
+): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row)) {
+    if (allowedCols && !allowedCols.has(k)) continue;
     if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(v)) {
       clean[k] = new Date(v);
     } else {
@@ -162,15 +167,16 @@ export async function POST(request: NextRequest) {
     "place_lists",
     "place_list_items",
     "group_invitations",
+    "group_join_requests",
     "sharing_group_members",
     "place_occasions",
     "place_tags",
     "user_places",
     "place_comments",
-    "place_group_access",
-    "place_user_access",
     "saved_filters",
     "audit_logs",
+    "api_usage",
+    "places_api_cache",
   ];
 
   // Incluir también cualquier tabla presente en el esquema actual que no esté en el backup
@@ -207,7 +213,18 @@ export async function POST(request: NextRequest) {
         const rows = payload.tables[tableName];
         const table = tableMap[tableName];
         if (Array.isArray(rows) && rows.length > 0 && table) {
-          let rowsToInsert = rows.map((r) => sanitizeRow(r as Record<string, unknown>));
+          const allowedCols = new Set(Object.keys(getTableColumns(table)));
+          let rowsToInsert = rows.map((r) => {
+            const clean = sanitizeRow(r as Record<string, unknown>, allowedCols);
+            if (
+              tableName === "places" &&
+              typeof clean.googleMapsUrl === "string" &&
+              !clean.mapsUrlKey
+            ) {
+              clean.mapsUrlKey = normalizeMapsUrlKey(clean.googleMapsUrl);
+            }
+            return clean;
+          });
 
           if (tableName === "users") {
             const currentAdminById = rowsToInsert.find((r) => r.id === user.id);
@@ -271,6 +288,82 @@ export async function POST(request: NextRequest) {
             }
           }
           restoredCounts[tableName] = rows.length;
+        }
+      }
+
+      // 3. Compatibilidad automática si el backup proviene de v0.1.x (sin espacios/Pinono ni scopeKey)
+      const backupVersion = typeof payload.version === "string" ? payload.version.trim() : "";
+      const placesRows = Array.isArray(payload.tables.places) ? payload.tables.places : [];
+      const occasionsRows = Array.isArray(payload.tables.occasions) ? payload.tables.occasions : [];
+      const isLegacyV1Backup =
+        backupVersion.startsWith("0.1.") ||
+        (placesRows.length > 0 && placesRows.every((p: any) => p.groupId === undefined)) ||
+        (occasionsRows.length > 0 && occasionsRows.every((o: any) => o.scopeKey === undefined));
+
+      if (isLegacyV1Backup) {
+        const allUsers = await tx
+          .select({ id: schema.users.id, role: schema.users.role })
+          .from(schema.users);
+        const ownerUser =
+          allUsers.find((u) => u.role === "admin") || allUsers[0];
+
+        if (ownerUser) {
+          let [defaultGroup] = await tx
+            .select({ id: schema.sharingGroups.id })
+            .from(schema.sharingGroups)
+            .orderBy(schema.sharingGroups.createdAt)
+            .limit(1);
+
+          if (!defaultGroup) {
+            const [created] = await tx
+              .insert(schema.sharingGroups)
+              .values({
+                name: "Grupo Principal",
+                icon: "🍻",
+                description: "Grupo importado desde copia de seguridad",
+                ownerUserId: ownerUser.id,
+              })
+              .returning({ id: schema.sharingGroups.id });
+            defaultGroup = created;
+          }
+
+          const defaultScope = `group:${defaultGroup.id}`;
+
+          for (const u of allUsers) {
+            await tx
+              .insert(schema.sharingGroupMembers)
+              .values({
+                groupId: defaultGroup.id,
+                userId: u.id,
+                role: u.role === "admin" ? "admin" : "member",
+              })
+              .onConflictDoNothing();
+          }
+
+          await tx
+            .update(schema.places)
+            .set({ groupId: defaultGroup.id })
+            .where(and(isNull(schema.places.groupId), eq(schema.places.communityPublished, true)));
+
+          await tx
+            .update(schema.placeLists)
+            .set({ groupId: defaultGroup.id })
+            .where(isNull(schema.placeLists.groupId));
+
+          await tx
+            .update(schema.savedFilters)
+            .set({ groupId: defaultGroup.id })
+            .where(isNull(schema.savedFilters.groupId));
+
+          await tx
+            .update(schema.occasions)
+            .set({ scopeKey: defaultScope })
+            .where(eq(schema.occasions.scopeKey, "global"));
+
+          await tx
+            .update(schema.tags)
+            .set({ scopeKey: defaultScope })
+            .where(eq(schema.tags.scopeKey, "global"));
         }
       }
     });

@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -105,18 +106,20 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
   const sheet = useSwipeToClose(onClose);
   const [activeTab, setActiveTab] = useState<"overview" | "wrapped">("overview");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [spaceFilter, setSpaceFilter] = useState<string>("all");
   const [stats, setStats] = useState<UserStatsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
+  const [showGroupBreakdown, setShowGroupBreakdown] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      getUserStatsAction(selectedYear)
+      getUserStatsAction(selectedYear, spaceFilter)
         .then(setStats)
         .finally(() => setLoading(false));
     }
-  }, [isOpen, selectedYear]);
+  }, [isOpen, selectedYear, spaceFilter]);
 
   if (!isOpen) return null;
 
@@ -345,6 +348,42 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
               <span className="truncate">{t("stats.wrapped_tab", { year: selectedYear }).replace(/^[^\p{L}\p{N}]+/u, "")}</span>
             </button>
           </div>
+
+          {stats && stats.availableSpaces.length > 0 && (
+            <div className="mt-2.5 flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                {t("stats.space_filter_label")}
+              </span>
+              <SearchableSelect
+                value={spaceFilter}
+                onChange={setSpaceFilter}
+                allOption={{
+                  value: "all",
+                  label: t("spaces.all_my_places"),
+                  icon: <span>🌍</span>,
+                }}
+                options={[
+                  {
+                    value: "personal",
+                    label: t("spaces.personal_map"),
+                    icon: <span>🏠</span>,
+                  },
+                  ...stats.availableSpaces
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                    .map((sp) => ({
+                      value: sp.id,
+                      label: sp.name,
+                      icon: <span>{sp.icon}</span>,
+                    })),
+                ]}
+                searchPlaceholder={t("admin_places.search_space_placeholder")}
+                ariaLabel={t("stats.space_filter_label")}
+                className="w-56 sm:w-64"
+                buttonClassName="w-full justify-between !py-1.5 !px-3 !text-xs bg-[#f2f3ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+              />
+            </div>
+          )}
         </div>
 
         {/* Contenido */}
@@ -414,6 +453,50 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                 </div>
               </div>
 
+              {/* Franja de progreso de exploración */}
+              {stats.totalAvailablePlaces > 0 && (
+                <div className="p-3.5 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-extrabold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-indigo-600 dark:text-indigo-400 leading-none">
+                        explore
+                      </span>
+                      <span>{t("stats.exploration_progress")}</span>
+                    </span>
+                    <div className="flex items-center gap-2 font-bold">
+                      <span className="text-emerald-700 dark:text-emerald-400">
+                        {t("stats.visited_pct", {
+                          pct: Math.round((stats.visitedCount / stats.totalAvailablePlaces) * 100),
+                          visited: stats.visitedCount,
+                          total: stats.totalAvailablePlaces,
+                        })}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-dashed border-indigo-300 dark:border-indigo-700/80 text-[10px]">
+                        {t("stats.unexplored_count", { count: stats.unexploredCount })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-200/80 dark:bg-slate-700/70 overflow-hidden flex">
+                    {stats.visitedCount > 0 && (
+                      <div
+                        className="h-full bg-emerald-600 transition-all"
+                        style={{
+                          width: `${Math.round((stats.visitedCount / stats.totalAvailablePlaces) * 100)}%`,
+                        }}
+                      />
+                    )}
+                    {stats.pendingCount > 0 && (
+                      <div
+                        className="h-full bg-amber-400 transition-all"
+                        style={{
+                          width: `${Math.round((stats.pendingCount / stats.totalAvailablePlaces) * 100)}%`,
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Franja resumen secundaria */}
               <div className="px-4 py-3 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 flex items-center justify-around flex-wrap gap-3 text-xs">
                 <div className="flex items-center gap-1.5">
@@ -446,6 +529,63 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   </span>
                 </div>
               </div>
+
+              {/* Desglose por grupos (colapsable por defecto) */}
+              {spaceFilter === "all" && stats.groupBreakdown.length > 0 && (
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-[#f4f5ff] dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800 space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowGroupBreakdown((prev) => !prev)}
+                    aria-expanded={showGroupBreakdown}
+                    className="w-full flex items-center justify-between gap-2 text-left cursor-pointer"
+                  >
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                        diversity_3
+                      </span>
+                      <span>{t("stats.my_groups_title")}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                        {stats.groupBreakdown.length}
+                      </span>
+                    </span>
+                    <span className="material-symbols-outlined text-lg text-slate-400 leading-none">
+                      {showGroupBreakdown ? "expand_less" : "expand_more"}
+                    </span>
+                  </button>
+                  {showGroupBreakdown && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                      {stats.groupBreakdown.map((g) => (
+                        <button
+                          key={g.groupId}
+                          type="button"
+                          onClick={() => setSpaceFilter(g.groupId)}
+                          className="p-2.5 rounded-xl bg-white dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700/70 hover:border-orange-400 flex items-center justify-between gap-2 text-left transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-base shrink-0">{g.icon}</span>
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                {g.name}
+                              </div>
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                                {g.role === "owner"
+                                  ? t("group_admin.owner_badge")
+                                  : g.role === "admin"
+                                    ? t("spaces.group_admin_badge")
+                                    : t("group_admin.member_badge")}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right text-[11px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                            <div>{g.placesAdded} 📍 · {g.visitedCount} ✓</div>
+                            <div className="text-[10px] text-slate-400">{g.commentsCount} 💬</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Gráficas 2x2 estilo Stitch */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -488,6 +628,17 @@ export function StatsModal({ isOpen, onClose, username }: StatsModalProps) {
                   topLabelClass="text-orange-700 dark:text-orange-400"
                 />
               </div>
+
+              {stats.topCountries.length > 1 && (
+                <MiniBarList
+                  title={t("stats.top_countries")}
+                  icon="public"
+                  items={stats.topCountries}
+                  topBarClass="bg-indigo-600"
+                  restBarClass="bg-indigo-300 dark:bg-indigo-500/40"
+                  topLabelClass="text-indigo-700 dark:text-indigo-400"
+                />
+              )}
             </>
           ) : (
             /* Pestaña Wrapped Anual estilo Stitch */
