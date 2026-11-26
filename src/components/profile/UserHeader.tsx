@@ -53,6 +53,7 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
   const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSpaceMenuOpen, setIsSpaceMenuOpen] = useState(false);
+  const [spaceSearch, setSpaceSearch] = useState("");
   const [switchingSpace, setSwitchingSpace] = useState(false);
   const [clearingCache, setClearingCache] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -240,8 +241,25 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                         <span>{t("spaces.my_groups_section")}</span>
                         <span>{workspace.myGroups.length}</span>
                       </div>
+                      {workspace.myGroups.length > 5 && (
+                        <div className="px-1 pb-1">
+                          <input
+                            type="text"
+                            value={spaceSearch}
+                            onChange={(e) => setSpaceSearch(e.target.value)}
+                            placeholder={t("admin_groups.search_placeholder")}
+                            className="w-full px-3 py-1.5 rounded-full text-xs bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                          />
+                        </div>
+                      )}
                       <div className="max-h-52 overflow-y-auto space-y-0.5">
-                        {workspace.myGroups.map((g) => {
+                        {workspace.myGroups
+                          .filter((g) =>
+                            !spaceSearch.trim()
+                              ? true
+                              : g.name.toLowerCase().includes(spaceSearch.trim().toLowerCase())
+                          )
+                          .map((g) => {
                           const isCurrent =
                             workspace.mode === "group" && workspace.groupId === g.id;
                           return (

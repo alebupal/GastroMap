@@ -384,16 +384,57 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     allGroupMembers,
     publicRegistrationEnabled,
   ] = await Promise.all([
-    db.select().from(users),
-    db.select().from(places).where(isNull(places.deletedAt)),
-    db.select().from(userPlaces),
-    db.select().from(placeComments),
-    db.select().from(occasions),
-    db.select().from(tags),
-    db.select().from(placeOccasions),
-    db.select().from(placeTags),
-    db.select().from(sharingGroups),
-    db.select().from(sharingGroupMembers),
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        username: users.username,
+        status: users.status,
+        createdAt: users.createdAt,
+      })
+      .from(users),
+    db
+      .select({
+        id: places.id,
+        name: places.name,
+        city: places.city,
+        priceRange: places.priceRange,
+        groupId: places.groupId,
+        communityPublished: places.communityPublished,
+        createdById: places.createdById,
+        createdAt: places.createdAt,
+      })
+      .from(places)
+      .where(isNull(places.deletedAt)),
+    db
+      .select({
+        placeId: userPlaces.placeId,
+        personalStatus: userPlaces.personalStatus,
+        favorite: userPlaces.favorite,
+        rating: userPlaces.rating,
+        updatedAt: userPlaces.updatedAt,
+      })
+      .from(userPlaces),
+    db
+      .select({
+        placeId: placeComments.placeId,
+        userId: placeComments.userId,
+        createdAt: placeComments.createdAt,
+      })
+      .from(placeComments),
+    db.select({ id: occasions.id, name: occasions.name, icon: occasions.icon }).from(occasions),
+    db.select({ id: tags.id }).from(tags),
+    db.select({ placeId: placeOccasions.placeId, occasion: placeOccasions.occasion }).from(placeOccasions),
+    db.select({ placeId: placeTags.placeId, tag: placeTags.tag }).from(placeTags),
+    db
+      .select({
+        id: sharingGroups.id,
+        name: sharingGroups.name,
+        icon: sharingGroups.icon,
+        ownerUserId: sharingGroups.ownerUserId,
+      })
+      .from(sharingGroups),
+    db.select({ groupId: sharingGroupMembers.groupId }).from(sharingGroupMembers),
     isPublicRegistrationEnabled(),
   ]);
 
