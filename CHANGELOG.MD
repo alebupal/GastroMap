@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-11-26
+
+Security hardening and author moderation release building on `v0.2.0`.
+
+### 🔒 Security
+- **Anti-SSRF Protection on Google Maps URLs**: Strict official hostname validation and blocking of private/local IPs (`127.x`, `10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, `::1`, `.local`, `.internal`) on both the initial request and every manual redirect hop (`redirect: "manual"`, max 4 hops).
+- **Automatic `Secure` Cookies Behind HTTPS**: `HttpOnly` session and impersonation cookies automatically set `secure: true` behind HTTPS reverse proxies (`x-forwarded-proto: https` or `COOKIE_SECURE=true`), while preserving `http://localhost` compatibility.
+- **Hardened CSP & Safe API Errors**: Added `object-src 'none'` to `Content-Security-Policy` and generic error responses without internal details in `/api/docs/[type]`.
+- **Production Encryption Secret Validation**: Enforces/warns on missing `APP_SECRET` / `SESSION_SECRET` for `AES-256-GCM` Google Places API key encryption.
+
+### 🛡️ Author Moderation & Ghost Account
+- **Preserve Contributions Under a Ghost Account (`👻 @usuario_eliminado`)**: When deleting a user in `/admin > Users`, superadmins can preserve all group places and comments under a protected, non-login system account (`@usuario_eliminado`), alongside reassigning to each group owner or purging.
+- **Author Reassignment on Places & Comments**: Superadmins and group admins can reassign the author (via alphabetical `SearchableSelect`, including `@usuario_eliminado`) when editing any place (`EditPlaceModal`) or comment (`PlaceCommentsThread`).
+
 ## [0.2.0] - 2026-11-26
 
 Multi-space evolution of **GastroMap**: configurable open registration, a **private Personal Map** for every account, and **100% isolated friend groups** where each group works like its own self-contained app with independent places, categories, tags, lists, and group administrators.
@@ -27,8 +41,7 @@ Multi-space evolution of **GastroMap**: configurable open registration, a **priv
 - **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Creator` / `Group Admin` / `Member`), pending join-request approvals, revocable invite links, **30-day Places Trash**, **full group export**, **per-group Google Places API key**, and scoped plans/tags (collapsed by default).
 - **Bulk Copy / Move Across Spaces with Duplicate Detection & Undo**: From `/admin > Places` and `/group-admin > Places` (and single-card copy), copy or **move** one or many places into another group or Personal Map choosing *Keep both* (`(copia)`), *Replace existing*, or *Skip*, with a 10-minute **Undo** action, plus a **Data health** tab to spot and fix invalid links, missing coordinates, or missing plans/cities.
 - **Detect & Import Existing Venues**: When adding a place in `/new`, matches in your other spaces are surfaced so you can import basic details (name, address, city, coordinates, Maps link) while keeping each group's tags, plans, and comments independent, alongside a destination-space banner.
-- **Safe User Deletion & Author Reassignment**: Deleting an account with group contributions lets admins **preserve their places and comments under a `👻 @usuario_eliminado` ghost account**, reassign them to each group owner, or purge them (blocking deletion of group owners until ownership is transferred). Superadmins and group admins can also **reassign the author** when editing any place or comment.
-- **Security Hardening**: Strict hostname/redirect anti-SSRF validation when resolving Google Maps URLs, automatic `Secure` session cookies behind HTTPS proxies, `object-src 'none'` in CSP, and production encryption secret checks.
+- **Safe User Deletion**: Deleting an account with group contributions prompts to reassign their places and comments to each group owner or purge them, blocking deletion of group owners until ownership is transferred.
 - **Per-Group Google Places API, Quotas & Cache**: Groups can configure their own encrypted API key; otherwise they share the project key with configurable monthly quotas (`900/mo` global safety cap under the 1,000 free Enterprise tier, `50/mo` per group), a 30-day shared cache, and automatic OpenStreetMap fallback.
 - **`v0.1.x` Backup Compatibility & Scalability**: Restoring legacy `v0.1.x` backups automatically migrates community places into a default «Grupo Principal» and ignores dropped columns; the header workspace switcher also adds a live search input when you belong to more than 5 groups.
 - **Maps URL Validation & «Search on Google»**: Inline validation in `/new` and edit modals (*Remove link* / *Keep anyway*), coordinate-based Maps fallback on mobile, and a **Search on Google** action in each card's `⋮` menu.

@@ -5,6 +5,20 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.1] - 2026-11-26
+
+Actualización de endurecimiento de seguridad y moderación avanzada de autoría sobre `v0.2.0`.
+
+### 🔒 Seguridad
+- **Protección Anti-SSRF en Enlaces de Google Maps**: Validación estricta de `hostname` oficial y bloqueo de IPs privadas/locales (`127.x`, `10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, `::1`, `.local`, `.internal`) tanto en la URL inicial como en cada salto de redirección manual (`redirect: "manual"`, máx. 4 saltos).
+- **Cookies `Secure` Automáticas tras HTTPS**: Las cookies `HttpOnly` de sesión e impersonación activan `secure: true` automáticamente cuando la petición llega por HTTPS detrás de un proxy inverso (`x-forwarded-proto: https` o `COOKIE_SECURE=true`), manteniendo compatibilidad con `http://localhost`.
+- **CSP Endurecida y Respuestas Limpias**: Añadido `object-src 'none'` en `Content-Security-Policy` y mensajes genéricos sin detalles internos en errores de `/api/docs/[type]`.
+- **Control de Secreto de Cifrado en Producción**: Validación y aviso de `APP_SECRET` / `SESSION_SECRET` para el cifrado `AES-256-GCM` de claves de Google Places API.
+
+### 🛡️ Moderación de Autoría y Cuenta Fantasma
+- **Conservar Aportaciones bajo Cuenta Fantasma (`👻 @usuario_eliminado`)**: Al eliminar una cuenta en `/admin > Usuarios`, el superadministrador puede conservar todos sus sitios y comentarios de grupo asignados a la cuenta de sistema protegida `@usuario_eliminado` (deshabilitada y sin acceso), además de las opciones de reasignar al creador de cada grupo o purgar.
+- **Reasignación de Autor al Editar Sitios y Comentarios**: Superadministradores y administradores de grupo pueden cambiar el autor (`SearchableSelect` alfabético, incluyendo `@usuario_eliminado`) directamente desde el modal de edición de un sitio (`EditPlaceModal`) y desde la edición de cualquier comentario (`PlaceCommentsThread`).
+
 ## [0.2.0] - 2026-11-26
 
 Evolución multi-espacio de **GastroMap**: registro público configurable, **Mapa Personal privado** para cada cuenta y **grupos de amigos 100 % aislados** donde cada grupo funciona como su propia app independiente con sus sitios, categorías, etiquetas, listas y administradores propios.
@@ -27,8 +41,7 @@ Evolución multi-espacio de **GastroMap**: registro público configurable, **Map
 - **Panel Dedicado `/group-admin` para Administradores de Grupo**: El creador del grupo y los co-administradores designados cuentan con su propio panel para consultar estadísticas del grupo, editar/fusionar duplicados, gestionar miembros/roles (`Creador` / `Admin grupo` / `Miembro`), aprobar solicitudes de unión, configurar enlaces de invitación revocables, gestionar la **Papelera de sitios (30 días)**, **Exportar el grupo completo**, configurar una **clave propia de Google Places API** y administrar planes/etiquetas propios del grupo (plegados por defecto).
 - **Copia Masiva entre Espacios con Detección de Duplicados, Mover y Deshacer**: Desde `/admin > Sitios` y `/group-admin > Sitios` (y al copiar una tarjeta individual) puedes copiar o **mover** varios sitios a otro grupo o Mapa Personal eligiendo entre *Conservar ambos* (`(copia)`), *Reemplazar existente* o *Omitir*, con opción **Deshacer** durante 10 minutos, además de una pestaña **Salud de datos** para corregir enlaces no válidos, coordenadas o campos vacíos.
 - **Detectar e Importar al Añadir Locales**: Si el establecimiento ya existe en otro de tus espacios, el formulario `/new` ofrece importar sus datos básicos (nombre, dirección, ciudad, coordenadas y enlace) conservando independientes los planes, etiquetas y comentarios de cada grupo, además de un banner superior con el espacio destino.
-- **Baja Segura de Usuarios y Moderación de Autoría**: Al eliminar una cuenta con aportaciones en grupos compartidos, el administrador puede **conservar sus sitios y comentarios bajo la cuenta fantasma `👻 @usuario_eliminado`**, reasignarlos al creador de cada grupo o eliminarlos (impidiendo borrar creadores sin transferir propiedad). Además, superadministradores y administradores de grupo pueden **reasignar el autor** al editar cualquier sitio o comentario.
-- **Endurecimiento de Seguridad**: Validación estricta de dominios y bloqueo anti-SSRF (IPs privadas/locales y redirecciones) en la resolución de enlaces de Google Maps, flag `Secure` automático en cookies tras proxy HTTPS, `object-src 'none'` en CSP y validación de secreto de cifrado en producción.
+- **Baja Segura de Usuarios**: Al eliminar una cuenta con aportaciones en grupos compartidos, el administrador elige si reasignar sus sitios y comentarios al creador de cada grupo o eliminarlos, impidiendo borrar creadores de grupo sin transferir antes la propiedad.
 - **API de Google Places por Grupo, Cupos y Caché**: Cada grupo puede usar su propia clave cifrada; sin ella, comparte la clave del proyecto con cupo mensual configurable (`900/mes` global de margen seguro bajo el tope gratuito de 1.000, `50/mes` por grupo), caché global de 30 días y respaldo automático en OpenStreetMap.
 - **Compatibilidad de Backups `v0.1.x` y Escalabilidad**: La restauración de copias de seguridad antiguas migra automáticamente los sitios comunitarios a un «Grupo Principal» y filtra columnas eliminadas; además, el selector de espacios en cabecera incluye buscador automático cuando perteneces a más de 5 grupos.
 - **Validación de Enlaces Maps y «Buscar en Google»**: Validación en `/new` y edición con opciones *Quitar enlace* / *Mantener igualmente*, enlace efectivo por coordenadas en móvil y acción **Buscar en Google** en el menú `⋮` de cada tarjeta.
