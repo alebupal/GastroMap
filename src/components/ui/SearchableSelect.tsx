@@ -84,8 +84,7 @@ export function SearchableSelect({
   const updateCoords = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const desiredWidth = Math.max(rect.width, window.innerWidth < 640 ? 288 : 384);
-      const popupWidth = Math.min(desiredWidth, window.innerWidth - 24);
+      const popupWidth = Math.min(rect.width, window.innerWidth - 24);
       let left = rect.left;
       if (left + popupWidth > window.innerWidth - 12) {
         left = window.innerWidth - popupWidth - 12;
