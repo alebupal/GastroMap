@@ -414,7 +414,12 @@
       "invite_btn": "Invite only",
       "enabled_toast": "✓ Public open registration enabled.",
       "disabled_toast": "✓ Invite-only mode enabled."
-    }
+    },
+    "tab_overview": "Overview",
+    "tab_system": "System & Audit",
+    "system_tab_general": "General & Access",
+    "system_tab_demo": "Demo Data",
+    "system_tab_audit": "Audit Log"
   },
   "notes_visits": {
     "personal_notes_title": "Personal rating",
@@ -657,7 +662,8 @@
     "by_price": "Distribution by Price",
     "top_tags": "Most used tags",
     "recent_activity": "Latest Global Activity",
-    "no_data": "No data yet"
+    "no_data": "No data yet",
+    "top_groups": "Top active groups"
   },
   "admin_places": {
     "search_placeholder": "Search by name, address, author or tags...",
@@ -762,7 +768,19 @@
     "no_users_found": "No users found {query}.",
     "matching_query": "matching \"{query}\"",
     "cannot_select_self": "You cannot select yourself",
-    "select_user": "Select user"
+    "select_user": "Select user",
+    "tab_users": "Users",
+    "tab_invites": "Platform Invites",
+    "groups_btn": "{count} groups",
+    "places_badge": "{count} places",
+    "groups_modal_title": "Groups & roles for {username}",
+    "groups_modal_subtitle": "Change their role in each group, remove them, or add them to existing groups.",
+    "groups_modal_empty": "This user does not belong to any group yet.",
+    "add_to_group_label": "Add to an existing group",
+    "add_to_group_placeholder": "Select a group...",
+    "add_to_group_btn": "Add",
+    "remove_from_group": "Remove from group",
+    "confirm_remove_from_group": "Remove this user from group \"{group}\"?"
   },
   "admin_taxonomy": {
     "space_selector_title": "Space or Group to Manage",
@@ -1149,7 +1167,10 @@
     "manage_btn": "Manage",
     "item_label": "groups",
     "delete_confirm": "Permanently delete group «{name}» and its {places} places? This action cannot be undone.",
-    "delete_success": "✓ Group «{name}» deleted successfully."
+    "delete_success": "✓ Group «{name}» deleted successfully.",
+    "filter_with_places": "With places",
+    "filter_empty": "Empty",
+    "created_toast": "Group created successfully."
   },
   "group_admin": {
     "badge": "Group Admin",
@@ -1193,5 +1214,15 @@
     "danger_zone_title": "Danger Zone — Delete group",
     "danger_zone_desc": "Deleting this group permanently removes its space and all {count} places inside it (copies in other groups or personal maps are unaffected).",
     "delete_group_btn": "Permanently delete group"
+  },
+  "role_legend": {
+    "title": "What does each role do? (Permissions legend)",
+    "global_section": "Global platform roles",
+    "group_section": "Roles within each group",
+    "superadmin_desc": "Full platform control: manages users, all groups, shared places, public registration, and global settings.",
+    "user_desc": "Standard user with their own private Personal Map and access to any groups they join or create.",
+    "owner_desc": "Primary owner of the group. Has all Group Admin permissions plus transferring ownership or deleting the group.",
+    "group_admin_desc": "Manages group members, invites, occasions, tags, duplicates, and settings. Cannot delete the group or remove the owner.",
+    "member_desc": "Can view, add, and comment on places in the group, plus track their own visits and personal ratings."
   }
 }

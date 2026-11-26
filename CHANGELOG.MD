@@ -23,12 +23,17 @@ Multi-space evolution of **GastroMap**: configurable open registration, a **priv
 - **Public Sign-Up Page (`/register`)**: Open registration with rate limiting, `callbackUrl` support for group invite links, and automatic Personal Map initialization.
 - **Superadmin Registration Mode Toggle**: Instant switch in `/admin > Settings` between **Open Registration** and **Invite Only**.
 
-### 🛡️ Per-Group Admin Panel (`/group-admin`) & Sortable Admin Tables
-- **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Admin` / `Member`) & invite links, scoped plans/tags, and group settings.
-- **Global Groups Tab in `/admin`**: Superadministrators can inspect and manage all instance groups from `/admin > Groups`.
+### 🛡️ Per-Group Admin Panel (`/group-admin`) & Scalable 5-Section `/admin` Dashboard
+- **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Creator` / `Group Admin` / `Member`) & invite links, scoped plans/tags, and group settings.
+- **Scalable 5-Section `/admin` Restructuring**:
+  - **📊 Overview** (default view): Global KPIs, Registration Mode badge, and **Top Active Groups** card with 1-click access to `/group-admin`.
+  - **🍻 Groups**: Paginated, searchable, sortable directory with quick activity filters (`All`, `With places`, `Empty`), plans/tags count, inline group creation, and `Manage →` shortcut to each group's isolated `/group-admin` panel.
+  - **👥 Users**: Sub-tabs for **Users** and **Platform Invites**, compact user rows with a **`🍻 N groups`** button opening the **«Groups & roles for @user»** modal (role changes, removals, adding to groups), plus a collapsible **role permissions legend** (`SUPERADMIN`, `USER`, `CREATOR`, `GROUP ADMIN`, `MEMBER`).
+  - **📍 Places**: Global moderation table with searchable **Space / Group**, country, and city filters plus a dedicated sortable **Date** column.
+  - **⚙️ System & Audit**: Unified sub-tabs for **General & Access**, **Demo Data**, and **Audit Log**.
 - **Alphabetical Tag Merge & Sortable Admin Columns**:
   - **Tag & category merge/reassign selectors** are now sorted strictly alphabetically (`A-Z`) with place counts.
-  - Clickable ascending/descending (`↑`/`↓`) sortable column headers across all admin tables (*Places*, *Users*, *Groups*, *Taxonomy*, and *Audit Log*).
+  - Clickable ascending/descending (`↑`/`↓`) sortable column headers across all admin tables.
 
 ## [0.1.0] - 2026-11-25
 

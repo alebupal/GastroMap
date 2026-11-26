@@ -5,8 +5,6 @@ import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { UsersManager } from "./UsersManager";
 import { AdminGroupsManager } from "./AdminGroupsManager";
-import { AdminTaxonomyWorkspace } from "./AdminTaxonomyWorkspace";
-import { InviteManager } from "@/components/InviteManager";
 import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
 import { PlacesTableManager } from "./PlacesTableManager";
@@ -21,34 +19,42 @@ import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
 import type { AdminGroupOverviewItem } from "@/lib/actions/groups";
 
-type AdminTab =
-  | "stats"
-  | "places"
-  | "users"
-  | "groups"
-  | "taxonomy"
-  | "invites"
-  | "audit"
-  | "settings"
-  | "demo";
+type AdminTab = "stats" | "groups" | "users" | "places" | "system";
+type SystemSubTab = "general" | "demo" | "audit";
 
-const VALID_TABS: AdminTab[] = [
-  "stats",
-  "places",
-  "users",
-  "groups",
-  "taxonomy",
-  "invites",
-  "audit",
-  "settings",
-  "demo",
-];
+function resolveInitialNavigation(rawTab?: string): {
+  tab: AdminTab;
+  usersSubTab: "users" | "invites";
+  systemSubTab: SystemSubTab;
+} {
+  switch (rawTab) {
+    case "stats":
+      return { tab: "stats", usersSubTab: "users", systemSubTab: "general" };
+    case "groups":
+    case "taxonomy":
+      return { tab: "groups", usersSubTab: "users", systemSubTab: "general" };
+    case "users":
+      return { tab: "users", usersSubTab: "users", systemSubTab: "general" };
+    case "invites":
+      return { tab: "users", usersSubTab: "invites", systemSubTab: "general" };
+    case "places":
+      return { tab: "places", usersSubTab: "users", systemSubTab: "general" };
+    case "system":
+    case "settings":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "general" };
+    case "demo":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "demo" };
+    case "audit":
+      return { tab: "system", usersSubTab: "users", systemSubTab: "audit" };
+    default:
+      return { tab: "stats", usersSubTab: "users", systemSubTab: "general" };
+  }
+}
 
 interface AdminDashboardProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: { id: string; name: string; placesCount: number }[];
   allGroups?: AdminGroupOverviewItem[];
-  initialTaxonomySpaceId?: string;
   allPlaces?: PlaceWithDetails[];
   googlePlacesApiKey?: string | null;
   publicRegistrationEnabled?: boolean;
@@ -66,7 +72,6 @@ export function AdminDashboard({
   initialOccasions,
   initialTags,
   allGroups = [],
-  initialTaxonomySpaceId = "personal",
   allPlaces = [],
   googlePlacesApiKey,
   publicRegistrationEnabled = true,
@@ -74,12 +79,11 @@ export function AdminDashboard({
   initialTab,
 }: AdminDashboardProps) {
   const { t } = useT();
-  const resolvedInitialTab: AdminTab =
-    initialTab && VALID_TABS.includes(initialTab as AdminTab)
-      ? (initialTab as AdminTab)
-      : "places";
+  const initialNav = resolveInitialNavigation(initialTab);
 
-  const [activeTab, setActiveTab] = useState<AdminTab>(resolvedInitialTab);
+  const [activeTab, setActiveTab] = useState<AdminTab>(initialNav.tab);
+  const [usersInitialSubTab] = useState<"users" | "invites">(initialNav.usersSubTab);
+  const [systemSubTab, setSystemSubTab] = useState<SystemSubTab>(initialNav.systemSubTab);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -121,7 +125,14 @@ export function AdminDashboard({
     icon: string;
     badge?: number;
   }> = [
-      { id: "stats", label: t("admin.tab_stats").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "bar_chart" },
+      { id: "stats", label: t("admin.tab_overview"), icon: "bar_chart" },
+      {
+        id: "groups",
+        label: t("admin.tab_groups"),
+        icon: "diversity_3",
+        badge: allGroups.length,
+      },
+      { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
       {
         id: "places",
         label: t("admin.tab_places", { count: allPlaces.length })
@@ -130,13 +141,7 @@ export function AdminDashboard({
         icon: "storefront",
         badge: allPlaces.length,
       },
-      { id: "users", label: t("admin.tab_users").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "group" },
-      { id: "groups", label: t("admin.tab_groups"), icon: "diversity_3" },
-      { id: "taxonomy", label: t("admin.tab_taxonomy").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "sell" },
-      { id: "invites", label: t("admin.tab_invites").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "confirmation_number" },
-      { id: "audit", label: t("admin.tab_audit").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "receipt_long" },
-      { id: "settings", label: t("admin.tab_settings").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "settings" },
-      { id: "demo", label: t("admin.tab_demo").replace(/^[^\p{L}\p{N}]+/u, ""), icon: "science" },
+      { id: "system", label: t("admin.tab_system"), icon: "settings" },
     ];
 
   const sidebarContent = (
@@ -349,44 +354,70 @@ export function AdminDashboard({
         >
           {activeTab === "stats" && <AdminStatsPanel />}
 
+          {activeTab === "groups" && <AdminGroupsManager />}
+
+          {activeTab === "users" && (
+            <UsersManager
+              currentUserId={currentUser.id}
+              allGroups={allGroups}
+              initialSubTab={usersInitialSubTab}
+            />
+          )}
+
           {activeTab === "places" && (
             <PlacesTableManager places={allPlaces} occasionsList={initialOccasions} />
           )}
 
-          {activeTab === "users" && <UsersManager currentUserId={currentUser.id} />}
+          {activeTab === "system" && (
+            <div className="space-y-4">
+              {/* Sub-pestañas de Sistema y Auditoría */}
+              <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[#f2f3ff] dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex-wrap">
+                {(
+                  [
+                    { id: "general", label: t("admin.system_tab_general"), icon: "tune" },
+                    { id: "demo", label: t("admin.system_tab_demo"), icon: "science" },
+                    { id: "audit", label: t("admin.system_tab_audit"), icon: "receipt_long" },
+                  ] as const
+                ).map((sub) => {
+                  const active = systemSubTab === sub.id;
+                  return (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => setSystemSubTab(sub.id)}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                        active
+                          ? "bg-orange-600 text-white shadow-xs"
+                          : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-base leading-none">
+                        {sub.icon}
+                      </span>
+                      <span>{sub.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-          {activeTab === "groups" && <AdminGroupsManager />}
+              {systemSubTab === "general" && (
+                <SettingsManager
+                  initialGooglePlacesApiKey={googlePlacesApiKey}
+                  initialPublicRegistrationEnabled={publicRegistrationEnabled}
+                  totalPlacesCount={allPlaces.length}
+                />
+              )}
 
-          {activeTab === "taxonomy" && (
-            <AdminTaxonomyWorkspace
-              groups={allGroups}
-              personalPlacesCount={
-                allPlaces.filter((p) => !p.groupId && p.createdById === currentUser.id).length
-              }
-              initialSpaceId={initialTaxonomySpaceId}
-              initialOccasions={initialOccasions}
-              initialTags={initialTags}
-            />
-          )}
+              {systemSubTab === "demo" && (
+                <DemoPlacesSeeder
+                  totalPlacesCount={allPlaces.length}
+                  totalOccasionsCount={initialOccasions.length}
+                  totalTagsCount={initialTags.length}
+                />
+              )}
 
-          {activeTab === "invites" && <InviteManager />}
-
-          {activeTab === "audit" && <AuditLogViewer />}
-
-          {activeTab === "settings" && (
-            <SettingsManager
-              initialGooglePlacesApiKey={googlePlacesApiKey}
-              initialPublicRegistrationEnabled={publicRegistrationEnabled}
-              totalPlacesCount={allPlaces.length}
-            />
-          )}
-
-          {activeTab === "demo" && (
-            <DemoPlacesSeeder
-              totalPlacesCount={allPlaces.length}
-              totalOccasionsCount={initialOccasions.length}
-              totalTagsCount={initialTags.length}
-            />
+              {systemSubTab === "audit" && <AuditLogViewer />}
+            </div>
           )}
         </main>
 

@@ -20,6 +20,7 @@ import type { GroupStatsData } from "@/lib/actions/stats";
 import type { Occasion } from "@/db/schema";
 import { PlacesTableManager } from "@/components/admin/PlacesTableManager";
 import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
+import { RoleLegendCard } from "@/components/admin/RoleLegendCard";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
@@ -712,6 +713,8 @@ export function GroupAdminDashboard({
                     );
                   })}
                 </div>
+
+                <RoleLegendCard scope="group" />
               </div>
 
               {/* Invitaciones por enlace */}

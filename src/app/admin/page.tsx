@@ -56,7 +56,6 @@ export default async function AdminPage({
       initialOccasions={occasionsList}
       initialTags={tagsList}
       allGroups={allGroups}
-      initialTaxonomySpaceId={defaultTaxonomyGroupId || "personal"}
       allPlaces={places}
       googlePlacesApiKey={googlePlacesApiKey}
       publicRegistrationEnabled={publicRegistrationEnabled}

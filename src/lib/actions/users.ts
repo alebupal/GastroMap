@@ -36,6 +36,7 @@ export interface SafeUser {
   locale: string;
   lastLoginAt: Date | null;
   createdAt: Date;
+  placesCount?: number;
   groups?: UserGroupRoleSummary[];
 }
 
@@ -48,7 +49,7 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
     return [];
   }
 
-  const [rows, allGroups, allMemberships] = await Promise.all([
+  const [rows, allGroups, allMemberships, placeCounts] = await Promise.all([
     db
       .select({
         id: users.id,
@@ -78,7 +79,16 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
         role: sharingGroupMembers.role,
       })
       .from(sharingGroupMembers),
+    db
+      .select({
+        createdById: places.createdById,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(places)
+      .groupBy(places.createdById),
   ]);
+
+  const placesCountByUser = new Map(placeCounts.map((p) => [p.createdById, p.count]));
 
   const groupMap = new Map(allGroups.map((g) => [g.id, g]));
   const groupsByUser = new Map<string, Map<string, UserGroupRoleSummary>>();
@@ -112,6 +122,7 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
 
   return rows.map((u) => ({
     ...u,
+    placesCount: placesCountByUser.get(u.id) || 0,
     groups: Array.from(groupsByUser.get(u.id)?.values() || []).sort((a, b) =>
       a.groupName.localeCompare(b.groupName, "es", { sensitivity: "base" })
     ),

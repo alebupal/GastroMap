@@ -23,12 +23,17 @@ Evolución multi-espacio de **GastroMap**: registro público configurable, **Map
 - **Página de Registro Público (`/register`)**: Alta abierta con validación, *rate limiting*, soporte de redirección directa a invitaciones de grupo (`callbackUrl`) e inicialización automática del Mapa Personal.
 - **Modo de Registro Configurable por Superadmin**: Conmutador instantáneo en `/admin > Configuración` para alternar entre **Registro Abierto** y **Solo por Invitación**.
 
-### 🛡️ Administración por Grupo (`/group-admin`) y Mejoras en Tablas Admin
-- **Panel Dedicado `/group-admin` para Administradores de Grupo**: El creador del grupo y los co-administradores designados cuentan con su propio panel para consultar estadísticas del grupo, editar/fusionar duplicados, gestionar miembros/roles (`Admin` / `Miembro`) e invitaciones, administrar planes/etiquetas propios del grupo y editar sus ajustes.
-- **Pestaña Global de Grupos en `/admin`**: Nueva vista `Grupos` para el Superadministrador con supervisión global de todos los espacios creados en la instancia.
+### 🛡️ Administración por Grupo (`/group-admin`) y Panel `/admin` Escalable en 5 Secciones
+- **Panel Dedicado `/group-admin` para Administradores de Grupo**: El creador del grupo y los co-administradores designados cuentan con su propio panel para consultar estadísticas del grupo, editar/fusionar duplicados, gestionar miembros/roles (`Creador` / `Admin grupo` / `Miembro`) e invitaciones, administrar planes/etiquetas propios del grupo y editar sus ajustes.
+- **Reestructuración Escalable de `/admin` en 5 Secciones**:
+  - **📊 Resumen** (vista por defecto): KPIs globales, insignia del modo de registro y tarjeta **Top grupos activos** con acceso directo a `/group-admin`.
+  - **🍻 Grupos**: Directorio paginado, buscable y ordenable con filtros rápidos (`Todos`, `Con sitios`, `Vacíos`), contador de planes/etiquetas, creación inline de grupos y botón `Administrar →` para gestionar cada grupo y su taxonomía de forma aislada.
+  - **👥 Usuarios**: Sub-pestañas **Usuarios** e **Invitaciones de plataforma**, filas compactas con botón **`🍻 N grupos`** que abre el modal **«Grupos y roles de @usuario»** (cambiar rol, expulsar o añadir a grupos) y **leyenda desplegable de permisos** (`SUPERADMIN`, `USUARIO`, `CREADOR`, `ADMIN GRUPO`, `MIEMBRO`).
+  - **📍 Sitios**: Moderación global con filtro buscable de **Espacio / Grupo**, país y ciudad, más columna dedicada y ordenable de **Fecha**.
+  - **⚙️ Sistema y Auditoría**: Sub-pestañas unificadas para **General y Acceso**, **Datos Demo** y **Auditoría**.
 - **Ordenación Alfabética y Columnas Ordenables en Admin**:
   - Selector de **fusionar y reasignar etiquetas/categorías** ordenado estrictamente por orden alfabético (`A-Z`) con contador de sitios.
-  - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración (*Sitios*, *Usuarios*, *Grupos*, *Taxonomía* y *Auditoría*).
+  - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración.
 
 ## [0.1.0] - 2026-11-25
 
