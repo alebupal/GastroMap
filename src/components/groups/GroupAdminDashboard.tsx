@@ -28,6 +28,7 @@ import { TaxonomyManager } from "@/components/admin/TaxonomyManager";
 import { RoleLegendCard } from "@/components/admin/RoleLegendCard";
 import { ExportImportModal } from "@/components/places/ExportImportModal";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { GastroMapIcon, GastroMapLogo } from "@/components/ui/GastroMapLogo";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -340,23 +341,23 @@ export function GroupAdminDashboard({
           </div>
 
           {adminGroups.length > 1 && (
-            <select
+            <SearchableSelect
               value={group.id}
-              onChange={(e) => {
-                router.push(`/group-admin?groupId=${encodeURIComponent(e.target.value)}&tab=${activeTab}`);
+              onChange={(val) => {
+                router.push(`/group-admin?groupId=${encodeURIComponent(val)}&tab=${activeTab}`);
               }}
-              aria-label={t("group_admin.switch_group")}
-              className="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold bg-[#f8f9ff] dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer"
-            >
-              {adminGroups
-                .slice()
+              options={[...adminGroups]
                 .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
-                .map((ag) => (
-                <option key={ag.id} value={ag.id}>
-                  {ag.icon} {ag.name}
-                </option>
-              ))}
-            </select>
+                .map((ag) => ({
+                  value: ag.id,
+                  label: ag.name,
+                  icon: <span>{ag.icon}</span>,
+                }))}
+              searchPlaceholder={t("admin_groups.search_placeholder")}
+              ariaLabel={t("group_admin.switch_group")}
+              className="w-full"
+              buttonClassName="w-full justify-between !rounded-xl !py-1.5 !px-2.5 !text-xs bg-[#f8f9ff] dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200"
+            />
           )}
         </div>
 

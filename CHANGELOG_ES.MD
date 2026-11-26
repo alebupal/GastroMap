@@ -41,6 +41,11 @@ Evolución multi-espacio de **GastroMap**: registro público configurable, **Map
 - **Ordenación Alfabética y Columnas Ordenables en Admin**:
   - Selector de **fusionar y reasignar etiquetas/categorías** ordenado estrictamente por orden alfabético (`A-Z`) con contador de sitios.
   - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración.
+- **Mejoras de Usabilidad Multi-Grupo y Tarjetas**:
+  - **Selectores buscables (`SearchableSelect`)** ordenados alfabéticamente en `/new`, `GroupsModal`, `/group-admin`, cabecera y copia masiva de sitios (`BulkCopyPlacesModal`).
+  - **Modal de Grupos en Acordeón (`GroupsModal`)**: Formulario de creación colapsable, buscador en vivo y tarjetas plegadas por defecto para gestionar decenas de grupos sin scroll interminable.
+  - **Tarjetas (`PlaceCard`) Compactas**: Chips de contexto (insignia de grupo y estado *Por descubrir* con borde discontinuo) unificados en la misma fila que categorías y `#tags` con separador vertical, evitando repetir el estado activo inferior.
+  - **Ancho Completo en `/docs` y `/new`**: Vistas de documentación y alta de sitios alineadas al ancho completo en escritorio.
 
 ## [0.1.0] - 2026-11-25
 
