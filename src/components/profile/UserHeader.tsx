@@ -253,7 +253,8 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                         </div>
                       )}
                       <div className="max-h-52 overflow-y-auto space-y-0.5">
-                        {workspace.myGroups
+                        {[...workspace.myGroups]
+                          .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
                           .filter((g) =>
                             !spaceSearch.trim()
                               ? true

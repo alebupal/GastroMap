@@ -348,7 +348,10 @@ export function GroupAdminDashboard({
               aria-label={t("group_admin.switch_group")}
               className="w-full px-2.5 py-1.5 rounded-xl text-xs font-bold bg-[#f8f9ff] dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer"
             >
-              {adminGroups.map((ag) => (
+              {adminGroups
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                .map((ag) => (
                 <option key={ag.id} value={ag.id}>
                   {ag.icon} {ag.name}
                 </option>

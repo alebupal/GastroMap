@@ -55,9 +55,12 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const filteredGroups = useMemo(() => {
+    const sorted = [...groups].sort((a, b) =>
+      a.name.localeCompare(b.name, "es", { sensitivity: "base" })
+    );
     const q = groupSearch.trim().toLowerCase();
-    if (!q) return groups;
-    return groups.filter((g) => g.name.toLowerCase().includes(q));
+    if (!q) return sorted;
+    return sorted.filter((g) => g.name.toLowerCase().includes(q));
   }, [groups, groupSearch]);
 
   async function loadData() {
@@ -369,12 +372,14 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                   <SearchableSelect
                     value={cloneSourceId}
                     onChange={setCloneSourceId}
-                    options={groups.map((g) => ({
-                      value: g.id,
-                      label: g.name,
-                      icon: <span>{g.icon}</span>,
-                      subtitle: `${g.placesCount ?? 0} ${t("spaces.places_count")} · ${g.members.length} ${t("spaces.members_count")}`,
-                    }))}
+                    options={[...groups]
+                      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                      .map((g) => ({
+                        value: g.id,
+                        label: g.name,
+                        icon: <span>{g.icon}</span>,
+                        subtitle: `${g.placesCount ?? 0} ${t("spaces.places_count")} · ${g.members.length} ${t("spaces.members_count")}`,
+                      }))}
                     placeholder={t("groups.template_clone_pick")}
                     searchPlaceholder={t("admin_groups.search_placeholder")}
                     ariaLabel={t("groups.template_clone_pick")}
