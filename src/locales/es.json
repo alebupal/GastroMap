@@ -1280,7 +1280,8 @@
     "save_key_btn": "Guardar clave",
     "key_saved_toast": "Clave de API del grupo guardada y cifrada.",
     "key_cleared_toast": "Clave propia eliminada; el grupo usará la clave del proyecto.",
-    "restrict_hint": "Consejo: restringe la clave en Google Cloud al dominio de esta app y a «Places API (New)»."
+    "restrict_hint": "Consejo: restringe la clave en Google Cloud al dominio de esta app y a «Places API (New)».",
+    "google_tier_hint": "Límite gratuito oficial de Google Places (New): 1.000 peticiones/mes con precio/descripción (Enterprise) · 5.000/mes datos básicos (Pro). Se recomienda 900 para dejar margen de seguridad."
   },
   "bulk_copy": {
     "btn_copy_to": "Copiar a… ({count})",

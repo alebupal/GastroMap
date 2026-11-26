@@ -177,7 +177,7 @@ export async function resolvePlacesLookup(params: {
     return { source: "no_key", data: null };
   }
 
-  const globalLimit = Math.max(1, parseInt(rawGlobalLimit || "1000", 10) || 1000);
+  const globalLimit = Math.max(1, parseInt(rawGlobalLimit || "900", 10) || 900);
   const groupLimit = Math.max(
     1,
     groupQuotaOverride ?? (parseInt(rawGroupLimit || "50", 10) || 50)
@@ -296,7 +296,7 @@ export async function getGlobalApiUsageSummary() {
     db.select().from(apiUsage).where(eq(apiUsage.period, period)),
   ]);
 
-  const globalLimit = Math.max(1, parseInt(rawGlobalLimit || "1000", 10) || 1000);
+  const globalLimit = Math.max(1, parseInt(rawGlobalLimit || "900", 10) || 900);
   const groupDefaultLimit = Math.max(1, parseInt(rawGroupLimit || "50", 10) || 50);
   const projectRow = rows.find((r) => r.scopeKey === "project");
 

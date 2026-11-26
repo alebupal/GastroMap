@@ -345,6 +345,7 @@
 "api_usage.cache_hits_badge","{count} ahorradas por caché","{count} saved by cache"
 "api_usage.clear_key_btn","Quitar clave","Remove key"
 "api_usage.global_limit_label","Límite mensual global (clave del proyecto)","Global monthly limit (project key)"
+"api_usage.google_tier_hint","Límite gratuito oficial de Google Places (New): 1.000 peticiones/mes con precio/descripción (Enterprise) · 5.000/mes datos básicos (Pro). Se recomienda 900 para dejar margen de seguridad.","Official Google Places (New) free monthly cap: 1,000 requests/month with price/summary (Enterprise) · 5,000/month basic data (Pro). 900 is recommended as a safety buffer."
 "api_usage.group_api_recommend","Recomendado: usa una clave propia de Google Places para no depender del cupo compartido.","Recommended: use your own Google Places API key so you do not rely on the shared quota."
 "api_usage.group_api_title","API de Google Places del grupo","Group Google Places API"
 "api_usage.group_quota_label","Cupo mensual por grupo (sin clave propia)","Monthly quota per group (without own key)"
