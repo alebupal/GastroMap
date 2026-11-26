@@ -14,7 +14,9 @@ import { useToast } from "@/components/ui/Toast";
 import { EditPlaceModal } from "@/components/places/EditPlaceModal";
 import { BulkCopyPlacesModal } from "@/components/places/BulkCopyPlacesModal";
 import { TrashPlacesPanel } from "./TrashPlacesPanel";
+import { DataHealthPanel } from "./DataHealthPanel";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { isValidGoogleMapsUrl } from "@/lib/maps";
 import { parseCityCountry, findCountry } from "@/lib/location";
 import { normalizeSearchText } from "@/lib/search";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -44,8 +46,21 @@ export function PlacesTableManager({
 }: PlacesTableManagerProps) {
   const { t, locale } = useT();
   const { toast } = useToast();
-  const [activeView, setActiveView] = useState<"active" | "trash">("active");
+  const [activeView, setActiveView] = useState<"active" | "health" | "trash">("active");
   const [placesList, setPlacesList] = useState<PlaceWithDetails[]>(initialPlaces);
+  const healthIssuesCount = useMemo(
+    () =>
+      placesList.filter(
+        (p) =>
+          Boolean(p.googleMapsUrl && !isValidGoogleMapsUrl(p.googleMapsUrl)) ||
+          p.latitude == null ||
+          p.longitude == null ||
+          !p.occasions ||
+          p.occasions.length === 0 ||
+          !p.city?.trim()
+      ).length,
+    [placesList]
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkCopyModal, setShowBulkCopyModal] = useState(false);
   const [lastCopyBatch, setLastCopyBatch] = useState<{
@@ -445,6 +460,12 @@ export function PlacesTableManager({
               badge: placesList.length,
             },
             {
+              id: "health",
+              label: t("data_health.tab_label"),
+              icon: "health_and_safety",
+              badge: healthIssuesCount,
+            },
+            {
               id: "trash",
               label: t("trash.tab_label"),
               icon: "delete_sweep",
@@ -453,7 +474,11 @@ export function PlacesTableManager({
         />
       </div>
 
-      {activeView === "trash" ? (
+      {activeView === "health" ? (
+        <div className="gm-tab-in">
+          <DataHealthPanel places={placesList} occasionsList={occasionsList} />
+        </div>
+      ) : activeView === "trash" ? (
         <div className="gm-tab-in">
           <TrashPlacesPanel
             groupId={groupId}

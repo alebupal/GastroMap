@@ -1296,7 +1296,8 @@
     "strategy_skip": "Skip",
     "result_banner": "Copy completed in {target}: {copied} copied · {replaced} replaced · {skipped} skipped.",
     "undo_btn": "Undo",
-    "undone_toast": "Bulk copy undone successfully."
+    "undone_toast": "Bulk copy undone successfully.",
+    "move_toggle": "Move (send original to trash after copying)"
   },
   "trash": {
     "tab_label": "Trash",
@@ -1309,5 +1310,15 @@
     "restored_toast": "Place restored successfully.",
     "purged_toast": "Place permanently deleted.",
     "confirm_purge": "Permanently delete \"{name}\"? This cannot be undone."
+  },
+  "data_health": {
+    "tab_label": "Data health",
+    "title": "Data health",
+    "subtitle": "Spot invalid Maps links, missing coordinates, missing plans, or missing cities to fix them fast.",
+    "issue_invalid_url": "Invalid Maps link",
+    "issue_missing_coords": "Missing coordinates",
+    "issue_no_occasion": "No plan",
+    "issue_no_city": "No city",
+    "all_clean": "All places have complete and valid data!"
   }
 }

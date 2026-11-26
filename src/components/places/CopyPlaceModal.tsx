@@ -40,6 +40,7 @@ export function CopyPlaceModal({
   const sheet = useSwipeToClose(onClose);
   const [mounted, setMounted] = useState(false);
   const [copyingTo, setCopyingTo] = useState<string | null>(null);
+  const [moveOriginal, setMoveOriginal] = useState(false);
   const [pendingConflict, setPendingConflict] = useState<{
     target: CopyTargetSpaceOption;
     conflict: CopyConflictPreview;
@@ -95,7 +96,8 @@ export function CopyPlaceModal({
     const targetSpaceKey = target.isPersonal ? "personal" : target.id;
     const res = await bulkCopyPlacesAction(
       [{ placeId, strategy, conflictWithId }],
-      targetSpaceKey
+      targetSpaceKey,
+      { moveOriginals: moveOriginal }
     );
     setCopyingTo(null);
 
@@ -150,6 +152,20 @@ export function CopyPlaceModal({
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             {t("spaces.copy_modal_desc")}
           </p>
+
+          {targets.length > 0 && !pendingConflict && (
+            <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 cursor-pointer text-xs">
+              <input
+                type="checkbox"
+                checked={moveOriginal}
+                onChange={(e) => setMoveOriginal(e.target.checked)}
+                className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4"
+              />
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                {t("bulk_copy.move_toggle")}
+              </span>
+            </label>
+          )}
 
           {pendingConflict ? (
             <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 space-y-3 text-xs gm-tab-in">

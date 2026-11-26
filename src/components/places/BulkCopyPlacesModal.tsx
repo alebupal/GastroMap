@@ -49,6 +49,7 @@ export function BulkCopyPlacesModal({
   const [validIds, setValidIds] = useState<string[]>([]);
   const [conflicts, setConflicts] = useState<CopyConflictPreview[]>([]);
   const [strategies, setStrategies] = useState<Record<string, Strategy>>({});
+  const [moveOriginals, setMoveOriginals] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -61,6 +62,7 @@ export function BulkCopyPlacesModal({
     setConflicts([]);
     setValidIds([]);
     setStrategies({});
+    setMoveOriginals(false);
     setLoadingTargets(true);
     getCopyTargetSpacesAction()
       .then((list) => setTargets(list))
@@ -123,7 +125,7 @@ export function BulkCopyPlacesModal({
       };
     });
 
-    const res = await bulkCopyPlacesAction(items, selectedTarget);
+    const res = await bulkCopyPlacesAction(items, selectedTarget, { moveOriginals });
     setExecuting(false);
 
     if (res.error) {
@@ -237,6 +239,20 @@ export function BulkCopyPlacesModal({
                     );
                   })}
                 </div>
+              )}
+
+              {targets.length > 0 && (
+                <label className="flex items-center gap-2.5 p-3 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700 cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={moveOriginals}
+                    onChange={(e) => setMoveOriginals(e.target.checked)}
+                    className="rounded border-slate-300 text-orange-600 focus:ring-orange-500 w-4 h-4"
+                  />
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">
+                    {t("bulk_copy.move_toggle")}
+                  </span>
+                </label>
               )}
             </>
           )}

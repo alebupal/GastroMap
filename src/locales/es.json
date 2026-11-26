@@ -1296,7 +1296,8 @@
     "strategy_skip": "Omitir",
     "result_banner": "Copia completada en {target}: {copied} copiados · {replaced} reemplazados · {skipped} omitidos.",
     "undo_btn": "Deshacer",
-    "undone_toast": "Copia masiva deshecha correctamente."
+    "undone_toast": "Copia masiva deshecha correctamente.",
+    "move_toggle": "Mover (enviar el original a la papelera tras copiar)"
   },
   "trash": {
     "tab_label": "Papelera",
@@ -1309,5 +1310,15 @@
     "restored_toast": "Sitio restaurado correctamente.",
     "purged_toast": "Sitio eliminado definitivamente.",
     "confirm_purge": "¿Eliminar definitivamente «{name}»? Esta acción no se puede deshacer."
+  },
+  "data_health": {
+    "tab_label": "Salud de datos",
+    "title": "Salud de datos",
+    "subtitle": "Detecta enlaces no válidos, sitios sin coordenadas, sin plan o sin ciudad para corregirlos rápido.",
+    "issue_invalid_url": "Enlace Maps no válido",
+    "issue_missing_coords": "Sin coordenadas",
+    "issue_no_occasion": "Sin plan",
+    "issue_no_city": "Sin ciudad",
+    "all_clean": "¡Todos los sitios tienen sus datos completos y válidos!"
   }
 }
