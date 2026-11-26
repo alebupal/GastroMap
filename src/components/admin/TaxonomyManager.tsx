@@ -32,6 +32,7 @@ interface TaxonomyManagerProps {
   section?: "occasions" | "tags";
   defaultOpen?: boolean;
   explicitGroupId?: string | null;
+  onChanged?: () => void;
 }
 
 export function TaxonomyManager({
@@ -40,6 +41,7 @@ export function TaxonomyManager({
   section,
   defaultOpen = false,
   explicitGroupId,
+  onChanged,
 }: TaxonomyManagerProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -280,6 +282,7 @@ export function TaxonomyManager({
     } else {
       setNewOccasionName("");
       setSuccessMessage(t("admin_taxonomy.created_success_occasion"));
+      onChanged?.();
       router.refresh();
       setTimeout(() => setSuccessMessage(null), 3500);
     }
@@ -312,6 +315,7 @@ export function TaxonomyManager({
         )
       );
     }
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setEditingItem(null);
@@ -362,6 +366,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setItemToDelete(null);
@@ -393,6 +398,7 @@ export function TaxonomyManager({
       });
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setItemToMerge(null);
@@ -458,6 +464,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setEmptyConfirmModal(null);
@@ -515,6 +522,7 @@ export function TaxonomyManager({
       }
     }
 
+    onChanged?.();
     router.refresh();
     setLoading(false);
     setBulkDeleteModal(null);
