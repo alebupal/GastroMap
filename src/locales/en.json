@@ -359,7 +359,11 @@
     "wrapped_repeated_in": "Repeated in {count} places",
     "wrapped_year_favorite": "Your favorite of the year",
     "space_filter_label": "Space",
-    "my_groups_title": "My groups"
+    "my_groups_title": "My groups",
+    "exploration_progress": "Exploration progress",
+    "unexplored_count": "{count} to discover",
+    "visited_pct": "{pct}% visited ({visited}/{total})",
+    "top_countries": "Top countries"
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -667,6 +671,15 @@
     "kpi_taxonomy": "Taxonomy",
     "kpi_taxonomy_sub": "Plans / Tags",
     "kpi_groups_spaces": "Groups",
+    "kpi_api_usage": "Google Places API (month)",
+    "kpi_api_cache": "{count} saved by cache",
+    "kpi_groups_active_sub": "{active} active · {empty} empty · {trash} in trash",
+    "group_health_title": "Group health & moderation",
+    "health_invalid_links": "{count} invalid links",
+    "health_missing_coords": "{count} missing coordinates",
+    "health_pending_requests": "{count} pending requests",
+    "health_trash": "{count} in trash",
+    "health_all_ok": "Everything looks healthy in group places and requests.",
     "kpi_closed_places": "closed places",
     "pulse_title": "Last 30 days pulse:",
     "pulse_places": "places",

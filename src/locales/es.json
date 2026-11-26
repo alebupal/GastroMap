@@ -359,7 +359,11 @@
     "wrapped_repeated_in": "Repetida en {count} locales",
     "wrapped_year_favorite": "Tu favorito del año",
     "space_filter_label": "Espacio",
-    "my_groups_title": "Mis grupos"
+    "my_groups_title": "Mis grupos",
+    "exploration_progress": "Progreso de exploración",
+    "unexplored_count": "{count} por descubrir",
+    "visited_pct": "{pct}% visitado ({visited}/{total})",
+    "top_countries": "Top países"
   },
   "admin": {
     "title": "Panel de Administración",
@@ -667,6 +671,15 @@
     "kpi_taxonomy": "Taxonomía",
     "kpi_taxonomy_sub": "Planes / Tags",
     "kpi_groups_spaces": "Grupos",
+    "kpi_api_usage": "Google Places API (mes)",
+    "kpi_api_cache": "{count} ahorradas por caché",
+    "kpi_groups_active_sub": "{active} activos · {empty} vacíos · {trash} en papelera",
+    "group_health_title": "Salud y moderación del grupo",
+    "health_invalid_links": "{count} enlaces inválidos",
+    "health_missing_coords": "{count} sin coordenadas",
+    "health_pending_requests": "{count} solicitudes pendientes",
+    "health_trash": "{count} en papelera",
+    "health_all_ok": "Todo en orden en el catálogo y solicitudes del grupo.",
     "kpi_closed_places": "sitios cerrados",
     "pulse_title": "Pulso de los últimos 30 días:",
     "pulse_places": "sitios",
