@@ -983,13 +983,15 @@ export async function bulkCopyPlacesAction(
     strategy: "skip" | "replace" | "keep_both";
     conflictWithId?: string;
   }>,
-  targetSpace: string
+  targetSpace: string,
+  options?: { moveOriginals?: boolean }
 ): Promise<{
   success?: boolean;
   batchId?: string;
   copiedCount?: number;
   replacedCount?: number;
   skippedCount?: number;
+  movedCount?: number;
   error?: string;
 }> {
   const currentUser = await getCurrentUser();
@@ -1047,6 +1049,7 @@ export async function bulkCopyPlacesAction(
   let copiedCount = 0;
   let replacedCount = 0;
   let skippedCount = 0;
+  const movedOriginalIds: string[] = [];
 
   for (const item of items) {
     const source = sourceMap.get(item.placeId);
@@ -1162,6 +1165,13 @@ export async function bulkCopyPlacesAction(
       }
 
       replacedCount++;
+      if (options?.moveOriginals && perms.canDelete) {
+        await db
+          .update(places)
+          .set({ deletedAt: new Date(), updatedAt: new Date() })
+          .where(eq(places.id, source.id));
+        movedOriginalIds.push(source.id);
+      }
       continue;
     }
 
@@ -1218,6 +1228,13 @@ export async function bulkCopyPlacesAction(
 
     createdIds.push(copied.id);
     copiedCount++;
+    if (options?.moveOriginals && perms.canDelete) {
+      await db
+        .update(places)
+        .set({ deletedAt: new Date(), updatedAt: new Date() })
+        .where(eq(places.id, source.id));
+      movedOriginalIds.push(source.id);
+    }
   }
 
   await logAudit({
@@ -1232,6 +1249,7 @@ export async function bulkCopyPlacesAction(
       copiedCount,
       replacedCount,
       skippedCount,
+      movedOriginalIds,
       createdIds,
       replacedSnapshots,
     },
@@ -1246,6 +1264,7 @@ export async function bulkCopyPlacesAction(
     copiedCount,
     replacedCount,
     skippedCount,
+    movedCount: movedOriginalIds.length,
   };
 }
 
@@ -1277,6 +1296,7 @@ export async function undoBulkCopyAction(
 
   const meta = (entry.metadata || {}) as {
     createdIds?: string[];
+    movedOriginalIds?: string[];
     replacedSnapshots?: Array<{
       placeId: string;
       previous: {
@@ -1296,6 +1316,13 @@ export async function undoBulkCopyAction(
       };
     }>;
   };
+
+  if (meta.movedOriginalIds && meta.movedOriginalIds.length > 0) {
+    await db
+      .update(places)
+      .set({ deletedAt: null, updatedAt: new Date() })
+      .where(inArray(places.id, meta.movedOriginalIds));
+  }
 
   if (meta.createdIds && meta.createdIds.length > 0) {
     await db

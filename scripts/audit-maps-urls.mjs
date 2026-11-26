@@ -11,22 +11,6 @@ if (!process.env.DATABASE_URL && fs.existsSync(".env")) {
   }
 }
 
-async function main() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    console.error("Falta DATABASE_URL en el entorno.");
-    process.exit(1);
-  }
-  const sql = postgres(connectionString);
-  try {
-    const rows = await sql`
-      SELECT p.id, p.name, p.city, p.google_maps_url, p.latitude, p.longitude, g.name AS group_name
-      FROM places p
-      LEFT JOIN sharing_groups g ON g.id = p.group_id
-      WHERE p.deleted_at IS NULL
-      ORDER BY p.created_at DESC
-    `;
-
 function isValidGoogleMapsUrl(rawUrl) {
   const clean = (rawUrl || "").trim();
   if (!clean) return true;
@@ -49,10 +33,21 @@ function isValidGoogleMapsUrl(rawUrl) {
   }
 }
 
-  } finally {
-    await sql.end();
+async function main() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("Falta DATABASE_URL en el entorno.");
+    process.exit(1);
   }
-}
+  const sql = postgres(connectionString);
+  try {
+    const rows = await sql`
+      SELECT p.id, p.name, p.city, p.google_maps_url, p.latitude, p.longitude, g.name AS group_name
+      FROM places p
+      LEFT JOIN sharing_groups g ON g.id = p.group_id
+      WHERE p.deleted_at IS NULL
+      ORDER BY p.created_at DESC
+    `;
 
     const invalid = rows.filter((r) => r.google_maps_url && !isValidGoogleMapsUrl(r.google_maps_url));
     const missingBoth = rows.filter(
@@ -69,7 +64,7 @@ function isValidGoogleMapsUrl(rawUrl) {
       console.log(`  - [${r.group_name || "Mapa Personal"}] ${r.name} (${r.city || "?"})`);
     }
   } finally {
-    await pool.end();
+    await sql.end();
   }
 }
 
