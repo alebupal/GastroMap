@@ -144,7 +144,7 @@ docker compose up -d
 * **Arquitectura:** Monolito full-stack con Next.js 15 (App Router, TypeScript estricto, Server Actions y Server Components).
 * **Base de Datos:** PostgreSQL 16 con PostGIS gestionado mediante Drizzle ORM (`src/db/schema.ts`).
 * **Estilos:** Tailwind CSS con diseño mobile-first y componentes accesibles.
-* **Autenticación:** Sesiones en base de datos (`sessions`) con cookies HttpOnly seguras y contraseñas hasheadas con Argon2id.
+* **Autenticación y Seguridad:** Sesiones en base de datos (`sessions`) con cookies `HttpOnly` (`Secure` automático tras HTTPS), contraseñas con Argon2id, protección anti-SSRF en enlaces Maps y cifrado AES-256-GCM para claves API.
 
 ---
 

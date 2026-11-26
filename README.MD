@@ -146,7 +146,7 @@ Contributions are welcome! This guide is written with clear technical instructio
 * **Architecture:** Full-stack monolith using Next.js 15 (App Router, strict TypeScript, Server Actions, and Server Components).
 * **Database:** PostgreSQL 16 with PostGIS managed via Drizzle ORM (`src/db/schema.ts`).
 * **UI:** Tailwind CSS with a mobile-first, touch-friendly design.
-* **Auth:** Native PostgreSQL sessions (`sessions`) with secure HttpOnly cookies and Argon2id password hashing.
+* **Auth & Security:** Native PostgreSQL sessions (`sessions`) with `HttpOnly` cookies (auto-`Secure` behind HTTPS), Argon2id password hashing, anti-SSRF Maps URL validation, and AES-256-GCM API key encryption.
 
 ---
 
