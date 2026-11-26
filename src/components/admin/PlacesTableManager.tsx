@@ -830,41 +830,40 @@ export function PlacesTableManager({
                 </th>
                 <th className="p-3">{t("admin_places.col_gps")}</th>
                 <th className="p-3">
-                  <div className="inline-flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("author")}
-                      className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
-                        sortField === "author" ? "text-orange-600 dark:text-orange-400" : ""
-                      }`}
-                    >
-                      <span>{t("admin_places.col_author")}</span>
-                      <span className="material-symbols-outlined text-[14px] leading-none">
-                        {sortField === "author"
-                          ? sortDir === "asc"
-                            ? "arrow_upward"
-                            : "arrow_downward"
-                          : "unfold_more"}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleSort("createdAt")}
-                      title={t("common.sort_date")}
-                      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
-                        sortField === "createdAt"
-                          ? "bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400"
-                          : "text-slate-400"
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-[13px] leading-none">schedule</span>
-                      {sortField === "createdAt" && (
-                        <span className="material-symbols-outlined text-[12px] leading-none">
-                          {sortDir === "asc" ? "arrow_upward" : "arrow_downward"}
-                        </span>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("author")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "author" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("admin_places.col_author")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "author"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
+                </th>
+                <th className="p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort("createdAt")}
+                    className={`inline-flex items-center gap-1 uppercase tracking-wider cursor-pointer hover:text-orange-600 transition ${
+                      sortField === "createdAt" ? "text-orange-600 dark:text-orange-400" : ""
+                    }`}
+                  >
+                    <span>{t("common.sort_date")}</span>
+                    <span className="material-symbols-outlined text-[14px] leading-none">
+                      {sortField === "createdAt"
+                        ? sortDir === "asc"
+                          ? "arrow_upward"
+                          : "arrow_downward"
+                        : "unfold_more"}
+                    </span>
+                  </button>
                 </th>
                 <th className="p-3 text-right">{t("admin_places.col_action")}</th>
               </tr>
@@ -872,7 +871,7 @@ export function PlacesTableManager({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
               {paginatedPlaces.length === 0 ? (
                 <tr>
-                  <td colSpan={showSpaceColumn ? 9 : 8} className="p-8 text-center text-slate-500 text-xs">
+                  <td colSpan={showSpaceColumn ? 10 : 9} className="p-8 text-center text-slate-500 text-xs">
                     {t("admin_places.empty_search")}
                   </td>
                 </tr>
@@ -950,6 +949,13 @@ export function PlacesTableManager({
 
                       <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
                         @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+                      </td>
+
+                      <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
+                        {new Date(place.createdAt).toLocaleDateString(
+                          locale === "en" ? "en-GB" : "es-ES",
+                          { day: "2-digit", month: "short", year: "numeric" }
+                        )}
                       </td>
 
                       <td className="p-3 text-right whitespace-nowrap">
