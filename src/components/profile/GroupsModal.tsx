@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { copyText } from "@/lib/clipboard";
 import { useT } from "@/lib/i18n/client";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import {
   getMyGroupsAction,
   createGroupAction,
@@ -43,12 +44,21 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
-  // Estado para gestión de invitaciones por grupo
+  // Estado para gestión de invitaciones y acordeón por grupo
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [groupSearch, setGroupSearch] = useState("");
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
   const [expandedInvitesGroupId, setExpandedInvitesGroupId] = useState<string | null>(null);
   const [groupInvites, setGroupInvites] = useState<Record<string, GroupInviteItem[]>>({});
   const [generatingInviteForGroup, setGeneratingInviteForGroup] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const filteredGroups = useMemo(() => {
+    const q = groupSearch.trim().toLowerCase();
+    if (!q) return groups;
+    return groups.filter((g) => g.name.toLowerCase().includes(q));
+  }, [groups, groupSearch]);
 
   async function loadData() {
     setLoading(true);
@@ -152,6 +162,7 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
       setError(res.error);
     } else {
       setNewGroupName("");
+      setShowCreateForm(false);
       await loadData();
       router.refresh();
     }
@@ -270,76 +281,109 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
             </div>
           )}
 
-          {/* Formulario nuevo grupo con selector de icono */}
-          <form onSubmit={handleCreateGroup} className="space-y-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-              {GROUP_ICONS.map((ic) => (
-                <button
-                  key={ic}
-                  type="button"
-                  onClick={() => setNewGroupIcon(ic)}
-                  className={`w-8 h-8 rounded-full text-sm flex items-center justify-center shrink-0 transition cursor-pointer border ${
-                    newGroupIcon === ic
-                      ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500 scale-105"
-                      : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200/70 dark:border-slate-700 hover:bg-slate-100"
-                  }`}
-                >
-                  {ic}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-1 min-w-0">
-                <span className="text-base absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
-                  {newGroupIcon}
+          {/* Formulario nuevo grupo colapsable */}
+          {!showCreateForm ? (
+            <button
+              type="button"
+              onClick={() => setShowCreateForm(true)}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold bg-[#f8f9ff] dark:bg-slate-800/80 hover:bg-orange-50 dark:hover:bg-slate-800 border border-dashed border-orange-300 dark:border-orange-800/70 text-orange-600 dark:text-orange-400 transition cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-base leading-none">add_circle</span>
+              <span>{t("groups.create")}</span>
+            </button>
+          ) : (
+            <form
+              onSubmit={handleCreateGroup}
+              className="p-3.5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/70 space-y-2.5"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                  {t("groups.create")}
                 </span>
-                <input
-                  type="text"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder={`${t("groups.name")}...`}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={creating || !newGroupName.trim()}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
-              >
-                <span className="material-symbols-outlined text-sm leading-none">add</span>
-                <span>{creating ? t("common.loading") : t("groups.create")}</span>
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-              <span className="font-bold text-slate-500 dark:text-slate-400">
-                {t("groups.template_label")}
-              </span>
-              <select
-                value={templateMode}
-                onChange={(e) => setTemplateMode(e.target.value as "default" | "empty" | "clone")}
-                className="px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
-              >
-                <option value="default">{t("groups.template_default")}</option>
-                <option value="empty">{t("groups.template_empty")}</option>
-                {groups.length > 0 && <option value="clone">{t("groups.template_clone")}</option>}
-              </select>
-              {templateMode === "clone" && groups.length > 0 && (
-                <select
-                  value={cloneSourceId}
-                  onChange={(e) => setCloneSourceId(e.target.value)}
-                  className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
-                  <option value="">{t("groups.template_clone_pick")}</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.icon} {g.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </form>
+                  {t("common.cancel")}
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                {GROUP_ICONS.map((ic) => (
+                  <button
+                    key={ic}
+                    type="button"
+                    onClick={() => setNewGroupIcon(ic)}
+                    className={`w-8 h-8 rounded-full text-sm flex items-center justify-center shrink-0 transition cursor-pointer border ${
+                      newGroupIcon === ic
+                        ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500 scale-105"
+                        : "bg-white dark:bg-slate-800 border-slate-200/70 dark:border-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {ic}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <span className="text-base absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                    {newGroupIcon}
+                  </span>
+                  <input
+                    type="text"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    placeholder={`${t("groups.name")}...`}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-full text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={creating || !newGroupName.trim()}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-40 transition cursor-pointer shrink-0 shadow-xs"
+                >
+                  <span className="material-symbols-outlined text-sm leading-none">add</span>
+                  <span>{creating ? t("common.loading") : t("groups.create")}</span>
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[11px]">
+                <span className="font-bold text-slate-500 dark:text-slate-400">
+                  {t("groups.template_label")}
+                </span>
+                <SearchableSelect
+                  value={templateMode}
+                  onChange={(val) => setTemplateMode(val as "default" | "empty" | "clone")}
+                  options={[
+                    { value: "default", label: t("groups.template_default") },
+                    { value: "empty", label: t("groups.template_empty") },
+                    ...(groups.length > 0
+                      ? [{ value: "clone", label: t("groups.template_clone") }]
+                      : []),
+                  ]}
+                  searchPlaceholder={t("admin_groups.search_placeholder")}
+                  ariaLabel={t("groups.template_label")}
+                  buttonClassName="!py-1.5 !px-3 !text-[11px]"
+                />
+                {templateMode === "clone" && groups.length > 0 && (
+                  <SearchableSelect
+                    value={cloneSourceId}
+                    onChange={setCloneSourceId}
+                    options={groups.map((g) => ({
+                      value: g.id,
+                      label: g.name,
+                      icon: <span>{g.icon}</span>,
+                      subtitle: `${g.placesCount ?? 0} ${t("spaces.places_count")} · ${g.members.length} ${t("spaces.members_count")}`,
+                    }))}
+                    placeholder={t("groups.template_clone_pick")}
+                    searchPlaceholder={t("admin_groups.search_placeholder")}
+                    ariaLabel={t("groups.template_clone_pick")}
+                    buttonClassName="!py-1.5 !px-3 !text-[11px]"
+                  />
+                )}
+              </div>
+            </form>
+          )}
 
           {/* Listado de grupos */}
           {loading ? (
@@ -362,8 +406,33 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {groups.map((g) => {
+            <div className="space-y-2.5">
+              {groups.length > 3 && (
+                <div className="relative">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={groupSearch}
+                    onChange={(e) => setGroupSearch(e.target.value)}
+                    placeholder={t("admin_groups.search_placeholder")}
+                    className="w-full pl-9 pr-8 py-2 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                  />
+                  {groupSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setGroupSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-sm leading-none">close</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {filteredGroups.map((g) => {
+                const isGroupExpanded = expandedGroupId === g.id;
                 const isExpanded = expandedInvitesGroupId === g.id;
                 const invites = groupInvites[g.id] || [];
                 const groupInitials = g.name
@@ -477,12 +546,26 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                               </span>
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedGroupId((prev) => (prev === g.id ? null : g.id))
+                            }
+                            aria-expanded={isGroupExpanded}
+                            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-base leading-none">
+                              {isGroupExpanded ? "expand_less" : "expand_more"}
+                            </span>
+                          </button>
                         </div>
                       )}
                     </div>
 
-                    {/* Miembros del grupo */}
-                    <div className="space-y-1.5">
+                    {isGroupExpanded && (
+                      <div className="pt-2.5 border-t border-slate-200/70 dark:border-slate-700/60 space-y-3">
+                        {/* Miembros del grupo */}
+                        <div className="space-y-1.5">
                       <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400">
                         {t("groups.members_label", { count: String(g.members.length) })}
                       </span>
@@ -617,6 +700,8 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                             )}
                           </div>
                         )}
+                      </div>
+                    )}
                       </div>
                     )}
                   </div>
