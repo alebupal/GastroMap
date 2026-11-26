@@ -141,8 +141,8 @@ export function AdminDashboard({
         <div className="flex items-center justify-between gap-2 px-1 pt-1">
           <Link href="/" className="flex items-center gap-2 group">
             <GastroMapLogo iconClassName="w-8 h-8" textClassName="text-base" />
-            <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-300 text-[10px] font-bold tracking-wide">
-              Admin
+            <span className="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/70 text-violet-800 dark:text-violet-300 text-[10px] font-bold tracking-wide">
+              Superadmin
             </span>
           </Link>
           <button
@@ -264,8 +264,8 @@ export function AdminDashboard({
                   <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 font-bold text-xs flex items-center justify-center shadow-xs border border-orange-200 dark:border-orange-800">
                     {displayUsername.charAt(0).toUpperCase()}
                   </div>
-                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
-                    Admin
+                  <span className="absolute -bottom-1 -right-1 px-1 rounded-full bg-violet-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                    Super
                   </span>
                 </div>
                 <span className="material-symbols-outlined text-sm text-slate-400">
@@ -280,8 +280,8 @@ export function AdminDashboard({
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
                         @{displayUsername}
                       </span>
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
-                        ADMIN
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-violet-600 text-white uppercase tracking-wider">
+                        SUPERADMIN
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400 truncate mt-0.5">

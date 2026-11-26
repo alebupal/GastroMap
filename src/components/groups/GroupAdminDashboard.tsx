@@ -140,8 +140,10 @@ export function GroupAdminDashboard({
     }
   }
 
-  async function handleToggleMemberRole(userId: string, currentRole: "admin" | "member") {
-    const nextRole = currentRole === "admin" ? "member" : "admin";
+  async function handleChangeMemberRole(
+    userId: string,
+    nextRole: "owner" | "admin" | "member"
+  ) {
     setBusyMemberId(userId);
     const res = await setGroupMemberRoleAction(group.id, userId, nextRole);
     setBusyMemberId(null);
@@ -149,9 +151,20 @@ export function GroupAdminDashboard({
       toast(res.error, { kind: "error" });
     } else {
       setMembers((prev) =>
-        prev.map((m) => (m.userId === userId ? { ...m, role: nextRole } : m))
+        prev.map((m) => {
+          if (nextRole === "owner") {
+            return m.userId === userId
+              ? { ...m, role: "admin", isOwner: true }
+              : { ...m, isOwner: false };
+          }
+          if (m.userId === userId) {
+            return { ...m, role: nextRole, isOwner: nextRole === "admin" ? m.isOwner : false };
+          }
+          return m;
+        })
       );
       toast(t("group_admin.role_updated_toast"), { kind: "success" });
+      router.refresh();
     }
   }
 
@@ -621,59 +634,83 @@ export function GroupAdminDashboard({
                 </form>
 
                 <div className="space-y-2">
-                  {sortedMembers.map((m) => (
-                    <div
-                      key={m.userId}
-                      className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-wrap items-center justify-between gap-2 text-xs"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
-                            @{m.username || m.name}
-                          </span>
-                          {m.isOwner && (
-                            <span className="px-1.5 py-0.5 rounded bg-orange-600 text-white text-[10px] font-black uppercase">
-                              {t("group_admin.owner_badge")}
+                  {sortedMembers.map((m) => {
+                    const isSuperAdminViewer = currentUser.role === "admin";
+                    const canManageRole = isSuperAdminViewer || !m.isOwner;
+                    const effectiveSelectRole: "owner" | "admin" | "member" = m.isOwner
+                      ? "owner"
+                      : m.role === "admin"
+                        ? "admin"
+                        : "member";
+
+                    return (
+                      <div
+                        key={m.userId}
+                        className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex flex-wrap items-center justify-between gap-2 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-slate-900 dark:text-slate-100">
+                              @{m.username || m.name}
                             </span>
-                          )}
-                          {!m.isOwner && m.role === "admin" && (
-                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-bold uppercase">
-                              Admin
-                            </span>
-                          )}
+                            {m.isOwner ? (
+                              <span className="px-1.5 py-0.5 rounded bg-orange-600 text-white text-[10px] font-black uppercase">
+                                {t("group_admin.owner_badge")}
+                              </span>
+                            ) : m.role === "admin" ? (
+                              <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 text-[10px] font-extrabold uppercase">
+                                {t("spaces.group_admin_badge")}
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold uppercase">
+                                {t("group_admin.member_badge")}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                            {m.name}
+                          </div>
                         </div>
-                        <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                          {m.name}
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {canManageRole && (
+                            <select
+                              value={effectiveSelectRole}
+                              disabled={busyMemberId === m.userId}
+                              onChange={(e) =>
+                                handleChangeMemberRole(
+                                  m.userId,
+                                  e.target.value as "owner" | "admin" | "member"
+                                )
+                              }
+                              aria-label={t("admin_users.role")}
+                              className="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-[11px] font-bold text-slate-700 dark:text-slate-200 cursor-pointer focus:outline-none focus:ring-1 focus:ring-orange-500"
+                            >
+                              <option value="member">{t("group_admin.member_badge")}</option>
+                              <option value="admin">{t("spaces.group_admin_badge")}</option>
+                              {(isSuperAdminViewer || group.isOwner) && (
+                                <option value="owner">{t("group_admin.owner_badge")}</option>
+                              )}
+                            </select>
+                          )}
+
+                          {!m.isOwner && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveMember(m.userId, m.username || m.name)}
+                              disabled={busyMemberId === m.userId}
+                              className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 hover:bg-red-200 transition cursor-pointer"
+                              title={t("group_admin.kick_btn")}
+                            >
+                              <span className="material-symbols-outlined text-[15px] leading-none block">
+                                person_remove
+                              </span>
+                            </button>
+                          )}
                         </div>
                       </div>
-
-                      {!m.isOwner && (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleMemberRole(m.userId, m.role)}
-                            disabled={busyMemberId === m.userId}
-                            className="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-slate-700 transition cursor-pointer"
-                          >
-                            {m.role === "admin"
-                              ? t("group_admin.demote_member")
-                              : t("group_admin.promote_admin")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveMember(m.userId, m.username || m.name)}
-                            disabled={busyMemberId === m.userId}
-                            className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 hover:bg-red-200 transition cursor-pointer"
-                            title={t("group_admin.kick_btn")}
-                          >
-                            <span className="material-symbols-outlined text-[15px] leading-none block">
-                              person_remove
-                            </span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

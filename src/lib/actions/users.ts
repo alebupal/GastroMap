@@ -12,10 +12,19 @@ import {
   userPlaces,
   placeOccasions,
   placeTags,
+  sharingGroups,
+  sharingGroupMembers,
   type User,
 } from "@/db/schema";
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+
+export interface UserGroupRoleSummary {
+  groupId: string;
+  groupName: string;
+  groupIcon: string;
+  role: "owner" | "admin" | "member";
+}
 
 export interface SafeUser {
   id: string;
@@ -27,10 +36,11 @@ export interface SafeUser {
   locale: string;
   lastLoginAt: Date | null;
   createdAt: Date;
+  groups?: UserGroupRoleSummary[];
 }
 
 /**
- * Obtiene todos los usuarios del sistema (solo accesible por administradores)
+ * Obtiene todos los usuarios del sistema junto con sus roles en cada grupo (solo Superadmin)
  */
 export async function getAllUsersAction(): Promise<SafeUser[]> {
   const currentUser = await getCurrentUser();
@@ -38,22 +48,74 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
     return [];
   }
 
-  const rows = await db
-    .select({
-      id: users.id,
-      username: users.username,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      status: users.status,
-      locale: users.locale,
-      lastLoginAt: users.lastLoginAt,
-      createdAt: users.createdAt,
-    })
-    .from(users)
-    .orderBy(users.createdAt);
+  const [rows, allGroups, allMemberships] = await Promise.all([
+    db
+      .select({
+        id: users.id,
+        username: users.username,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        locale: users.locale,
+        lastLoginAt: users.lastLoginAt,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(users.createdAt),
+    db
+      .select({
+        id: sharingGroups.id,
+        name: sharingGroups.name,
+        icon: sharingGroups.icon,
+        ownerUserId: sharingGroups.ownerUserId,
+      })
+      .from(sharingGroups),
+    db
+      .select({
+        groupId: sharingGroupMembers.groupId,
+        userId: sharingGroupMembers.userId,
+        role: sharingGroupMembers.role,
+      })
+      .from(sharingGroupMembers),
+  ]);
 
-  return rows;
+  const groupMap = new Map(allGroups.map((g) => [g.id, g]));
+  const groupsByUser = new Map<string, Map<string, UserGroupRoleSummary>>();
+
+  for (const m of allMemberships) {
+    const g = groupMap.get(m.groupId);
+    if (!g) continue;
+    const uMap = groupsByUser.get(m.userId) || new Map<string, UserGroupRoleSummary>();
+    const isOwner = g.ownerUserId === m.userId;
+    uMap.set(g.id, {
+      groupId: g.id,
+      groupName: g.name,
+      groupIcon: g.icon || "🍻",
+      role: isOwner ? "owner" : m.role === "admin" ? "admin" : "member",
+    });
+    groupsByUser.set(m.userId, uMap);
+  }
+
+  for (const g of allGroups) {
+    const uMap = groupsByUser.get(g.ownerUserId) || new Map<string, UserGroupRoleSummary>();
+    if (!uMap.has(g.id)) {
+      uMap.set(g.id, {
+        groupId: g.id,
+        groupName: g.name,
+        groupIcon: g.icon || "🍻",
+        role: "owner",
+      });
+      groupsByUser.set(g.ownerUserId, uMap);
+    }
+  }
+
+  return rows.map((u) => ({
+    ...u,
+    groups: Array.from(groupsByUser.get(u.id)?.values() || []).sort((a, b) =>
+      a.groupName.localeCompare(b.groupName, "es", { sensitivity: "base" })
+    ),
+  }));
 }
 
 /**

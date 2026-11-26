@@ -227,8 +227,8 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                       : t("spaces.personal_map")}
                 </span>
                 {workspace.mode === "group" && workspace.isSpaceAdmin && (
-                  <span className="hidden md:inline-flex px-1.5 py-0.5 rounded-full bg-orange-600/15 text-orange-700 dark:text-orange-300 text-[9px] font-black uppercase tracking-wider shrink-0">
-                    Admin
+                  <span className="hidden md:inline-flex px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase tracking-wider shrink-0">
+                    {t("spaces.group_admin_badge")}
                   </span>
                 )}
                 <span className="material-symbols-outlined text-sm text-slate-400 shrink-0 leading-none">
@@ -270,8 +270,8 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                                       {g.name}
                                     </span>
                                     {(g.isOwner || g.myRole === "admin") && (
-                                      <span className="px-1.5 py-0.5 rounded bg-orange-600/15 text-orange-700 dark:text-orange-300 text-[9px] font-black uppercase">
-                                        Admin
+                                      <span className="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase">
+                                        {g.isOwner ? t("groups.owner_badge") : t("spaces.group_admin_badge")}
                                       </span>
                                     )}
                                   </div>
@@ -472,8 +472,8 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                   {displayUsername.charAt(0).toUpperCase()}
                 </div>
                 {currentUser.role === "admin" && (
-                  <span className="absolute -bottom-1 right-0 px-1 rounded-full bg-slate-900 dark:bg-orange-600 sm:bg-orange-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
-                    Admin
+                  <span className="absolute -bottom-1 right-0 px-1 rounded-full bg-violet-600 text-white text-[8px] leading-tight font-black uppercase tracking-wider">
+                    Super
                   </span>
                 )}
               </div>
@@ -492,8 +492,8 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
                       @{displayUsername}
                     </span>
                     {currentUser.role === "admin" && (
-                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-orange-600 text-white uppercase tracking-wider">
-                        ADMIN
+                      <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-violet-600 text-white uppercase tracking-wider">
+                        SUPERADMIN
                       </span>
                     )}
                   </div>
