@@ -166,8 +166,9 @@ GastroMap organiza la experiencia en **espacios 100 % aislados**, de forma que c
 - **Roles y Permisos (con Leyenda Integrada)**:
   - **Roles globales:** `SUPERADMIN` (primer usuario en `/setup`, control total de la plataforma) y `USUARIO` (cuentas posteriores con su Mapa Personal privado).
   - **Roles dentro de cada grupo:** `CREADOR` (propietario principal, puede transferir o eliminar el grupo), `ADMIN GRUPO` (gestiona miembros, solicitudes, taxonomía, sitios, papelera y API) y `MIEMBRO` (añade, comenta y registra visitas).
-- **Panel de Administración por Grupo (`/group-admin`)**:
+- **Panel de Administración por Grupo (`/group-admin`) y Moderación de Autoría**:
   - Los administradores de un grupo acceden a `/group-admin` para gestionar **Estadísticas del grupo**, **Sitios** (copia/movimiento masivo, fusión de duplicados, **Salud de datos** y **Papelera de 30 días**), **Miembros, solicitudes e invitaciones**, **Planes y etiquetas propios del grupo** (plegados por defecto para mantener la vista limpia) y **Ajustes** (**Exportar grupo completo**, **clave propia cifrada de Google Places API** y eliminación del grupo).
+  - Si un miembro abandona un grupo, sus sitios y comentarios permanecen en el grupo. Al eliminar una cuenta desde `/admin > Usuarios`, el superadministrador puede conservar su historial bajo la cuenta fantasma **`👻 @usuario_eliminado`**, reasignarlo al creador de cada grupo o purgarlo; además, los administradores pueden **reasignar el autor** al editar un sitio o un comentario.
   - El panel global `/admin` queda reservado exclusivamente al **Superadministrador** de la instancia.
 
 ---
@@ -243,6 +244,7 @@ GastroMap cuenta con un sistema de traducción dinámico y extensible inspirado 
   - `Referrer-Policy: strict-origin-when-cross-origin`.
   - `Permissions-Policy: geolocation=(self), camera=(), microphone=()`.
   - `Content-Security-Policy`: Restricción estricta de orígenes autorizados para scripts, estilos, fuentes, imágenes y conexiones de tiles.
+- **Protección Anti-SSRF y Cookies Seguras**: La resolución de enlaces acortados de Google Maps valida estrictamente dominios oficiales y bloquea IPs privadas/locales en saltos y redirecciones; las cookies `HttpOnly` activan `Secure` automáticamente detrás de proxies HTTPS (`x-forwarded-proto: https`).
 - **Aislamiento de Grupos y Permisos**: Las Server Actions validan en cada consulta la pertenencia del usuario a los grupos privados antes de exponer datos o permitir operaciones.
 - **Registro de Auditoría (`audit_logs`)**: Registro histórico en base de datos de acciones administrativas críticas (borrados masivos, reseteos de claves, descargas de backups).
 
