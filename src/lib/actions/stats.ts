@@ -16,6 +16,7 @@ import {
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getGroupMembership } from "@/lib/workspace";
+import { isPublicRegistrationEnabled } from "@/lib/actions/settings";
 
 export interface CountItem {
   label: string;
@@ -63,12 +64,22 @@ export interface AdminStatsData {
   totalGroups: number;
   totalOccasions: number;
   totalTags: number;
+  publicRegistrationEnabled: boolean;
   last30Days: {
     places: number;
     comments: number;
     visits: number;
     users: number;
   };
+  topGroups: Array<{
+    groupId: string;
+    name: string;
+    icon: string;
+    ownerName: string;
+    ownerUsername: string | null;
+    membersCount: number;
+    placesCount: number;
+  }>;
   topContributors: Array<{
     userId: string;
     name: string;
@@ -303,6 +314,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     allPlaceOccs,
     allPlaceTags,
     allGroups,
+    allGroupMembers,
+    publicRegistrationEnabled,
   ] = await Promise.all([
     db.select().from(users),
     db.select().from(places),
@@ -313,6 +326,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     db.select().from(placeOccasions),
     db.select().from(placeTags),
     db.select().from(sharingGroups),
+    db.select().from(sharingGroupMembers),
+    isPublicRegistrationEnabled(),
   ]);
 
   const occMap = new Map(allOccasions.map((o) => [o.id, { name: o.name, icon: o.icon }]));
@@ -442,6 +457,33 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     .map((p) => ({ label: p, count: priceCounts.get(p) || 0 }))
     .filter((i) => i.count > 0);
 
+  const userById = new Map(allUsers.map((u) => [u.id, u]));
+  const membersByGroup = new Map<string, number>();
+  for (const gm of allGroupMembers) {
+    membersByGroup.set(gm.groupId, (membersByGroup.get(gm.groupId) || 0) + 1);
+  }
+  const placesByGroup = new Map<string, number>();
+  for (const p of allPlaces) {
+    if (p.groupId) {
+      placesByGroup.set(p.groupId, (placesByGroup.get(p.groupId) || 0) + 1);
+    }
+  }
+  const topGroups = allGroups
+    .map((g) => {
+      const owner = userById.get(g.ownerUserId);
+      return {
+        groupId: g.id,
+        name: g.name,
+        icon: g.icon || "🍻",
+        ownerName: owner?.name || "—",
+        ownerUsername: owner?.username || null,
+        membersCount: Math.max(1, membersByGroup.get(g.id) || 0),
+        placesCount: placesByGroup.get(g.id) || 0,
+      };
+    })
+    .sort((a, b) => b.placesCount * 3 + b.membersCount - (a.placesCount * 3 + a.membersCount))
+    .slice(0, 6);
+
   return {
     totalUsers: allUsers.length,
     activeUsers,
@@ -454,7 +496,9 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
     totalGroups: allGroups.length,
     totalOccasions: allOccasions.length,
     totalTags: allTags.length,
+    publicRegistrationEnabled,
     last30Days,
+    topGroups,
     topContributors,
     topPopularPlaces,
     topCitiesGlobal: topEntries(cityCounts, 8),

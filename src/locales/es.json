@@ -414,7 +414,12 @@
       "invite_btn": "Solo por invitación",
       "enabled_toast": "✓ Registro público abierto activado.",
       "disabled_toast": "✓ Modo cerrado (solo por invitación) activado."
-    }
+    },
+    "tab_overview": "Resumen",
+    "tab_system": "Sistema y Auditoría",
+    "system_tab_general": "General y Acceso",
+    "system_tab_demo": "Datos Demo",
+    "system_tab_audit": "Auditoría"
   },
   "notes_visits": {
     "personal_notes_title": "Valoración personal",
@@ -657,7 +662,8 @@
     "by_price": "Distribución por Precios",
     "top_tags": "Etiquetas más utilizadas",
     "recent_activity": "Última Actividad Global",
-    "no_data": "Sin datos todavía"
+    "no_data": "Sin datos todavía",
+    "top_groups": "Top grupos activos"
   },
   "admin_places": {
     "search_placeholder": "Buscar por nombre, dirección, autor o etiquetas...",
@@ -762,7 +768,19 @@
     "no_users_found": "No se encontraron usuarios {query}.",
     "matching_query": "que coincidan con «{query}»",
     "cannot_select_self": "No puedes seleccionarte a ti mismo",
-    "select_user": "Seleccionar usuario"
+    "select_user": "Seleccionar usuario",
+    "tab_users": "Usuarios",
+    "tab_invites": "Invitaciones de plataforma",
+    "groups_btn": "{count} grupos",
+    "places_badge": "{count} sitios",
+    "groups_modal_title": "Grupos y roles de {username}",
+    "groups_modal_subtitle": "Cambia su rol en cada grupo, expúlsalo o añádelo a nuevos grupos.",
+    "groups_modal_empty": "Este usuario todavía no pertenece a ningún grupo.",
+    "add_to_group_label": "Añadir a un grupo existente",
+    "add_to_group_placeholder": "Selecciona un grupo...",
+    "add_to_group_btn": "Añadir",
+    "remove_from_group": "Quitar del grupo",
+    "confirm_remove_from_group": "¿Quitar a este usuario del grupo «{group}»?"
   },
   "admin_taxonomy": {
     "space_selector_title": "Espacio o Grupo a Gestionar",
@@ -1149,7 +1167,10 @@
     "manage_btn": "Administrar",
     "item_label": "grupos",
     "delete_confirm": "¿Eliminar definitivamente el grupo «{name}» y sus {places} establecimientos asociados? Esta acción es irreversible.",
-    "delete_success": "✓ Grupo «{name}» eliminado correctamente."
+    "delete_success": "✓ Grupo «{name}» eliminado correctamente.",
+    "filter_with_places": "Con sitios",
+    "filter_empty": "Vacíos",
+    "created_toast": "Grupo creado correctamente."
   },
   "group_admin": {
     "badge": "Admin de Grupo",
@@ -1193,5 +1214,15 @@
     "danger_zone_title": "Zona de Peligro — Eliminar grupo",
     "danger_zone_desc": "Eliminar este grupo borrará permanentemente su espacio y los {count} sitios guardados dentro de él (no afecta a copias en otros grupos ni mapas personales).",
     "delete_group_btn": "Eliminar grupo definitivamente"
+  },
+  "role_legend": {
+    "title": "¿Qué hace cada rol? (Leyenda de permisos)",
+    "global_section": "Roles globales de plataforma",
+    "group_section": "Roles dentro de cada grupo",
+    "superadmin_desc": "Control total de la plataforma: gestiona usuarios, todos los grupos, sitios compartidos, registro público y configuración global.",
+    "user_desc": "Usuario estándar con su propio Mapa Personal privado y acceso a los grupos en los que participe o cree.",
+    "owner_desc": "Propietario principal del grupo. Tiene todos los permisos de Admin grupo y además puede transferir la propiedad o eliminar el grupo.",
+    "group_admin_desc": "Gestiona miembros, invitaciones, planes, etiquetas, duplicados y ajustes del grupo. No puede eliminar el grupo ni expulsar al creador.",
+    "member_desc": "Puede ver, añadir y comentar sitios dentro del grupo, además de registrar sus visitas y notas personales."
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { getAdminStatsAction, type AdminStatsData, type CountItem } from "@/lib/actions/stats";
 import { useT } from "@/lib/i18n/client";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -119,6 +120,22 @@ export function AdminStatsPanel() {
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {t("ui.realtime")}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  stats.publicRegistrationEnabled
+                    ? "bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                }`}
+              >
+                <span className="material-symbols-outlined text-xs leading-none">
+                  {stats.publicRegistrationEnabled ? "public" : "lock"}
+                </span>
+                <span>
+                  {stats.publicRegistrationEnabled
+                    ? t("admin.registration_mode.open_badge")
+                    : t("admin.registration_mode.invite_only_badge")}
+                </span>
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -262,6 +279,51 @@ export function AdminStatsPanel() {
           </span>
         </div>
       </div>
+
+      {/* Top Grupos Activos con acceso directo a /group-admin */}
+      {stats.topGroups && stats.topGroups.length > 0 && (
+        <div className="p-4 sm:p-5 rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <span>🍻</span>
+              <span>{t("admin_stats.top_groups")}</span>
+            </h4>
+            <span className="text-[10px] font-semibold text-slate-400">
+              {stats.totalGroups} {t("admin_groups.item_label")}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {stats.topGroups.map((g, idx) => (
+              <div
+                key={g.groupId}
+                className="p-3 rounded-xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-2 text-xs"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-xs font-black text-orange-600 dark:text-orange-400 shrink-0">
+                    #{idx + 1}
+                  </span>
+                  <span className="text-lg shrink-0">{g.icon}</span>
+                  <div className="min-w-0">
+                    <div className="font-bold text-slate-900 dark:text-slate-100 truncate">
+                      {g.name}
+                    </div>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                      @{g.ownerUsername || g.ownerName} · 👥 {g.membersCount} · 🍽️ {g.placesCount}
+                    </div>
+                  </div>
+                </div>
+                <Link
+                  href={`/group-admin?groupId=${encodeURIComponent(g.groupId)}`}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-[10px] font-bold transition shrink-0"
+                >
+                  <span>{t("admin_groups.manage_btn")}</span>
+                  <span className="material-symbols-outlined text-xs leading-none">arrow_forward</span>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Rankings: Top Contribuidores y Top Sitios Populares */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">

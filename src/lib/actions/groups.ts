@@ -66,6 +66,8 @@ export interface AdminGroupOverviewItem {
   ownerUsername: string | null;
   membersCount: number;
   placesCount: number;
+  occasionsCount: number;
+  tagsCount: number;
   createdAt: Date;
 }
 
@@ -652,7 +654,8 @@ export async function getAllGroupsAdminAction(): Promise<AdminGroupOverviewItem[
   if (allGroups.length === 0) return [];
 
   const groupIds = allGroups.map((g) => g.id);
-  const [memberCounts, placeCounts] = await Promise.all([
+  const scopeKeys = groupIds.map((gid) => `group:${gid}`);
+  const [memberCounts, placeCounts, occCounts, tagCounts] = await Promise.all([
     db
       .select({
         groupId: sharingGroupMembers.groupId,
@@ -669,12 +672,30 @@ export async function getAllGroupsAdminAction(): Promise<AdminGroupOverviewItem[
       .from(places)
       .where(inArray(places.groupId, groupIds))
       .groupBy(places.groupId),
+    db
+      .select({
+        scopeKey: occasions.scopeKey,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(occasions)
+      .where(inArray(occasions.scopeKey, scopeKeys))
+      .groupBy(occasions.scopeKey),
+    db
+      .select({
+        scopeKey: tags.scopeKey,
+        count: sql<number>`cast(count(*) as integer)`,
+      })
+      .from(tags)
+      .where(inArray(tags.scopeKey, scopeKeys))
+      .groupBy(tags.scopeKey),
   ]);
 
   const mMap = new Map(memberCounts.map((m) => [m.groupId, m.count]));
   const pMap = new Map(
     placeCounts.filter((p) => p.groupId !== null).map((p) => [p.groupId as string, p.count])
   );
+  const oMap = new Map(occCounts.map((o) => [o.scopeKey, o.count]));
+  const tMap = new Map(tagCounts.map((t) => [t.scopeKey, t.count]));
 
   return allGroups.map((g) => ({
     ...g,
@@ -682,6 +703,8 @@ export async function getAllGroupsAdminAction(): Promise<AdminGroupOverviewItem[
     description: g.description ?? null,
     membersCount: Math.max(1, mMap.get(g.id) || 0),
     placesCount: pMap.get(g.id) || 0,
+    occasionsCount: oMap.get(`group:${g.id}`) || 0,
+    tagsCount: tMap.get(`group:${g.id}`) || 0,
   }));
 }
 

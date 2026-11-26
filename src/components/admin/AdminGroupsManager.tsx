@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   getAllGroupsAdminAction,
+  createGroupAction,
   deleteGroupAction,
   switchActiveSpaceAction,
   type AdminGroupOverviewItem,
@@ -25,6 +26,11 @@ export function AdminGroupsManager() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activityFilter, setActivityFilter] = useState<"all" | "active" | "empty">("all");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupIcon, setNewGroupIcon] = useState("🍻");
+  const [creatingGroup, setCreatingGroup] = useState(false);
   const [sortField, setSortField] = useState<GroupSortField>("placesCount");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,14 +66,15 @@ export function AdminGroupsManager() {
 
   const filteredGroups = useMemo(() => {
     const q = normalizeSearchText(searchQuery);
-    const base = !q
-      ? [...groups]
-      : groups.filter((g) => {
-          const hay = normalizeSearchText(
-            `${g.name} ${g.description || ""} ${g.ownerName} ${g.ownerUsername || ""}`
-          );
-          return hay.includes(q);
-        });
+    const base = groups.filter((g) => {
+      if (activityFilter === "active" && g.placesCount === 0) return false;
+      if (activityFilter === "empty" && g.placesCount > 0) return false;
+      if (!q) return true;
+      const hay = normalizeSearchText(
+        `${g.name} ${g.description || ""} ${g.ownerName} ${g.ownerUsername || ""}`
+      );
+      return hay.includes(q);
+    });
 
     const dir = sortDir === "asc" ? 1 : -1;
     return base.sort((a, b) => {
@@ -91,7 +98,23 @@ export function AdminGroupsManager() {
           return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
       }
     });
-  }, [groups, searchQuery, sortField, sortDir]);
+  }, [groups, searchQuery, activityFilter, sortField, sortDir]);
+
+  async function handleCreateGroup(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newGroupName.trim() || creatingGroup) return;
+    setCreatingGroup(true);
+    const res = await createGroupAction(newGroupName, newGroupIcon);
+    setCreatingGroup(false);
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      setNewGroupName("");
+      setShowCreateForm(false);
+      toast(t("admin_groups.created_toast"), { kind: "success" });
+      await loadGroups();
+    }
+  }
 
   const totalPages = Math.max(1, Math.ceil(filteredGroups.length / pageSize));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
@@ -180,6 +203,16 @@ export function AdminGroupsManager() {
             </div>
             <button
               type="button"
+              onClick={() => setShowCreateForm((prev) => !prev)}
+              className="inline-flex items-center gap-1 px-3.5 py-2 rounded-full text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition cursor-pointer shrink-0 shadow-xs"
+            >
+              <span className="material-symbols-outlined text-sm leading-none">
+                {showCreateForm ? "close" : "add"}
+              </span>
+              <span>{showCreateForm ? t("common.cancel") : t("groups.create")}</span>
+            </button>
+            <button
+              type="button"
               onClick={loadGroups}
               disabled={loading}
               className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-xs font-bold bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer shrink-0"
@@ -191,6 +224,80 @@ export function AdminGroupsManager() {
             </button>
           </div>
         </div>
+
+        {/* Filtros rápidos de actividad */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+          {(
+            [
+              { id: "all", label: `${t("places.all")} (${groups.length})` },
+              {
+                id: "active",
+                label: `${t("admin_groups.filter_with_places")} (${groups.filter((g) => g.placesCount > 0).length})`,
+              },
+              {
+                id: "empty",
+                label: `${t("admin_groups.filter_empty")} (${groups.filter((g) => g.placesCount === 0).length})`,
+              },
+            ] as const
+          ).map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => {
+                setActivityFilter(f.id);
+                setCurrentPage(1);
+              }}
+              className={`px-3 py-1 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                activityFilter === f.id
+                  ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                  : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Formulario rápido para crear grupo */}
+        {showCreateForm && (
+          <form
+            onSubmit={handleCreateGroup}
+            className="p-3.5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-orange-200/70 dark:border-orange-900/50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
+          >
+            <div className="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0">
+              {["🍻", "🍕", "🍷", "🍽️", "🍣", "☕", "🌍", "🎉"].map((ic) => (
+                <button
+                  key={ic}
+                  type="button"
+                  onClick={() => setNewGroupIcon(ic)}
+                  className={`w-8 h-8 rounded-full text-sm flex items-center justify-center border cursor-pointer shrink-0 ${
+                    newGroupIcon === ic
+                      ? "bg-orange-100 dark:bg-orange-950/70 border-orange-500"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  }`}
+                >
+                  {ic}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              required
+              minLength={2}
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder={`${t("groups.name")}...`}
+              className="flex-1 px-3.5 py-2 rounded-full text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+            />
+            <button
+              type="submit"
+              disabled={creatingGroup || !newGroupName.trim()}
+              className="px-4 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 shrink-0"
+            >
+              {creatingGroup ? t("common.loading") : t("common.save")}
+            </button>
+          </form>
+        )}
       </div>
 
       {loading ? (
@@ -345,6 +452,7 @@ export function AdminGroupsManager() {
                         </span>
                       </button>
                     </th>
+                    <th className="p-3">{t("admin_stats.kpi_taxonomy_sub")}</th>
                     <th className="p-3">
                       <button
                         type="button"
@@ -396,6 +504,9 @@ export function AdminGroupsManager() {
                         <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/60 text-orange-800 dark:text-orange-300 font-bold text-[11px]">
                           {g.placesCount}
                         </span>
+                      </td>
+                      <td className="p-3 whitespace-nowrap text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        {g.occasionsCount} / {g.tagsCount}
                       </td>
                       <td className="p-3 whitespace-nowrap text-[11px] text-slate-500 dark:text-slate-400">
                         {new Date(g.createdAt).toLocaleDateString(

@@ -14,7 +14,15 @@ import {
 } from "@/lib/actions/users";
 import { PaginationBar } from "@/components/ui/PaginationBar";
 import { impersonateUserAction } from "@/lib/actions/auth";
-import { setGroupMemberRoleAction } from "@/lib/actions/groups";
+import {
+  addGroupMemberAction,
+  getAllGroupsAdminAction,
+  removeGroupMemberAction,
+  setGroupMemberRoleAction,
+  type AdminGroupOverviewItem,
+} from "@/lib/actions/groups";
+import { InviteManager } from "@/components/InviteManager";
+import { RoleLegendCard } from "./RoleLegendCard";
 import { normalizeSearchText } from "@/lib/search";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 import { useT } from "@/lib/i18n/client";
@@ -23,15 +31,31 @@ import type { Locale } from "@/lib/i18n/config";
 
 interface UsersManagerProps {
   currentUserId?: string;
+  allGroups?: AdminGroupOverviewItem[];
+  initialSubTab?: "users" | "invites";
 }
 
-export function UsersManager({ currentUserId }: UsersManagerProps) {
+export function UsersManager({
+  currentUserId,
+  allGroups: initialAllGroups,
+  initialSubTab = "users",
+}: UsersManagerProps) {
   const { t } = useT();
   const { toast } = useToast();
+  const [subTab, setSubTab] = useState<"users" | "invites">(initialSubTab);
   const [usersList, setUsersList] = useState<SafeUser[]>([]);
+  const [allGroupsList, setAllGroupsList] = useState<AdminGroupOverviewItem[]>(
+    initialAllGroups || []
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Modal de gestión de grupos y roles de un usuario
+  const [managingGroupsUserId, setManagingGroupsUserId] = useState<string | null>(null);
+  const [groupModalSearch, setGroupModalSearch] = useState("");
+  const [selectedNewGroupId, setSelectedNewGroupId] = useState("");
+  const [busyGroupAction, setBusyGroupAction] = useState<string | null>(null);
 
   // Búsqueda, ordenación, paginación y selección múltiple
   const [filterQuery, setFilterQuery] = useState("");
@@ -138,8 +162,12 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   async function loadUsers() {
     setLoading(true);
     try {
-      const data = await getAllUsersAction();
+      const [data, groupsData] = await Promise.all([
+        getAllUsersAction(),
+        allGroupsList.length === 0 ? getAllGroupsAdminAction() : Promise.resolve(null),
+      ]);
       setUsersList(data);
+      if (groupsData) setAllGroupsList(groupsData);
     } catch {
       setError("No se pudieron cargar los usuarios.");
     } finally {
@@ -149,7 +177,58 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
 
   useEffect(() => {
     loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const managingGroupsUser = useMemo(
+    () => (managingGroupsUserId ? usersList.find((u) => u.id === managingGroupsUserId) || null : null),
+    [managingGroupsUserId, usersList]
+  );
+
+  const availableGroupsForModalUser = useMemo(() => {
+    if (!managingGroupsUser) return [];
+    const memberGroupIds = new Set((managingGroupsUser.groups || []).map((g) => g.groupId));
+    return allGroupsList
+      .filter((g) => !memberGroupIds.has(g.id))
+      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+  }, [managingGroupsUser, allGroupsList]);
+
+  const filteredModalUserGroups = useMemo(() => {
+    if (!managingGroupsUser?.groups) return [];
+    const q = normalizeSearchText(groupModalSearch);
+    const list = [...managingGroupsUser.groups].sort((a, b) =>
+      a.groupName.localeCompare(b.groupName, "es", { sensitivity: "base" })
+    );
+    if (!q) return list;
+    return list.filter((g) => normalizeSearchText(g.groupName).includes(q));
+  }, [managingGroupsUser, groupModalSearch]);
+
+  async function handleAddUserToGroup() {
+    if (!managingGroupsUser || !selectedNewGroupId) return;
+    setBusyGroupAction(`add:${selectedNewGroupId}`);
+    const res = await addGroupMemberAction(selectedNewGroupId, managingGroupsUser.id);
+    setBusyGroupAction(null);
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.member_added_toast"), { kind: "success" });
+      setSelectedNewGroupId("");
+      await loadUsers();
+    }
+  }
+
+  async function handleRemoveUserFromGroup(userId: string, groupId: string, groupName: string) {
+    if (!confirm(t("admin_users.confirm_remove_from_group", { group: groupName }))) return;
+    setBusyGroupAction(`rm:${groupId}`);
+    const res = await removeGroupMemberAction(groupId, userId);
+    setBusyGroupAction(null);
+    if (res.error) {
+      toast(res.error, { kind: "error" });
+    } else {
+      toast(t("group_admin.member_removed_toast"), { kind: "success" });
+      await loadUsers();
+    }
+  }
 
   // Filtrar y ordenar lista de usuarios reactivamente por nombre, email, username, rol o estado
   const filteredUsers = useMemo(() => {
@@ -407,24 +486,59 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
   }
 
   return (
-    <div className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm text-left">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-xl leading-none">group</span>
-          </div>
-          <div>
-            <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-              {t("admin_users.title")}
-            </h3>
-            <p className="text-xs text-slate-500">
-              {t("admin_users.subtitle")}
-            </p>
-          </div>
-        </div>
+    <div className="space-y-4 text-left">
+      {/* Sub-pestañas: Usuarios | Invitaciones de plataforma */}
+      <div className="inline-flex items-center gap-1 p-1 rounded-2xl bg-[#f2f3ff] dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800">
+        <button
+          type="button"
+          onClick={() => setSubTab("users")}
+          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            subTab === "users"
+              ? "bg-orange-600 text-white shadow-xs"
+              : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
+          }`}
+        >
+          <span className="material-symbols-outlined text-base leading-none">group</span>
+          <span>
+            {t("admin_users.tab_users")} ({usersList.length})
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSubTab("invites")}
+          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+            subTab === "invites"
+              ? "bg-orange-600 text-white shadow-xs"
+              : "text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800"
+          }`}
+        >
+          <span className="material-symbols-outlined text-base leading-none">confirmation_number</span>
+          <span>{t("admin_users.tab_invites")}</span>
+        </button>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+      {subTab === "invites" ? (
+        <InviteManager />
+      ) : (
+        <div className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-sm text-left">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-xl leading-none">group</span>
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                  {t("admin_users.title")}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {t("admin_users.subtitle")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+            <RoleLegendCard scope="all" />
           {error && (
             <div className="p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1.5">
               <span className="material-symbols-outlined text-sm leading-none shrink-0">warning</span>
@@ -737,48 +851,35 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
                           {u.name} • {u.email}
                         </div>
 
-                        {/* Chapitas y selector rápido de rol en cada grupo al que pertenece */}
-                        {u.groups && u.groups.length > 0 && (
-                          <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                            {u.groups.map((gm) => (
-                              <span
-                                key={gm.groupId}
-                                className={`inline-flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full text-[10px] font-bold border ${
-                                  gm.role === "owner"
-                                    ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-800 dark:text-orange-200"
-                                    : gm.role === "admin"
-                                      ? "bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200"
-                                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                                }`}
-                              >
-                                <span>{gm.groupIcon}</span>
-                                <span className="truncate max-w-[110px]">{gm.groupName}:</span>
-                                <select
-                                  value={gm.role}
-                                  onChange={(e) =>
-                                    handleChangeUserGroupRole(
-                                      u.id,
-                                      gm.groupId,
-                                      e.target.value as "owner" | "admin" | "member"
-                                    )
-                                  }
-                                  aria-label={`${gm.groupName} role`}
-                                  className="bg-transparent font-extrabold focus:outline-none cursor-pointer pr-0.5"
-                                >
-                                  <option value="member" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                                    {t("group_admin.member_badge")}
-                                  </option>
-                                  <option value="admin" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                                    {t("spaces.group_admin_badge")}
-                                  </option>
-                                  <option value="owner" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
-                                    {t("group_admin.owner_badge")}
-                                  </option>
-                                </select>
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        {/* Resumen compacto escalable: botón para gestionar grupos y contador de sitios */}
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setManagingGroupsUserId(u.id);
+                              setGroupModalSearch("");
+                              setSelectedNewGroupId("");
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-400 hover:text-orange-600 dark:hover:text-orange-400 transition cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-xs leading-none text-orange-600">
+                              diversity_3
+                            </span>
+                            <span>
+                              {t("admin_users.groups_btn", { count: u.groups?.length ?? 0 })}
+                            </span>
+                            <span className="material-symbols-outlined text-xs leading-none text-slate-400">
+                              chevron_right
+                            </span>
+                          </button>
+
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 text-slate-500 dark:text-slate-400">
+                            <span className="material-symbols-outlined text-xs leading-none">
+                              storefront
+                            </span>
+                            <span>{t("admin_users.places_badge", { count: u.placesCount ?? 0 })}</span>
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -884,7 +985,180 @@ export function UsersManager({ currentUserId }: UsersManagerProps) {
               />
             </div>
           )}
-      </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para gestionar los grupos y roles de un usuario */}
+      {managingGroupsUser && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-sm gm-backdrop-in">
+          <div className="w-full max-w-lg max-h-[92dvh] sm:max-h-[86dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200 dark:border-slate-800 flex flex-col text-left overflow-hidden gm-modal-in">
+            <div className="px-5 sm:px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 text-orange-600 dark:text-orange-400 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-xl leading-none">diversity_3</span>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
+                    {t("admin_users.groups_modal_title", {
+                      username: `@${managingGroupsUser.username || managingGroupsUser.name}`,
+                    })}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {t("admin_users.groups_modal_subtitle")}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setManagingGroupsUserId(null)}
+                className="w-9 h-9 rounded-full bg-[#f2f3ff] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center shrink-0 cursor-pointer"
+                aria-label={t("common.close")}
+              >
+                <span className="material-symbols-outlined text-lg leading-none">close</span>
+              </button>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+              {/* Buscador si pertenece a varios grupos */}
+              {(managingGroupsUser.groups?.length ?? 0) > 4 && (
+                <div className="relative">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none leading-none">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={groupModalSearch}
+                    onChange={(e) => setGroupModalSearch(e.target.value)}
+                    placeholder={t("admin_groups.search_placeholder")}
+                    className="w-full pl-9 pr-3 py-2 rounded-full text-xs bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+              )}
+
+              {/* Lista de grupos actuales del usuario */}
+              {filteredModalUserGroups.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-[#f8f9ff] dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-500 text-center italic">
+                  {t("admin_users.groups_modal_empty")}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredModalUserGroups.map((gm) => (
+                    <div
+                      key={gm.groupId}
+                      className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-800/40 flex items-center justify-between gap-2"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-base shrink-0">{gm.groupIcon}</span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                          {gm.groupName}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <select
+                          value={gm.role}
+                          onChange={(e) =>
+                            handleChangeUserGroupRole(
+                              managingGroupsUser.id,
+                              gm.groupId,
+                              e.target.value as "owner" | "admin" | "member"
+                            )
+                          }
+                          aria-label={`${gm.groupName} role`}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold border focus:outline-none cursor-pointer ${
+                            gm.role === "owner"
+                              ? "bg-orange-50 dark:bg-orange-950/50 border-orange-300 dark:border-orange-800 text-orange-800 dark:text-orange-200"
+                              : gm.role === "admin"
+                                ? "bg-amber-50 dark:bg-amber-950/50 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-200"
+                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                          }`}
+                        >
+                          <option value="member" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("group_admin.member_badge")}
+                          </option>
+                          <option value="admin" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("spaces.group_admin_badge")}
+                          </option>
+                          <option value="owner" className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                            {t("group_admin.owner_badge")}
+                          </option>
+                        </select>
+
+                        {gm.role !== "owner" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveUserFromGroup(
+                                managingGroupsUser.id,
+                                gm.groupId,
+                                gm.groupName
+                              )
+                            }
+                            disabled={busyGroupAction === `rm:${gm.groupId}`}
+                            className="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/70 transition cursor-pointer disabled:opacity-40"
+                            title={t("admin_users.remove_from_group")}
+                            aria-label={t("admin_users.remove_from_group")}
+                          >
+                            <span className="material-symbols-outlined text-sm leading-none">
+                              person_remove
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Añadir a otro grupo existente */}
+              {availableGroupsForModalUser.length > 0 && (
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                    {t("admin_users.add_to_group_label")}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedNewGroupId}
+                      onChange={(e) => setSelectedNewGroupId(e.target.value)}
+                      className="flex-1 min-w-0 px-3 py-2 rounded-xl text-xs bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
+                    >
+                      <option value="">{t("admin_users.add_to_group_placeholder")}</option>
+                      {availableGroupsForModalUser.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.icon} {g.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleAddUserToGroup}
+                      disabled={!selectedNewGroupId || busyGroupAction !== null}
+                      className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40 shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-sm leading-none">add</span>
+                      <span>{t("admin_users.add_to_group_btn")}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Leyenda explicativa de roles dentro de grupos */}
+              <RoleLegendCard scope="group" />
+            </div>
+
+            <div className="px-5 sm:px-6 pt-3 pb-[calc(0.875rem+env(safe-area-inset-bottom,0px))] sm:py-3.5 flex justify-end border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
+              <button
+                type="button"
+                onClick={() => setManagingGroupsUserId(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal para resetear contraseña */}
       {passwordUserId && (
