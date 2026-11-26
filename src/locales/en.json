@@ -1280,7 +1280,8 @@
     "save_key_btn": "Save key",
     "key_saved_toast": "Group API key encrypted and saved.",
     "key_cleared_toast": "Own key removed; group will use the project key.",
-    "restrict_hint": "Tip: restrict the key in Google Cloud to this app domain and «Places API (New)»."
+    "restrict_hint": "Tip: restrict the key in Google Cloud to this app domain and «Places API (New)».",
+    "google_tier_hint": "Official Google Places (New) free monthly cap: 1,000 requests/month with price/summary (Enterprise) · 5,000/month basic data (Pro). 900 is recommended as a safety buffer."
   },
   "bulk_copy": {
     "btn_copy_to": "Copy to… ({count})",

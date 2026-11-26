@@ -395,7 +395,7 @@ export async function fetchGooglePlacesDetails(params: {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": apiKey,
         "X-Goog-FieldMask":
-          "places.displayName,places.formattedAddress,places.location,places.priceLevel,places.priceRange,places.editorialSummary,places.primaryType,places.primaryTypeDisplayName,places.types,places.websiteUri,places.nationalPhoneNumber",
+          "places.id,places.displayName,places.formattedAddress,places.location,places.priceLevel,places.priceRange,places.editorialSummary,places.primaryType,places.primaryTypeDisplayName,places.types",
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(5000),
