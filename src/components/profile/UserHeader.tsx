@@ -407,18 +407,6 @@ export function UserHeader({ currentUser, workspace }: UserHeaderProps) {
               )}
             </div>
           )}
-
-          {/* Acceso directo rápido al Panel del Grupo cuando eres Admin del grupo activo */}
-          {workspace?.mode === "group" && workspace.group && workspace.isSpaceAdmin && (
-            <Link
-              href={`/group-admin?groupId=${workspace.group.id}`}
-              className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white dark:bg-slate-900 hover:bg-orange-600 hover:text-white border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition shadow-2xs"
-              title={t("spaces.manage_group_btn")}
-            >
-              <span className="material-symbols-outlined text-sm leading-none">tune</span>
-              <span>{t("spaces.group_panel_short")}</span>
-            </Link>
-          )}
         </div>
 
         {/* User profile pill & controls */}
