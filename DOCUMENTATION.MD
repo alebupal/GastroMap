@@ -141,7 +141,7 @@ When launching on a clean database:
   - **Detect & Import**: If the venue already exists in another space you can access, offers to import its basic details (name, address, city, coordinates, Maps link) while keeping each group's plans, tags, and comments independent.
   - **Google Maps URL Validation**: Warns if a pasted URL is not a Google Maps link, offering **Remove link** (use coordinates only) or **Keep anyway** (the card still opens Maps via coordinates).
 - **Side-by-Side Comparator (`⚖️`)**: Compare up to 3 places at once.
-- **Personal Stats (`📊 Stats`) & «Wrapped»**: Filter your KPIs and annual summary by **All my places**, **Personal Map**, or any **group**, plus a **My groups** breakdown card showing your role and contributions per group.
+- **Personal Stats (`📊 Stats`) & «Wrapped»**: Filter your KPIs, **exploration progress** bar (*To discover* & `% visited`), and annual summary by **All my places**, **Personal Map**, or any **group**, plus a collapsible **My groups** breakdown showing your role, contributions, visits, and comments per group.
 
 ### 🔖 Shareable Lists & Collections (Personal Guides)
 - **Themed Organization**: From the user menu (*My lists & guides*) or via `⋮ > Save to list` on any place card, organize places into themed collections such as *“Tapas tour in Granada”*, *“Lisbon trip”*, or *“Special dinners”*.

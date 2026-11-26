@@ -141,7 +141,7 @@ Al acceder por primera vez a una instancia limpia:
   - **Detectar e importar**: Si el local ya existe en otro de tus espacios, ofrece importar sus datos básicos (nombre, dirección, ciudad, coordenadas y enlace) conservando independientes los planes, etiquetas y comentarios de cada grupo.
   - **Validación de enlaces de Google Maps**: Si pegas un enlace que no es de Maps, muestra aviso con opciones **Quitar enlace** (usar solo coordenadas) o **Mantener igualmente** (la tarjeta abrirá Maps usando las coordenadas).
 - **Comparador Lado a Lado (`⚖️`)**: Compara hasta 3 establecimientos simultáneamente por precio, distancia, servicios y notas.
-- **Mis Estadísticas (`📊 Stats`) y «Wrapped»**: Consulta tus KPIs y resumen anual filtrados por **Todos mis sitios**, **Mapa Personal** o cualquiera de tus **grupos**, junto con la tarjeta **Mis grupos** (tu rol y aportaciones en cada uno).
+- **Mis Estadísticas (`📊 Stats`) y «Wrapped»**: Consulta tus KPIs, barra de **progreso de exploración** (*Por descubrir* y `% visitado`) y resumen anual filtrados por **Todos mis sitios**, **Mapa Personal** o cualquiera de tus **grupos**, junto con el desglose colapsable **Mis grupos** (tu rol, aportaciones, visitas y comentarios en cada uno).
 
 ### 🔖 Listas / Colecciones Compartibles (Guías Personales)
 - **Organización Temática**: Desde el menú de usuario (*Mis listas y guías*) o pulsando `⋮ > Guardar en lista` en cualquier establecimiento, puedes crear colecciones temáticas como *«Ruta de tapas por Granada»*, *«Viaje a Lisboa»* o *«Cenas especiales»*.

@@ -1186,6 +1186,8 @@
     "save_destination_label": "Space where this place will be saved",
     "save_destination_hint": "Each group and your Personal Map are independent spaces.",
     "group_destination_sub": "Visible to members of this group",
+    "places_count": "places",
+    "members_count": "members",
     "belonging_space": "Belongs to space",
     "copy_to_space_menu": "Copy to another space…",
     "copy_modal_title": "Copy place to another space",

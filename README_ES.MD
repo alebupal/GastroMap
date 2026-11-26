@@ -37,7 +37,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Los autores y administradores del grupo gestionan sus sitios.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Escalable (`/admin`):**
-  * Panel de estadísticas personales (`📊 Stats`) con **filtro por espacio** y desglose **Mis grupos**, más resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
+  * Panel de estadísticas personales (`📊 Stats`) con **filtro por espacio**, barra de **progreso de exploración** (*Por descubrir* / `% visitado`) y desglose colapsable **Mis grupos**, más resumen anual interactivo **«Wrapped»** por año enfocado en sitios probados, favoritos guardados, aportaciones y reseñas.
   * **Panel de Superadministración en 5 secciones (`/admin`)** con navegación lateral estilo Stitch: **Resumen** (KPIs + Top grupos), **Grupos** (directorio paginado con acceso a `/group-admin`), **Usuarios** (modal *«Grupos y roles»*, leyenda de permisos, baja segura con reasignación e invitaciones de plataforma), **Sitios** (moderación global, copia/movimiento masivo, **Salud de datos** y **Papelera**) y **Sistema y Auditoría** (cupos de API, backups compatibles con `v0.1.x`, datos demo y auditoría).
 
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**

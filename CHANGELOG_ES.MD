@@ -42,10 +42,11 @@ Evolución multi-espacio de **GastroMap**: registro público configurable, **Map
   - Selector de **fusionar y reasignar etiquetas/categorías** ordenado estrictamente por orden alfabético (`A-Z`) con contador de sitios.
   - Cabeceras clicables de ordenación ascendente/descendente (`↑`/`↓`) por título/nombre, espacio, ciudad, precio, planes, autor, rol, estado o fecha en todas las tablas de administración.
 - **Mejoras de Usabilidad Multi-Grupo y Tarjetas**:
-  - **Selectores buscables (`SearchableSelect`)** ordenados alfabéticamente en `/new`, `GroupsModal`, `/group-admin`, cabecera y copia masiva de sitios (`BulkCopyPlacesModal`).
+  - **Selectores buscables (`SearchableSelect`)** ordenados alfabéticamente y ajustados al ancho del selector en `/new`, `GroupsModal`, `/group-admin`, `/admin`, `StatsModal`, cabecera y copia individual/masiva (`CopyPlaceModal` / `BulkCopyPlacesModal`).
   - **Modal de Grupos en Acordeón (`GroupsModal`)**: Formulario de creación colapsable, buscador en vivo y tarjetas plegadas por defecto para gestionar decenas de grupos sin scroll interminable.
-  - **Tarjetas (`PlaceCard`) Compactas**: Chips de contexto (insignia de grupo y estado *Por descubrir* con borde discontinuo) unificados en la misma fila que categorías y `#tags` con separador vertical, evitando repetir el estado activo inferior.
-  - **Ancho Completo en `/docs` y `/new`**: Vistas de documentación y alta de sitios alineadas al ancho completo en escritorio.
+  - **Tarjetas (`PlaceCard`) Compactas**: Chips de contexto (insignia de grupo y estado *Por descubrir* con borde discontinuo) unificados en la misma fila que categorías y `#tags` con separador vertical, y límite de 5 etiquetas visibles con botón **`+N más` / `Ver menos`**.
+  - **Estadísticas Mejoradas en los 3 Niveles**: Progreso de exploración (*Por descubrir* y `% visitado`), desglose colapsable *Mis grupos* y filtro estricto por espacio en `StatsModal`; pulso de 30 días, salud del grupo y distribuciones en `/group-admin`; consumo de Google Places API y grupos activos/vacíos en `/admin`.
+  - **Ancho Completo en `/docs` y `/new`**, y pie de página unificado en `/admin` y `/group-admin` con la web principal.
 
 ## [0.1.0] - 2026-11-25
 
