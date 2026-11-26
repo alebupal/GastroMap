@@ -699,26 +699,78 @@ export async function getAllPlaces(
     hasCoords ? sql`distance_meters ASC NULLS LAST` : desc(places.createdAt)
   );
 
-  // Cargar en bloque las interacciones (pendiente/visitado/favorito) de todos los sitios visibles
+  if (rows.length === 0) {
+    return [];
+  }
+
+  // Cargar en bloque (sin N+1) todas las relaciones e interacciones de los sitios visibles
   const placeIds = rows.map((r) => r.place.id);
-  const allUserPlaceRows =
-    placeIds.length > 0
-      ? await db
-          .select({
-            placeId: userPlaces.placeId,
-            userId: userPlaces.userId,
-            personalStatus: userPlaces.personalStatus,
-            rating: userPlaces.rating,
-            favorite: userPlaces.favorite,
-          })
-          .from(userPlaces)
-          .where(inArray(userPlaces.placeId, placeIds))
-      : [];
+  const [
+    allUserPlaceRows,
+    allOccasionRows,
+    allTagRows,
+    allCommentRows,
+    allGroupLinkRows,
+  ] = await Promise.all([
+    db
+      .select({
+        placeId: userPlaces.placeId,
+        userId: userPlaces.userId,
+        personalStatus: userPlaces.personalStatus,
+        rating: userPlaces.rating,
+        favorite: userPlaces.favorite,
+        privateNotes: userPlaces.privateNotes,
+      })
+      .from(userPlaces)
+      .where(inArray(userPlaces.placeId, placeIds)),
+    db
+      .select({
+        placeId: placeOccasions.placeId,
+        occasion: placeOccasions.occasion,
+      })
+      .from(placeOccasions)
+      .where(inArray(placeOccasions.placeId, placeIds)),
+    db
+      .select({
+        placeId: placeTags.placeId,
+        tag: placeTags.tag,
+      })
+      .from(placeTags)
+      .where(inArray(placeTags.placeId, placeIds)),
+    db
+      .select({
+        placeId: placeComments.placeId,
+        content: placeComments.content,
+        authorName: users.name,
+        authorUsername: users.username,
+      })
+      .from(placeComments)
+      .leftJoin(users, eq(placeComments.userId, users.id))
+      .where(inArray(placeComments.placeId, placeIds)),
+    db
+      .select({
+        placeId: placeGroupAccess.placeId,
+        groupId: sharingGroups.id,
+        groupName: sharingGroups.name,
+      })
+      .from(placeGroupAccess)
+      .innerJoin(sharingGroups, eq(placeGroupAccess.groupId, sharingGroups.id))
+      .where(inArray(placeGroupAccess.placeId, placeIds)),
+  ]);
 
   const pendingUsersByPlace = new Map<string, string[]>();
   const visitedUsersByPlace = new Map<string, string[]>();
   const favoriteUsersByPlace = new Map<string, string[]>();
   const highRatedUsersByPlace = new Map<string, string[]>();
+  const myInteractionByPlace = new Map<
+    string,
+    {
+      favorite: boolean;
+      personalStatus: "pending" | "visited" | null;
+      rating: number | null;
+      privateNotes: string | null;
+    }
+  >();
 
   for (const row of allUserPlaceRows) {
     if (row.personalStatus === "pending") {
@@ -741,63 +793,64 @@ export async function getAllPlaces(
       list.push(row.userId);
       highRatedUsersByPlace.set(row.placeId, list);
     }
+    if (currentUser && row.userId === currentUser.id) {
+      myInteractionByPlace.set(row.placeId, {
+        favorite: row.favorite,
+        personalStatus: row.personalStatus as "pending" | "visited" | null,
+        rating: row.rating,
+        privateNotes: row.privateNotes,
+      });
+    }
   }
 
-  // Para cada lugar, recuperar ocasiones, etiquetas, interacciones personales y comentarios
-  const placesWithDetails = await Promise.all(
-    rows.map(async ({ place, createdByName, createdByUsername, distanceMeters }) => {
-      const occs = await db
-        .select({ occasion: placeOccasions.occasion })
-        .from(placeOccasions)
-        .where(eq(placeOccasions.placeId, place.id));
+  const occasionsByPlace = new Map<string, string[]>();
+  for (const row of allOccasionRows) {
+    const list = occasionsByPlace.get(row.placeId) || [];
+    list.push(row.occasion);
+    occasionsByPlace.set(row.placeId, list);
+  }
 
-      const tags = await db
-        .select({ tag: placeTags.tag })
-        .from(placeTags)
-        .where(eq(placeTags.placeId, place.id));
+  const tagsByPlace = new Map<string, string[]>();
+  for (const row of allTagRows) {
+    const list = tagsByPlace.get(row.placeId) || [];
+    list.push(row.tag);
+    tagsByPlace.set(row.placeId, list);
+  }
 
-      // Comentarios (con autor) y grupos con acceso
-      const [comments, groupLinks] = await Promise.all([
-        db
-          .select({
-            id: placeComments.id,
-            content: placeComments.content,
-            authorName: users.name,
-            authorUsername: users.username,
-          })
-          .from(placeComments)
-          .leftJoin(users, eq(placeComments.userId, users.id))
-          .where(eq(placeComments.placeId, place.id)),
-        db
-          .select({
-            groupId: sharingGroups.id,
-            groupName: sharingGroups.name,
-          })
-          .from(placeGroupAccess)
-          .innerJoin(sharingGroups, eq(placeGroupAccess.groupId, sharingGroups.id))
-          .where(eq(placeGroupAccess.placeId, place.id)),
-      ]);
+  const commentsByPlace = new Map<
+    string,
+    Array<{ content: string; authorName: string | null; authorUsername: string | null }>
+  >();
+  for (const row of allCommentRows) {
+    const list = commentsByPlace.get(row.placeId) || [];
+    list.push({
+      content: row.content,
+      authorName: row.authorName,
+      authorUsername: row.authorUsername,
+    });
+    commentsByPlace.set(row.placeId, list);
+  }
 
-      // Interacción del usuario actual
-      let isFavorite = false;
-      let personalStatus: "pending" | "visited" | null = null;
-      let rating: number | null = null;
-      let privateNotes: string | null = null;
+  const groupsByPlace = new Map<string, Array<{ groupId: string; groupName: string }>>();
+  for (const row of allGroupLinkRows) {
+    const list = groupsByPlace.get(row.placeId) || [];
+    list.push({ groupId: row.groupId, groupName: row.groupName });
+    groupsByPlace.set(row.placeId, list);
+  }
 
-      if (currentUser) {
-        const [myInteraction] = await db
-          .select()
-          .from(userPlaces)
-          .where(and(eq(userPlaces.placeId, place.id), eq(userPlaces.userId, currentUser.id)))
-          .limit(1);
+  // Ensamblado en memoria O(N) sin consultas adicionales por sitio
+  const placesWithDetails: PlaceWithDetails[] = rows.map(
+    ({ place, createdByName, createdByUsername, distanceMeters }) => {
+      const occs = occasionsByPlace.get(place.id) || [];
+      const placeTagList = tagsByPlace.get(place.id) || [];
+      const comments = commentsByPlace.get(place.id) || [];
+      const groupLinks = groupsByPlace.get(place.id) || [];
+      const myInteraction = myInteractionByPlace.get(place.id);
 
-        if (myInteraction) {
-          isFavorite = myInteraction.favorite;
-          personalStatus = myInteraction.personalStatus as "pending" | "visited" | null;
-          rating = myInteraction.rating;
-          privateNotes = myInteraction.privateNotes;
-        }
-      }
+      const isFavorite = myInteraction?.favorite ?? false;
+      const personalStatus = myInteraction?.personalStatus ?? null;
+      const rating = myInteraction?.rating ?? null;
+      const privateNotes = myInteraction?.privateNotes ?? null;
 
       // Cálculo de experiencia: 'visited_by_me' | 'visited_by_others' | 'untried'
       const placeVisitedUserIds = visitedUsersByPlace.get(place.id) || [];
@@ -818,8 +871,8 @@ export async function getAllPlaces(
         createdByUsername:
           createdByUsername ||
           (createdByName ? createdByName.toLowerCase().replace(/\s+/g, "") : null),
-        occasions: occs.map((o) => o.occasion),
-        tags: tags.map((t) => t.tag),
+        occasions: occs,
+        tags: placeTagList,
         distanceMeters:
           distanceMeters !== null && distanceMeters !== undefined
             ? Math.round(Number(distanceMeters))
@@ -849,7 +902,7 @@ export async function getAllPlaces(
         favoriteUserIds: placeFavoriteUserIds,
         highRatedUserIds: placeHighRatedUserIds,
       };
-    })
+    }
   );
 
   return placesWithDetails;

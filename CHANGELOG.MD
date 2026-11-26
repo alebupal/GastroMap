@@ -53,5 +53,5 @@ Initial full release of **GastroMap**, a private, self-hosted web application to
 - **Automatic New-Version Alerts**: Background check against GitHub Releases (`/api/version`) with an animated header pill and a **«Version & Updates»** card with manual **«Check now»** button in `/admin > Settings`.
 
 ### 🛡️ Security & Architecture
-- **Modern Stack**: Next.js 15 (App Router), TypeScript, Drizzle ORM, PostgreSQL + PostGIS (Docker), and Tailwind CSS.
-- **Hardened Security**: **Argon2id** password hashing, `HttpOnly` session cookies, in-memory rate limiting on auth endpoints, and strict HTTP security headers (CSP, HSTS, X-Frame-Options).
+- **Modern Stack & Zero-N+1 Batched Queries**: Next.js 15 (App Router), TypeScript, Drizzle ORM, PostgreSQL + PostGIS (Docker), and Tailwind CSS, with catalog loading optimized into 5 parallel `inArray` batch queries instead of per-place queries.
+- **Hardened Security & Automated Test Suite**: **Argon2id** password hashing, `HttpOnly` session cookies, in-memory rate limiting on auth endpoints, strict HTTP security headers (CSP, HSTS, X-Frame-Options), and automated tests covering units, engineering quality, backups, audit logs, impersonation, and public guides.
