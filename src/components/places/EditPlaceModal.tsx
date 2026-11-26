@@ -90,6 +90,13 @@ export function EditPlaceModal({
   async function handleAutoResolve(rawUrl?: string) {
     const target = (rawUrl ?? googleMapsUrl).trim();
     if (!target) return;
+    if (
+      /^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(target) &&
+      !/\/maps\b/i.test(target)
+    ) {
+      toast(t("form.google_search_url_warning"), { kind: "info" });
+      return;
+    }
     setResolving(true);
     setError(null);
     try {
@@ -244,10 +251,15 @@ export function EditPlaceModal({
           </div>
 
           {/* Enlace Google Maps */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              {t("form.import_label")}
-            </label>
+          <div className="space-y-1.5">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {t("form.import_label")}
+              </label>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                {t("form.import_how_to_get")}
+              </p>
+            </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="url"
@@ -275,6 +287,15 @@ export function EditPlaceModal({
                 <span>{resolving ? t("form.analyzing") : t("form.analyze_button")}</span>
               </button>
             </div>
+            {/^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(googleMapsUrl.trim()) &&
+              !/\/maps\b/i.test(googleMapsUrl.trim()) && (
+                <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 font-semibold leading-snug">
+                  <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
+                    warning
+                  </span>
+                  <span>{t("form.google_search_url_warning")}</span>
+                </div>
+              )}
           </div>
 
           {/* Ubicación */}

@@ -235,6 +235,8 @@
   },
   "form": {
     "import_label": "Autocomplete by pasting a Google Maps link",
+    "import_how_to_get": "Open the place inside Google Maps (app or web, not from Google Search) and tap «Share → Copy link» (starts with maps.app.goo.gl/... or google.com/maps/...).",
+    "google_search_url_warning": "You pasted a Google Search link instead of a Google Maps link. Tap the «Maps» tab for the place and use «Share → Copy link».",
     "import_placeholder": "https://maps.app.goo.gl/... or paste shared link",
     "import_button": "Read data ⚡",
     "import_reading": "Reading link...",

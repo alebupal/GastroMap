@@ -90,8 +90,15 @@ export function NewPlaceForm({
   }, [name, lat, lng]);
 
   async function handleAutoResolve(rawUrl?: string) {
-    const target = rawUrl ?? url;
+    const target = (rawUrl ?? url).trim();
     if (!target) return;
+    if (
+      /^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(target) &&
+      !/\/maps\b/i.test(target)
+    ) {
+      toast(t("form.google_search_url_warning"), { kind: "info" });
+      return;
+    }
     setResolving(true);
     setError(null);
     try {
@@ -140,9 +147,6 @@ export function NewPlaceForm({
           formatCityCountry(parsed.locationDetails.city, parsed.locationDetails.country)
         );
       }
-      if (!name && parsed.locationDetails?.name) {
-        setName(parsed.locationDetails.name);
-      }
     } catch {
       // Ignorar fallo de parseo
     } finally {
@@ -188,17 +192,22 @@ export function NewPlaceForm({
       )}
 
       {/* 1. Tarjeta: Autocompletar pegando enlace de Google Maps */}
-      <section className="rounded-3xl bg-gradient-to-br from-orange-50/80 via-white to-white dark:from-orange-950/25 dark:via-slate-900 dark:to-slate-900 border border-orange-200/70 dark:border-orange-900/40 p-3.5 sm:p-5 shadow-xs space-y-3">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <label className="text-xs sm:text-sm font-extrabold text-orange-800 dark:text-orange-300 flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-base text-orange-600 leading-none">
-              auto_awesome
+      <section className="rounded-3xl bg-gradient-to-br from-orange-50/80 via-white to-white dark:from-orange-950/25 dark:via-slate-900 dark:to-slate-900 border border-orange-200/70 dark:border-orange-900/40 p-3.5 sm:p-5 shadow-xs space-y-2.5">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <label className="text-xs sm:text-sm font-extrabold text-orange-800 dark:text-orange-300 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-orange-600 leading-none">
+                auto_awesome
+              </span>
+              <span>{t("form.import_label")}</span>
+            </label>
+            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 text-[10px] font-extrabold">
+              {t("form.quick_assistant")}
             </span>
-            <span>{t("form.import_label")}</span>
-          </label>
-          <span className="px-2.5 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 text-[10px] font-extrabold">
-            Asistente Rápido
-          </span>
+          </div>
+          <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            {t("form.import_how_to_get")}
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
@@ -235,10 +244,20 @@ export function NewPlaceForm({
           </button>
         </div>
 
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-          <span className="material-symbols-outlined text-xs text-slate-400 leading-none">info</span>
-          <span>{t("form.import_hint")}</span>
-        </p>
+        {/^https?:\/\/(www\.)?google\.[a-z.]+\/(search|url)\b/i.test(url.trim()) &&
+        !/\/maps\b/i.test(url.trim()) ? (
+          <div className="flex items-start gap-2 px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-800 dark:text-amber-200 font-semibold leading-snug">
+            <span className="material-symbols-outlined text-sm text-amber-600 shrink-0 mt-0.5 leading-none">
+              warning
+            </span>
+            <span>{t("form.google_search_url_warning")}</span>
+          </div>
+        ) : (
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+            <span className="material-symbols-outlined text-xs text-slate-400 leading-none">info</span>
+            <span>{t("form.import_hint")}</span>
+          </p>
+        )}
       </section>
 
       {/* 2. Tarjeta: Nombre del sitio */}

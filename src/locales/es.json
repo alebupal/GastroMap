@@ -235,6 +235,8 @@
   },
   "form": {
     "import_label": "Autocompletar pegando enlace de Google Maps",
+    "import_how_to_get": "Abre el local dentro de Google Maps (app o web, no desde el buscador de Google) y pulsa «Compartir → Copiar enlace» (empieza por maps.app.goo.gl/... o google.com/maps/...).",
+    "google_search_url_warning": "Has pegado un enlace del buscador de Google y no de Google Maps. En Google, toca la pestaña «Maps» del local y usa «Compartir → Copiar enlace».",
     "import_placeholder": "https://maps.app.goo.gl/... o pega enlace compartido",
     "import_button": "Leer datos ⚡",
     "import_reading": "Leyendo enlace...",
