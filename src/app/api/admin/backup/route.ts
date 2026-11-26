@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, ne, getTableName, getTableColumns, is } from "drizzle-orm";
+import { eq, ne, and, isNull, sql, getTableName, getTableColumns, is } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
@@ -288,6 +288,82 @@ export async function POST(request: NextRequest) {
             }
           }
           restoredCounts[tableName] = rows.length;
+        }
+      }
+
+      // 3. Compatibilidad automática si el backup proviene de v0.1.x (sin espacios/Pinono ni scopeKey)
+      const backupVersion = typeof payload.version === "string" ? payload.version.trim() : "";
+      const placesRows = Array.isArray(payload.tables.places) ? payload.tables.places : [];
+      const occasionsRows = Array.isArray(payload.tables.occasions) ? payload.tables.occasions : [];
+      const isLegacyV1Backup =
+        backupVersion.startsWith("0.1.") ||
+        (placesRows.length > 0 && placesRows.every((p: any) => p.groupId === undefined)) ||
+        (occasionsRows.length > 0 && occasionsRows.every((o: any) => o.scopeKey === undefined));
+
+      if (isLegacyV1Backup) {
+        const allUsers = await tx
+          .select({ id: schema.users.id, role: schema.users.role })
+          .from(schema.users);
+        const ownerUser =
+          allUsers.find((u) => u.role === "admin") || allUsers[0];
+
+        if (ownerUser) {
+          let [pinono] = await tx
+            .select({ id: schema.sharingGroups.id })
+            .from(schema.sharingGroups)
+            .where(sql`lower(${schema.sharingGroups.name}) = 'pinono'`)
+            .limit(1);
+
+          if (!pinono) {
+            const [created] = await tx
+              .insert(schema.sharingGroups)
+              .values({
+                name: "Pinono",
+                icon: "🍻",
+                description: "Grupo gastronómico Pinono",
+                ownerUserId: ownerUser.id,
+              })
+              .returning({ id: schema.sharingGroups.id });
+            pinono = created;
+          }
+
+          const pinonoScope = `group:${pinono.id}`;
+
+          for (const u of allUsers) {
+            await tx
+              .insert(schema.sharingGroupMembers)
+              .values({
+                groupId: pinono.id,
+                userId: u.id,
+                role: u.role === "admin" ? "admin" : "member",
+              })
+              .onConflictDoNothing();
+          }
+
+          await tx
+            .update(schema.places)
+            .set({ groupId: pinono.id })
+            .where(and(isNull(schema.places.groupId), eq(schema.places.communityPublished, true)));
+
+          await tx
+            .update(schema.placeLists)
+            .set({ groupId: pinono.id })
+            .where(isNull(schema.placeLists.groupId));
+
+          await tx
+            .update(schema.savedFilters)
+            .set({ groupId: pinono.id })
+            .where(isNull(schema.savedFilters.groupId));
+
+          await tx
+            .update(schema.occasions)
+            .set({ scopeKey: pinonoScope })
+            .where(eq(schema.occasions.scopeKey, "global"));
+
+          await tx
+            .update(schema.tags)
+            .set({ scopeKey: pinonoScope })
+            .where(eq(schema.tags.scopeKey, "global"));
         }
       }
     });
