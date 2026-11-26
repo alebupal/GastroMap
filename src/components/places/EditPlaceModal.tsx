@@ -268,6 +268,7 @@ export function EditPlaceModal({
                 onPaste={(e) => {
                   const pasted = e.clipboardData.getData("text").trim();
                   if (/https?:\/\//i.test(pasted) && /(google|goo\.gl|g\.co|share\.google|maps)/i.test(pasted)) {
+                    e.preventDefault();
                     setGoogleMapsUrl(pasted);
                     setTimeout(() => handleAutoResolve(pasted), 0);
                   }
