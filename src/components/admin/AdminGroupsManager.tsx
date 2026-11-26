@@ -11,6 +11,7 @@ import {
   type AdminGroupOverviewItem,
 } from "@/lib/actions/groups";
 import { PaginationBar } from "@/components/ui/PaginationBar";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { normalizeSearchText } from "@/lib/search";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
@@ -307,28 +308,40 @@ export function AdminGroupsManager() {
               <span className="font-bold text-slate-500 dark:text-slate-400">
                 {t("groups.template_label")}
               </span>
-              <select
+              <SearchableSelect
                 value={templateMode}
-                onChange={(e) => setTemplateMode(e.target.value as "default" | "empty" | "clone")}
-                className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
-              >
-                <option value="default">{t("groups.template_default")}</option>
-                <option value="empty">{t("groups.template_empty")}</option>
-                {groups.length > 0 && <option value="clone">{t("groups.template_clone")}</option>}
-              </select>
+                onChange={(val) => setTemplateMode(val as "default" | "empty" | "clone")}
+                options={[
+                  { value: "default", label: t("groups.template_default") },
+                  { value: "empty", label: t("groups.template_empty") },
+                  ...(groups.length > 0
+                    ? [{ value: "clone", label: t("groups.template_clone") }]
+                    : []),
+                ]}
+                searchPlaceholder={t("admin_groups.search_placeholder")}
+                ariaLabel={t("groups.template_label")}
+                className="min-w-[210px]"
+                buttonClassName="w-full justify-between !py-1.5 !px-3 !text-[11px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+              />
               {templateMode === "clone" && groups.length > 0 && (
-                <select
+                <SearchableSelect
                   value={cloneSourceId}
-                  onChange={(e) => setCloneSourceId(e.target.value)}
-                  className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
-                >
-                  <option value="">{t("groups.template_clone_pick")}</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.icon} {g.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setCloneSourceId}
+                  options={groups
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+                    .map((g) => ({
+                      value: g.id,
+                      label: g.name,
+                      icon: <span>{g.icon}</span>,
+                      subtitle: `${g.placesCount ?? 0} ${t("spaces.places_count")} · ${g.membersCount} ${t("spaces.members_count")}`,
+                    }))}
+                  placeholder={t("groups.template_clone_pick")}
+                  searchPlaceholder={t("admin_groups.search_placeholder")}
+                  ariaLabel={t("groups.template_clone_pick")}
+                  className="min-w-[230px]"
+                  buttonClassName="w-full justify-between !py-1.5 !px-3 !text-[11px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                />
               )}
             </div>
           </form>

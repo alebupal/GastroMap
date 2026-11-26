@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   previewCopyPlacesAction,
@@ -41,6 +41,7 @@ export function CopyPlaceModal({
   const [mounted, setMounted] = useState(false);
   const [copyingTo, setCopyingTo] = useState<string | null>(null);
   const [moveOriginal, setMoveOriginal] = useState(false);
+  const [targetSearch, setTargetSearch] = useState("");
   const [pendingConflict, setPendingConflict] = useState<{
     target: CopyTargetSpaceOption;
     conflict: CopyConflictPreview;
@@ -52,6 +53,7 @@ export function CopyPlaceModal({
 
   useEffect(() => {
     if (!isOpen) return;
+    setTargetSearch("");
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -59,12 +61,22 @@ export function CopyPlaceModal({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !mounted) return null;
+  const targets = useMemo(() => {
+    return availableSpaces
+      .filter((s) => {
+        if (s.isPersonal) return currentGroupId !== null;
+        return s.id !== currentGroupId;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+  }, [availableSpaces, currentGroupId]);
 
-  const targets = availableSpaces.filter((s) => {
-    if (s.isPersonal) return currentGroupId !== null;
-    return s.id !== currentGroupId;
-  });
+  const filteredTargets = useMemo(() => {
+    const q = targetSearch.trim().toLowerCase();
+    if (!q) return targets;
+    return targets.filter((tItem) => tItem.name.toLowerCase().includes(q));
+  }, [targets, targetSearch]);
+
+  if (!isOpen || !mounted) return null;
 
   async function handleCopy(target: CopyTargetSpaceOption) {
     setCopyingTo(target.id);
@@ -215,8 +227,32 @@ export function CopyPlaceModal({
               {t("spaces.copy_no_targets")}
             </div>
           ) : (
-            <div className="space-y-2">
-              {targets.map((target) => {
+            <div className="space-y-2.5">
+              {targets.length > 3 && (
+                <div className="relative">
+                  <span className="material-symbols-outlined text-base text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={targetSearch}
+                    onChange={(e) => setTargetSearch(e.target.value)}
+                    placeholder={t("admin_places.search_space_placeholder")}
+                    className="w-full pl-9 pr-8 py-2 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 transition"
+                  />
+                  {targetSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setTargetSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-sm leading-none">close</span>
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="space-y-2">
+                {filteredTargets.map((target) => {
                 const busy = copyingTo === target.id;
                 return (
                   <button
@@ -250,6 +286,7 @@ export function CopyPlaceModal({
                   </button>
                 );
               })}
+              </div>
             </div>
           )}
         </div>
