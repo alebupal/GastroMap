@@ -404,8 +404,8 @@ function PlaceCardComponent({
           </p>
         )}
 
-        {/* Nivel 1: Contexto (Espacio / Grupo y estado Por descubrir) */}
-        {(showSpaceBadge || !personalStatus) && (
+        {/* Fila única compacta: Contexto (Grupo / Por descubrir) | Categorías + Etiquetas */}
+        {(showSpaceBadge || !personalStatus || place.occasions.length > 0 || place.tags.length > 0) && (
           <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
             {showSpaceBadge && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-300/80 dark:border-slate-700 font-extrabold text-[10px] shadow-2xs">
@@ -419,18 +419,13 @@ function PlaceCardComponent({
                 <span>{t("places.unexplored")}</span>
               </span>
             )}
-          </div>
-        )}
-
-        {/* Nivel 2: Taxonomía (Ocasiones / Categorías + Etiquetas) */}
-        {(place.occasions.length > 0 || place.tags.length > 0) && (
-          <div
-            className={`flex flex-wrap items-center gap-1.5 ${
-              showSpaceBadge || !personalStatus
-                ? "mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80"
-                : "mt-2.5"
-            }`}
-          >
+            {(showSpaceBadge || !personalStatus) &&
+              (place.occasions.length > 0 || place.tags.length > 0) && (
+                <span
+                  aria-hidden="true"
+                  className="h-3.5 w-px bg-slate-200 dark:bg-slate-700 mx-0.5 shrink-0"
+                />
+              )}
             {place.occasions.map((occId) => {
               const info = occasionMap[occId] || { name: occId, icon: "🏷️" };
               return (
@@ -443,7 +438,6 @@ function PlaceCardComponent({
                 </span>
               );
             })}
-
             {place.tags.map((tg) => (
               <span
                 key={tg}
