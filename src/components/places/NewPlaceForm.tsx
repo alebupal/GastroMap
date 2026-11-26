@@ -624,41 +624,8 @@ export function NewPlaceForm({
         />
       </section>
 
-      {/* 8. Tarjeta: Espacio donde se guarda este sitio (compacto y buscable para muchos grupos) */}
-      <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-950/50 border border-orange-200/70 dark:border-orange-900/50 flex items-center justify-center text-lg shrink-0">
-              {!targetSpace ? "🌍" : activeGroupInfo ? activeGroupInfo.icon || "🍻" : "🏠"}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
-                {t("spaces.save_destination_label")}
-              </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                {!targetSpace
-                  ? t("form.select_space_required")
-                  : activeGroupInfo
-                    ? `${activeGroupInfo.name} · ${t("spaces.group_destination_sub")}`
-                    : `${t("spaces.personal_map")} · ${t("spaces.personal_subtitle")}`}
-              </p>
-            </div>
-          </div>
-
-          <SearchableSelect
-            value={targetSpace}
-            onChange={setTargetSpace}
-            options={spaceSelectOptions}
-            placeholder={t("form.choose_space_placeholder")}
-            searchPlaceholder={t("admin_places.search_space_placeholder")}
-            ariaLabel={t("spaces.save_destination_label")}
-            className="w-full sm:w-auto sm:min-w-[250px] shrink-0"
-            buttonClassName="w-full sm:w-auto bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:border-orange-400"
-          />
-        </div>
-
-        <input type="hidden" name="targetSpace" value={targetSpace} />
-      </section>
+      {/* 8. Campo oculto del espacio destino (gestionado desde el banner superior) */}
+      <input type="hidden" name="targetSpace" value={targetSpace} />
 
       {/* Botones finales */}
       <div className="pt-2 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 sm:gap-3">
