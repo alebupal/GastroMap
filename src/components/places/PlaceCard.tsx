@@ -417,7 +417,7 @@ function PlaceCardComponent({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ffddb8] text-[#684000] font-bold text-[11px]">
-              <span className="material-symbols-outlined text-[13px] leading-none">auto_awesome</span>
+              <span className="material-symbols-outlined text-[12px] leading-none">auto_awesome</span>
               <span>{t("places.unexplored")}</span>
             </span>
           )}

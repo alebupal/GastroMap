@@ -1399,7 +1399,7 @@ export function PlacesExplorer({
                 >
                   {item.icon && (
                     <span
-                      className={`material-symbols-outlined text-[15px] leading-none ${active && !isUntried ? "text-current" : item.iconClass
+                      className={`material-symbols-outlined ${isUntried ? "text-[14px]" : "text-[15px]"} leading-none ${active && !isUntried ? "text-current" : item.iconClass
                         }`}
                     >
                       {item.icon}
