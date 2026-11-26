@@ -765,6 +765,9 @@
     "select_user": "Select user"
   },
   "admin_taxonomy": {
+    "space_selector_title": "Space or Group to Manage",
+    "space_selector_desc": "Since each group owns its own independent plans and tags, pick which group you want to manage first:",
+    "editing_space_banner": "Editing taxonomy for: {name}",
     "title_occasions": "Plans & Occasions",
     "subtitle_occasions": "Define categories to classify occasions (e.g. tapas, romantic dinner...)",
     "title_tags": "Global Tags",

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 import { UsersManager } from "./UsersManager";
 import { AdminGroupsManager } from "./AdminGroupsManager";
-import { TaxonomyManager } from "./TaxonomyManager";
+import { AdminTaxonomyWorkspace } from "./AdminTaxonomyWorkspace";
 import { InviteManager } from "@/components/InviteManager";
 import { SettingsManager } from "./SettingsManager";
 import { DemoPlacesSeeder } from "./DemoPlacesSeeder";
@@ -19,6 +19,7 @@ import { APP_VERSION } from "@/lib/version";
 import { useT } from "@/lib/i18n/client";
 import type { Occasion } from "@/db/schema";
 import type { PlaceWithDetails } from "@/lib/actions/places";
+import type { AdminGroupOverviewItem } from "@/lib/actions/groups";
 
 type AdminTab =
   | "stats"
@@ -46,6 +47,8 @@ const VALID_TABS: AdminTab[] = [
 interface AdminDashboardProps {
   initialOccasions: Array<Occasion & { placesCount: number }>;
   initialTags: { id: string; name: string; placesCount: number }[];
+  allGroups?: AdminGroupOverviewItem[];
+  initialTaxonomySpaceId?: string;
   allPlaces?: PlaceWithDetails[];
   googlePlacesApiKey?: string | null;
   publicRegistrationEnabled?: boolean;
@@ -62,6 +65,8 @@ interface AdminDashboardProps {
 export function AdminDashboard({
   initialOccasions,
   initialTags,
+  allGroups = [],
+  initialTaxonomySpaceId = "personal",
   allPlaces = [],
   googlePlacesApiKey,
   publicRegistrationEnabled = true,
@@ -353,20 +358,15 @@ export function AdminDashboard({
           {activeTab === "groups" && <AdminGroupsManager />}
 
           {activeTab === "taxonomy" && (
-            <div className="space-y-5">
-              <TaxonomyManager
-                key="occasions"
-                section="occasions"
-                initialOccasions={initialOccasions}
-                initialTags={initialTags}
-              />
-              <TaxonomyManager
-                key="tags"
-                section="tags"
-                initialOccasions={initialOccasions}
-                initialTags={initialTags}
-              />
-            </div>
+            <AdminTaxonomyWorkspace
+              groups={allGroups}
+              personalPlacesCount={
+                allPlaces.filter((p) => !p.groupId && p.createdById === currentUser.id).length
+              }
+              initialSpaceId={initialTaxonomySpaceId}
+              initialOccasions={initialOccasions}
+              initialTags={initialTags}
+            />
           )}
 
           {activeTab === "invites" && <InviteManager />}

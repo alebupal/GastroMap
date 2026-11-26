@@ -765,6 +765,9 @@
     "select_user": "Seleccionar usuario"
   },
   "admin_taxonomy": {
+    "space_selector_title": "Espacio o Grupo a Gestionar",
+    "space_selector_desc": "Como cada grupo tiene sus propios planes y etiquetas independientes, elige primero el grupo sobre el que quieres trabajar:",
+    "editing_space_banner": "Editando taxonomía de: {name}",
     "title_occasions": "Planes y Ocasiones",
     "subtitle_occasions": "Define las categorías para clasificar planes (ej: tapeo, cena romántica...)",
     "title_tags": "Etiquetas Globales",
