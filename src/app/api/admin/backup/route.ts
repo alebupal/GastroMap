@@ -308,32 +308,32 @@ export async function POST(request: NextRequest) {
           allUsers.find((u) => u.role === "admin") || allUsers[0];
 
         if (ownerUser) {
-          let [pinono] = await tx
+          let [defaultGroup] = await tx
             .select({ id: schema.sharingGroups.id })
             .from(schema.sharingGroups)
-            .where(sql`lower(${schema.sharingGroups.name}) = 'pinono'`)
+            .orderBy(schema.sharingGroups.createdAt)
             .limit(1);
 
-          if (!pinono) {
+          if (!defaultGroup) {
             const [created] = await tx
               .insert(schema.sharingGroups)
               .values({
-                name: "Pinono",
+                name: "Grupo Principal",
                 icon: "🍻",
-                description: "Grupo gastronómico Pinono",
+                description: "Grupo importado desde copia de seguridad",
                 ownerUserId: ownerUser.id,
               })
               .returning({ id: schema.sharingGroups.id });
-            pinono = created;
+            defaultGroup = created;
           }
 
-          const pinonoScope = `group:${pinono.id}`;
+          const defaultScope = `group:${defaultGroup.id}`;
 
           for (const u of allUsers) {
             await tx
               .insert(schema.sharingGroupMembers)
               .values({
-                groupId: pinono.id,
+                groupId: defaultGroup.id,
                 userId: u.id,
                 role: u.role === "admin" ? "admin" : "member",
               })
@@ -342,27 +342,27 @@ export async function POST(request: NextRequest) {
 
           await tx
             .update(schema.places)
-            .set({ groupId: pinono.id })
+            .set({ groupId: defaultGroup.id })
             .where(and(isNull(schema.places.groupId), eq(schema.places.communityPublished, true)));
 
           await tx
             .update(schema.placeLists)
-            .set({ groupId: pinono.id })
+            .set({ groupId: defaultGroup.id })
             .where(isNull(schema.placeLists.groupId));
 
           await tx
             .update(schema.savedFilters)
-            .set({ groupId: pinono.id })
+            .set({ groupId: defaultGroup.id })
             .where(isNull(schema.savedFilters.groupId));
 
           await tx
             .update(schema.occasions)
-            .set({ scopeKey: pinonoScope })
+            .set({ scopeKey: defaultScope })
             .where(eq(schema.occasions.scopeKey, "global"));
 
           await tx
             .update(schema.tags)
-            .set({ scopeKey: pinonoScope })
+            .set({ scopeKey: defaultScope })
             .where(eq(schema.tags.scopeKey, "global"));
         }
       }
