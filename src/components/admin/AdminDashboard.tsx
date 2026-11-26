@@ -406,15 +406,15 @@ export function AdminDashboard({
           )}
         </main>
 
-        {/* Footer estilo Stitch */}
-        <footer className="w-full border-t border-slate-200/60 dark:border-slate-800/60 bg-white/60 dark:bg-slate-900/40 py-4 px-4 sm:px-6 lg:px-8 mt-auto">
-          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        {/* Footer estilo Stitch idéntico al de la web principal */}
+        <footer className="w-full bg-[#f2f3ff] dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/60 py-6 mt-auto">
+          <div className="max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <GastroMapIcon className="w-5 h-5 rounded-[28%] shrink-0" />
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+              <GastroMapIcon className="w-6 h-6 shrink-0 shadow-xs rounded-[28%]" />
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 Gastro<span className="text-[#ea580c]">Map</span>
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              <span className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 text-[10px] font-bold text-slate-500 dark:text-slate-400">
                 v{APP_VERSION}
               </span>
             </div>
@@ -432,7 +432,7 @@ export function AdminDashboard({
                 href="https://www.paypal.me/alebupal"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 font-bold transition"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 hover:bg-rose-100 font-bold transition shadow-xs"
               >
                 <span className="material-symbols-outlined text-sm leading-none">favorite</span>
                 <span>{t("nav.donate")}</span>
