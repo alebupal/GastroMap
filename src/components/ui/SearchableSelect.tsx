@@ -46,6 +46,7 @@ export function SearchableSelect({
     top?: number;
     bottom?: number;
     left: number;
+    width: number;
   } | null>(null);
 
   useEffect(() => {
@@ -83,7 +84,8 @@ export function SearchableSelect({
   const updateCoords = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const popupWidth = window.innerWidth < 640 ? 288 : 384;
+      const desiredWidth = Math.max(rect.width, window.innerWidth < 640 ? 288 : 384);
+      const popupWidth = Math.min(desiredWidth, window.innerWidth - 24);
       let left = rect.left;
       if (left + popupWidth > window.innerWidth - 12) {
         left = window.innerWidth - popupWidth - 12;
@@ -96,8 +98,8 @@ export function SearchableSelect({
 
       setCoords(
         openUpward
-          ? { bottom: window.innerHeight - rect.top + 6, left }
-          : { top: rect.bottom + 6, left }
+          ? { bottom: window.innerHeight - rect.top + 6, left, width: popupWidth }
+          : { top: rect.bottom + 6, left, width: popupWidth }
       );
     }
   };
@@ -193,8 +195,9 @@ export function SearchableSelect({
               ...(coords.top !== undefined ? { top: `${coords.top}px` } : {}),
               ...(coords.bottom !== undefined ? { bottom: `${coords.bottom}px` } : {}),
               left: `${coords.left}px`,
+              width: `${coords.width}px`,
             }}
-            className="z-[9999] w-72 sm:w-96 max-w-[calc(100vw-24px)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
+            className="z-[9999] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-2 space-y-1.5 max-h-72 flex flex-col gm-popover-in"
           >
             {/* Buscador superior sin anillo naranja invasivo */}
             <div className="relative shrink-0">
