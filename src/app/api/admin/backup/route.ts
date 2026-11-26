@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq, ne, getTableName, is } from "drizzle-orm";
+import { eq, ne, getTableName, getTableColumns, is } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { normalizeMapsUrlKey } from "@/lib/place-identity";
 import { versionService } from "@/services/versionService";
 import { importPlacesAction, type ImportPlacePayload } from "@/lib/actions/export-import";
 
@@ -13,9 +14,13 @@ export const dynamic = "force-dynamic";
 // Tablas que no tiene sentido respaldar (sesiones activas)
 const EXCLUDED = new Set(["sessions"]);
 
-function sanitizeRow(row: Record<string, unknown>): Record<string, unknown> {
+function sanitizeRow(
+  row: Record<string, unknown>,
+  allowedCols?: Set<string>
+): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row)) {
+    if (allowedCols && !allowedCols.has(k)) continue;
     if (typeof v === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(v)) {
       clean[k] = new Date(v);
     } else {
@@ -162,6 +167,7 @@ export async function POST(request: NextRequest) {
     "place_lists",
     "place_list_items",
     "group_invitations",
+    "group_join_requests",
     "sharing_group_members",
     "place_occasions",
     "place_tags",
@@ -169,6 +175,8 @@ export async function POST(request: NextRequest) {
     "place_comments",
     "saved_filters",
     "audit_logs",
+    "api_usage",
+    "places_api_cache",
   ];
 
   // Incluir también cualquier tabla presente en el esquema actual que no esté en el backup
@@ -205,7 +213,18 @@ export async function POST(request: NextRequest) {
         const rows = payload.tables[tableName];
         const table = tableMap[tableName];
         if (Array.isArray(rows) && rows.length > 0 && table) {
-          let rowsToInsert = rows.map((r) => sanitizeRow(r as Record<string, unknown>));
+          const allowedCols = new Set(Object.keys(getTableColumns(table)));
+          let rowsToInsert = rows.map((r) => {
+            const clean = sanitizeRow(r as Record<string, unknown>, allowedCols);
+            if (
+              tableName === "places" &&
+              typeof clean.googleMapsUrl === "string" &&
+              !clean.mapsUrlKey
+            ) {
+              clean.mapsUrlKey = normalizeMapsUrlKey(clean.googleMapsUrl);
+            }
+            return clean;
+          });
 
           if (tableName === "users") {
             const currentAdminById = rowsToInsert.find((r) => r.id === user.id);
