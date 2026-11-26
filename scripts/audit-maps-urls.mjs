@@ -1,8 +1,31 @@
 #!/usr/bin/env node
-import "dotenv/config";
-import pg from "pg";
+import fs from "fs";
+import postgres from "postgres";
 
-const { Pool } = pg;
+if (!process.env.DATABASE_URL && fs.existsSync(".env")) {
+  for (const line of fs.readFileSync(".env", "utf8").split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].replace(/^["']|["']$/g, "");
+    }
+  }
+}
+
+async function main() {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("Falta DATABASE_URL en el entorno.");
+    process.exit(1);
+  }
+  const sql = postgres(connectionString);
+  try {
+    const rows = await sql`
+      SELECT p.id, p.name, p.city, p.google_maps_url, p.latitude, p.longitude, g.name AS group_name
+      FROM places p
+      LEFT JOIN sharing_groups g ON g.id = p.group_id
+      WHERE p.deleted_at IS NULL
+      ORDER BY p.created_at DESC
+    `;
 
 function isValidGoogleMapsUrl(rawUrl) {
   const clean = (rawUrl || "").trim();
@@ -26,20 +49,10 @@ function isValidGoogleMapsUrl(rawUrl) {
   }
 }
 
-async function main() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    console.error("Falta DATABASE_URL en el entorno.");
-    process.exit(1);
+  } finally {
+    await sql.end();
   }
-  const pool = new Pool({ connectionString });
-  try {
-    const { rows } = await pool.query(`
-      SELECT p.id, p.name, p.city, p.google_maps_url, p.latitude, p.longitude, g.name AS group_name
-      FROM places p
-      LEFT JOIN sharing_groups g ON g.id = p.group_id
-      ORDER BY p.created_at DESC
-    `);
+}
 
     const invalid = rows.filter((r) => r.google_maps_url && !isValidGoogleMapsUrl(r.google_maps_url));
     const missingBoth = rows.filter(

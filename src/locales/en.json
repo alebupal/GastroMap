@@ -308,7 +308,11 @@
     "keep_url_anyway_btn": "Keep anyway",
     "adding_to_space": "Adding to {space}",
     "select_space_required": "You are viewing \"All my places\": pick a destination space for this place.",
-    "choose_space_placeholder": "Select a space..."
+    "choose_space_placeholder": "Select a space...",
+    "cross_space_found_title": "This place already exists in another of your spaces",
+    "cross_space_import_btn": "Import details",
+    "cross_space_imported_toast": "Basic details imported from {space}.",
+    "places_api_quota_exceeded": "Monthly Google Places limit reached; OpenStreetMap was used instead."
   },
   "profile": {
     "title": "Edit my profile",
@@ -353,7 +357,9 @@
     "wrapped_places_visited": "{count} places visited",
     "wrapped_specialty": "Specialty",
     "wrapped_repeated_in": "Repeated in {count} places",
-    "wrapped_year_favorite": "Your favorite of the year"
+    "wrapped_year_favorite": "Your favorite of the year",
+    "space_filter_label": "Space",
+    "my_groups_title": "My groups"
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -566,7 +572,13 @@
     "empty_title": "You don\"t have any private groups yet",
     "empty_desc": "Create one above and generate an invitation link to share recommendations only with people you choose.",
     "yourself": "yourself",
-    "subtitle": "Create groups (e.g. Partner, Friends or Family) and generate invite links to share"
+    "subtitle": "Create groups (e.g. Partner, Friends or Family) and generate invite links to share",
+    "join_pending_approval": "Your request to join \"{name}\" has been sent. A group admin will review it soon.",
+    "template_label": "Start with:",
+    "template_default": "Default plans (8)",
+    "template_empty": "Empty (no plans)",
+    "template_clone": "Clone taxonomy from another group",
+    "template_clone_pick": "Pick source group..."
   },
   "common": {
     "save": "Save",
@@ -594,7 +606,8 @@
     "sort_title": "Title / Name",
     "sort_count": "Places count",
     "sort_date": "Date",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "back": "Back"
   },
   "comments": {
     "title": "Recommendations & comments",
@@ -711,7 +724,9 @@
     "merging": "Merging...",
     "cancel": "Cancel",
     "merge_success": "Places merged successfully.",
-    "edit_title": "Edit establishment"
+    "edit_title": "Edit establishment",
+    "title": "Places Management",
+    "active_tab": "Active places"
   },
   "admin_users": {
     "title": "User Management",
@@ -787,7 +802,16 @@
     "add_to_group_placeholder": "Select a group...",
     "add_to_group_btn": "Add",
     "remove_from_group": "Remove from group",
-    "confirm_remove_from_group": "Remove this user from group \"{group}\"?"
+    "confirm_remove_from_group": "Remove this user from group \"{group}\"?",
+    "safe_delete_title": "Delete account {username}",
+    "safe_delete_subtitle": "Review what will happen to their group contributions.",
+    "safe_delete_owner_block": "This user is the creator of one or more groups. Transfer ownership first:",
+    "safe_delete_transfer_btn": "Transfer groups now",
+    "safe_delete_group_places": "{count} places created in shared groups",
+    "safe_delete_group_comments": "{count} comments in shared groups",
+    "safe_delete_personal_places": "{count} places in their Personal Map (will be deleted)",
+    "safe_delete_reassign_btn": "Reassign to each group owner & delete account",
+    "safe_delete_purge_btn": "Also delete their group places & comments"
   },
   "admin_taxonomy": {
     "space_selector_title": "Space or Group to Manage",
@@ -1158,7 +1182,8 @@
     "copy_action_btn": "Copy place",
     "copy_success_toast": "✓ «{name}» copied to the selected space.",
     "filter_by_space": "Spaces",
-    "spaces_count_label": "spaces"
+    "spaces_count_label": "spaces",
+    "destination_space_title": "Destination space"
   },
   "admin_groups": {
     "title": "Instance Groups",
@@ -1220,7 +1245,16 @@
     "settings_saved_toast": "✓ Group settings saved.",
     "danger_zone_title": "Danger Zone — Delete group",
     "danger_zone_desc": "Deleting this group permanently removes its space and all {count} places inside it (copies in other groups or personal maps are unaffected).",
-    "delete_group_btn": "Permanently delete group"
+    "delete_group_btn": "Permanently delete group",
+    "join_requests_title": "Pending join requests",
+    "approve_btn": "Approve",
+    "reject_btn": "Reject",
+    "join_approved_toast": "Request approved: member added.",
+    "join_rejected_toast": "Request rejected.",
+    "require_join_approval": "Invite links require administrator approval",
+    "export_group_title": "Export entire group",
+    "export_group_desc": "Download all places in this group ({count}) as JSON, CSV, GeoJSON, KML, GPX, or PDF.",
+    "export_group_btn": "Export group"
   },
   "role_legend": {
     "title": "What does each role do? (Permissions legend)",
@@ -1231,5 +1265,49 @@
     "owner_desc": "Primary owner of the group. Has all Group Admin permissions plus transferring ownership or deleting the group.",
     "group_admin_desc": "Manages group members, invites, occasions, tags, duplicates, and settings. Cannot delete the group or remove the owner.",
     "member_desc": "Can view, add, and comment on places in the group, plus track their own visits and personal ratings."
+  },
+  "api_usage": {
+    "global_limit_label": "Global monthly limit (project key)",
+    "group_quota_label": "Monthly quota per group (without own key)",
+    "requests_badge": "{used} / {limit} requests this month",
+    "own_key_requests_badge": "{used} requests this month (own key)",
+    "cache_hits_badge": "{count} saved by cache",
+    "blocked_badge": "{count} fell back to OSM (limit)",
+    "group_api_title": "Group Google Places API",
+    "group_api_recommend": "Recommended: use your own Google Places API key so you do not rely on the shared quota.",
+    "own_key_active": "Own API key active ({key})",
+    "clear_key_btn": "Remove key",
+    "save_key_btn": "Save key",
+    "key_saved_toast": "Group API key encrypted and saved.",
+    "key_cleared_toast": "Own key removed; group will use the project key.",
+    "restrict_hint": "Tip: restrict the key in Google Cloud to this app domain and «Places API (New)»."
+  },
+  "bulk_copy": {
+    "btn_copy_to": "Copy to… ({count})",
+    "modal_title": "Copy {count} places to another space",
+    "step1_subtitle": "Choose the destination group or Personal Map.",
+    "step2_subtitle": "Review potential duplicates in the destination space.",
+    "continue_btn": "Continue",
+    "confirm_btn": "Confirm copy",
+    "conflicts_found": "{count} potential duplicates found:",
+    "matches_existing": "Similar place already exists: \"{name}\"",
+    "strategy_keep_both": "Keep both",
+    "strategy_replace": "Replace existing",
+    "strategy_skip": "Skip",
+    "result_banner": "Copy completed in {target}: {copied} copied · {replaced} replaced · {skipped} skipped.",
+    "undo_btn": "Undo",
+    "undone_toast": "Bulk copy undone successfully."
+  },
+  "trash": {
+    "tab_label": "Trash",
+    "title": "Places trash",
+    "subtitle": "Deleted places are kept for 30 days before permanent removal.",
+    "empty": "Trash is empty.",
+    "deleted_on": "Deleted on {date}",
+    "restore_btn": "Restore",
+    "purge_btn": "Delete permanently",
+    "restored_toast": "Place restored successfully.",
+    "purged_toast": "Place permanently deleted.",
+    "confirm_purge": "Permanently delete \"{name}\"? This cannot be undone."
   }
 }

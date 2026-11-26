@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq, ne, and, sql, inArray } from "drizzle-orm";
+import { eq, ne, and, sql, inArray, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
   users,
@@ -85,6 +85,7 @@ export async function getAllUsersAction(): Promise<SafeUser[]> {
         count: sql<number>`cast(count(*) as integer)`,
       })
       .from(places)
+      .where(isNull(places.deletedAt))
       .groupBy(places.createdById),
   ]);
 
@@ -361,9 +362,51 @@ export async function resetUserPasswordAction(userId: string, newPassword: strin
 }
 
 /**
- * Elimina un usuario (solo admin, no puede eliminarse a sí mismo)
+ * Analiza el impacto en grupos antes de eliminar un usuario (Punto 13).
  */
-export async function deleteUserAction(userId: string) {
+export async function getUserDeletionImpactAction(userId: string): Promise<{
+  ownedGroups: Array<{ id: string; name: string; icon: string }>;
+  groupPlacesCount: number;
+  groupCommentsCount: number;
+  personalPlacesCount: number;
+} | null> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") return null;
+
+  const [ownedGroups, createdPlaces, userComments] = await Promise.all([
+    db
+      .select({ id: sharingGroups.id, name: sharingGroups.name, icon: sharingGroups.icon })
+      .from(sharingGroups)
+      .where(eq(sharingGroups.ownerUserId, userId)),
+    db
+      .select({ id: places.id, groupId: places.groupId })
+      .from(places)
+      .where(and(eq(places.createdById, userId), isNull(places.deletedAt))),
+    db
+      .select({ id: placeComments.id, groupId: places.groupId })
+      .from(placeComments)
+      .innerJoin(places, eq(placeComments.placeId, places.id))
+      .where(eq(placeComments.userId, userId)),
+  ]);
+
+  return {
+    ownedGroups,
+    groupPlacesCount: createdPlaces.filter((p) => p.groupId !== null).length,
+    groupCommentsCount: userComments.filter((c) => c.groupId !== null).length,
+    personalPlacesCount: createdPlaces.filter((p) => p.groupId === null).length,
+  };
+}
+
+/**
+ * Elimina un usuario de forma segura (Punto 13):
+ * - Impide borrar si es creador de algún grupo sin transferir primero.
+ * - Su Mapa Personal se elimina siempre.
+ * - Permite reasignar sitios/comentarios de grupo al creador de cada grupo (por defecto) o eliminarlos.
+ */
+export async function deleteUserAction(
+  userId: string,
+  options?: { groupDataStrategy?: "reassign_owner" | "delete" }
+) {
   const currentUser = await getCurrentUser();
   if (!currentUser || currentUser.role !== "admin") {
     return { error: "No autorizado." };
@@ -373,37 +416,119 @@ export async function deleteUserAction(userId: string) {
     return { error: "No puedes eliminar tu propia cuenta de administrador." };
   }
 
-  // 1. Limpiar comentarios y reseñas escritos por el usuario en cualquier local
-  await db.delete(placeComments).where(eq(placeComments.userId, userId));
+  const owned = await db
+    .select({ id: sharingGroups.id, name: sharingGroups.name })
+    .from(sharingGroups)
+    .where(eq(sharingGroups.ownerUserId, userId));
+
+  if (owned.length > 0) {
+    return {
+      error: `Este usuario es creador de ${owned.map((g) => `«${g.name}»`).join(", ")}. Transfiere la propiedad antes de eliminar su cuenta.`,
+    };
+  }
+
+  const strategy = options?.groupDataStrategy || "reassign_owner";
+
+  // 1. Limpiar sesiones, invitaciones e interacciones privadas del usuario
   await db.delete(userPlaces).where(eq(userPlaces.userId, userId));
   await db.delete(sessions).where(eq(sessions.userId, userId));
   await db.delete(invitations).where(eq(invitations.createdById, userId));
 
-  // 2. Limpiar locales creados por el usuario con todas sus relaciones
+  // 2. Comentarios en grupos vs personales
+  if (strategy === "reassign_owner") {
+    const commentsInGroups = await db
+      .select({
+        commentId: placeComments.id,
+        ownerUserId: sharingGroups.ownerUserId,
+      })
+      .from(placeComments)
+      .innerJoin(places, eq(placeComments.placeId, places.id))
+      .innerJoin(sharingGroups, eq(places.groupId, sharingGroups.id))
+      .where(eq(placeComments.userId, userId));
+
+    const byOwner = new Map<string, string[]>();
+    for (const row of commentsInGroups) {
+      const targetOwner = row.ownerUserId === userId ? currentUser.id : row.ownerUserId;
+      const list = byOwner.get(targetOwner) || [];
+      list.push(row.commentId);
+      byOwner.set(targetOwner, list);
+    }
+    for (const [ownerId, cIds] of byOwner.entries()) {
+      await db
+        .update(placeComments)
+        .set({ userId: ownerId })
+        .where(inArray(placeComments.id, cIds));
+    }
+  }
+  await db.delete(placeComments).where(eq(placeComments.userId, userId));
+
+  // 3. Sitios del usuario: los personales siempre se eliminan; los de grupo se reasignan o eliminan según estrategia
   const userPlacesCreated = await db
-    .select({ id: places.id })
+    .select({ id: places.id, groupId: places.groupId })
     .from(places)
     .where(eq(places.createdById, userId));
-  const placeIds = userPlacesCreated.map((p) => p.id);
 
-  if (placeIds.length > 0) {
-    await db.delete(placeComments).where(inArray(placeComments.placeId, placeIds));
-    await db.delete(userPlaces).where(inArray(userPlaces.placeId, placeIds));
-    await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
-    await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
-    await db.delete(places).where(inArray(places.id, placeIds));
+  const personalPlaceIds = userPlacesCreated
+    .filter((p) => p.groupId === null)
+    .map((p) => p.id);
+  const groupPlaces = userPlacesCreated.filter((p) => p.groupId !== null);
+
+  let reassignedCount = 0;
+  let deletedPlaceIds = [...personalPlaceIds];
+
+  if (groupPlaces.length > 0) {
+    if (strategy === "reassign_owner") {
+      const groupIds = Array.from(new Set(groupPlaces.map((p) => p.groupId as string)));
+      const owners = await db
+        .select({ id: sharingGroups.id, ownerUserId: sharingGroups.ownerUserId })
+        .from(sharingGroups)
+        .where(inArray(sharingGroups.id, groupIds));
+      const ownerByGroup = new Map(owners.map((g) => [g.id, g.ownerUserId]));
+
+      const placesByNewOwner = new Map<string, string[]>();
+      for (const p of groupPlaces) {
+        const ownerId = ownerByGroup.get(p.groupId as string) || currentUser.id;
+        const safeOwner = ownerId === userId ? currentUser.id : ownerId;
+        const arr = placesByNewOwner.get(safeOwner) || [];
+        arr.push(p.id);
+        placesByNewOwner.set(safeOwner, arr);
+        reassignedCount++;
+      }
+      for (const [newOwnerId, pIds] of placesByNewOwner.entries()) {
+        await db
+          .update(places)
+          .set({ createdById: newOwnerId, updatedAt: new Date() })
+          .where(inArray(places.id, pIds));
+      }
+    } else {
+      deletedPlaceIds = [...deletedPlaceIds, ...groupPlaces.map((p) => p.id)];
+    }
   }
 
-  // 3. Eliminar usuario de forma segura
+  if (deletedPlaceIds.length > 0) {
+    await db.delete(placeComments).where(inArray(placeComments.placeId, deletedPlaceIds));
+    await db.delete(userPlaces).where(inArray(userPlaces.placeId, deletedPlaceIds));
+    await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, deletedPlaceIds));
+    await db.delete(placeTags).where(inArray(placeTags.placeId, deletedPlaceIds));
+    await db.delete(places).where(inArray(places.id, deletedPlaceIds));
+  }
+
+  // 4. Eliminar usuario de forma segura
   await db.delete(users).where(eq(users.id, userId));
   await logAudit({
     actorUserId: currentUser.id,
     entityType: "user",
     entityId: userId,
     action: "user_deleted",
-    metadata: { deletedPlacesCount: placeIds.length },
+    metadata: {
+      deletedPlacesCount: deletedPlaceIds.length,
+      reassignedPlacesCount: reassignedCount,
+      strategy,
+    },
   });
   revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
   return { success: true };
 }
 
@@ -590,47 +715,41 @@ export async function createUserDirectlyAction(formData: FormData) {
  * Elimina múltiples usuarios simultáneamente (solo admin)
  * Asegura que el administrador actual no se elimine a sí mismo
  */
-export async function deleteMultipleUsersAction(userIds: string[]) {
+export async function deleteMultipleUsersAction(
+  userIds: string[]
+): Promise<{ success?: boolean; count?: number; error?: string }> {
   const currentUser = await getCurrentUser();
   if (!currentUser || currentUser.role !== "admin") {
     return { error: "No autorizado. Solo los administradores pueden realizar esta acción." };
   }
 
-  // Filtrar para evitar que el usuario actual se elimine a sí mismo
   const validIds = userIds.filter((id) => id !== currentUser.id);
   if (validIds.length === 0) {
     return { error: "No se seleccionó ningún usuario válido para eliminar (no puedes eliminar tu propia cuenta)." };
   }
 
-  // 1. Limpiar comentarios y reseñas escritos por los usuarios
-  await db.delete(placeComments).where(inArray(placeComments.userId, validIds));
-  await db.delete(userPlaces).where(inArray(userPlaces.userId, validIds));
-  await db.delete(sessions).where(inArray(sessions.userId, validIds));
-  await db.delete(invitations).where(inArray(invitations.createdById, validIds));
+  const owned = await db
+    .select({ name: sharingGroups.name })
+    .from(sharingGroups)
+    .where(inArray(sharingGroups.ownerUserId, validIds));
 
-  // 2. Limpiar locales creados por los usuarios y todas sus dependencias
-  const userPlacesCreated = await db
-    .select({ id: places.id })
-    .from(places)
-    .where(inArray(places.createdById, validIds));
-  const placeIds = userPlacesCreated.map((p) => p.id);
-
-  if (placeIds.length > 0) {
-    await db.delete(placeComments).where(inArray(placeComments.placeId, placeIds));
-    await db.delete(userPlaces).where(inArray(userPlaces.placeId, placeIds));
-    await db.delete(placeOccasions).where(inArray(placeOccasions.placeId, placeIds));
-    await db.delete(placeTags).where(inArray(placeTags.placeId, placeIds));
-    await db.delete(places).where(inArray(places.id, placeIds));
+  if (owned.length > 0) {
+    return {
+      error: `Uno o más usuarios seleccionados son creadores de grupo (${owned.map((g) => `«${g.name}»`).join(", ")}). Transfiere la propiedad antes de eliminarlos.`,
+    };
   }
 
-  // 3. Eliminar los usuarios seleccionados
-  await db.delete(users).where(inArray(users.id, validIds));
+  for (const uid of validIds) {
+    const res = await deleteUserAction(uid, { groupDataStrategy: "reassign_owner" });
+    if (res.error) return res;
+  }
+
   await logAudit({
     actorUserId: currentUser.id,
     entityType: "user",
     entityId: "bulk",
     action: "users_bulk_deleted",
-    metadata: { count: validIds.length },
+    metadata: { count: validIds.length, groupDataStrategy: "reassign_owner" },
   });
   revalidatePath("/");
   return { success: true, count: validIds.length };

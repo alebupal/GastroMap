@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { copyPlaceToSpaceAction } from "@/lib/actions/places";
+import {
+  previewCopyPlacesAction,
+  bulkCopyPlacesAction,
+  type CopyConflictPreview,
+} from "@/lib/actions/places";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
 import { useToast } from "@/components/ui/Toast";
 import { useT } from "@/lib/i18n/client";
@@ -36,6 +40,10 @@ export function CopyPlaceModal({
   const sheet = useSwipeToClose(onClose);
   const [mounted, setMounted] = useState(false);
   const [copyingTo, setCopyingTo] = useState<string | null>(null);
+  const [pendingConflict, setPendingConflict] = useState<{
+    target: CopyTargetSpaceOption;
+    conflict: CopyConflictPreview;
+  } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -59,9 +67,35 @@ export function CopyPlaceModal({
 
   async function handleCopy(target: CopyTargetSpaceOption) {
     setCopyingTo(target.id);
-    const res = await copyPlaceToSpaceAction(
-      placeId,
-      target.isPersonal ? "personal" : `group:${target.id}`
+    const targetSpaceKey = target.isPersonal ? "personal" : target.id;
+    const preview = await previewCopyPlacesAction([placeId], targetSpaceKey);
+
+    if (preview.error) {
+      setCopyingTo(null);
+      toast(preview.error, { kind: "error" });
+      return;
+    }
+
+    const conflict = preview.conflicts?.[0];
+    if (conflict) {
+      setCopyingTo(null);
+      setPendingConflict({ target, conflict });
+      return;
+    }
+
+    await executeCopy(target, "keep_both");
+  }
+
+  async function executeCopy(
+    target: CopyTargetSpaceOption,
+    strategy: "replace" | "keep_both",
+    conflictWithId?: string
+  ) {
+    setCopyingTo(target.id);
+    const targetSpaceKey = target.isPersonal ? "personal" : target.id;
+    const res = await bulkCopyPlacesAction(
+      [{ placeId, strategy, conflictWithId }],
+      targetSpaceKey
     );
     setCopyingTo(null);
 
@@ -69,6 +103,7 @@ export function CopyPlaceModal({
       toast(res.error, { kind: "error" });
     } else {
       toast(t("spaces.copy_success_toast", { space: target.name }), { kind: "success" });
+      setPendingConflict(null);
       onClose();
     }
   }
@@ -116,7 +151,50 @@ export function CopyPlaceModal({
             {t("spaces.copy_modal_desc")}
           </p>
 
-          {targets.length === 0 ? (
+          {pendingConflict ? (
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 space-y-3 text-xs gm-tab-in">
+              <div className="font-bold text-amber-900 dark:text-amber-200">
+                {t("bulk_copy.matches_existing", { name: pendingConflict.conflict.existingName })}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={Boolean(copyingTo)}
+                  onClick={() =>
+                    executeCopy(
+                      pendingConflict.target,
+                      "keep_both",
+                      pendingConflict.conflict.existingId
+                    )
+                  }
+                  className="px-3.5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white font-bold cursor-pointer transition disabled:opacity-50"
+                >
+                  {t("bulk_copy.strategy_keep_both")}
+                </button>
+                <button
+                  type="button"
+                  disabled={Boolean(copyingTo)}
+                  onClick={() =>
+                    executeCopy(
+                      pendingConflict.target,
+                      "replace",
+                      pendingConflict.conflict.existingId
+                    )
+                  }
+                  className="px-3.5 py-2 rounded-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-bold hover:bg-amber-100 cursor-pointer transition disabled:opacity-50"
+                >
+                  {t("bulk_copy.strategy_replace")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPendingConflict(null)}
+                  className="px-3 py-2 rounded-full text-slate-600 dark:text-slate-300 font-semibold hover:bg-slate-200/60 dark:hover:bg-slate-800 cursor-pointer transition"
+                >
+                  {t("common.back")}
+                </button>
+              </div>
+            </div>
+          ) : targets.length === 0 ? (
             <div className="p-5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700 text-center text-xs text-slate-500 dark:text-slate-400">
               {t("spaces.copy_no_targets")}
             </div>

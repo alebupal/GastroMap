@@ -308,7 +308,11 @@
     "keep_url_anyway_btn": "Mantener igualmente",
     "adding_to_space": "Se añadirá a {space}",
     "select_space_required": "Estás en «Todos mis sitios»: elige a qué espacio añadir este local.",
-    "choose_space_placeholder": "Selecciona un espacio..."
+    "choose_space_placeholder": "Selecciona un espacio...",
+    "cross_space_found_title": "Este local ya existe en otro de tus espacios",
+    "cross_space_import_btn": "Importar datos",
+    "cross_space_imported_toast": "Datos básicos importados desde {space}.",
+    "places_api_quota_exceeded": "Se alcanzó el límite mensual de Google Places; se ha usado OpenStreetMap."
   },
   "profile": {
     "title": "Editar mi perfil",
@@ -353,7 +357,9 @@
     "wrapped_places_visited": "{count} locales visitados",
     "wrapped_specialty": "Especialidad",
     "wrapped_repeated_in": "Repetida en {count} locales",
-    "wrapped_year_favorite": "Tu favorito del año"
+    "wrapped_year_favorite": "Tu favorito del año",
+    "space_filter_label": "Espacio",
+    "my_groups_title": "Mis grupos"
   },
   "admin": {
     "title": "Panel de Administración",
@@ -566,7 +572,13 @@
     "empty_title": "Aún no tienes ningún grupo privado",
     "empty_desc": "Crea uno arriba y genera un enlace de invitación para compartir recomendaciones solo con quien tú elijas.",
     "yourself": "ti mismo",
-    "subtitle": "Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir"
+    "subtitle": "Crea grupos (ej. Pareja, Amigos o Familia) y genera enlaces de invitación para compartir",
+    "join_pending_approval": "Tu solicitud para unirte a «{name}» ha sido enviada. Un administrador la revisará pronto.",
+    "template_label": "Empezar con:",
+    "template_default": "Planes base (8)",
+    "template_empty": "Vacío (sin planes)",
+    "template_clone": "Clonar taxonomía de otro grupo",
+    "template_clone_pick": "Elige grupo origen..."
   },
   "common": {
     "save": "Guardar",
@@ -594,7 +606,8 @@
     "sort_title": "Título / Nombre",
     "sort_count": "Nº sitios",
     "sort_date": "Fecha",
-    "sort_status": "Estado"
+    "sort_status": "Estado",
+    "back": "Volver"
   },
   "comments": {
     "title": "Recomendaciones y comentarios",
@@ -711,7 +724,9 @@
     "merging": "Fusionando...",
     "cancel": "Cancelar",
     "merge_success": "Sitios fusionados correctamente.",
-    "edit_title": "Editar establecimiento"
+    "edit_title": "Editar establecimiento",
+    "title": "Gestión de Sitios",
+    "active_tab": "Sitios activos"
   },
   "admin_users": {
     "title": "Gestión de Usuarios",
@@ -787,7 +802,16 @@
     "add_to_group_placeholder": "Selecciona un grupo...",
     "add_to_group_btn": "Añadir",
     "remove_from_group": "Quitar del grupo",
-    "confirm_remove_from_group": "¿Quitar a este usuario del grupo «{group}»?"
+    "confirm_remove_from_group": "¿Quitar a este usuario del grupo «{group}»?",
+    "safe_delete_title": "Eliminar cuenta {username}",
+    "safe_delete_subtitle": "Revisa qué ocurrirá con sus aportaciones en grupos.",
+    "safe_delete_owner_block": "Este usuario es creador de uno o más grupos. Transfiere primero la propiedad:",
+    "safe_delete_transfer_btn": "Transferir grupos ahora",
+    "safe_delete_group_places": "{count} sitios creados en grupos compartidos",
+    "safe_delete_group_comments": "{count} comentarios en grupos compartidos",
+    "safe_delete_personal_places": "{count} sitios en su Mapa Personal (se eliminarán)",
+    "safe_delete_reassign_btn": "Reasignar al creador de cada grupo y eliminar cuenta",
+    "safe_delete_purge_btn": "Eliminar también sus sitios y comentarios de grupo"
   },
   "admin_taxonomy": {
     "space_selector_title": "Espacio o Grupo a Gestionar",
@@ -1158,7 +1182,8 @@
     "copy_action_btn": "Copiar sitio",
     "copy_success_toast": "✓ «{name}» copiado correctamente al espacio seleccionado.",
     "filter_by_space": "Espacios",
-    "spaces_count_label": "espacios"
+    "spaces_count_label": "espacios",
+    "destination_space_title": "Espacio de destino"
   },
   "admin_groups": {
     "title": "Grupos de la Instancia",
@@ -1220,7 +1245,16 @@
     "settings_saved_toast": "✓ Configuración del grupo actualizada.",
     "danger_zone_title": "Zona de Peligro — Eliminar grupo",
     "danger_zone_desc": "Eliminar este grupo borrará permanentemente su espacio y los {count} sitios guardados dentro de él (no afecta a copias en otros grupos ni mapas personales).",
-    "delete_group_btn": "Eliminar grupo definitivamente"
+    "delete_group_btn": "Eliminar grupo definitivamente",
+    "join_requests_title": "Solicitudes pendientes",
+    "approve_btn": "Aprobar",
+    "reject_btn": "Rechazar",
+    "join_approved_toast": "Solicitud aprobada: nuevo miembro añadido.",
+    "join_rejected_toast": "Solicitud rechazada.",
+    "require_join_approval": "Los enlaces de invitación requieren aprobación del administrador",
+    "export_group_title": "Exportar grupo completo",
+    "export_group_desc": "Descarga todos los sitios del grupo ({count}) en JSON, CSV, GeoJSON, KML, GPX o PDF.",
+    "export_group_btn": "Exportar grupo"
   },
   "role_legend": {
     "title": "¿Qué hace cada rol? (Leyenda de permisos)",
@@ -1231,5 +1265,49 @@
     "owner_desc": "Propietario principal del grupo. Tiene todos los permisos de Admin grupo y además puede transferir la propiedad o eliminar el grupo.",
     "group_admin_desc": "Gestiona miembros, invitaciones, planes, etiquetas, duplicados y ajustes del grupo. No puede eliminar el grupo ni expulsar al creador.",
     "member_desc": "Puede ver, añadir y comentar sitios dentro del grupo, además de registrar sus visitas y notas personales."
+  },
+  "api_usage": {
+    "global_limit_label": "Límite mensual global (clave del proyecto)",
+    "group_quota_label": "Cupo mensual por grupo (sin clave propia)",
+    "requests_badge": "{used} / {limit} peticiones este mes",
+    "own_key_requests_badge": "{used} peticiones este mes (clave propia)",
+    "cache_hits_badge": "{count} ahorradas por caché",
+    "blocked_badge": "{count} redirigidas a OSM por límite",
+    "group_api_title": "API de Google Places del grupo",
+    "group_api_recommend": "Recomendado: usa una clave propia de Google Places para no depender del cupo compartido.",
+    "own_key_active": "Clave propia activa ({key})",
+    "clear_key_btn": "Quitar clave",
+    "save_key_btn": "Guardar clave",
+    "key_saved_toast": "Clave de API del grupo guardada y cifrada.",
+    "key_cleared_toast": "Clave propia eliminada; el grupo usará la clave del proyecto.",
+    "restrict_hint": "Consejo: restringe la clave en Google Cloud al dominio de esta app y a «Places API (New)»."
+  },
+  "bulk_copy": {
+    "btn_copy_to": "Copiar a… ({count})",
+    "modal_title": "Copiar {count} sitios a otro espacio",
+    "step1_subtitle": "Elige el grupo o Mapa Personal de destino.",
+    "step2_subtitle": "Revisa posibles duplicados en el espacio destino.",
+    "continue_btn": "Continuar",
+    "confirm_btn": "Confirmar copia",
+    "conflicts_found": "{count} posibles duplicados detectados:",
+    "matches_existing": "Ya existe un sitio similar: «{name}»",
+    "strategy_keep_both": "Conservar ambos",
+    "strategy_replace": "Reemplazar existente",
+    "strategy_skip": "Omitir",
+    "result_banner": "Copia completada en {target}: {copied} copiados · {replaced} reemplazados · {skipped} omitidos.",
+    "undo_btn": "Deshacer",
+    "undone_toast": "Copia masiva deshecha correctamente."
+  },
+  "trash": {
+    "tab_label": "Papelera",
+    "title": "Papelera de sitios",
+    "subtitle": "Los sitios eliminados se conservan 30 días antes de borrarse definitivamente.",
+    "empty": "La papelera está vacía.",
+    "deleted_on": "Eliminado el {date}",
+    "restore_btn": "Restaurar",
+    "purge_btn": "Eliminar definitivamente",
+    "restored_toast": "Sitio restaurado correctamente.",
+    "purged_toast": "Sitio eliminado definitivamente.",
+    "confirm_purge": "¿Eliminar definitivamente «{name}»? Esta acción no se puede deshacer."
   }
 }

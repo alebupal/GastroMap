@@ -24,7 +24,13 @@ Multi-space evolution of **GastroMap**: configurable open registration, a **priv
 - **Superadmin Registration Mode Toggle**: Instant switch in `/admin > Settings` between **Open Registration** and **Invite Only**.
 
 ### 🛡️ Per-Group Admin Panel (`/group-admin`) & Scalable 5-Section `/admin` Dashboard
-- **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Creator` / `Group Admin` / `Member`) & invite links, scoped plans/tags, and group settings.
+- **Dedicated `/group-admin` Dashboard**: Group creators and promoted co-admins get their own group administration panel covering group analytics, places/duplicate merging, members/roles (`Creator` / `Group Admin` / `Member`), pending join-request approvals, revocable invite links, **30-day Places Trash**, **full group export**, **per-group Google Places API key**, and scoped plans/tags (collapsed by default).
+- **Bulk Copy Across Spaces with Duplicate Detection & Undo**: From `/admin > Places` and `/group-admin > Places` (and single-card copy), copy one or many places into another group or Personal Map choosing *Keep both* (`(copia)`), *Replace existing*, or *Skip*, with a 10-minute **Undo** action.
+- **Detect & Import Existing Venues**: When adding a place in `/new`, matches in your other spaces are surfaced so you can import basic details (name, address, city, coordinates, Maps link) while keeping each group's tags, plans, and comments independent, alongside a destination-space banner.
+- **Safe User Deletion**: Deleting an account with group contributions prompts to reassign their places and comments to each group owner or purge them, blocking deletion of group owners until ownership is transferred.
+- **Per-Group Google Places API, Quotas & Cache**: Groups can configure their own encrypted API key; otherwise they share the project key with configurable monthly quotas, a 30-day shared cache, and automatic OpenStreetMap fallback.
+- **Maps URL Validation & «Search on Google»**: Inline validation in `/new` and edit modals (*Remove link* / *Keep anyway*), coordinate-based Maps fallback on mobile, and a **Search on Google** action in each card's `⋮` menu.
+- **Space-Scoped Personal Stats & Animated `SegmentedTabs`**: Space filter and *My groups* breakdown in `StatsModal`, compact role legend, and unified `SegmentedTabs` across all tab controls.
 - **Scalable 5-Section `/admin` Restructuring**:
   - **📊 Overview** (default view): Global KPIs, Registration Mode badge, and **Top Active Groups** card with 1-click access to `/group-admin`.
   - **🍻 Groups**: Paginated, searchable, sortable directory with quick activity filters (`All`, `With places`, `Empty`), plans/tags count, inline group creation, and `Manage →` shortcut to each group's isolated `/group-admin` panel.

@@ -187,3 +187,10 @@ export async function resetApplicationAction() {
   revalidatePath("/");
   return { success: true };
 }
+
+export async function getGlobalApiUsageAction() {
+  const currentUser = await getCurrentUser();
+  if (!currentUser || currentUser.role !== "admin") return null;
+  const { getGlobalApiUsageSummary } = await import("@/lib/places-api");
+  return getGlobalApiUsageSummary();
+}

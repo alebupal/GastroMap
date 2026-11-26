@@ -36,6 +36,8 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
   const [loading, setLoading] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupIcon, setNewGroupIcon] = useState("🍻");
+  const [templateMode, setTemplateMode] = useState<"default" | "empty" | "clone">("default");
+  const [cloneSourceId, setCloneSourceId] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
@@ -141,7 +143,10 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
     if (!newGroupName.trim() || creating) return;
     setCreating(true);
     setError(null);
-    const res = await createGroupAction(newGroupName, newGroupIcon);
+    const res = await createGroupAction(newGroupName, newGroupIcon, undefined, {
+      mode: templateMode,
+      sourceGroupId: templateMode === "clone" ? cloneSourceId : undefined,
+    });
     setCreating(false);
     if (res.error) {
       setError(res.error);
@@ -304,6 +309,35 @@ export function GroupsModal({ isOpen, onClose, currentUserId }: GroupsModalProps
                 <span className="material-symbols-outlined text-sm leading-none">add</span>
                 <span>{creating ? t("common.loading") : t("groups.create")}</span>
               </button>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+              <span className="font-bold text-slate-500 dark:text-slate-400">
+                {t("groups.template_label")}
+              </span>
+              <select
+                value={templateMode}
+                onChange={(e) => setTemplateMode(e.target.value as "default" | "empty" | "clone")}
+                className="px-2.5 py-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+              >
+                <option value="default">{t("groups.template_default")}</option>
+                <option value="empty">{t("groups.template_empty")}</option>
+                {groups.length > 0 && <option value="clone">{t("groups.template_clone")}</option>}
+              </select>
+              {templateMode === "clone" && groups.length > 0 && (
+                <select
+                  value={cloneSourceId}
+                  onChange={(e) => setCloneSourceId(e.target.value)}
+                  className="px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold cursor-pointer"
+                >
+                  <option value="">{t("groups.template_clone_pick")}</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.icon} {g.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </form>
 

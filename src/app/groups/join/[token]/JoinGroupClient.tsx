@@ -21,6 +21,7 @@ export function JoinGroupClient({
   const { t } = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingApproval, setPendingApproval] = useState(false);
 
   async function handleJoin() {
     setLoading(true);
@@ -30,9 +31,28 @@ export function JoinGroupClient({
 
     if (res.error) {
       setError(res.error);
+    } else if (res.pendingApproval) {
+      setPendingApproval(true);
     } else {
       router.push("/");
     }
+  }
+
+  if (pendingApproval) {
+    return (
+      <div className="space-y-4">
+        <p className="text-xs text-amber-800 dark:text-amber-200 font-semibold bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-800">
+          ⏳ {t("groups.join_pending_approval", { name: groupName })}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="w-full py-3 px-4 rounded-2xl bg-[#f2f3ff] hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer"
+        >
+          {t("groups.join_go_to_map")}
+        </button>
+      </div>
+    );
   }
 
   if (isAlreadyMember) {

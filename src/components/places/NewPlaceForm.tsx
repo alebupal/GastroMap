@@ -6,7 +6,9 @@ import {
   createPlaceAction,
   parseUrlAction,
   findPotentialDuplicatesAction,
+  checkPlaceAcrossSpacesAction,
   type PotentialDuplicate,
+  type CrossSpaceMatch,
 } from "@/lib/actions/places";
 import { TagInput } from "@/components/places/TagInput";
 import { OccasionPicker } from "@/components/places/OccasionPicker";
@@ -61,6 +63,8 @@ export function NewPlaceForm({
   const [submitting, setSubmitting] = useState(false);
   const [duplicates, setDuplicates] = useState<PotentialDuplicate[]>([]);
   const [dismissedDuplicates, setDismissedDuplicates] = useState(false);
+  const [crossSpaceMatches, setCrossSpaceMatches] = useState<CrossSpaceMatch[]>([]);
+  const [dismissedCrossSpace, setDismissedCrossSpace] = useState(false);
   const [allowNonMapsUrl, setAllowNonMapsUrl] = useState(false);
 
   const isNonMapsUrl = Boolean(url.trim()) && !isValidGoogleMapsUrl(url);
@@ -74,28 +78,42 @@ export function NewPlaceForm({
     const hasCoords =
       parsedLat !== null && !isNaN(parsedLat) && parsedLng !== null && !isNaN(parsedLng);
 
-    if (name.trim().length < 3 && !hasCoords) {
+    if (name.trim().length < 3 && !hasCoords && !url.trim()) {
       setDuplicates([]);
+      setCrossSpaceMatches([]);
       return;
     }
 
     const timer = setTimeout(async () => {
       try {
-        const found = await findPotentialDuplicatesAction({
-          name: name.trim(),
-          latitude: hasCoords ? parsedLat : null,
-          longitude: hasCoords ? parsedLng : null,
-          targetSpace,
-        });
+        const [found, cross] = await Promise.all([
+          name.trim().length >= 3 || hasCoords
+            ? findPotentialDuplicatesAction({
+                name: name.trim(),
+                latitude: hasCoords ? parsedLat : null,
+                longitude: hasCoords ? parsedLng : null,
+                targetSpace,
+              })
+            : Promise.resolve([]),
+          checkPlaceAcrossSpacesAction({
+            name: name.trim(),
+            latitude: hasCoords ? parsedLat : null,
+            longitude: hasCoords ? parsedLng : null,
+            googleMapsUrl: url.trim() || null,
+            targetSpace,
+          }),
+        ]);
         setDuplicates(found);
         setDismissedDuplicates(false);
+        setCrossSpaceMatches(cross.inOtherSpaces);
+        setDismissedCrossSpace(false);
       } catch {
         // Silenciar error de comprobación no bloqueante
       }
     }, 450);
 
     return () => clearTimeout(timer);
-  }, [name, lat, lng, targetSpace]);
+  }, [name, lat, lng, url, targetSpace]);
 
   async function handleAutoResolve(rawUrl?: string) {
     const target = (rawUrl ?? url).trim();
@@ -110,7 +128,10 @@ export function NewPlaceForm({
     setResolving(true);
     setError(null);
     try {
-      const parsed = await parseUrlAction(target);
+      const parsed = await parseUrlAction(target, targetSpace);
+      if (parsed.quotaExceeded) {
+        toast(t("form.places_api_quota_exceeded"), { kind: "info" });
+      }
       if (!parsed.latitude && !parsed.name) {
         toast(t("form.import_nothing"), { kind: "info" });
       } else {
@@ -353,7 +374,66 @@ export function NewPlaceForm({
           className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-base sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 font-bold transition"
         />
 
-        {/* Aviso no bloqueante de posibles duplicados */}
+          {/* Aviso de local existente en otro espacio (Punto 4A: Detectar e importar) */}
+          {crossSpaceMatches.length > 0 && !dismissedCrossSpace && (
+            <div className="mt-2 p-3.5 rounded-2xl bg-sky-50 dark:bg-sky-950/35 border border-sky-200 dark:border-sky-800/60 space-y-2 gm-tab-in">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-extrabold text-sky-900 dark:text-sky-200 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-base text-sky-600 leading-none">
+                    content_paste_go
+                  </span>
+                  <span>{t("form.cross_space_found_title")}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDismissedCrossSpace(true)}
+                  className="text-xs text-sky-700 dark:text-sky-300 opacity-70 hover:opacity-100 cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                {crossSpaceMatches.map((m) => (
+                  <div
+                    key={m.id}
+                    className="p-2.5 rounded-xl bg-white dark:bg-slate-900/80 border border-sky-200/70 dark:border-sky-800/50 flex items-center justify-between gap-2 text-xs"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 dark:text-slate-100 truncate">
+                        {m.name} · {m.spaceIcon} {m.spaceName}
+                      </div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {[m.city, m.address].filter(Boolean).join(" — ")}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(m.name);
+                        if (m.address) setAddress(m.address);
+                        if (m.city) setCity(m.city);
+                        if (m.latitude != null) setLat(String(m.latitude));
+                        if (m.longitude != null) setLng(String(m.longitude));
+                        if (m.googleMapsUrl) {
+                          setUrl(m.googleMapsUrl);
+                          setAllowNonMapsUrl(false);
+                        }
+                        setDismissedCrossSpace(true);
+                        toast(t("form.cross_space_imported_toast", { space: m.spaceName }), {
+                          kind: "success",
+                        });
+                      }}
+                      className="px-3 py-1 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold shrink-0 cursor-pointer transition"
+                    >
+                      {t("form.cross_space_import_btn")}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Aviso no bloqueante de posibles duplicados */}
         {duplicates.length > 0 && !dismissedDuplicates && (
           <div className="mt-2 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/35 border border-amber-200 dark:border-amber-800/60 space-y-2 animate-in fade-in duration-150">
             <div className="flex items-start justify-between gap-2">
