@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
+  turbopack: {},
   async headers() {
     return [
       {

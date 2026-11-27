@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Visual Badge for `👻 @usuario_eliminado`**: Cards (`PlaceCard`), comments (`PlaceCommentsThread`), and admin tables (`PlacesTableManager`) highlight ghost-account contributions with a `👻` badge and muted italic styling.
 - **Mobile Admin Drawer Overflow Fix (`/admin` & `/group-admin`)**: Fixed horizontal scroll inside both mobile navigation drawer headers.
 - **Anti-SSRF Tests**: Added unit checks in `tests/` covering hostname validation, private IP blocking, and manual redirect handling for Google Maps links.
-- **Dependency Updates**: Upgraded `next` (`15.5.29`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`), and `zod` (`4.6.7`) to mitigate security advisories while keeping Node 18/20 compatibility.
+- **Dependency & Runtime Updates**: Upgraded `Node.js 22` (`Dockerfile`), `next` (`16.4.6` with Turbopack), `eslint` (`9.x`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`), and `zod` (`4.6.7`), resolving all high-severity advisories.
 
 ## [0.2.1] - 2026-11-26
 
