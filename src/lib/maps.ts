@@ -192,29 +192,58 @@ function isPrivateOrLocalHostname(hostname: string): boolean {
   );
 }
 
+const ALLOWED_GOOGLE_ORIGINS = (() => {
+  const map = new Map<string, string>([
+    ["maps.app.goo.gl", "https://maps.app.goo.gl"],
+    ["share.google", "https://share.google"],
+    ["goo.gl", "https://goo.gl"],
+    ["g.co", "https://g.co"],
+  ]);
+  const tlds = [
+    "com",
+    "es",
+    "fr",
+    "de",
+    "it",
+    "pt",
+    "co.uk",
+    "nl",
+    "be",
+    "ch",
+    "at",
+    "ie",
+    "ca",
+    "com.mx",
+    "com.ar",
+    "com.br",
+    "com.co",
+    "cl",
+    "com.pe",
+    "co.jp",
+    "com.au",
+  ];
+  for (const tld of tlds) {
+    map.set(`google.${tld}`, `https://google.${tld}`);
+    map.set(`www.google.${tld}`, `https://www.google.${tld}`);
+    map.set(`maps.google.${tld}`, `https://maps.google.${tld}`);
+    map.set(`consent.google.${tld}`, `https://consent.google.${tld}`);
+  }
+  return map;
+})();
+
 function getSafeGoogleMapsFetchUrl(rawUrl: string): string | null {
   try {
     const parsed = new URL(rawUrl);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    if (parsed.port && parsed.port !== "443" && parsed.port !== "80") return null;
     const host = parsed.hostname.toLowerCase();
     if (isPrivateOrLocalHostname(host)) return null;
 
-    const isAllowedHost =
-      host === "maps.app.goo.gl" ||
-      host === "share.google" ||
-      host === "goo.gl" ||
-      host === "g.co" ||
-      /^(maps|consent)\.google\.[a-z.]+$/.test(host) ||
-      /^(www\.)?google\.[a-z.]+$/.test(host);
+    const staticOrigin = ALLOWED_GOOGLE_ORIGINS.get(host);
+    if (!staticOrigin) return null;
 
-    if (!isAllowedHost) return null;
-
-    const portSuffix = parsed.port ? `:${parsed.port}` : "";
-    const rebuilt = new URL(
-      `${parsed.pathname}${parsed.search}${parsed.hash}`,
-      `${parsed.protocol}//${host}${portSuffix}`
-    );
-    return rebuilt.toString();
+    const safePath = parsed.pathname.startsWith("/") ? parsed.pathname : `/${parsed.pathname}`;
+    return `${staticOrigin}${safePath}${parsed.search}`;
   } catch {
     return null;
   }
