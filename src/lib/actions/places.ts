@@ -354,7 +354,31 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
   }
 
   const targetGroupId = target.groupId;
-  const scopeKey = buildScopeKey(targetGroupId, currentUser.id);
+
+  const requestedCreatedById = (formData.get("createdById") as string | null)?.trim();
+  let finalCreatedById = currentUser.id;
+  if (requestedCreatedById && requestedCreatedById !== currentUser.id) {
+    if (currentUser.role !== "admin") {
+      if (!targetGroupId) {
+        return { error: "No tienes permiso para asignar otro autor." };
+      }
+      const membership = await getGroupMembership(currentUser.id, targetGroupId);
+      if (!membership.isGroupAdmin) {
+        return { error: "No tienes permiso para asignar otro autor en este grupo." };
+      }
+    }
+    const [targetAuthor] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, requestedCreatedById))
+      .limit(1);
+    if (!targetAuthor) {
+      return { error: "El usuario seleccionado como autor no existe." };
+    }
+    finalCreatedById = targetAuthor.id;
+  }
+
+  const scopeKey = buildScopeKey(targetGroupId, finalCreatedById);
 
   const [newPlace] = await db
     .insert(places)
@@ -374,7 +398,7 @@ export async function createPlaceAction(formData: FormData): Promise<CreatePlace
       communityPublished: targetGroupId !== null,
       website,
       phone,
-      createdById: currentUser.id,
+      createdById: finalCreatedById,
     })
     .returning();
 
