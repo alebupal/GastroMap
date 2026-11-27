@@ -565,12 +565,25 @@ function PlaceCardComponent({
       {/* Pie de tarjeta: en móvil barra uniforme de acciones + autor abajo; en desktop 1 fila horizontal */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
         <div className="flex items-center gap-1.5 shrink-0 pt-1 sm:pt-0 border-t border-slate-100/80 dark:border-slate-800/50 sm:border-t-0">
-          <span className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[9px] flex items-center justify-center border border-orange-200/70 dark:border-orange-800/60">
-            {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
-          </span>
-          <span className="font-bold text-slate-700 dark:text-slate-300">
-            @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
-          </span>
+          {place.createdByUsername === "usuario_eliminado" ? (
+            <>
+              <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                👻
+              </span>
+              <span className="font-semibold italic text-slate-400 dark:text-slate-500">
+                @usuario_eliminado
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[9px] flex items-center justify-center border border-orange-200/70 dark:border-orange-800/60">
+                {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
+              </span>
+              <span className="font-bold text-slate-700 dark:text-slate-300">
+                @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 sm:flex-wrap w-full sm:w-auto">

@@ -794,7 +794,11 @@ export function PlacesTableManager({
 
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
                   <span className="text-[11px] text-slate-400 truncate min-w-0">
-                    @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+                    {place.createdByUsername === "usuario_eliminado" ? (
+                      <span className="italic">👻 @usuario_eliminado</span>
+                    ) : (
+                      `@${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}`
+                    )}
                   </span>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {place.googleMapsUrl && (
@@ -1073,7 +1077,13 @@ export function PlacesTableManager({
                       </td>
 
                       <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
-                        @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+                        {place.createdByUsername === "usuario_eliminado" ? (
+                          <span className="italic text-slate-400 dark:text-slate-500">
+                            👻 @usuario_eliminado
+                          </span>
+                        ) : (
+                          `@${place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}`
+                        )}
                       </td>
 
                       <td className="p-3 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">

@@ -20,3 +20,12 @@ test("Identidad de locales y sufijo de copia: funciones puras presentes", () => 
   assert.ok(identitySrc.includes("export function buildCopyName"));
   assert.ok(identitySrc.includes("(copia)"));
 });
+
+test("Seguridad anti-SSRF en resolución de Google Maps", () => {
+  assert.ok(mapsSrc.includes("function isPrivateOrLocalHostname"));
+  assert.ok(mapsSrc.includes("function isAllowedGoogleMapsFetchUrl"));
+  assert.ok(mapsSrc.includes("function fetchGoogleMapsWithSafeRedirects"));
+  assert.ok(mapsSrc.includes('redirect: "manual"'));
+  assert.ok(mapsSrc.includes("169"));
+  assert.ok(mapsSrc.includes("127"));
+});

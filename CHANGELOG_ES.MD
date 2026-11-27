@@ -7,9 +7,11 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 
 ## [0.2.2] - 2026-11-27
 
-### 🛡️ Grupos y Móvil
+### 🛡️ Grupos, Móvil y Seguridad
 - **Ceder Propiedad y Salir del Grupo (`/group-admin > Ajustes`)**: El creador del grupo puede transferir la propiedad a otro miembro activo existente y abandonar el grupo sin eliminar su catálogo, con opción de pasar sus propios sitios y comentarios a **`👻 @usuario_eliminado`**.
-- **Menú Móvil de Superadmin sin Scroll Lateral (`/admin`)**: Ajustada la cabecera del drawer y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
+- **Distintivo Visual para `👻 @usuario_eliminado`**: Tarjetas (`PlaceCard`), comentarios (`PlaceCommentsThread`) y tablas de administración (`PlacesTableManager`) muestran con icono `👻` y estilo atenuado las aportaciones reasignadas a la cuenta fantasma.
+- **Menús Móviles sin Scroll Lateral (`/admin` y `/group-admin`)**: Ajustadas las cabeceras de ambos drawers y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
+- **Tests Anti-SSRF**: Añadida verificación automática en `tests/` para la validación de dominios, bloqueo de IPs privadas y redirecciones manuales en enlaces de Google Maps.
 
 ## [0.2.1] - 2026-11-26
 
