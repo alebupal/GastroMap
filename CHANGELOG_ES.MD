@@ -12,6 +12,7 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 - **Distintivo Visual para `👻 @usuario_eliminado`**: Tarjetas (`PlaceCard`), comentarios (`PlaceCommentsThread`) y tablas de administración (`PlacesTableManager`) muestran con icono `👻` y estilo atenuado las aportaciones reasignadas a la cuenta fantasma.
 - **Menús Móviles sin Scroll Lateral (`/admin` y `/group-admin`)**: Ajustadas las cabeceras de ambos drawers y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
 - **Tests Anti-SSRF**: Añadida verificación automática en `tests/` para la validación de dominios, bloqueo de IPs privadas y redirecciones manuales en enlaces de Google Maps.
+- **Ordenación «✨ Para ti (Tus gustos)»**: Nueva opción en *Ordenar por* que puntúa cada sitio según tus categorías, etiquetas, rangos de precio y ciudades favoritas o mejor valoradas, priorizando sitios afines por descubrir.
 - **Actualización de Dependencias y Entorno**: Actualizados `Node.js 22` (`Dockerfile`), `next` (`16.4.6` con Turbopack), `eslint` (`9.x`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`) y `zod` (`4.6.7`), eliminando todas las vulnerabilidades altas.
 
 ## [0.2.1] - 2026-11-26

@@ -20,7 +20,7 @@ export interface SavedFilterCriteria {
     | "favorite"
     | "pending";
   radiusKm?: number | null;
-  sortBy?: "recent" | "distance" | "name" | "price_asc" | "price_desc" | "rating";
+  sortBy?: "recent" | "for_you" | "distance" | "name" | "price_asc" | "price_desc" | "rating";
 }
 
 export interface SavedFilterItem {
