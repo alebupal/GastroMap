@@ -12,6 +12,7 @@ y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org
 - **Distintivo Visual para `👻 @usuario_eliminado`**: Tarjetas (`PlaceCard`), comentarios (`PlaceCommentsThread`) y tablas de administración (`PlacesTableManager`) muestran con icono `👻` y estilo atenuado las aportaciones reasignadas a la cuenta fantasma.
 - **Menús Móviles sin Scroll Lateral (`/admin` y `/group-admin`)**: Ajustadas las cabeceras de ambos drawers y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
 - **Tests Anti-SSRF**: Añadida verificación automática en `tests/` para la validación de dominios, bloqueo de IPs privadas y redirecciones manuales en enlaces de Google Maps.
+- **Actualización de Dependencias**: Actualizados `next` (`15.5.29`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`) y `zod` (`4.6.7`) para mitigar vulnerabilidades de seguridad manteniendo compatibilidad con Node 18/20.
 
 ## [0.2.1] - 2026-11-26
 
