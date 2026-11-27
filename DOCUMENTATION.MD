@@ -146,7 +146,7 @@ When launching on a clean database:
 - **Personal Stats (`📊 Stats`) & «Wrapped»**: Filter your KPIs, **exploration progress** bar (*To discover* & `% visited`), and annual summary by **All my places**, **Personal Map**, or any **group**, plus a collapsible **My groups** breakdown showing your role, contributions, visits, and comments per group.
 
 ### 🔖 Shareable Lists & Collections (Personal Guides)
-- **Themed Organization**: From the user menu (*My lists & guides*) or via `⋮ > Save to list` on any place card, organize places into themed collections such as *“Tapas tour in Granada”*, *“Lisbon trip”*, or *“Special dinners”*.
+- **Themed Organization & Bulk Adding**: From the user menu (*My lists & guides*) or via `⋮ > Save to list` on any place card, organize places into themed collections such as *“Tapas tour in Granada”*, *“Tenerife trip”*, or *“Special dinners”*. For trips or large collections, use the **«To list»** button in the explorer to add all filtered places at once (creating a public guide on the fly), or click **«Add multiple places»** inside any list to multi-select venues filtered by city or name.
 - **Manual Stop Ordering**: Expand any list in *My lists & guides* to reorder stops (`↑`/`↓`) or remove places without deleting them from the main catalog.
 - **Read-Only Public Link (`/guide/[slug]`)**: Toggle any list to **Public** to generate a shareable link (with one-tap copy or WhatsApp share). Friends can browse the full guide with an interactive map, numbered stops, and a multi-stop **«Route in Google Maps»** button without registering or logging in. Switch the list back to **Private** at any time to immediately revoke public access.
 

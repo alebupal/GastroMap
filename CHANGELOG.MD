@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-11-27
+
+### 🔖 Bulk List & Guide Actions
+- **Add Filtered View to a List (`PlacesExplorer` → `BulkAddToListModal`)**: New **«To list»** action next to *Share view* / *Save* (and inside mobile `+ Filters`) to add all currently filtered places (e.g., a trip destination city) into an existing list or create a new shareable public guide on the fly with instant link copy.
+- **Multi-Select Picker inside `My lists` (`ListsModal`)**: Expanding any list now includes **«Add multiple places»** with live search, city filter, *Select visible*, and checkboxes to add multiple places at once while skipping duplicates (`addPlacesToListAction`).
+
 ## [0.2.5] - 2026-11-27
 
 ### 🛡️ Author Moderation

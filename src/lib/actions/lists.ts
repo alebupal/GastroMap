@@ -503,6 +503,126 @@ export async function togglePlaceInListAction(listId: string, placeId: string) {
   return { success: true, added: true };
 }
 
+export interface ListCandidatePlace {
+  id: string;
+  name: string;
+  city: string | null;
+  address: string | null;
+  priceRange: string;
+}
+
+/**
+ * Añade varios establecimientos de golpe a una lista existente, omitiendo duplicados.
+ */
+export async function addPlacesToListAction(
+  listId: string,
+  placeIds: string[]
+): Promise<{ success?: boolean; addedCount?: number; skippedCount?: number; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autorizado." };
+
+  const uniqueIds = Array.from(new Set(placeIds.map((id) => id.trim()).filter(Boolean)));
+  if (uniqueIds.length === 0) {
+    return { success: true, addedCount: 0, skippedCount: 0 };
+  }
+
+  const [list] = await db
+    .select()
+    .from(placeLists)
+    .where(eq(placeLists.id, listId))
+    .limit(1);
+
+  if (!list || !(await canReadList(currentUser.id, currentUser.role, list))) {
+    return { error: "Lista no encontrada." };
+  }
+
+  const existingItems = await db
+    .select({
+      placeId: placeListItems.placeId,
+      position: placeListItems.position,
+    })
+    .from(placeListItems)
+    .where(eq(placeListItems.listId, listId));
+
+  const existingSet = new Set(existingItems.map((i) => i.placeId));
+  let nextPos = existingItems.reduce((acc, item) => Math.max(acc, item.position), -1) + 1;
+
+  const toInsert = uniqueIds.filter((id) => !existingSet.has(id));
+  if (toInsert.length > 0) {
+    await db
+      .insert(placeListItems)
+      .values(
+        toInsert.map((placeId) => ({
+          listId,
+          placeId,
+          position: nextPos++,
+        }))
+      )
+      .onConflictDoNothing();
+
+    await db
+      .update(placeLists)
+      .set({ updatedAt: new Date() })
+      .where(eq(placeLists.id, listId));
+  }
+
+  if (list.shareSlug) revalidatePath(`/guide/${list.shareSlug}`);
+  revalidatePath("/");
+  return {
+    success: true,
+    addedCount: toInsert.length,
+    skippedCount: uniqueIds.length - toInsert.length,
+  };
+}
+
+/**
+ * Lista los establecimientos disponibles del mismo espacio que la lista para añadirlos por lote.
+ */
+export async function getListCandidatePlacesAction(
+  listId: string
+): Promise<ListCandidatePlace[]> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+
+  const [list] = await db
+    .select()
+    .from(placeLists)
+    .where(eq(placeLists.id, listId))
+    .limit(1);
+
+  if (!list || !(await canReadList(currentUser.id, currentUser.role, list))) {
+    return [];
+  }
+
+  const ws = await getActiveWorkspace();
+  let spaceFilter;
+  if (list.groupId) {
+    spaceFilter = eq(places.groupId, list.groupId);
+  } else if (ws && ws.myGroups.length > 0) {
+    spaceFilter = or(
+      and(isNull(places.groupId), eq(places.createdById, currentUser.id)),
+      inArray(
+        places.groupId,
+        ws.myGroups.map((g) => g.id)
+      )
+    );
+  } else {
+    spaceFilter = and(isNull(places.groupId), eq(places.createdById, currentUser.id));
+  }
+
+  return db
+    .select({
+      id: places.id,
+      name: places.name,
+      city: places.city,
+      address: places.address,
+      priceRange: places.priceRange,
+    })
+    .from(places)
+    .where(and(isNull(places.deletedAt), spaceFilter))
+    .orderBy(asc(places.name));
+}
+
 export async function reorderListItemsAction(listId: string, orderedPlaceIds: string[]) {
   const currentUser = await getCurrentUser();
   if (!currentUser) return { error: "No autorizado." };
