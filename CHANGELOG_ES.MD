@@ -5,6 +5,12 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.6] - 2026-11-27
+
+### 🔖 Listas y Guías en Lote
+- **Añadir Vista Filtrada a una Lista (`PlacesExplorer` → `BulkAddToListModal`)**: Nuevo botón **«A lista»** junto a *Compartir vista* / *Guardar* (y en el panel móvil `+ Filtros`) para añadir de golpe todos los sitios filtrados (p. ej. una ciudad de viaje como *Tenerife*) a una lista existente o crear una guía pública nueva al vuelo con enlace copiable al instante.
+- **Añadir Varios Sitios dentro de `Mis listas` (`ListsModal`)**: Al desplegar cualquier lista, nuevo botón **«Añadir varios sitios»** con buscador, filtro por ciudad, botón *Seleccionar visibles* y checkboxes para incorporar múltiples locales de una vez omitiendo duplicados (`addPlacesToListAction`).
+
 ## [0.2.5] - 2026-11-27
 
 ### 🛡️ Moderación de Autoría

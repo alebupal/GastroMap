@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   getMyListsAction,
   getListItemsAction,
+  getListCandidatePlacesAction,
   createListAction,
   updateListAction,
   deleteListAction,
   togglePlaceInListAction,
+  addPlacesToListAction,
   reorderListItemsAction,
   type UserPlaceListSummary,
   type ListPlaceItemDetail,
+  type ListCandidatePlace,
 } from "@/lib/actions/lists";
 import { copyText } from "@/lib/clipboard";
 import { useT } from "@/lib/i18n/client";
@@ -47,6 +50,15 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
   const [editDesc, setEditDesc] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Selector múltiple en lote dentro de una lista
+  const [pickerListId, setPickerListId] = useState<string | null>(null);
+  const [candidatesByList, setCandidatesByList] = useState<Record<string, ListCandidatePlace[]>>({});
+  const [loadingCandidatesId, setLoadingCandidatesId] = useState<string | null>(null);
+  const [pickerSearch, setPickerSearch] = useState("");
+  const [pickerCity, setPickerCity] = useState("");
+  const [pickerSelected, setPickerSelected] = useState<Set<string>>(new Set());
+  const [savingBulkId, setSavingBulkId] = useState<string | null>(null);
+
   async function loadLists() {
     setLoading(true);
     try {
@@ -71,6 +83,33 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
+
+  const activePickerCandidates = useMemo(() => {
+    if (!pickerListId) {
+      return {
+        cities: [] as string[],
+        filtered: [] as ListCandidatePlace[],
+        selectableIds: [] as string[],
+      };
+    }
+    const activeList = lists.find((l) => l.id === pickerListId);
+    const existingSet = new Set(activeList?.placeIds || []);
+    const all = candidatesByList[pickerListId] || [];
+    const cities = Array.from(
+      new Set(all.map((p) => (p.city || "").trim()).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+    const q = pickerSearch.trim().toLowerCase();
+    const filtered = all.filter((p) => {
+      if (pickerCity && (p.city || "").trim() !== pickerCity) return false;
+      if (q) {
+        const hay = `${p.name} ${p.city || ""} ${p.address || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const selectableIds = filtered.filter((p) => !existingSet.has(p.id)).map((p) => p.id);
+    return { cities, filtered, selectableIds };
+  }, [pickerListId, lists, candidatesByList, pickerSearch, pickerCity]);
 
   if (!isOpen) return null;
 
@@ -211,6 +250,64 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
     const url = getGuideUrl(list.shareSlug);
     const text = `${list.name}\n${url}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  }
+
+  async function handleOpenBulkPicker(listId: string) {
+    if (pickerListId === listId) {
+      setPickerListId(null);
+      return;
+    }
+    setPickerListId(listId);
+    setPickerSearch("");
+    setPickerCity("");
+    setPickerSelected(new Set());
+    if (!candidatesByList[listId]) {
+      setLoadingCandidatesId(listId);
+      try {
+        const candidates = await getListCandidatePlacesAction(listId);
+        setCandidatesByList((prev) => ({ ...prev, [listId]: candidates }));
+      } finally {
+        setLoadingCandidatesId(null);
+      }
+    }
+  }
+
+  async function handleConfirmBulkPicker(list: UserPlaceListSummary) {
+    const ids = Array.from(pickerSelected);
+    if (ids.length === 0 || savingBulkId) return;
+    setSavingBulkId(list.id);
+    const res = await addPlacesToListAction(list.id, ids);
+    setSavingBulkId(null);
+    if (res?.error) {
+      toast(res.error, { kind: "error" });
+      return;
+    }
+    const addedCount = res.addedCount ?? 0;
+    const skippedCount = res.skippedCount ?? 0;
+    if (addedCount === 0) {
+      toast(t("lists.bulk_already_all_toast", { name: list.name }), { kind: "info" });
+    } else if (skippedCount > 0) {
+      toast(
+        t("lists.bulk_added_with_skipped_toast", {
+          added: String(addedCount),
+          name: list.name,
+          skipped: String(skippedCount),
+        }),
+        { kind: "success" }
+      );
+    } else {
+      toast(
+        t("lists.bulk_added_toast", {
+          added: String(addedCount),
+          name: list.name,
+        }),
+        { kind: "success" }
+      );
+    }
+    setPickerListId(null);
+    setPickerSelected(new Set());
+    const [freshItems] = await Promise.all([getListItemsAction(list.id), loadLists()]);
+    setItemsByList((prev) => ({ ...prev, [list.id]: freshItems }));
   }
 
   return (
@@ -484,7 +581,146 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
 
                     {/* Paradas desplegadas */}
                     {isExpanded && (
-                      <div className="pt-2 space-y-1.5">
+                      <div className="pt-2 space-y-2">
+                        <div className="flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenBulkPicker(l.id)}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                              pickerListId === l.id
+                                ? "bg-indigo-600 text-white"
+                                : "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60 hover:bg-indigo-100"
+                            }`}
+                          >
+                            <span className="material-symbols-outlined text-sm leading-none">
+                              {pickerListId === l.id ? "close" : "playlist_add"}
+                            </span>
+                            <span>{t("lists.bulk_picker_open")}</span>
+                          </button>
+                        </div>
+
+                        {pickerListId === l.id && (
+                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 space-y-2.5">
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <input
+                                type="text"
+                                value={pickerSearch}
+                                onChange={(e) => setPickerSearch(e.target.value)}
+                                placeholder={t("lists.bulk_picker_search")}
+                                className="flex-1 px-3 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                              />
+                              {activePickerCandidates.cities.length > 0 && (
+                                <select
+                                  value={pickerCity}
+                                  onChange={(e) => setPickerCity(e.target.value)}
+                                  className="px-2.5 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
+                                >
+                                  <option value="">{t("lists.bulk_picker_all_cities")}</option>
+                                  {activePickerCandidates.cities.map((c) => (
+                                    <option key={c} value={c}>
+                                      {c}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+
+                            {loadingCandidatesId === l.id ? (
+                              <div className="h-20 rounded-xl gm-shimmer" />
+                            ) : activePickerCandidates.filtered.length === 0 ? (
+                              <p className="text-[11px] text-slate-400 text-center py-2">
+                                {t("lists.bulk_picker_empty")}
+                              </p>
+                            ) : (
+                              <>
+                                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold">
+                                  <button
+                                    type="button"
+                                    disabled={activePickerCandidates.selectableIds.length === 0}
+                                    onClick={() =>
+                                      setPickerSelected(new Set(activePickerCandidates.selectableIds))
+                                    }
+                                    className="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer disabled:opacity-40"
+                                  >
+                                    {t("lists.bulk_picker_select_visible", {
+                                      count: String(activePickerCandidates.selectableIds.length),
+                                    })}
+                                  </button>
+                                  {pickerSelected.size > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setPickerSelected(new Set())}
+                                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                                    >
+                                      {t("lists.bulk_picker_clear")}
+                                    </button>
+                                  )}
+                                </div>
+
+                                <div className="max-h-44 overflow-y-auto space-y-1 pr-0.5">
+                                  {activePickerCandidates.filtered.map((cand) => {
+                                    const alreadyIn = l.placeIds.includes(cand.id);
+                                    const checked = alreadyIn || pickerSelected.has(cand.id);
+                                    return (
+                                      <label
+                                        key={cand.id}
+                                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs ${
+                                          alreadyIn
+                                            ? "bg-slate-50 dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800 opacity-60 cursor-not-allowed"
+                                            : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-700 cursor-pointer hover:border-indigo-300"
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          disabled={alreadyIn}
+                                          checked={checked}
+                                          onChange={() => {
+                                            setPickerSelected((prev) => {
+                                              const next = new Set(prev);
+                                              if (next.has(cand.id)) next.delete(cand.id);
+                                              else next.add(cand.id);
+                                              return next;
+                                            });
+                                          }}
+                                          className="rounded accent-indigo-600 w-3.5 h-3.5 shrink-0"
+                                        />
+                                        <span className="font-semibold text-slate-800 dark:text-slate-100 truncate flex-1">
+                                          {cand.name}
+                                        </span>
+                                        {cand.city && (
+                                          <span className="text-[10px] text-slate-400 truncate max-w-[100px]">
+                                            {cand.city}
+                                          </span>
+                                        )}
+                                        {alreadyIn && (
+                                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                                            {t("lists.bulk_picker_already_in")}
+                                          </span>
+                                        )}
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+
+                                <div className="flex justify-end pt-1">
+                                  <button
+                                    type="button"
+                                    disabled={pickerSelected.size === 0 || savingBulkId === l.id}
+                                    onClick={() => handleConfirmBulkPicker(l)}
+                                    className="px-3.5 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
+                                  >
+                                    {savingBulkId === l.id
+                                      ? t("common.loading")
+                                      : t("lists.bulk_picker_add_selected", {
+                                          count: String(pickerSelected.size),
+                                        })}
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+
                         {loadingItemsId === l.id ? (
                           <div className="h-12 rounded-xl gm-shimmer" />
                         ) : items.length === 0 ? (

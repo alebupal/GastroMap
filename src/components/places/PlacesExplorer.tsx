@@ -42,6 +42,9 @@ const ComparePlacesModal = dynamic(() =>
 const CommandPalette = dynamic(() =>
   import("@/components/ui/CommandPalette").then((m) => m.CommandPalette)
 );
+const BulkAddToListModal = dynamic(() =>
+  import("./BulkAddToListModal").then((m) => m.BulkAddToListModal)
+);
 
 interface PlacesExplorerProps {
   initialPlaces: PlaceWithDetails[];
@@ -254,6 +257,7 @@ export function PlacesExplorer({
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isExportImportOpen, setIsExportImportOpen] = useState(false);
+  const [isBulkAddListOpen, setIsBulkAddListOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [isCompareOpen, setIsCompareOpen] = useState(false);
@@ -1424,6 +1428,17 @@ export function PlacesExplorer({
           </div>
 
           <div className="flex items-center gap-2 text-xs">
+            {filteredPlaces.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsBulkAddListOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/50 text-xs font-semibold transition cursor-pointer"
+                title={t("lists.bulk_add_view_tooltip", { count: String(filteredPlaces.length) })}
+              >
+                <span className="material-symbols-outlined text-sm leading-none">playlist_add</span>
+                <span className="hidden sm:inline">{t("lists.bulk_add_view_btn")}</span>
+              </button>
+            )}
             {activeFiltersCount > 0 && (
               <button
                 type="button"
@@ -2482,6 +2497,20 @@ export function PlacesExplorer({
                 <span className="material-symbols-outlined text-sm leading-none">import_export</span>
                 <span>{t("places.export_import")}</span>
               </button>
+              {filteredPlaces.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExtraFilters(false);
+                    setIsBulkAddListOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold cursor-pointer"
+                  title={t("lists.bulk_add_view_tooltip", { count: String(filteredPlaces.length) })}
+                >
+                  <span className="material-symbols-outlined text-sm leading-none">playlist_add</span>
+                  <span>{t("lists.bulk_add_view_btn")}</span>
+                </button>
+              )}
               {activeFiltersCount > 0 && (
                 <button
                   type="button"
@@ -3084,6 +3113,15 @@ export function PlacesExplorer({
           isOpen={isExportImportOpen}
           onClose={() => setIsExportImportOpen(false)}
           places={filteredPlaces}
+        />
+      )}
+
+      {isBulkAddListOpen && (
+        <BulkAddToListModal
+          isOpen={isBulkAddListOpen}
+          onClose={() => setIsBulkAddListOpen(false)}
+          places={filteredPlaces}
+          suggestedListName={selectedCities.length === 1 ? selectedCities[0] : ""}
         />
       )}
 
