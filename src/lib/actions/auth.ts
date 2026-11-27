@@ -7,6 +7,7 @@ import { eq, and, or, isNull, gt, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { users, invitations } from "@/db/schema";
 import { logAudit } from "@/lib/audit";
+import { isReservedGhostIdentity } from "@/lib/ghost";
 import { rateLimit, resetRateLimit } from "@/lib/rate-limit";
 import {
   hashPassword,
@@ -66,6 +67,9 @@ export async function setupAdminAction(formData: FormData): Promise<ActionResult
   }
   if (!/^[a-z0-9_-]+$/.test(username)) {
     return { error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos." };
+  }
+  if (isReservedGhostIdentity(username, email)) {
+    return { error: "Ese nombre de usuario o correo está reservado por el sistema." };
   }
   if (!email || !email.includes("@")) {
     return { error: "Por favor, introduce un correo electrónico válido." };
@@ -134,6 +138,9 @@ export async function registerPublicAction(formData: FormData): Promise<ActionRe
     return {
       error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.",
     };
+  }
+  if (isReservedGhostIdentity(username, email)) {
+    return { error: "Ese nombre de usuario o correo está reservado por el sistema." };
   }
   if (!email || !email.includes("@")) {
     return { error: "Introduce un correo electrónico válido." };
@@ -466,6 +473,9 @@ export async function registerWithInvitationAction(
   }
   if (!/^[a-z0-9_-]+$/.test(username)) {
     return { error: "El nombre de usuario solo puede contener letras, números, guiones y guiones bajos." };
+  }
+  if (isReservedGhostIdentity(username, email)) {
+    return { error: "Ese nombre de usuario o correo está reservado por el sistema." };
   }
   if (!email || !email.includes("@")) {
     return { error: "Introduce un correo válido." };
