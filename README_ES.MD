@@ -1,6 +1,6 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.3-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)

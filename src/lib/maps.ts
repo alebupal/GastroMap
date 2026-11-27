@@ -73,15 +73,32 @@ export function extractFirstUrl(input: string): string {
   return match ? match[0].replace(/[),.;]+$/, "") : trimmed;
 }
 
+const HTML_ENTITY_MAP: Record<string, string> = {
+  "&amp;": "&",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&apos;": "'",
+  "&lt;": "<",
+  "&gt;": ">",
+};
+
 function decodeHtmlEntities(str: string): string {
-  return str
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)));
+  return str.replace(
+    /&(amp|quot|#39|apos|lt|gt|#x[0-9a-f]+|#\d+);/gi,
+    (match) => {
+      const lower = match.toLowerCase();
+      if (HTML_ENTITY_MAP[lower]) return HTML_ENTITY_MAP[lower];
+      if (lower.startsWith("&#x")) {
+        const code = parseInt(lower.slice(3, -1), 16);
+        return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+      }
+      if (lower.startsWith("&#")) {
+        const code = parseInt(lower.slice(2, -1), 10);
+        return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+      }
+      return match;
+    }
+  );
 }
 
 function isGenericGoogleMapsDescription(text: string): boolean {
@@ -175,30 +192,40 @@ function isPrivateOrLocalHostname(hostname: string): boolean {
   );
 }
 
-function isAllowedGoogleMapsFetchUrl(rawUrl: string): boolean {
+function getSafeGoogleMapsFetchUrl(rawUrl: string): string | null {
   try {
     const parsed = new URL(rawUrl);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
     const host = parsed.hostname.toLowerCase();
-    if (isPrivateOrLocalHostname(host)) return false;
+    if (isPrivateOrLocalHostname(host)) return null;
 
-    if (host === "maps.app.goo.gl" || host === "share.google" || host === "goo.gl" || host === "g.co") {
-      return true;
-    }
-    if (host.startsWith("maps.google.") || host.startsWith("consent.google.")) return true;
-    if (/^(www\.)?google\.[a-z.]+$/.test(host)) return true;
+    const isAllowedHost =
+      host === "maps.app.goo.gl" ||
+      host === "share.google" ||
+      host === "goo.gl" ||
+      host === "g.co" ||
+      /^(maps|consent)\.google\.[a-z.]+$/.test(host) ||
+      /^(www\.)?google\.[a-z.]+$/.test(host);
 
-    return false;
+    if (!isAllowedHost) return null;
+
+    const portSuffix = parsed.port ? `:${parsed.port}` : "";
+    const rebuilt = new URL(
+      `${parsed.pathname}${parsed.search}${parsed.hash}`,
+      `${parsed.protocol}//${host}${portSuffix}`
+    );
+    return rebuilt.toString();
   } catch {
-    return false;
+    return null;
   }
 }
 
 async function fetchGoogleMapsWithSafeRedirects(initialUrl: string): Promise<Response | null> {
   let currentUrl = initialUrl;
   for (let hop = 0; hop < 4; hop++) {
-    if (!isAllowedGoogleMapsFetchUrl(currentUrl)) return null;
-    const response = await fetch(currentUrl, {
+    const safeUrl = getSafeGoogleMapsFetchUrl(currentUrl);
+    if (!safeUrl) return null;
+    const response = await fetch(safeUrl, {
       method: "GET",
       redirect: "manual",
       signal: AbortSignal.timeout(4500),
@@ -212,7 +239,7 @@ async function fetchGoogleMapsWithSafeRedirects(initialUrl: string): Promise<Res
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
       if (!location) return response;
-      const nextUrl = new URL(location, currentUrl).toString();
+      const nextUrl = new URL(location, safeUrl).toString();
       currentUrl = nextUrl;
       continue;
     }
@@ -232,7 +259,7 @@ export async function resolveGoogleMapsDetails(rawInput: string): Promise<Resolv
   const result: ResolvedGoogleMapsResult = { resolvedUrl: url };
 
   try {
-    if (!isValidGoogleMapsUrl(url) || !isAllowedGoogleMapsFetchUrl(url)) {
+    if (!isValidGoogleMapsUrl(url) || !getSafeGoogleMapsFetchUrl(url)) {
       return result;
     }
 

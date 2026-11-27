@@ -1,6 +1,6 @@
 {
   "name": "gastromap",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "license": "GPL-3.0-or-later",
   "scripts": {
@@ -45,5 +45,8 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
   }
 }

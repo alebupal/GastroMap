@@ -59,11 +59,14 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   // 1. Teselas de mapas (OpenStreetMap, CartoDB, etc.)
-  if (
-    url.hostname.includes("tile.openstreetmap.org") ||
-    url.hostname.includes("basemaps.cartocdn.com") ||
-    url.pathname.includes("/tile/")
-  ) {
+  const host = url.hostname.toLowerCase();
+  const isTileHost =
+    host === "tile.openstreetmap.org" ||
+    host.endsWith(".tile.openstreetmap.org") ||
+    host === "basemaps.cartocdn.com" ||
+    host.endsWith(".basemaps.cartocdn.com");
+
+  if (isTileHost || url.pathname.includes("/tile/")) {
     event.respondWith(
       caches.open(TILES_CACHE).then((cache) =>
         cache.match(request).then((cachedResponse) => {

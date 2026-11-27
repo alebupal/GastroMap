@@ -5,6 +5,18 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.3] - 2026-11-27
+
+Actualización de endurecimiento de seguridad (CodeQL y Dependabot a 0 alertas).
+
+### 🔒 Seguridad y CI
+- **Validación Anti-SSRF Reforzada (`src/lib/maps.ts`)**: Expresiones regulares ancladas para dominios oficiales de Google Maps/Consent y reconstrucción explícita de la URL validada antes de `fetch`.
+- **Decodificación HTML en Una Sola Pasada (`src/lib/maps.ts`)**: `decodeHtmlEntities` resuelve entidades en un único paso evitando el doble desescapado.
+- **Validación Exacta de Hosts de Teselas (`public/sw.js`)**: Comprobación estricta por igualdad o subdominio (`.endsWith`) para `tile.openstreetmap.org` y `basemaps.cartocdn.com`.
+- **Parser XML Seguro para KML/GPX (`ExportImportModal.tsx`)**: Sustitución de `DOMParser` por un extractor XML ligero sin interpretación HTML.
+- **Permisos Mínimos en GitHub Actions**: Añadido `permissions: contents: read` en los workflows de Docker (`docker-image-branches.yml` y `docker-image-releases.yml`).
+- **Dependencias a 0 Vulnerabilidades**: Añadido `overrides` para `esbuild >= 0.25.0` en `package.json`, eliminando la alerta transitiva de `drizzle-kit` (`npm audit`: 0 vulnerabilidades).
+
 ## [0.2.2] - 2026-11-27
 
 Nuevas funciones de descubrimiento, importación y compartición pública, mejoras en la administración de grupos y actualización completa del stack a **Next.js 16 + Node.js 22**.
