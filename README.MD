@@ -25,7 +25,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * **Unified search bar & Command Palette (`Ctrl+K` / `⌘+K`)**: Rounded search input with keyboard-driven `⌘K` quick launcher to jump to any place or action, plus inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
   * **Segmented experience filters (Row 1) & Shareable Views**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), live URL query param sync with a **«Share view»** button, active filter chip (`✕`), and `💾 Save` button.
   * **Two-tier segmentation (Row 2) & Dining with friends**: Searchable dropdowns for countries (+195) and cities (accent-insensitive search), explicit price range chips (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`), quick **minimum rating filter** (`★ 7+`, `★ 8+`, `★ 9+`), **«Dining with friends»** filter to find places pending or untried for the friends you're meeting, featured tags with animated `+ Filters` panel, and actionable empty state with removable active-filter chips.
-  * **Stitch-styled place cards**: Initials avatar, address with pin, emerald price badge, favorite button, collection buttons (`Want to go`, `Visited`, `My note`), **one-tap copy/share place info**, and author footer with actions.
+  * **Stitch-styled place cards & «✨ For you» sorting**: Initials avatar, address with pin and **one-tap copy address**, emerald price badge, favorite button, collection buttons (`Want to go`, `Visited`, `My note`), **«✨ For you (Your taste)» sorting** based on your favorites and ratings, **shareable public place card links (`/p/[id]`) with Open Graph previews** without exposing private notes or comments, and author footer with actions.
   * **Modern pagination & synced map**: Circular pill buttons, live map floating count, and default **«Scroll list»** mode on mobile for effortless scrolling without getting trapped inside the map.
 
 * **🗺️ Interactive Leaflet Map:**
@@ -45,7 +45,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
   * Saved filter presets (`💾`) with persistent label, multi-criteria sorting, centered quick actions, and live searchable taxonomies with progressive «Show more» loading.
-  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview and downloadable sample templates.
+  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout (Spanish/English CSV & GeoJSON), KML, GPX, and CSV** with automatic deduplication, preview, and downloadable sample templates.
   * Bulk place backup downloads directly from the admin management table.
 
 * **🌐 Multi-language System (i18n):**

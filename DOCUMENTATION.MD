@@ -111,9 +111,11 @@ When launching on a clean database:
   - `Dining with friends`: Pick which users you're going out with (in `+ Filters` or the Decision Assistant / Mobile Filters) and choose from 11 modes with live descriptions (*Pending or untried*, *Everyone wants to go*, *Someone wants to go & untried*, *Someone wants to go even if visited*, *Someone's favorite*, *Everyone's favorite*, *Someone's favorite & new for others*, *Highly rated by someone (8+)*, *Tried by some & new for others*, *Visited by everyone*, or *Added by the group*). Works seamlessly with **🎲 Random Pick** and the map.
   - **Actionable Empty State**: When a filter combination yields 0 results, clickable chips let you remove any single active filter without resetting the entire search.
 - **Stitch-styled Place Cards**:
-  - Restaurant initials avatar, address with pin, emerald price badge, and interactive favorite heart (`favorite`).
+  - Restaurant initials avatar, address with pin and **one-tap copy address button**, emerald price badge, and interactive favorite heart (`favorite`).
   - Horizontal collection action buttons (`Want to go`, `Visited`, `My note`) with tactile micro-interactions.
-  - Card footer with author badge and complete actions (`Comments`, `Compare`, `Map`, `Google Maps`, **one-tap copy/share place info**, `Edit`, `Delete`).
+  - Card footer with author badge (showing `👻 @usuario_eliminado` for preserved contributions from deleted accounts) and complete actions (`Comments`, `Compare`, `Map`, `Google Maps`, **WhatsApp/Instagram share, copy text, or HMAC-signed public card link `/p/[id]` with Open Graph preview without exposing private notes or comments**, `Edit`, `Delete`).
+- **«✨ For you (Your taste)» Sorting**:
+  - Alongside date, rating, price, and distance sorting, **For you** scores places against your favorite, top-rated, and visited plans, tags, price brackets, and cities—surfacing matching unexplored venues first with a live taste summary banner.
 - **Synced Interactive Map**:
   - Floating top-right badge displaying live count and a subtle radar pulse ring on the selected pin.
   - Default **«Scroll list»** mode on mobile for smooth scrolling without getting trapped inside the map.
@@ -196,7 +198,7 @@ In the **Import / Export** modal (`📦`):
 - **GPX**: Waypoint format for Garmin, OsmAnd, or GPS devices.
 
 ### 📥 Import Formats
-- Import `.json`, `.geojson`, `.kml`, `.gpx`, and `.csv` files with duplicate detection and preview.
+- Import `.json`, `.geojson`, `.kml`, `.gpx`, and `.csv` files (including **Google Takeout / Google Maps** exports in Spanish or English, automatically stripping UTF-8 BOM and recognizing accented headers such as `Título`, `Nota`, `Comentario`, `URL`, and `Etiquetas`) with automatic space-level deduplication by Google Maps URL or normalized name and interactive preview.
 - **Downloadable Complete Sample Templates**: The import tab includes direct 1-click downloads for realistic, fully structured example documents in all 5 accepted formats (`JSON`, `CSV`, `GeoJSON`, `KML`, `GPX`), making it easy to verify the expected format before importing.
 - **Occasions & Tags Auto-creation**: When importing places with categories or occasions, the system automatically registers them in the `occasions` and `tags` tables, ensuring filters and selectors are synchronized.
 - **Automatic Linkification (LinkifiedText)**: Any URLs present in notes or comments are automatically rendered as secure clickable links.

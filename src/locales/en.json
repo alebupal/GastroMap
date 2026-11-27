@@ -145,6 +145,8 @@
     "visited": "Visited",
     "copy_address": "Copy address",
     "address_copied": "Address copied to clipboard",
+    "share_public_link": "Public card link",
+    "share_public_copied": "Public preview link copied",
     "private_note": "My note",
     "by_author": "By @{author}",
     "comments": "Comments",

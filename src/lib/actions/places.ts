@@ -50,6 +50,7 @@ import {
   type GeocodingResult,
 } from "@/lib/geocoding";
 import { parseCityCountry } from "@/lib/location";
+import { signPlaceShareToken } from "@/lib/share-token";
 
 export interface PlaceWithDetails extends Place {
   createdByName: string;
@@ -2248,4 +2249,48 @@ export async function checkPlaceAcrossSpacesAction(params: {
   }
 
   return { inOtherSpaces };
+}
+
+/**
+ * Genera el enlace público firmado (/p/[id]?s=<token>) para compartir la ficha
+ * de un restaurante con tarjeta Open Graph sin exponer notas privadas ni comentarios.
+ */
+export async function getPlaceShareLinkAction(
+  placeId: string
+): Promise<{ path?: string; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return { error: "Debes iniciar sesión." };
+  }
+
+  const [place] = await db
+    .select({
+      id: places.id,
+      groupId: places.groupId,
+      createdById: places.createdById,
+    })
+    .from(places)
+    .where(and(eq(places.id, placeId), isNull(places.deletedAt)))
+    .limit(1);
+
+  if (!place) {
+    return { error: "Establecimiento no encontrado." };
+  }
+
+  const isGlobalAdmin = currentUser.role === "admin";
+  if (!isGlobalAdmin) {
+    if (place.groupId === null) {
+      if (place.createdById !== currentUser.id) {
+        return { error: "No tienes acceso a este establecimiento." };
+      }
+    } else {
+      const membership = await getGroupMembership(currentUser.id, place.groupId);
+      if (!membership.isMember) {
+        return { error: "No tienes acceso a este establecimiento." };
+      }
+    }
+  }
+
+  const token = signPlaceShareToken(place.id);
+  return { path: `/p/${place.id}?s=${token}` };
 }
