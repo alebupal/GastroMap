@@ -1,6 +1,6 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -23,7 +23,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
   * **Barra de búsqueda unificada y Paleta de Comandos (`Ctrl+K` / `⌘+K`)**: Campo de búsqueda redondeado con acceso rápido `⌘K` navegable por teclado para saltar a cualquier sitio o acción, y píldoras integradas (`🎯 Asistente`, `🎲 Al azar`, `📦 Importar`, `📍 Cerca` y `➕ Añadir`).
   * **Filtros por experiencia segmentados (Fila 1) y Enlaces Compartibles**: Selector de estado personal (`Todos`, `⭐ Favoritos`, `🕒 Quiero ir`, `✅ Ya he ido`, `✨ Por descubrir`), sincronización automática de filtros en la URL con botón **«Compartir vista»**, chip de filtro activo (`✕`) y botón `💾 Guardar`.
   * **Segmentación en dos niveles (Fila 2) y Plan con amigos**: Selectores desplegables de países (+195) y ciudades (búsqueda sin distinguir tildes), rangos de precio explícitos (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`), filtro rápido por **nota mínima** (`★ 7+`, `★ 8+`, `★ 9+`), filtro **«Plan con amigos»** para encontrar sitios pendientes o por descubrir para los usuarios con los que quedas, categorías destacadas con panel desplegable animado `+ Filtros` y estado vacío con chips para quitar filtros individuales.
-  * **Tarjetas de locales estilo Stitch**: Avatar con iniciales, dirección con pin, badge de precio esmeralda, botón favorito, botones de colección (`Pendiente`, `Ya he ido`, `Mi nota`), **copiado rápido de datos del local** y pie completo con autor y acciones.
+  * **Tarjetas de locales estilo Stitch y ordenación «✨ Para ti»**: Avatar con iniciales, dirección con pin y **copiado rápido de dirección**, badge de precio esmeralda, botón favorito, botones de colección (`Pendiente`, `Ya he ido`, `Mi nota`), **ordenación inteligente «✨ Para ti (Tus gustos)»** basada en tus favoritos y valoraciones, **enlace de ficha pública (`/p/[id]`) con vista previa Open Graph** sin exponer notas ni comentarios privados, y pie completo con autor y acciones.
   * **Paginación moderna y mapa sincronizado**: Botones de página circulares tipo píldora, recuento flotante en mapa y modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll cómodamente sin quedar atrapado en el mapa.
 
 * **🗺️ Mapa interactivo Leaflet:**
@@ -32,7 +32,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 
 * **🌍 Espacios Independientes, Grupos de Amigos, Mapa Personal y Guías:**
   * Despliegue autohospedado bajo servidor propio (Docker), con **registro público abierto** (`/register`) o **modo cerrado por invitación** configurable desde `/admin > Sistema y Auditoría`.
-  * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear (desde plantilla vacía, planes base o clonando otro grupo) o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`) con aprobación opcional del administrador. Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas, **panel de administración de grupo (`/group-admin`)**, copia/movimiento masivo de sitios entre espacios con detección de duplicados y **Deshacer**, **Papelera (30 días)** y pestaña **Salud de datos**. Además, dispone de vista combinada **🌍 Todos mis sitios** y buscador rápido de grupos en la cabecera.
+  * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear (desde plantilla vacía, planes base o clonando otro grupo) o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`) con aprobación opcional del administrador. Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas, **panel de administración de grupo (`/group-admin`)** con **cesión de propiedad y salida segura del grupo**, reasignación de autoría y cuenta fantasma **`👻 @usuario_eliminado`**, copia/movimiento masivo de sitios entre espacios con detección de duplicados y **Deshacer**, **Papelera (30 días)** y pestaña **Salud de datos**. Además, dispone de vista combinada **🌍 Todos mis sitios** y buscador rápido de grupos en la cabecera.
   * **Listas / Guías personales compartibles**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales), ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Los autores y administradores del grupo gestionan sus sitios.
 
@@ -43,7 +43,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **⚖️ Comparador, Filtros Guardados e Importación / Exportación:**
   * Comparador de establecimientos lado a lado (`⚖️`) para hasta 3 sitios.
   * Filtros guardados (`💾`) con etiqueta explícita, ordenación multicriterio, acciones rápidas centradas y taxonomías con buscador en vivo y carga progresiva «Mostrar más».
-  * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout, KML, GPX y CSV** con vista previa y plantillas de ejemplo descargables por formato.
+  * Exportación en **PDF nativo (imprimible A4), JSON, CSV, GeoJSON, KML y GPX** e importación desde **JSON, GeoJSON, Google Takeout (CSV/GeoJSON en español o inglés), KML, GPX y CSV** con deduplicación automática, vista previa y plantillas de ejemplo descargables por formato.
   * Copia de seguridad (backup) en lote de sitios seleccionados desde la tabla de administración.
 
 * **🌐 Sistema Multi-idioma (i18n):**
@@ -127,7 +127,7 @@ docker compose up -d
 
 ## 🛠️ Tecnologías Empleadas
 
-* **Frontend & Backend:** [Next.js 15](https://nextjs.org/) (App Router, Server Actions, TypeScript)
+* **Frontend & Backend:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, TypeScript)
 * **Base de Datos:** [PostgreSQL 16](https://www.postgresql.org/) con extensión geoespacial [PostGIS 3.4](https://postgis.net/)
 * **ORM:** [Drizzle ORM](https://orm.drizzle.team/) + Drizzle Kit para migraciones controladas
 * **Diseño e Interfaz:** [Tailwind CSS](https://tailwindcss.com/) + componentes mobile-first
@@ -141,7 +141,7 @@ docker compose up -d
 ¡Cualquier contribución es bienvenida! Esta guía está redactada con suficiente detalle y precisión técnica para que **cualquier persona pueda pasarla como instrucción a una IA (Cursor, Claude Code, Copilot, ChatGPT, etc.) y que el asistente realice todo el proceso de forma autónoma y correcta**.
 
 ### 🤖 Contexto Rápido para Agentes de IA
-* **Arquitectura:** Monolito full-stack con Next.js 15 (App Router, TypeScript estricto, Server Actions y Server Components).
+* **Arquitectura:** Monolito full-stack con Next.js 16 (App Router, TypeScript estricto, Server Actions y Server Components).
 * **Base de Datos:** PostgreSQL 16 con PostGIS gestionado mediante Drizzle ORM (`src/db/schema.ts`).
 * **Estilos:** Tailwind CSS con diseño mobile-first y componentes accesibles.
 * **Autenticación y Seguridad:** Sesiones en base de datos (`sessions`) con cookies `HttpOnly` (`Secure` automático tras HTTPS), contraseñas con Argon2id, protección anti-SSRF en enlaces Maps y cifrado AES-256-GCM para claves API.

@@ -111,9 +111,11 @@ Al acceder por primera vez a una instancia limpia:
   - `Plan con amigos`: Selecciona con qué usuarios vas a salir (en `+ Filtros` o en el Asistente/Filtros móvil) y elige entre 11 modos con descripción dinámica (*Pendiente o por descubrir*, *Todos quieren ir*, *Alguno quiere ir sin probar*, *Alguno quiere ir aunque otro ya fue*, *Favorito de alguno*, *Favorito de todos*, *Favorito de alguno, nuevo para otros*, *Bien valorado por alguno (8+)*, *Probado por alguno, nuevo para otros*, *Visitado por todos* o *Añadidos por el grupo*). Combina a la perfección con **🎲 Al azar** y el mapa.
   - **Estado vacío accionable**: Si una combinación de filtros no devuelve resultados, aparecen chips clicables para retirar un filtro individual sin reiniciar toda la búsqueda.
 - **Tarjetas de Locales Estilo Stitch**:
-  - Avatar con iniciales del establecimiento, dirección con pin, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
+  - Avatar con iniciales del establecimiento, dirección con pin y **botón de copiar dirección en un toque**, badge de rango de precios esmeralda y botón de favorito interactivo (`favorite`).
   - Botones horizontales de colección rápida (`Pendiente`, `Ya he ido`, `Mi nota`) con micro-interacciones táctiles.
-  - Pie de tarjeta con autor y botones de acción completos (`Comentarios`, `Comparar`, `Mapa`, `Google Maps`, **copiado rápido de datos del sitio**, `Editar`, `Eliminar`).
+  - Pie de tarjeta con autor (con distintivo `👻 @usuario_eliminado` para aportaciones conservadas de cuentas borradas) y botones de acción completos (`Comentarios`, `Comparar`, `Mapa`, `Google Maps`, **compartir por WhatsApp/Instagram, copiar texto o generar un enlace de ficha pública `/p/[id]` con tarjeta Open Graph sin exponer notas privadas ni comentarios**, `Editar`, `Eliminar`).
+- **Ordenación «✨ Para ti (Tus gustos)»**:
+  - Además de ordenar por fecha, puntuación, precio o distancia, la opción **Para ti** analiza tus favoritos, mejor valorados y visitados (planes, etiquetas, rango de precio y ciudad) para priorizar sitios afines —especialmente los que aún no has probado— y muestra un banner con los gustos detectados.
 - **Mapa Interactivo Sincronizado**:
   - Insignia flotante superior derecha con recuento local en tiempo real y pulso radar en el pin seleccionado.
   - Modo **«Deslizar lista»** activado por defecto en móvil para hacer scroll sin quedar atrapado dentro del mapa.
@@ -196,9 +198,9 @@ En el modal de **Importar / Exportar** (`📦`) dispones de herramientas complet
 - **GPX**: Formato GPS estándar con waypoints para dispositivos Garmin, OsmAnd o wikiloc.
 
 ### 📥 Formatos de Importación
-- Archivos `.json`, `.geojson`, `.kml`, `.gpx` y `.csv`.
+- Archivos `.json`, `.geojson`, `.kml`, `.gpx` y `.csv` (incluidos los CSV/GeoJSON exportados desde **Google Takeout / Google Maps** en español o inglés, limpiando BOM UTF-8 y reconociendo cabeceras con tildes como `Título`, `Nota`, `Comentario`, `URL` y `Etiquetas`).
 - **Plantillas y Archivos de Ejemplo Descargables**: La pestaña de importación incluye botones de descarga con un clic para obtener documentos de ejemplo completos y funcionales para cada uno de los formatos aceptados (`JSON`, `CSV`, `GeoJSON`, `KML`, `GPX`), facilitando preparar y verificar la estructura antes de importar.
-- Detección automática de duplicados por nombre y proximidad de coordenadas con vista previa interactiva antes de confirmar la importación.
+- Detección y omisión automática de duplicados dentro del espacio destino por enlace de Google Maps (`mapsUrlKey`) o nombre normalizado, con vista previa interactiva antes de confirmar la importación.
 - **Auto-creación de Ocasiones y Tags**: Al importar datos que contengan categorías u ocasiones temáticas, el sistema las registra automáticamente en el catálogo de `occasions` y `tags`, auto-sincronizando los selectores y filtros.
 - **Detección Automática de Enlaces (LinkifiedText)**: Cualquier URL presente en notas personales o comentarios se transforma automáticamente en un enlace web seguro clicable.
 
@@ -257,7 +259,7 @@ GastroMap está construido bajo los principios de modularidad, tipado estricto y
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   Cliente Web (PWA)                    │
-│   Next.js 15 App Router • Tailwind CSS • Leaflet Maps  │
+│   Next.js 16 App Router • Tailwind CSS • Leaflet Maps  │
 └───────────────────────────▲────────────────────────────┘
                             │ Server Actions / REST API
 ┌───────────────────────────▼────────────────────────────┐

@@ -20,10 +20,13 @@ import {
 import { getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
 import { getGroupMembership } from "@/lib/workspace";
 import { logAudit } from "@/lib/audit";
+import {
+  GHOST_USER_EMAIL,
+  GHOST_USER_USERNAME,
+  isReservedGhostIdentity,
+} from "@/lib/ghost";
 
-const GHOST_USER_EMAIL = "deleted-user@gastromap.local";
-
-async function ensureGhostUser(): Promise<string> {
+export async function ensureGhostUser(): Promise<string> {
   const [existing] = await db
     .select({ id: users.id })
     .from(users)
@@ -35,7 +38,7 @@ async function ensureGhostUser(): Promise<string> {
   const [created] = await db
     .insert(users)
     .values({
-      username: "usuario_eliminado",
+      username: GHOST_USER_USERNAME,
       name: "Usuario eliminado",
       email: GHOST_USER_EMAIL,
       passwordHash,
@@ -336,6 +339,9 @@ export async function updateUserByAdminAction(userId: string, data: UpdateUserDa
 
   if (!email || !email.includes("@")) {
     return { error: "Introduce un correo electrónico válido." };
+  }
+  if (isReservedGhostIdentity(username, email)) {
+    return { error: "Ese nombre de usuario o correo está reservado por el sistema." };
   }
 
   // Comprobar si el email ya existe para otro usuario
@@ -762,6 +768,9 @@ export async function createUserDirectlyAction(formData: FormData) {
 
   if (!email || !email.includes("@")) {
     return { error: "Introduce un correo electrónico válido." };
+  }
+  if (isReservedGhostIdentity(username, email)) {
+    return { error: "Ese nombre de usuario o correo está reservado por el sistema." };
   }
 
   if (!password || password.length < 4) {

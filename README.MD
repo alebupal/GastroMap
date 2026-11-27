@@ -2,7 +2,7 @@
 
 [Versión en Español](README_ES.MD)
 
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -25,7 +25,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
   * **Unified search bar & Command Palette (`Ctrl+K` / `⌘+K`)**: Rounded search input with keyboard-driven `⌘K` quick launcher to jump to any place or action, plus inline quick action pills (`🎯 Assistant`, `🎲 Random`, `📦 Import`, `📍 Near me`, and `➕ Add place`).
   * **Segmented experience filters (Row 1) & Shareable Views**: Personal status tabs (`All`, `⭐ Favorites`, `🕒 Want to go`, `✅ Visited`, `✨ To discover`), live URL query param sync with a **«Share view»** button, active filter chip (`✕`), and `💾 Save` button.
   * **Two-tier segmentation (Row 2) & Dining with friends**: Searchable dropdowns for countries (+195) and cities (accent-insensitive search), explicit price range chips (`< 20 €`, `20-30 €`, `30-40 €`, `> 40 €`), quick **minimum rating filter** (`★ 7+`, `★ 8+`, `★ 9+`), **«Dining with friends»** filter to find places pending or untried for the friends you're meeting, featured tags with animated `+ Filters` panel, and actionable empty state with removable active-filter chips.
-  * **Stitch-styled place cards**: Initials avatar, address with pin, emerald price badge, favorite button, collection buttons (`Want to go`, `Visited`, `My note`), **one-tap copy/share place info**, and author footer with actions.
+  * **Stitch-styled place cards & «✨ For you» sorting**: Initials avatar, address with pin and **one-tap copy address**, emerald price badge, favorite button, collection buttons (`Want to go`, `Visited`, `My note`), **«✨ For you (Your taste)» sorting** based on your favorites and ratings, **shareable public place card links (`/p/[id]`) with Open Graph previews** without exposing private notes or comments, and author footer with actions.
   * **Modern pagination & synced map**: Circular pill buttons, live map floating count, and default **«Scroll list»** mode on mobile for effortless scrolling without getting trapped inside the map.
 
 * **🗺️ Interactive Leaflet Map:**
@@ -34,7 +34,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 
 * **🌍 Independent Spaces, Friend Groups, Personal Map & Guides:**
   * Self-hosted on your own infrastructure (Docker), with **open public registration** (`/register`) or **invite-only mode** configurable in `/admin > System & Audit`.
-  * **100% Isolated Multi-Space Architecture**: Every user gets **🏠 My Personal Map** (strictly private) and can create (empty, with 8 default plans, or cloning taxonomy from another group) or join unlimited **🍻 Friend Groups** via magic links (`/groups/join/[token]`) with optional admin approval. Each group operates like its own independent app with its own places, plans, tags, lists, **per-group admin panel (`/group-admin`)**, bulk copy/move across spaces with duplicate detection and **Undo**, **30-day Trash**, and a **Data health** tab—plus a combined **🌍 All my places** view and searchable header switcher.
+  * **100% Isolated Multi-Space Architecture**: Every user gets **🏠 My Personal Map** (strictly private) and can create (empty, with 8 default plans, or cloning taxonomy from another group) or join unlimited **🍻 Friend Groups** via magic links (`/groups/join/[token]`) with optional admin approval. Each group operates like its own independent app with its own places, plans, tags, lists, **per-group admin panel (`/group-admin`)** with **ownership transfer & safe group leave**, author reassignment and **`👻 @usuario_eliminado` ghost account**, bulk copy/move across spaces with duplicate detection and **Undo**, **30-day Trash**, and a **Data health** tab—plus a combined **🌍 All my places** view and searchable header switcher.
   * **Shareable Lists & Personal Guides**: Curate themed collections (trips, tapas routes, special dinners), reorder stops manually, and toggle a **read-only public link** (`/guide/[slug]`) with an interactive map and Google Maps route that friends can browse without signing up.
   * Private personal notes and collaborative comments on each place, moderated by place authors and group administrators.
 
@@ -45,7 +45,7 @@ Built with a **mobile-first** approach and installable as a **PWA**, it lets you
 * **⚖️ Comparator, Saved Filters & Import / Export:**
   * Side-by-side place comparator (`⚖️`) for up to 3 establishments.
   * Saved filter presets (`💾`) with persistent label, multi-criteria sorting, centered quick actions, and live searchable taxonomies with progressive «Show more» loading.
-  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout, KML, GPX, and CSV** with preview and downloadable sample templates.
+  * Export in **native PDF (printable A4), JSON, CSV, GeoJSON, KML, and GPX**; import from **JSON, GeoJSON, Google Takeout (Spanish/English CSV & GeoJSON), KML, GPX, and CSV** with automatic deduplication, preview, and downloadable sample templates.
   * Bulk place backup downloads directly from the admin management table.
 
 * **🌐 Multi-language System (i18n):**
@@ -129,7 +129,7 @@ docker compose up -d
 
 ## 🛠️ Tech Stack
 
-* **Frontend & Backend:** [Next.js 15](https://nextjs.org/) (App Router, Server Actions, TypeScript)
+* **Frontend & Backend:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, TypeScript)
 * **Database:** [PostgreSQL 16](https://www.postgresql.org/) with [PostGIS 3.4](https://postgis.net/) extension
 * **ORM:** [Drizzle ORM](https://orm.drizzle.team/) + Drizzle Kit
 * **UI & Styling:** [Tailwind CSS](https://tailwindcss.com/)
@@ -143,7 +143,7 @@ docker compose up -d
 Contributions are welcome! This guide is written with clear technical instructions so that **anyone can pass it directly to an AI coding assistant (Cursor, Claude Code, Copilot, ChatGPT, etc.) to perform the contribution end-to-end**.
 
 ### 🤖 AI Agent Quick Context
-* **Architecture:** Full-stack monolith using Next.js 15 (App Router, strict TypeScript, Server Actions, and Server Components).
+* **Architecture:** Full-stack monolith using Next.js 16 (App Router, strict TypeScript, Server Actions, and Server Components).
 * **Database:** PostgreSQL 16 with PostGIS managed via Drizzle ORM (`src/db/schema.ts`).
 * **UI:** Tailwind CSS with a mobile-first, touch-friendly design.
 * **Auth & Security:** Native PostgreSQL sessions (`sessions`) with `HttpOnly` cookies (auto-`Secure` behind HTTPS), Argon2id password hashing, anti-SSRF Maps URL validation, and AES-256-GCM API key encryption.

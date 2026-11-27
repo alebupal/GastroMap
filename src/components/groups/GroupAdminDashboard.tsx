@@ -16,6 +16,7 @@ import {
   decideGroupJoinRequestAction,
   updateGroupApiSettingsAction,
   getGroupApiUsageAction,
+  transferGroupOwnershipAndLeaveAction,
   type SharingGroupWithMembers,
   type GroupInviteItem,
   type GroupJoinRequestItem,
@@ -90,6 +91,9 @@ export function GroupAdminDashboard({
   const [memberSortDir, setMemberSortDir] = useState<"asc" | "desc">("asc");
   const [newMemberUsername, setNewMemberUsername] = useState("");
   const [addingMember, setAddingMember] = useState(false);
+  const [transferTargetId, setTransferTargetId] = useState("");
+  const [anonymizeOnLeave, setAnonymizeOnLeave] = useState(false);
+  const [transferringOwnership, setTransferringOwnership] = useState(false);
   const [busyMemberId, setBusyMemberId] = useState<string | null>(null);
 
   const [invites, setInvites] = useState<GroupInviteItem[]>(initialInvites);
@@ -312,14 +316,14 @@ export function GroupAdminDashboard({
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-4 gap-4">
       <div className="space-y-5">
-        <div className="flex items-center justify-between gap-2 px-1 pt-1">
-          <Link href="/" className="flex items-center gap-2">
-            <GastroMapLogo iconClassName="w-8 h-8" textClassName="text-base" />
+        <div className="flex items-center justify-between gap-2 px-1 pt-1 min-w-0">
+          <Link href="/" className="flex items-center gap-2 min-w-0 flex-1">
+            <GastroMapLogo iconClassName="w-7 h-7 shrink-0" textClassName="text-sm truncate" />
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200/70 dark:hover:bg-slate-800 cursor-pointer"
+            className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200/70 dark:hover:bg-slate-800 cursor-pointer shrink-0"
             aria-label={t("common.close")}
           >
             <span className="material-symbols-outlined text-lg leading-none">close</span>
@@ -426,8 +430,8 @@ export function GroupAdminDashboard({
   );
 
   return (
-    <div className="min-h-screen flex bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors duration-200">
-      <aside className="hidden lg:block w-64 shrink-0 bg-[#f2f3ff] dark:bg-slate-900/90 border-r border-slate-200/70 dark:border-slate-800/80 sticky top-0 h-screen overflow-y-auto">
+    <div className="min-h-screen flex overflow-x-hidden bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <aside className="hidden lg:block w-64 shrink-0 bg-[#f2f3ff] dark:bg-slate-900/90 border-r border-slate-200/70 dark:border-slate-800/80 sticky top-0 h-screen overflow-y-auto overflow-x-hidden">
         {sidebarContent}
       </aside>
 
@@ -437,7 +441,7 @@ export function GroupAdminDashboard({
             className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto overflow-x-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
             {sidebarContent}
           </aside>
         </div>
@@ -1267,13 +1271,92 @@ export function GroupAdminDashboard({
               />
 
               {canDeleteGroup && (
-                <div className="p-5 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50/60 dark:bg-red-950/20 space-y-3">
-                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-red-700 dark:text-red-400">
-                    {t("group_admin.danger_zone_title")}
-                  </h4>
-                  <p className="text-xs text-red-700/90 dark:text-red-300/90">
-                    {t("group_admin.danger_zone_desc", { count: String(places.length) })}
-                  </p>
+                <div className="p-5 rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50/60 dark:bg-red-950/20 space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-red-700 dark:text-red-400">
+                      {t("group_admin.danger_zone_title")}
+                    </h4>
+                    <p className="text-xs text-red-700/90 dark:text-red-300/90">
+                      {t("group_admin.danger_zone_desc", { count: String(places.length) })}
+                    </p>
+                  </div>
+
+                  {group.ownerUserId === currentUser.id &&
+                    members.filter((m) => m.userId !== currentUser.id).length > 0 && (
+                      <div className="p-4 rounded-xl bg-white/90 dark:bg-slate-900/70 border border-amber-200 dark:border-amber-800/60 space-y-3">
+                        <div>
+                          <h5 className="text-xs font-extrabold text-slate-900 dark:text-slate-100">
+                            {t("group_admin.transfer_leave_title")}
+                          </h5>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                            {t("group_admin.transfer_leave_desc", { count: String(places.length) })}
+                          </p>
+                        </div>
+
+                        <SearchableSelect
+                          value={transferTargetId}
+                          onChange={setTransferTargetId}
+                          options={members
+                            .filter((m) => m.userId !== currentUser.id)
+                            .slice()
+                            .sort((a, b) =>
+                              (a.username || a.name).localeCompare(b.username || b.name, "es", {
+                                sensitivity: "base",
+                              })
+                            )
+                            .map((m) => ({
+                              value: m.userId,
+                              label: m.username ? `@${m.username}` : m.name,
+                              subtitle: m.username ? m.name : undefined,
+                              icon: <span>👤</span>,
+                            }))}
+                          placeholder={t("group_admin.transfer_leave_pick")}
+                          searchPlaceholder={t("friends_filter.search_placeholder")}
+                          ariaLabel={t("group_admin.transfer_leave_pick")}
+                          className="w-full sm:w-72"
+                          buttonClassName="w-full justify-between !py-2 !px-3 !text-xs bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                        />
+
+                        <label className="flex items-start gap-2 text-[11px] text-slate-700 dark:text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={anonymizeOnLeave}
+                            onChange={(e) => setAnonymizeOnLeave(e.target.checked)}
+                            className="mt-0.5 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                          />
+                          <span>{t("group_admin.transfer_leave_ghost_opt")}</span>
+                        </label>
+
+                        <button
+                          type="button"
+                          disabled={!transferTargetId || transferringOwnership}
+                          onClick={async () => {
+                            if (!transferTargetId) return;
+                            if (!confirm(t("group_admin.transfer_leave_confirm"))) return;
+                            setTransferringOwnership(true);
+                            const res = await transferGroupOwnershipAndLeaveAction(
+                              group.id,
+                              transferTargetId,
+                              { anonymizeMyContributions: anonymizeOnLeave }
+                            );
+                            setTransferringOwnership(false);
+                            if (res.error) {
+                              toast(res.error, { kind: "error" });
+                            } else {
+                              toast(t("group_admin.transfer_leave_success"), { kind: "success" });
+                              router.push("/");
+                              router.refresh();
+                            }
+                          }}
+                          className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
+                        >
+                          {transferringOwnership
+                            ? t("common.loading")
+                            : t("group_admin.transfer_leave_btn")}
+                        </button>
+                      </div>
+                    )}
+
                   <button
                     type="button"
                     onClick={handleDeleteEntireGroup}

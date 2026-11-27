@@ -5,6 +5,20 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.2] - 2026-11-27
+
+### 🛡️ Grupos, Móvil y Seguridad
+- **Ceder Propiedad y Salir del Grupo (`/group-admin > Ajustes`)**: El creador del grupo puede transferir la propiedad a otro miembro activo existente y abandonar el grupo sin eliminar su catálogo, con opción de pasar sus propios sitios y comentarios a **`👻 @usuario_eliminado`**.
+- **Distintivo Visual para `👻 @usuario_eliminado`**: Tarjetas (`PlaceCard`), comentarios (`PlaceCommentsThread`) y tablas de administración (`PlacesTableManager`) muestran con icono `👻` y estilo atenuado las aportaciones reasignadas a la cuenta fantasma.
+- **Menús Móviles sin Scroll Lateral (`/admin` y `/group-admin`)**: Ajustadas las cabeceras de ambos drawers y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
+- **Tests Anti-SSRF**: Añadida verificación automática en `tests/` para la validación de dominios, bloqueo de IPs privadas y redirecciones manuales en enlaces de Google Maps.
+- **Ordenación «✨ Para ti (Tus gustos)»**: Nueva opción en *Ordenar por* que puntúa cada sitio según tus categorías, etiquetas, rangos de precio y ciudades favoritas o mejor valoradas, priorizando sitios afines por descubrir y mostrando un banner resumen con las preferencias detectadas.
+- **Copiar Dirección en un Toque**: Nuevo botón rápido junto a la dirección en cada tarjeta (`PlaceCard`) para copiarla al portapapeles al instante.
+- **Importación CSV de Google Takeout y Deduplicación Automática**: El importador CSV limpia BOM UTF-8, reconoce cabeceras en español/inglés con tildes (`Título`, `Nota`, `Note`, `Comentario`, `URL`, `Etiquetas`) y omite automáticamente duplicados en el espacio destino por enlace de Google Maps o nombre normalizado.
+- **Ficha Pública Compartible (`/p/[id]`) con Open Graph**: Nueva opción *Enlace de ficha pública* en el menú Compartir de cada tarjeta que genera un enlace firmado con HMAC (`/p/[id]?s=<token>`) y vista previa enriquecida para WhatsApp/Telegram (Open Graph / Twitter Card) sin exponer notas privadas, comentarios de grupo ni miembros.
+- **Build Turbopack Limpio**: Añadido `turbopackIgnore` en `/api/docs/[type]` para evitar el trazado dinámico innecesario en Next.js 16.
+- **Actualización de Dependencias y Entorno**: Actualizados `Node.js 22` (`Dockerfile`), `next` (`16.4.6` con Turbopack), `eslint` (`9.x`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`) y `zod` (`4.6.7`), eliminando todas las vulnerabilidades altas.
+
 ## [0.2.1] - 2026-11-26
 
 Actualización de endurecimiento de seguridad y moderación avanzada de autoría sobre `v0.2.0`.

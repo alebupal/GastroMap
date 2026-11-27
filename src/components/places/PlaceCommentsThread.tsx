@@ -805,12 +805,17 @@ export function PlaceCommentsThread({
                     const canEdit = isOwn || isAdmin;
                     const canDelete = isOwn || isAdmin;
                     const isEditing = editingCommentId === c.id;
-                    const authorInitials = (c.authorName || "U")
-                      .split(/\s+/)
-                      .map((w) => w[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase();
+                    const isGhostAuthor =
+                      c.authorName === "@usuario_eliminado" ||
+                      c.authorName === "Usuario eliminado";
+                    const authorInitials = isGhostAuthor
+                      ? "👻"
+                      : (c.authorName || "U")
+                          .split(/\s+/)
+                          .map((w) => w[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase();
 
                     return (
                       <div
@@ -821,16 +826,24 @@ export function PlaceCommentsThread({
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div
                               className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shrink-0 ${
-                                isOwn
-                                  ? "bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-200"
-                                  : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                isGhostAuthor
+                                  ? "bg-slate-100 dark:bg-slate-800 text-sm"
+                                  : isOwn
+                                    ? "bg-orange-100 dark:bg-orange-950/70 text-orange-800 dark:text-orange-200"
+                                    : "bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200"
                               }`}
                             >
                               {authorInitials}
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate">
+                                <span
+                                  className={`text-xs truncate ${
+                                    isGhostAuthor
+                                      ? "font-semibold italic text-slate-400 dark:text-slate-500"
+                                      : "font-extrabold text-slate-900 dark:text-slate-100"
+                                  }`}
+                                >
                                   {c.authorName}
                                 </span>
                                 {isOwn && (

@@ -177,22 +177,30 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
     return items;
   }
 
-  // 2. CSV
+  // 2. CSV (incluye Google Takeout Saved Places en ES/EN con BOM y tildes)
   if (lower.endsWith(".csv")) {
-    const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+    const cleanText = text.replace(/^\uFEFF/, "");
+    const lines = cleanText.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length < 2) return [];
-    const headers = parseCsvLine(lines[0]).map((h) => h.toLowerCase());
+    const normalizeHeader = (h: string) =>
+      h
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    const headers = parseCsvLine(lines[0]).map(normalizeHeader);
     const idx = (names: string[]) => headers.findIndex((h) => names.includes(h));
 
     const nameIdx = idx(["name", "nombre", "title", "titulo"]);
     if (nameIdx === -1) return [];
     const cityIdx = idx(["city", "ciudad", "municipio"]);
-    const addrIdx = idx(["address", "direccion", "dirección"]);
+    const addrIdx = idx(["address", "direccion"]);
     const latIdx = idx(["latitude", "lat", "latitud"]);
     const lngIdx = idx(["longitude", "lng", "lon", "longitud"]);
     const priceIdx = idx(["pricerange", "price", "precio"]);
     const mapsIdx = idx(["googlemapsurl", "url", "maps", "google_maps_url"]);
-    const notesIdx = idx(["notes", "notas", "comment", "comentario"]);
+    const notesIdx = idx(["notes", "notas", "note", "nota", "comment", "comentario"]);
+    const commentIdx = idx(["comment", "comentario"]);
     const tagsIdx = idx(["tags", "etiquetas"]);
 
     const items: ImportPlacePayload[] = [];
@@ -203,6 +211,10 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
 
       const lat = latIdx >= 0 && cols[latIdx] ? parseFloat(cols[latIdx]) : null;
       const lng = lngIdx >= 0 && cols[lngIdx] ? parseFloat(cols[lngIdx]) : null;
+      const rawNote = notesIdx >= 0 ? cols[notesIdx]?.trim() || "" : "";
+      const rawComment =
+        commentIdx >= 0 && commentIdx !== notesIdx ? cols[commentIdx]?.trim() || "" : "";
+      const combinedNotes = [rawNote, rawComment].filter(Boolean).join(" — ") || null;
 
       items.push({
         name,
@@ -212,10 +224,10 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
         longitude: lng !== null && !isNaN(lng) ? lng : null,
         priceRange: priceIdx >= 0 && cols[priceIdx] ? cols[priceIdx] : "???",
         googleMapsUrl: mapsIdx >= 0 ? cols[mapsIdx] || null : null,
-        notes: notesIdx >= 0 ? cols[notesIdx] || null : null,
+        notes: combinedNotes,
         tags:
           tagsIdx >= 0 && cols[tagsIdx]
-            ? cols[tagsIdx].split(/[;|]/).map((t) => t.trim()).filter(Boolean)
+            ? cols[tagsIdx].split(/[;|,]/).map((t) => t.trim()).filter(Boolean)
             : [],
       });
     }

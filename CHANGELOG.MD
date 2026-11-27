@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-11-27
+
+### 🛡️ Groups, Mobile & Security
+- **Transfer Ownership & Leave Group (`/group-admin > Settings`)**: Group owners can transfer ownership to another active group member and leave without deleting the group's catalog, with an optional toggle to reassign their own places and comments to **`👻 @usuario_eliminado`**.
+- **Visual Badge for `👻 @usuario_eliminado`**: Cards (`PlaceCard`), comments (`PlaceCommentsThread`), and admin tables (`PlacesTableManager`) highlight ghost-account contributions with a `👻` badge and muted italic styling.
+- **Mobile Admin Drawer Overflow Fix (`/admin` & `/group-admin`)**: Fixed horizontal scroll inside both mobile navigation drawer headers.
+- **Anti-SSRF Tests**: Added unit checks in `tests/` covering hostname validation, private IP blocking, and manual redirect handling for Google Maps links.
+- **«✨ For you (Your taste)» Sorting**: New *Sort by* option scoring places against your favorite/top-rated plans, tags, price brackets, and cities, highlighting matching unexplored spots and displaying a taste summary banner.
+- **One-Tap Copy Address**: New subtle copy button next to each place's address in `PlaceCard`.
+- **Google Takeout CSV Import & Automatic Deduplication**: CSV import strips UTF-8 BOM, supports Spanish/English accented headers (`Título`, `Nota`, `Note`, `Comentario`, `URL`, `Etiquetas`), and automatically skips duplicates in the target space by Google Maps URL key or normalized name.
+- **Shareable Public Place Card (`/p/[id]`) with Open Graph**: New *Public card link* option in each card's Share menu generating an HMAC-signed link (`/p/[id]?s=<token>`) with rich WhatsApp/Telegram preview metadata (Open Graph / Twitter Card) without exposing private notes, group comments, or member lists.
+- **Clean Turbopack Build**: Added `turbopackIgnore` in `/api/docs/[type]` to prevent dynamic filesystem tracing warnings in Next.js 16.
+- **Dependency & Runtime Updates**: Upgraded `Node.js 22` (`Dockerfile`), `next` (`16.4.6` with Turbopack), `eslint` (`9.x`), `drizzle-orm` (`0.45.4`), `drizzle-kit` (`0.31.11`), and `zod` (`4.6.7`), resolving all high-severity advisories.
+
 ## [0.2.1] - 2026-11-26
 
 Security hardening and author moderation release building on `v0.2.0`.

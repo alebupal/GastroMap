@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { places, occasions, placeOccasions, placeTags, tags, userPlaces, placeComments } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
 import { KNOWN_OCCASIONS } from "@/data/occasions";
 import { parseCityCountry } from "@/lib/location";
+import { normalizeMapsUrlKey, normalizePlaceName } from "@/lib/place-identity";
 import { buildScopeKey, getActiveWorkspace, getGroupMembership } from "@/lib/workspace";
 
 export interface ImportPlacePayload {
@@ -64,6 +66,28 @@ export async function importPlacesAction(
 
   const scopeKey = buildScopeKey(targetGroupId, currentUser.id);
 
+  const existingInSpace = await db
+    .select({
+      name: places.name,
+      mapsUrlKey: places.mapsUrlKey,
+      googleMapsUrl: places.googleMapsUrl,
+    })
+    .from(places)
+    .where(
+      targetGroupId !== null
+        ? and(eq(places.groupId, targetGroupId), isNull(places.deletedAt))
+        : and(isNull(places.groupId), eq(places.createdById, currentUser.id), isNull(places.deletedAt))
+    );
+
+  const existingUrlKeys = new Set<string>();
+  const existingNames = new Set<string>();
+  for (const row of existingInSpace) {
+    const k = row.mapsUrlKey || normalizeMapsUrlKey(row.googleMapsUrl);
+    if (k) existingUrlKeys.add(k);
+    const n = normalizePlaceName(row.name);
+    if (n) existingNames.add(n);
+  }
+
   const maxBatch = 300;
   const toProcess = items.slice(0, maxBatch);
   let importedCount = 0;
@@ -77,6 +101,15 @@ export async function importPlacesAction(
       skippedCount++;
       continue;
     }
+
+    const urlKey = normalizeMapsUrlKey(raw.googleMapsUrl);
+    const normName = normalizePlaceName(cleanName);
+    if ((urlKey && existingUrlKeys.has(urlKey)) || (normName && existingNames.has(normName))) {
+      skippedCount++;
+      continue;
+    }
+    if (urlKey) existingUrlKeys.add(urlKey);
+    if (normName) existingNames.add(normName);
 
     const lat =
       typeof raw.latitude === "number" && !isNaN(raw.latitude) ? raw.latitude : null;
@@ -101,6 +134,7 @@ export async function importPlacesAction(
         longitude: lng,
         priceRange,
         googleMapsUrl: raw.googleMapsUrl?.trim() || null,
+        mapsUrlKey: urlKey,
         website: raw.website?.trim() || null,
         phone: raw.phone?.trim()?.slice(0, 50) || null,
         notes: raw.notes?.trim() || null,

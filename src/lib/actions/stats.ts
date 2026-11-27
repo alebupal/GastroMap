@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, ne, or } from "drizzle-orm";
 import { db } from "@/db";
 import {
   users,
@@ -20,6 +20,7 @@ import { getGroupMembership } from "@/lib/workspace";
 import { isPublicRegistrationEnabled } from "@/lib/actions/settings";
 import { getGlobalApiUsageSummary } from "@/lib/places-api";
 import { isValidGoogleMapsUrl } from "@/lib/maps";
+import { GHOST_USER_EMAIL } from "@/lib/ghost";
 
 export interface CountItem {
   label: string;
@@ -444,7 +445,8 @@ export async function getAdminStatsAction(): Promise<AdminStatsData | null> {
         status: users.status,
         createdAt: users.createdAt,
       })
-      .from(users),
+      .from(users)
+      .where(ne(users.email, GHOST_USER_EMAIL)),
     db
       .select({
         id: places.id,

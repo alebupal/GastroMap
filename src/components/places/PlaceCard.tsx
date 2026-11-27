@@ -2,7 +2,11 @@
 
 import { useState, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
-import { deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
+import {
+  deletePlaceAction,
+  getPlaceShareLinkAction,
+  type PlaceWithDetails,
+} from "@/lib/actions/places";
 import {
   setFavoriteAction,
   setPersonalStatusAction,
@@ -13,6 +17,7 @@ import { useToast } from "@/components/ui/Toast";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { getGoogleSearchHref, getMapsHref } from "@/lib/maps";
+import { copyText } from "@/lib/clipboard";
 
 const PlaceCommentsThread = dynamic(() =>
   import("./PlaceCommentsThread").then((m) => m.PlaceCommentsThread)
@@ -98,6 +103,7 @@ function PlaceCardComponent({
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
   // Sincronizar estado local si cambian los datos externos (ej. importación o edición)
   useEffect(() => {
@@ -169,6 +175,22 @@ function PlaceCardComponent({
       // Fallback silencioso
     }
     window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
+  }
+
+  async function handleCopyPublicLink() {
+    setShowShareMenu(false);
+    const res = await getPlaceShareLinkAction(place.id);
+    if (res.error || !res.path) {
+      toast(res.error || "Error", { kind: "error" });
+      return;
+    }
+    const url = `${window.location.origin}${res.path}`;
+    const ok = await copyText(url);
+    if (ok) {
+      setCopiedPlace(true);
+      setTimeout(() => setCopiedPlace(false), 1800);
+      toast(t("cards.share_public_copied"), { kind: "success" });
+    }
   }
 
   const canDelete = place.canDelete ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
@@ -395,14 +417,36 @@ function PlaceCardComponent({
 
         {/* Ubicación a ancho completo para que nunca se corte en móvil */}
         {(place.city || place.address) && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 min-w-0">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 min-w-0">
             <span className="material-symbols-outlined text-sm text-orange-600 leading-none shrink-0">location_on</span>
             <span className="truncate">
               {place.city ? `${place.city}` : ""}
               {place.city && place.address ? " • " : ""}
               {place.address || ""}
             </span>
-          </p>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const textToCopy = place.address || place.city || "";
+                if (!textToCopy) return;
+                copyText(textToCopy).then((ok) => {
+                  if (ok) {
+                    setCopiedAddress(true);
+                    toast(t("cards.address_copied"), { kind: "success" });
+                    setTimeout(() => setCopiedAddress(false), 2000);
+                  }
+                });
+              }}
+              className="p-0.5 rounded text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+              title={t("cards.copy_address")}
+              aria-label={t("cards.copy_address")}
+            >
+              <span className="material-symbols-outlined text-[13px] leading-none block">
+                {copiedAddress ? "check" : "content_copy"}
+              </span>
+            </button>
+          </div>
         )}
 
         {/* Fila única compacta: Contexto (Grupo / Por descubrir) | Categorías + Etiquetas */}
@@ -565,12 +609,25 @@ function PlaceCardComponent({
       {/* Pie de tarjeta: en móvil barra uniforme de acciones + autor abajo; en desktop 1 fila horizontal */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between text-[11px] text-slate-500 dark:text-slate-400 gap-2">
         <div className="flex items-center gap-1.5 shrink-0 pt-1 sm:pt-0 border-t border-slate-100/80 dark:border-slate-800/50 sm:border-t-0">
-          <span className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[9px] flex items-center justify-center border border-orange-200/70 dark:border-orange-800/60">
-            {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
-          </span>
-          <span className="font-bold text-slate-700 dark:text-slate-300">
-            @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
-          </span>
+          {place.createdByUsername === "usuario_eliminado" ? (
+            <>
+              <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                👻
+              </span>
+              <span className="font-semibold italic text-slate-400 dark:text-slate-500">
+                @usuario_eliminado
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-orange-900 dark:text-orange-200 font-bold text-[9px] flex items-center justify-center border border-orange-200/70 dark:border-orange-800/60">
+                {(place.createdByUsername || place.createdByName || "A").charAt(0).toUpperCase()}
+              </span>
+              <span className="font-bold text-slate-700 dark:text-slate-300">
+                @{place.createdByUsername || place.createdByName.toLowerCase().replace(/\s+/g, "")}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-1 sm:gap-2 sm:flex-wrap w-full sm:w-auto">
@@ -696,6 +753,14 @@ function PlaceCardComponent({
                   >
                     <span className="material-symbols-outlined text-base leading-none">photo_camera</span>
                     <span>{t("cards.share_instagram")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyPublicLink}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition cursor-pointer text-left"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">link</span>
+                    <span>{t("cards.share_public_link")}</span>
                   </button>
                   <button
                     type="button"
