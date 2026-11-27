@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-11-27
+
+### 🛡️ Groups & Mobile
+- **Transfer Ownership & Leave Group (`/group-admin > Settings`)**: Group owners can transfer ownership to another active group member and leave without deleting the group's catalog, with an optional toggle to reassign their own places and comments to **`👻 @usuario_eliminado`**.
+- **Superadmin Mobile Drawer Overflow Fix (`/admin`)**: Fixed horizontal scroll inside the mobile navigation drawer header.
+
 ## [0.2.1] - 2026-11-26
 
 Security hardening and author moderation release building on `v0.2.0`.

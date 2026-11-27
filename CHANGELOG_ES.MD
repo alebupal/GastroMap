@@ -5,6 +5,12 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.2] - 2026-11-27
+
+### 🛡️ Grupos y Móvil
+- **Ceder Propiedad y Salir del Grupo (`/group-admin > Ajustes`)**: El creador del grupo puede transferir la propiedad a otro miembro activo existente y abandonar el grupo sin eliminar su catálogo, con opción de pasar sus propios sitios y comentarios a **`👻 @usuario_eliminado`**.
+- **Menú Móvil de Superadmin sin Scroll Lateral (`/admin`)**: Ajustada la cabecera del drawer y `overflow-x-hidden` para evitar desbordamiento horizontal en pantallas estrechas.
+
 ## [0.2.1] - 2026-11-26
 
 Actualización de endurecimiento de seguridad y moderación avanzada de autoría sobre `v0.2.0`.
