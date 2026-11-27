@@ -127,7 +127,7 @@ docker compose up -d
 
 ## 🛠️ Tecnologías Empleadas
 
-* **Frontend & Backend:** [Next.js 15](https://nextjs.org/) (App Router, Server Actions, TypeScript)
+* **Frontend & Backend:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, TypeScript)
 * **Base de Datos:** [PostgreSQL 16](https://www.postgresql.org/) con extensión geoespacial [PostGIS 3.4](https://postgis.net/)
 * **ORM:** [Drizzle ORM](https://orm.drizzle.team/) + Drizzle Kit para migraciones controladas
 * **Diseño e Interfaz:** [Tailwind CSS](https://tailwindcss.com/) + componentes mobile-first
@@ -141,7 +141,7 @@ docker compose up -d
 ¡Cualquier contribución es bienvenida! Esta guía está redactada con suficiente detalle y precisión técnica para que **cualquier persona pueda pasarla como instrucción a una IA (Cursor, Claude Code, Copilot, ChatGPT, etc.) y que el asistente realice todo el proceso de forma autónoma y correcta**.
 
 ### 🤖 Contexto Rápido para Agentes de IA
-* **Arquitectura:** Monolito full-stack con Next.js 15 (App Router, TypeScript estricto, Server Actions y Server Components).
+* **Arquitectura:** Monolito full-stack con Next.js 16 (App Router, TypeScript estricto, Server Actions y Server Components).
 * **Base de Datos:** PostgreSQL 16 con PostGIS gestionado mediante Drizzle ORM (`src/db/schema.ts`).
 * **Estilos:** Tailwind CSS con diseño mobile-first y componentes accesibles.
 * **Autenticación y Seguridad:** Sesiones en base de datos (`sessions`) con cookies `HttpOnly` (`Secure` automático tras HTTPS), contraseñas con Argon2id, protección anti-SSRF en enlaces Maps y cifrado AES-256-GCM para claves API.

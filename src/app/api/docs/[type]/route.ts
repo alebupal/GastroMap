@@ -23,22 +23,22 @@ export async function GET(
     }
 
     const candidatePaths = [
-      path.join(process.cwd(), filename),
-      path.join(process.cwd(), "GastroMap", filename),
-      path.join(process.cwd(), "..", filename),
-      path.join("/app", filename),
+      path.join(/*turbopackIgnore: true*/ process.cwd(), filename),
+      path.join(/*turbopackIgnore: true*/ process.cwd(), "GastroMap", filename),
+      path.join(/*turbopackIgnore: true*/ process.cwd(), "..", filename),
+      path.join(/*turbopackIgnore: true*/ "/app", filename),
     ];
 
     let filePath: string | null = null;
     for (const p of candidatePaths) {
-      if (fs.existsSync(p)) {
+      if (fs.existsSync(/*turbopackIgnore: true*/ p)) {
         filePath = p;
         break;
       }
     }
 
     if (filePath) {
-      const content = fs.readFileSync(filePath, "utf-8");
+      const content = fs.readFileSync(/*turbopackIgnore: true*/ filePath, "utf-8");
       return NextResponse.json(
         { filename, content },
         { headers: { "Cache-Control": "no-store" } }

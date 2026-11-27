@@ -129,7 +129,7 @@ docker compose up -d
 
 ## 🛠️ Tech Stack
 
-* **Frontend & Backend:** [Next.js 15](https://nextjs.org/) (App Router, Server Actions, TypeScript)
+* **Frontend & Backend:** [Next.js 16](https://nextjs.org/) (App Router, Server Actions, TypeScript)
 * **Database:** [PostgreSQL 16](https://www.postgresql.org/) with [PostGIS 3.4](https://postgis.net/) extension
 * **ORM:** [Drizzle ORM](https://orm.drizzle.team/) + Drizzle Kit
 * **UI & Styling:** [Tailwind CSS](https://tailwindcss.com/)
@@ -143,7 +143,7 @@ docker compose up -d
 Contributions are welcome! This guide is written with clear technical instructions so that **anyone can pass it directly to an AI coding assistant (Cursor, Claude Code, Copilot, ChatGPT, etc.) to perform the contribution end-to-end**.
 
 ### 🤖 AI Agent Quick Context
-* **Architecture:** Full-stack monolith using Next.js 15 (App Router, strict TypeScript, Server Actions, and Server Components).
+* **Architecture:** Full-stack monolith using Next.js 16 (App Router, strict TypeScript, Server Actions, and Server Components).
 * **Database:** PostgreSQL 16 with PostGIS managed via Drizzle ORM (`src/db/schema.ts`).
 * **UI:** Tailwind CSS with a mobile-first, touch-friendly design.
 * **Auth & Security:** Native PostgreSQL sessions (`sessions`) with `HttpOnly` cookies (auto-`Secure` behind HTTPS), Argon2id password hashing, anti-SSRF Maps URL validation, and AES-256-GCM API key encryption.

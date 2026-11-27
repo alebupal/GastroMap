@@ -120,3 +120,36 @@ export function scorePlaceByTaste(place: TasteInputPlace, profile: TasteProfile)
 
   return score;
 }
+
+export interface TasteSummary {
+  topOccasionIds: string[];
+  topTags: string[];
+  topPrice: string | null;
+}
+
+/**
+ * Extrae las preferencias principales del perfil para mostrarlas al usuario.
+ */
+export function getTasteSummary(profile: TasteProfile): TasteSummary {
+  const topOccasionIds = Array.from(profile.occasionWeights.entries())
+    .filter(([, w]) => w > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([id]) => id);
+
+  const topTags = Array.from(profile.tagWeights.entries())
+    .filter(([, w]) => w > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([tg]) => tg);
+
+  const topPriceEntry = Array.from(profile.priceWeights.entries())
+    .filter(([, w]) => w > 0)
+    .sort((a, b) => b[1] - a[1])[0];
+
+  return {
+    topOccasionIds,
+    topTags,
+    topPrice: topPriceEntry ? topPriceEntry[0] : null,
+  };
+}

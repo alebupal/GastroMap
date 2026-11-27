@@ -257,7 +257,7 @@ GastroMap está construido bajo los principios de modularidad, tipado estricto y
 ```
 ┌────────────────────────────────────────────────────────┐
 │                   Cliente Web (PWA)                    │
-│   Next.js 15 App Router • Tailwind CSS • Leaflet Maps  │
+│   Next.js 16 App Router • Tailwind CSS • Leaflet Maps  │
 └───────────────────────────▲────────────────────────────┘
                             │ Server Actions / REST API
 ┌───────────────────────────▼────────────────────────────┐

@@ -9,7 +9,7 @@ import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
 import { normalizeSearchText } from "@/lib/search";
-import { buildTasteProfile, scorePlaceByTaste } from "@/lib/taste";
+import { buildTasteProfile, scorePlaceByTaste, getTasteSummary } from "@/lib/taste";
 import type { PlaceWithDetails, CommunityUserSummary } from "@/lib/actions/places";
 import {
   createSavedFilterAction,
@@ -469,6 +469,7 @@ export function PlacesExplorer({
   >("recent");
 
   const tasteProfile = useMemo(() => buildTasteProfile(placesData), [placesData]);
+  const tasteSummary = useMemo(() => getTasteSummary(tasteProfile), [tasteProfile]);
 
   // Estados de vista adaptativa para evitar problemas de espacio con muchas categorías o tags
   const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
@@ -2850,6 +2851,42 @@ export function PlacesExplorer({
                   </div>
                 </div>
               </div>
+
+              {sortBy === "for_you" && (
+                <div className="px-3.5 py-2.5 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/60 flex flex-wrap items-center gap-1.5 text-[11px] text-indigo-800 dark:text-indigo-200">
+                  <span className="material-symbols-outlined text-sm text-indigo-600 dark:text-indigo-400 leading-none">
+                    auto_awesome
+                  </span>
+                  {tasteProfile.hasSignals ? (
+                    <>
+                      <span className="font-bold">{t("places.for_you_banner")}</span>
+                      {tasteSummary.topOccasionIds.map((occId) => (
+                        <span
+                          key={occId}
+                          className="px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 border border-indigo-200/60 dark:border-indigo-800 font-semibold"
+                        >
+                          {occasionMap[occId]?.name || occId}
+                        </span>
+                      ))}
+                      {tasteSummary.topTags.map((tg) => (
+                        <span
+                          key={tg}
+                          className="px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 border border-indigo-200/60 dark:border-indigo-800 font-semibold"
+                        >
+                          #{tg}
+                        </span>
+                      ))}
+                      {tasteSummary.topPrice && (
+                        <span className="px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-900/70 border border-indigo-200/60 dark:border-indigo-800 font-semibold">
+                          {tasteSummary.topPrice}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="font-medium">{t("places.for_you_empty_hint")}</span>
+                  )}
+                </div>
+              )}
 
               {/* Tarjetas paginadas con entrada escalonada sutil */}
               {paginatedPlaces.map((place, idx) => (
