@@ -134,22 +134,42 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
       }));
   }
 
-  // 1b. KML (Google My Maps / Earth) y GPX (waypoints)
+  // 1b. KML (Google My Maps / Earth) y GPX (waypoints) sin DOMParser sobre entrada de usuario
   if (lower.endsWith(".kml") || lower.endsWith(".gpx")) {
-    const doc = new DOMParser().parseFromString(text, "text/xml");
     const items: ImportPlacePayload[] = [];
-    const txt = (el: Element | null, tag: string) =>
-      el?.getElementsByTagName(tag)[0]?.textContent?.trim() || null;
+    const decodeXmlText = (raw: string) =>
+      raw
+        .replace(/^<!\[CDATA\[([\s\S]*?)\]\]>$/i, "$1")
+        .replace(/&(amp|quot|#39|apos|lt|gt);/gi, (m) => {
+          const map: Record<string, string> = {
+            "&amp;": "&",
+            "&quot;": '"',
+            "&#39;": "'",
+            "&apos;": "'",
+            "&lt;": "<",
+            "&gt;": ">",
+          };
+          return map[m.toLowerCase()] ?? m;
+        })
+        .trim();
+
+    const extractTag = (block: string, tag: string): string | null => {
+      const m = block.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i"));
+      if (!m) return null;
+      const val = decodeXmlText(m[1]);
+      return val || null;
+    };
 
     if (lower.endsWith(".kml")) {
-      for (const pm of Array.from(doc.getElementsByTagName("Placemark"))) {
-        const name = txt(pm, "name");
-        const coords = txt(pm, "coordinates");
+      const placemarks = text.match(/<Placemark(?:\s[^>]*)?>[\s\S]*?<\/Placemark>/gi) || [];
+      for (const pm of placemarks) {
+        const name = extractTag(pm, "name");
+        const coords = extractTag(pm, "coordinates");
         if (!name || !coords) continue;
         const [lng, lat] = coords.split(/[,\s]+/).map(Number);
         items.push({
           name,
-          notes: txt(pm, "description"),
+          notes: extractTag(pm, "description"),
           latitude: !isNaN(lat) ? lat : null,
           longitude: !isNaN(lng) ? lng : null,
           priceRange: "???",
@@ -158,14 +178,20 @@ function parseUploadedFile(text: string, filename: string): ImportPlacePayload[]
         });
       }
     } else {
-      for (const w of Array.from(doc.getElementsByTagName("wpt"))) {
-        const name = txt(w, "name");
+      const wptRegex = /<wpt\s+([^>]*?)>([\s\S]*?)<\/wpt>/gi;
+      let match: RegExpExecArray | null;
+      while ((match = wptRegex.exec(text)) !== null) {
+        const attrs = match[1];
+        const body = match[2];
+        const name = extractTag(body, "name");
         if (!name) continue;
-        const lat = parseFloat(w.getAttribute("lat") || "");
-        const lng = parseFloat(w.getAttribute("lon") || "");
+        const latMatch = attrs.match(/\blat\s*=\s*["']([^"']+)["']/i);
+        const lonMatch = attrs.match(/\blon\s*=\s*["']([^"']+)["']/i);
+        const lat = parseFloat(latMatch?.[1] || "");
+        const lng = parseFloat(lonMatch?.[1] || "");
         items.push({
           name,
-          notes: txt(w, "desc") || txt(w, "cmt"),
+          notes: extractTag(body, "desc") || extractTag(body, "cmt"),
           latitude: !isNaN(lat) ? lat : null,
           longitude: !isNaN(lng) ? lng : null,
           priceRange: "???",
