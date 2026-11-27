@@ -9,6 +9,7 @@ import { MapContainerWrapper } from "@/components/map/MapContainerWrapper";
 import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { useT } from "@/lib/i18n/client";
 import { normalizeSearchText } from "@/lib/search";
+import { buildTasteProfile, scorePlaceByTaste } from "@/lib/taste";
 import type { PlaceWithDetails, CommunityUserSummary } from "@/lib/actions/places";
 import {
   createSavedFilterAction,
@@ -464,8 +465,10 @@ export function PlacesExplorer({
 
   // Ordenación de resultados
   const [sortBy, setSortBy] = useState<
-    "recent" | "distance" | "name" | "price_asc" | "price_desc" | "rating"
+    "recent" | "for_you" | "distance" | "name" | "price_asc" | "price_desc" | "rating"
   >("recent");
+
+  const tasteProfile = useMemo(() => buildTasteProfile(placesData), [placesData]);
 
   // Estados de vista adaptativa para evitar problemas de espacio con muchas categorías o tags
   const [isOccasionsWrapped, setIsOccasionsWrapped] = useState(false);
@@ -925,6 +928,12 @@ export function PlacesExplorer({
         if (rb !== ra) return rb - ra;
         return a.name.localeCompare(b.name, "es");
       });
+    } else if (sortBy === "for_you") {
+      result.sort((a, b) => {
+        const diff = scorePlaceByTaste(b, tasteProfile) - scorePlaceByTaste(a, tasteProfile);
+        if (Math.abs(diff) > 0.01) return diff;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
     } else {
       // 'recent': más recientes primero
       result.sort(
@@ -954,6 +963,7 @@ export function PlacesExplorer({
     userLocation,
     radiusKm,
     sortBy,
+    tasteProfile,
   ]);
 
   // Al cambiar filtros, resetear a la primera página
@@ -976,6 +986,7 @@ export function PlacesExplorer({
     includeMeWithFriends,
     radiusKm,
     sortBy,
+    tasteProfile,
   ]);
 
   // Cálculo de locales paginados
@@ -2555,6 +2566,7 @@ export function PlacesExplorer({
                     aria-label={t("places.sort_by")}
                   >
                     <option value="recent">{t("places.sort_recent")}</option>
+                    <option value="for_you">{t("places.sort_for_you")}</option>
                     {userLocation && <option value="distance">{t("places.sort_distance")}</option>}
                     <option value="rating">{t("places.sort_rating")}</option>
                     <option value="name">{t("places.sort_alphabetical")}</option>
@@ -2772,6 +2784,15 @@ export function PlacesExplorer({
                           icon: (
                             <span className="material-symbols-outlined text-[15px] text-orange-600 dark:text-orange-400 leading-none">
                               schedule
+                            </span>
+                          ),
+                        },
+                        {
+                          value: "for_you",
+                          label: t("places.sort_for_you"),
+                          icon: (
+                            <span className="material-symbols-outlined text-[15px] text-indigo-600 dark:text-indigo-400 leading-none">
+                              auto_awesome
                             </span>
                           ),
                         },
