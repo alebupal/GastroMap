@@ -170,7 +170,7 @@ GastroMap organizes places into **100% isolated spaces**, so every group of frie
   - **Per-group roles:** `CREATOR` (primary owner, can transfer ownership or delete the group), `GROUP ADMIN` (manages members, join requests, taxonomy, places, trash, and API), and `MEMBER` (adds places, comments, and tracks visits).
 - **Per-Group Administration Panel (`/group-admin`) & Author Moderation**:
   - Group admins access `/group-admin` to manage **Group Statistics**, **Places** (bulk copy/move, duplicate merging, **Data health**, and **30-day Trash**), **Members, Join Requests & Invites**, **Group Plans & Tags** (collapsed by default), and **Settings** (**Export entire group**, **own encrypted Google Places API key**, and group deletion).
-  - If a member leaves a group, their places and comments stay intact in the group. When deleting an account in `/admin > Users`, superadmins can preserve contributions under a **`👻 @usuario_eliminado` ghost account**, reassign them to each group owner, or purge them; admins can also **reassign the author** when editing any place or comment.
+  - If a member leaves a group, their places and comments stay intact in the group. When deleting an account in `/admin > Users`, superadmins can preserve contributions under a **`👻 @usuario_eliminado` ghost account**, reassign them to each group owner, or purge them; admins can also **choose or reassign the author** when **adding (`/new`)** or editing any place or comment.
   - The global `/admin` dashboard remains exclusively for the instance **Superadministrator**.
 
 ---

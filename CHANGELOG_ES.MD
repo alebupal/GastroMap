@@ -5,6 +5,11 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.5] - 2026-11-27
+
+### 🛡️ Moderación de Autoría
+- **Elegir Autor al Añadir un Sitio (`/new`)**: Superadministradores y administradores del grupo destino pueden seleccionar el autor (incluyendo `👻 @usuario_eliminado`) directamente al crear un nuevo establecimiento, con validación de permisos en servidor (`createPlaceAction`).
+
 ## [0.2.4] - 2026-11-27
 
 ### 🔒 Seguridad
