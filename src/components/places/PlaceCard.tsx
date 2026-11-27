@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/Toast";
 import { LinkifiedText } from "@/components/ui/LinkifiedText";
 import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { getGoogleSearchHref, getMapsHref } from "@/lib/maps";
+import { copyText } from "@/lib/clipboard";
 
 const PlaceCommentsThread = dynamic(() =>
   import("./PlaceCommentsThread").then((m) => m.PlaceCommentsThread)
@@ -98,6 +99,7 @@ function PlaceCardComponent({
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showActionsMenu, setShowActionsMenu] = useState(false);
   const [showAllTags, setShowAllTags] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
 
   // Sincronizar estado local si cambian los datos externos (ej. importación o edición)
   useEffect(() => {
@@ -395,14 +397,36 @@ function PlaceCardComponent({
 
         {/* Ubicación a ancho completo para que nunca se corte en móvil */}
         {(place.city || place.address) && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 min-w-0">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex items-center gap-1 min-w-0">
             <span className="material-symbols-outlined text-sm text-orange-600 leading-none shrink-0">location_on</span>
             <span className="truncate">
               {place.city ? `${place.city}` : ""}
               {place.city && place.address ? " • " : ""}
               {place.address || ""}
             </span>
-          </p>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const textToCopy = place.address || place.city || "";
+                if (!textToCopy) return;
+                copyText(textToCopy).then((ok) => {
+                  if (ok) {
+                    setCopiedAddress(true);
+                    toast(t("cards.address_copied"), { kind: "success" });
+                    setTimeout(() => setCopiedAddress(false), 2000);
+                  }
+                });
+              }}
+              className="p-0.5 rounded text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shrink-0"
+              title={t("cards.copy_address")}
+              aria-label={t("cards.copy_address")}
+            >
+              <span className="material-symbols-outlined text-[13px] leading-none block">
+                {copiedAddress ? "check" : "content_copy"}
+              </span>
+            </button>
+          </div>
         )}
 
         {/* Fila única compacta: Contexto (Grupo / Por descubrir) | Categorías + Etiquetas */}
