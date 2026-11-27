@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] - 2026-11-27
+
+### 📱 Mobile & Lists
+- **«Save» & «To list» on Mobile (`MobileFilterBar` & `PlacesExplorer`)**: Added *To list* and *Save* filter quick pills directly in the mobile action bar (and inside the mobile *Filters* footer), plus the inline mobile save-filter form.
+- **List Share Icon (`ListsModal`)**: Replaced the `chat` bubble icon with `share` on the guide sharing button.
+
 ## [0.2.6] - 2026-11-27
 
 ### 🔖 Bulk List & Guide Actions
