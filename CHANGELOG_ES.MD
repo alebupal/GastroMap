@@ -5,6 +5,12 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.7] - 2026-11-27
+
+### 📱 Móvil y Listas
+- **«Guardar» y «A lista» en Móvil (`MobileFilterBar` y `PlacesExplorer`)**: Añadidos los accesos rápidos *A lista* y *Guardar* filtro directamente en la barra móvil (y en el pie de *Filtros*), junto al mini-formulario móvil para guardar combinaciones al instante.
+- **Icono de Compartir Lista (`ListsModal`)**: Sustituido el icono `chat` (bocadillo de comentario) por `share` en el botón de compartir guía por WhatsApp.
+
 ## [0.2.6] - 2026-11-27
 
 ### 🔖 Listas y Guías en Lote

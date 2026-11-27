@@ -28,6 +28,9 @@ interface MobileFilterBarProps {
   onOpenRandom: () => void;
   onOpenAssistant: () => void;
   onResetFilters: () => void;
+  onOpenBulkAddToList: () => void;
+  isSaveFilterOpen: boolean;
+  onToggleSaveFilter: () => void;
 }
 
 export function MobileFilterBar({
@@ -52,6 +55,9 @@ export function MobileFilterBar({
   onOpenRandom,
   onOpenAssistant,
   onResetFilters,
+  onOpenBulkAddToList,
+  isSaveFilterOpen,
+  onToggleSaveFilter,
 }: MobileFilterBarProps) {
   const { t } = useT();
 
@@ -312,6 +318,40 @@ export function MobileFilterBar({
             casino
           </span>
           <span>{t("places.roulette")}</span>
+        </button>
+
+        {filteredPlacesCount > 0 && (
+          <button
+            type="button"
+            onClick={onOpenBulkAddToList}
+            title={t("lists.bulk_add_view_tooltip", { count: String(filteredPlacesCount) })}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/80 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[15px] leading-none">
+              playlist_add
+            </span>
+            <span>{t("lists.bulk_add_view_btn")}</span>
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={onToggleSaveFilter}
+          title={t("places.save_filter_tooltip")}
+          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition active:scale-95 shrink-0 cursor-pointer ${
+            isSaveFilterOpen
+              ? "bg-amber-600 border-amber-600 text-white"
+              : "bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-200"
+          }`}
+        >
+          <span
+            className={`material-symbols-outlined text-[15px] leading-none ${
+              isSaveFilterOpen ? "text-white" : "text-amber-600"
+            }`}
+          >
+            bookmark
+          </span>
+          <span>{t("places.save_filter")}</span>
         </button>
       </div>
     </section>
