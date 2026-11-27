@@ -11,6 +11,7 @@ import {
   type PotentialDuplicate,
   type CrossSpaceMatch,
 } from "@/lib/actions/places";
+import { getAssignableAuthorsAction, type AssignableAuthorOption } from "@/lib/actions/users";
 import { TagInput } from "@/components/places/TagInput";
 import { OccasionPicker } from "@/components/places/OccasionPicker";
 import { LocationPicker } from "@/components/places/LocationPicker";
@@ -29,6 +30,7 @@ const PRICE_OPTIONS = [
 ];
 
 interface NewPlaceFormProps {
+  currentUserId: string;
   initialUrl?: string;
   initialTitle?: string;
   availableOccasions: Occasion[];
@@ -38,6 +40,7 @@ interface NewPlaceFormProps {
 }
 
 export function NewPlaceForm({
+  currentUserId,
   initialUrl = "",
   initialTitle = "",
   availableOccasions,
@@ -59,6 +62,8 @@ export function NewPlaceForm({
     availableOccasions.length > 0 ? [availableOccasions[0].id] : []
   );
   const [targetSpace, setTargetSpace] = useState<string>(defaultTargetSpace ?? "personal");
+  const [createdById, setCreatedById] = useState<string>(currentUserId);
+  const [assignableAuthors, setAssignableAuthors] = useState<AssignableAuthorOption[]>([]);
   const [resolving, setResolving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -71,6 +76,26 @@ export function NewPlaceForm({
   const isNonMapsUrl = Boolean(url.trim()) && !isValidGoogleMapsUrl(url);
   const hasUnresolvedNonMapsUrl = isNonMapsUrl && !allowNonMapsUrl;
   const activeGroupInfo = availableGroups.find((g) => g.id === targetSpace);
+
+  // Cargar autores asignables según el espacio destino (solo devuelve lista si el usuario es superadmin o admin del grupo)
+  useEffect(() => {
+    let active = true;
+    const groupIdParam = targetSpace && targetSpace !== "personal" ? targetSpace : null;
+    getAssignableAuthorsAction(groupIdParam)
+      .then((authors) => {
+        if (!active) return;
+        setAssignableAuthors(authors);
+        if (authors.length > 0) {
+          setCreatedById((prev) => (authors.some((a) => a.id === prev) ? prev : currentUserId));
+        }
+      })
+      .catch(() => {
+        if (active) setAssignableAuthors([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [targetSpace, currentUserId]);
 
   const spaceSelectOptions = useMemo(
     () => [
@@ -623,6 +648,35 @@ export function NewPlaceForm({
           className="w-full px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700 bg-[#f8f9ff] dark:bg-slate-800/80 text-base sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500 resize-y transition"
         />
       </section>
+
+      {/* 7b. Asignación de autor (solo superadmins o admins del grupo destino) */}
+      {assignableAuthors.length > 0 && (
+        <section className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-3.5 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <div>
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+              {t("form.author_label")}
+            </h2>
+            <p className="text-[11px] text-slate-400 font-medium">
+              {t("form.public_for_community")}
+            </p>
+          </div>
+          <SearchableSelect
+            value={createdById}
+            onChange={setCreatedById}
+            options={assignableAuthors.map((u) => ({
+              value: u.id,
+              label: u.username ? `@${u.username}` : u.name,
+              subtitle: u.username ? u.name : undefined,
+              icon: <span>{u.isGhost ? "👻" : "👤"}</span>,
+            }))}
+            searchPlaceholder={t("friends_filter.search_placeholder")}
+            ariaLabel={t("form.author_label")}
+            className="w-full sm:w-72"
+            buttonClassName="w-full justify-between !py-2 !px-3.5 !text-xs bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+          />
+          <input type="hidden" name="createdById" value={createdById} />
+        </section>
+      )}
 
       {/* 8. Campo oculto del espacio destino (gestionado desde el banner superior) */}
       <input type="hidden" name="targetSpace" value={targetSpace} />

@@ -94,6 +94,7 @@ export default async function NewPlacePage({ searchParams }: NewPageProps) {
           </div>
 
           <NewPlaceForm
+            currentUserId={currentUser.id}
             initialUrl={initialUrl}
             initialTitle={initialTitle}
             availableOccasions={occasions}
