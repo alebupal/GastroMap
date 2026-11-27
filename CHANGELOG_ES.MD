@@ -5,6 +5,11 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.4] - 2026-11-27
+
+### 🔒 Seguridad
+- **Lista Blanca Estática de Orígenes en Resolución de Google Maps (`src/lib/maps.ts`)**: Reemplazada la reconstrucción dinámica de origen por un diccionario cerrado de orígenes constantes (`ALLOWED_GOOGLE_ORIGINS`) para eliminar cualquier vector SSRF y cerrar la alerta CodeQL `js/request-forgery`.
+
 ## [0.2.3] - 2026-11-27
 
 Actualización de endurecimiento de seguridad (CodeQL y Dependabot a 0 alertas).

@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-11-27
+
+### 🔒 Security
+- **Static Origin Allowlist for Google Maps Resolution (`src/lib/maps.ts`)**: Replaced dynamic origin reconstruction with a closed constant origin map (`ALLOWED_GOOGLE_ORIGINS`) to eliminate SSRF taint paths and resolve CodeQL `js/request-forgery`.
+
 ## [0.2.3] - 2026-11-27
 
 Security hardening release (resolving all CodeQL and Dependabot alerts).
