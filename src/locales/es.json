@@ -145,6 +145,8 @@
     "visited": "Ya he ido",
     "copy_address": "Copiar dirección",
     "address_copied": "Dirección copiada al portapapeles",
+    "share_public_link": "Enlace ficha pública",
+    "share_public_copied": "Enlace público copiado (con vista previa)",
     "private_note": "Mi nota",
     "by_author": "Por @{author}",
     "comments": "Comentarios",

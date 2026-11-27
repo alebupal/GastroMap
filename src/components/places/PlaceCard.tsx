@@ -2,7 +2,11 @@
 
 import { useState, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
-import { deletePlaceAction, type PlaceWithDetails } from "@/lib/actions/places";
+import {
+  deletePlaceAction,
+  getPlaceShareLinkAction,
+  type PlaceWithDetails,
+} from "@/lib/actions/places";
 import {
   setFavoriteAction,
   setPersonalStatusAction,
@@ -171,6 +175,22 @@ function PlaceCardComponent({
       // Fallback silencioso
     }
     window.open("https://www.instagram.com/direct/inbox/", "_blank", "noopener,noreferrer");
+  }
+
+  async function handleCopyPublicLink() {
+    setShowShareMenu(false);
+    const res = await getPlaceShareLinkAction(place.id);
+    if (res.error || !res.path) {
+      toast(res.error || "Error", { kind: "error" });
+      return;
+    }
+    const url = `${window.location.origin}${res.path}`;
+    const ok = await copyText(url);
+    if (ok) {
+      setCopiedPlace(true);
+      setTimeout(() => setCopiedPlace(false), 1800);
+      toast(t("cards.share_public_copied"), { kind: "success" });
+    }
   }
 
   const canDelete = place.canDelete ?? (isAdmin || isSpaceAdmin || place.createdById === currentUserId);
@@ -733,6 +753,14 @@ function PlaceCardComponent({
                   >
                     <span className="material-symbols-outlined text-base leading-none">photo_camera</span>
                     <span>{t("cards.share_instagram")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyPublicLink}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition cursor-pointer text-left"
+                  >
+                    <span className="material-symbols-outlined text-base leading-none">link</span>
+                    <span>{t("cards.share_public_link")}</span>
                   </button>
                   <button
                     type="button"
