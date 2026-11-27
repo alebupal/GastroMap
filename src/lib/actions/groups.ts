@@ -11,6 +11,7 @@ import {
   groupInvitations,
   groupJoinRequests,
   places,
+  placeComments,
   occasions,
   tags,
   placeLists,
@@ -18,6 +19,7 @@ import {
   users,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { ensureGhostUser } from "@/lib/actions/users";
 import { logAudit } from "@/lib/audit";
 import { rateLimit } from "@/lib/rate-limit";
 import { encryptApiKey, getGroupApiUsageSummary } from "@/lib/places-api";
@@ -679,6 +681,137 @@ export async function deleteGroupAction(
 
   revalidatePath("/");
   revalidatePath("/admin");
+  return { success: true };
+}
+
+/**
+ * Permite al creador ceder la propiedad del grupo a otro miembro existente
+ * y abandonar el grupo sin borrar su catálogo (opcionalmente pasando sus aportaciones a @usuario_eliminado).
+ */
+export async function transferGroupOwnershipAndLeaveAction(
+  groupId: string,
+  newOwnerUserId: string,
+  options?: { anonymizeMyContributions?: boolean }
+): Promise<{ success?: boolean; error?: string }> {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return { error: "No autenticado." };
+
+  const [group] = await db
+    .select()
+    .from(sharingGroups)
+    .where(eq(sharingGroups.id, groupId))
+    .limit(1);
+
+  if (!group) return { error: "Grupo no encontrado." };
+  if (group.ownerUserId !== currentUser.id) {
+    return { error: "Solo el creador del grupo puede ceder su propiedad y abandonarlo." };
+  }
+  if (!newOwnerUserId || newOwnerUserId === currentUser.id) {
+    return { error: "Debes seleccionar otro miembro existente del grupo." };
+  }
+
+  const [targetMembership] = await db
+    .select({
+      id: sharingGroupMembers.id,
+      userStatus: users.status,
+    })
+    .from(sharingGroupMembers)
+    .innerJoin(users, eq(sharingGroupMembers.userId, users.id))
+    .where(
+      and(
+        eq(sharingGroupMembers.groupId, groupId),
+        eq(sharingGroupMembers.userId, newOwnerUserId)
+      )
+    )
+    .limit(1);
+
+  if (!targetMembership || targetMembership.userStatus === "disabled") {
+    return { error: "El nuevo propietario debe ser un usuario activo miembro del grupo." };
+  }
+
+  await db
+    .update(sharingGroups)
+    .set({ ownerUserId: newOwnerUserId, updatedAt: new Date() })
+    .where(eq(sharingGroups.id, groupId));
+
+  await db
+    .update(sharingGroupMembers)
+    .set({ role: "admin" })
+    .where(
+      and(
+        eq(sharingGroupMembers.groupId, groupId),
+        eq(sharingGroupMembers.userId, newOwnerUserId)
+      )
+    );
+
+  if (options?.anonymizeMyContributions) {
+    const ghostUserId = await ensureGhostUser();
+    const myGroupPlaces = await db
+      .select({ id: places.id })
+      .from(places)
+      .where(and(eq(places.groupId, groupId), eq(places.createdById, currentUser.id)));
+
+    if (myGroupPlaces.length > 0) {
+      await db
+        .update(places)
+        .set({ createdById: ghostUserId, updatedAt: new Date() })
+        .where(
+          inArray(
+            places.id,
+            myGroupPlaces.map((p) => p.id)
+          )
+        );
+    }
+
+    const groupPlaceIds = (
+      await db.select({ id: places.id }).from(places).where(eq(places.groupId, groupId))
+    ).map((p) => p.id);
+
+    if (groupPlaceIds.length > 0) {
+      await db
+        .update(placeComments)
+        .set({ userId: ghostUserId })
+        .where(
+          and(
+            inArray(placeComments.placeId, groupPlaceIds),
+            eq(placeComments.userId, currentUser.id)
+          )
+        );
+    }
+  }
+
+  await db
+    .delete(sharingGroupMembers)
+    .where(
+      and(
+        eq(sharingGroupMembers.groupId, groupId),
+        eq(sharingGroupMembers.userId, currentUser.id)
+      )
+    );
+
+  const cookieStore = await cookies();
+  if (cookieStore.get(ACTIVE_SPACE_COOKIE)?.value === `group:${groupId}`) {
+    cookieStore.set(ACTIVE_SPACE_COOKIE, "personal", {
+      path: "/",
+      maxAge: 31536000,
+      sameSite: "lax",
+    });
+  }
+
+  await logAudit({
+    actorUserId: currentUser.id,
+    entityType: "group",
+    entityId: groupId,
+    action: "group_ownership_transferred_and_left",
+    metadata: {
+      newOwnerUserId,
+      anonymized: Boolean(options?.anonymizeMyContributions),
+    },
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/group-admin");
   return { success: true };
 }
 
