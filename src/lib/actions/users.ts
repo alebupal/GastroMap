@@ -23,7 +23,7 @@ import { logAudit } from "@/lib/audit";
 
 const GHOST_USER_EMAIL = "deleted-user@gastromap.local";
 
-async function ensureGhostUser(): Promise<string> {
+export async function ensureGhostUser(): Promise<string> {
   const [existing] = await db
     .select({ id: users.id })
     .from(users)
