@@ -570,10 +570,10 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                             type="button"
                             onClick={() => handleShareWhatsApp(l)}
                             className="inline-flex items-center justify-center p-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 transition cursor-pointer"
-                            title="WhatsApp"
-                            aria-label="WhatsApp"
+                            title={t("lists.share_guide")}
+                            aria-label={t("lists.share_guide")}
                           >
-                            <span className="material-symbols-outlined text-sm leading-none">chat</span>
+                            <span className="material-symbols-outlined text-sm leading-none">share</span>
                           </button>
                         </div>
                       )}

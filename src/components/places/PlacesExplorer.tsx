@@ -1215,7 +1215,42 @@ export function PlacesExplorer({
         onOpenRandom={() => setIsRandomModalOpen(true)}
         onOpenAssistant={() => setIsAssistantOpen(true)}
         onResetFilters={resetAllFilters}
+        onOpenBulkAddToList={() => setIsBulkAddListOpen(true)}
+        isSaveFilterOpen={isSaveFilterOpen}
+        onToggleSaveFilter={() => setIsSaveFilterOpen((v) => !v)}
       />
+
+      {/* Mini formulario móvil para guardar combinación actual de filtros */}
+      {isSaveFilterOpen && (
+        <form
+          onSubmit={handleSaveCurrentFilter}
+          className="lg:hidden flex items-center gap-2 p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs animate-in fade-in duration-150"
+        >
+          <input
+            type="text"
+            value={newFilterName}
+            onChange={(e) => setNewFilterName(e.target.value)}
+            placeholder="Ej. Tapear sin estrenar, Citas baratas..."
+            autoFocus
+            className="flex-1 min-w-0 px-3 py-1.5 rounded-full text-base sm:text-xs bg-[#f2f3ff] dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={savingFilter || newFilterName.trim().length < 2}
+            className="px-3 py-1.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition cursor-pointer disabled:opacity-40 shrink-0"
+          >
+            {savingFilter ? "..." : t("common.save")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsSaveFilterOpen(false)}
+            className="p-1.5 text-slate-400 hover:text-slate-600 cursor-pointer shrink-0"
+            aria-label={t("common.close")}
+          >
+            <span className="material-symbols-outlined text-base leading-none">close</span>
+          </button>
+        </form>
+      )}
 
       {/* =========================================================================
           1. HERO ACTION HUB (Desktop): Búsqueda interactiva y botones de acción rápida
@@ -2522,6 +2557,18 @@ export function PlacesExplorer({
                   <span className="material-symbols-outlined text-base leading-none">share</span>
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExtraFilters(false);
+                  setIsSaveFilterOpen(true);
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[11px] font-bold cursor-pointer"
+                title={t("places.save_filter_tooltip")}
+              >
+                <span className="material-symbols-outlined text-sm text-amber-600 leading-none">bookmark</span>
+                <span>{t("places.save_filter")}</span>
+              </button>
             </div>
 
             <button
