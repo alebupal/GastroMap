@@ -316,14 +316,14 @@ export function GroupAdminDashboard({
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-4 gap-4">
       <div className="space-y-5">
-        <div className="flex items-center justify-between gap-2 px-1 pt-1">
-          <Link href="/" className="flex items-center gap-2">
-            <GastroMapLogo iconClassName="w-8 h-8" textClassName="text-base" />
+        <div className="flex items-center justify-between gap-2 px-1 pt-1 min-w-0">
+          <Link href="/" className="flex items-center gap-2 min-w-0 flex-1">
+            <GastroMapLogo iconClassName="w-7 h-7 shrink-0" textClassName="text-sm truncate" />
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200/70 dark:hover:bg-slate-800 cursor-pointer"
+            className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-200/70 dark:hover:bg-slate-800 cursor-pointer shrink-0"
             aria-label={t("common.close")}
           >
             <span className="material-symbols-outlined text-lg leading-none">close</span>
@@ -430,8 +430,8 @@ export function GroupAdminDashboard({
   );
 
   return (
-    <div className="min-h-screen flex bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors duration-200">
-      <aside className="hidden lg:block w-64 shrink-0 bg-[#f2f3ff] dark:bg-slate-900/90 border-r border-slate-200/70 dark:border-slate-800/80 sticky top-0 h-screen overflow-y-auto">
+    <div className="min-h-screen flex overflow-x-hidden bg-[#faf8ff] dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <aside className="hidden lg:block w-64 shrink-0 bg-[#f2f3ff] dark:bg-slate-900/90 border-r border-slate-200/70 dark:border-slate-800/80 sticky top-0 h-screen overflow-y-auto overflow-x-hidden">
         {sidebarContent}
       </aside>
 
@@ -441,7 +441,7 @@ export function GroupAdminDashboard({
             className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+          <aside className="relative z-10 w-64 max-w-[82vw] h-full bg-[#f2f3ff] dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto overflow-x-hidden pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
             {sidebarContent}
           </aside>
         </div>

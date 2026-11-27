@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.2] - 2026-11-27
 
-### 🛡️ Groups & Mobile
+### 🛡️ Groups, Mobile & Security
 - **Transfer Ownership & Leave Group (`/group-admin > Settings`)**: Group owners can transfer ownership to another active group member and leave without deleting the group's catalog, with an optional toggle to reassign their own places and comments to **`👻 @usuario_eliminado`**.
-- **Superadmin Mobile Drawer Overflow Fix (`/admin`)**: Fixed horizontal scroll inside the mobile navigation drawer header.
+- **Visual Badge for `👻 @usuario_eliminado`**: Cards (`PlaceCard`), comments (`PlaceCommentsThread`), and admin tables (`PlacesTableManager`) highlight ghost-account contributions with a `👻` badge and muted italic styling.
+- **Mobile Admin Drawer Overflow Fix (`/admin` & `/group-admin`)**: Fixed horizontal scroll inside both mobile navigation drawer headers.
+- **Anti-SSRF Tests**: Added unit checks in `tests/` covering hostname validation, private IP blocking, and manual redirect handling for Google Maps links.
 
 ## [0.2.1] - 2026-11-26
 
