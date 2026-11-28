@@ -11,6 +11,11 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
+import {
+  hasActiveListFilters,
+  summarizeListFilterCriteria,
+  type ListFilterCriteria,
+} from "@/lib/list-filters";
 
 export interface BulkListPlaceItem {
   id: string;
@@ -23,6 +28,7 @@ interface BulkAddToListModalProps {
   onClose: () => void;
   places: BulkListPlaceItem[];
   suggestedListName?: string;
+  activeFilterCriteria?: ListFilterCriteria | null;
 }
 
 export function BulkAddToListModal({
@@ -30,6 +36,7 @@ export function BulkAddToListModal({
   onClose,
   places,
   suggestedListName = "",
+  activeFilterCriteria = null,
 }: BulkAddToListModalProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -44,7 +51,16 @@ export function BulkAddToListModal({
   // Crear nueva lista al vuelo
   const [newName, setNewName] = useState(suggestedListName);
   const [newPublic, setNewPublic] = useState(true);
+  const [newAuto, setNewAuto] = useState(false);
   const [creating, setCreating] = useState(false);
+  const canCreateAuto = useMemo(
+    () => hasActiveListFilters(activeFilterCriteria),
+    [activeFilterCriteria]
+  );
+  const filterChips = useMemo(
+    () => summarizeListFilterCriteria(activeFilterCriteria),
+    [activeFilterCriteria]
+  );
 
   // Resultado final con acceso directo a la guía compartida
   const [doneResult, setDoneResult] = useState<{
@@ -60,6 +76,7 @@ export function BulkAddToListModal({
     setShowPicker(false);
     setDoneResult(null);
     setNewName(suggestedListName);
+    setNewAuto(false);
     setLoading(true);
     getMyListsAction()
       .then(setLists)
@@ -138,15 +155,29 @@ export function BulkAddToListModal({
   async function handleCreateAndAdd(e: React.FormEvent) {
     e.preventDefault();
     const clean = newName.trim();
-    if (!clean || creating || targetIds.length === 0) return;
+    if (!clean || creating || (!newAuto && targetIds.length === 0)) return;
     setCreating(true);
     const created = await createListAction({
       name: clean,
       isPublic: newPublic,
+      isAuto: Boolean(newAuto && canCreateAuto),
+      filterCriteria: canCreateAuto ? activeFilterCriteria : null,
     });
     if (created?.error || !created.list) {
       setCreating(false);
       toast(created?.error || "Error", { kind: "error" });
+      return;
+    }
+
+    if (newAuto && canCreateAuto) {
+      setCreating(false);
+      showResultToast(created.list.name, places.length, 0);
+      setDoneResult({
+        listName: created.list.name,
+        shareSlug: created.list.isPublic ? created.list.shareSlug : null,
+        addedCount: places.length,
+        skippedCount: 0,
+      });
       return;
     }
 
@@ -344,6 +375,36 @@ export function BulkAddToListModal({
                   placeholder={t("lists.quick_create_placeholder")}
                   className="w-full px-3 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 font-semibold"
                 />
+                {canCreateAuto && (
+                  <div className="p-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-900/50 space-y-1.5">
+                    <label className="flex items-start gap-2 text-xs font-bold text-indigo-900 dark:text-indigo-200 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={newAuto}
+                        onChange={(e) => setNewAuto(e.target.checked)}
+                        className="rounded accent-indigo-600 w-4 h-4 mt-0.5 shrink-0"
+                      />
+                      <span>
+                        <span className="block">{t("lists.auto_toggle_label")}</span>
+                        <span className="block text-[10px] font-normal text-indigo-700/80 dark:text-indigo-300/80 mt-0.5">
+                          {t("lists.auto_toggle_hint")}
+                        </span>
+                      </span>
+                    </label>
+                    {filterChips.length > 0 && (
+                      <div className="flex flex-wrap gap-1 pt-0.5">
+                        {filterChips.map((chip) => (
+                          <span
+                            key={chip}
+                            className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-800/60 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <label className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
                     <input

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-11-28
+
+### 🔖 Auto-Updating Smart Lists & Table Place Manager
+- **Filter-Driven Auto-Updating Lists (`isAuto` + `filterCriteria`)**: When creating a list from the explorer («To list») or inside *My lists & guides*, you can optionally enable **Auto-updating** mode (e.g., *Tenerife + Tapas + #comida canaria*). Any newly added or edited place matching those rules appears automatically in the list and its public guide (`/guide/[slug]`), with seamless conversion back to manual mode preserving current stops.
+- **Live Auto-List Filter Editor (`ListsModal`)**: Edit city, country, categories, tags, price brackets, and text filters with a live matching-places counter.
+- **Table-Style Bulk Manager (`ListsModal`)**: Full table view with search, city/category/status filters (*All / In list / Out*), *Check/Uncheck visible* actions, and single-click batch save (`syncListPlacesAction`) to add and remove multiple places at once.
+
 ## [0.2.7] - 2026-11-27
 
 ### 📱 Mobile & Lists

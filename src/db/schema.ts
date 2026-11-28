@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import type { ListFilterCriteria } from "@/lib/list-filters";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -297,6 +298,8 @@ export const placeLists = pgTable(
     icon: varchar("icon", { length: 32 }).notNull().default("bookmark"),
     isPublic: boolean("is_public").notNull().default(false),
     shareSlug: varchar("share_slug", { length: 120 }).unique(),
+    isAuto: boolean("is_auto").notNull().default(false),
+    filterCriteria: jsonb("filter_criteria").$type<ListFilterCriteria | null>(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },

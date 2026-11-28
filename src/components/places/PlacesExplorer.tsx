@@ -3169,6 +3169,15 @@ export function PlacesExplorer({
           onClose={() => setIsBulkAddListOpen(false)}
           places={filteredPlaces}
           suggestedListName={selectedCities.length === 1 ? selectedCities[0] : ""}
+          activeFilterCriteria={{
+            textSearch,
+            selectedCountries,
+            selectedCities,
+            selectedTowns,
+            selectedOccasions,
+            selectedTags,
+            selectedPrices,
+          }}
         />
       )}
 
