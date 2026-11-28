@@ -174,8 +174,14 @@ export function PublicGuideView({ guide }: PublicGuideViewProps) {
                 <div className="flex items-center gap-2 flex-wrap mb-1">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
                     <span className="material-symbols-outlined text-[13px] leading-none">public</span>
-                    <span>{t("lists.public_guide_badge")}</span>
+                    {t("lists.public_guide_badge")}
                   </span>
+                  {guide.isAuto && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold">
+                      <span className="material-symbols-outlined text-[13px] leading-none">bolt</span>
+                      {t("lists.auto_badge")}
+                    </span>
+                  )}
                   <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     {t("lists.public_guide_by", { author: authorHandle })}
                   </span>

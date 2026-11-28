@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   getMyListsAction,
   createListAction,
+  updateListAction,
   addPlacesToListAction,
   type UserPlaceListSummary,
 } from "@/lib/actions/lists";
@@ -11,6 +12,11 @@ import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
 import { copyText } from "@/lib/clipboard";
 import { useSwipeToClose, SheetHandle } from "@/components/ui/BottomSheet";
+import {
+  hasActiveListFilters,
+  summarizeListFilterCriteria,
+  type ListFilterCriteria,
+} from "@/lib/list-filters";
 
 export interface BulkListPlaceItem {
   id: string;
@@ -23,6 +29,7 @@ interface BulkAddToListModalProps {
   onClose: () => void;
   places: BulkListPlaceItem[];
   suggestedListName?: string;
+  activeFilterCriteria?: ListFilterCriteria | null;
 }
 
 export function BulkAddToListModal({
@@ -30,6 +37,7 @@ export function BulkAddToListModal({
   onClose,
   places,
   suggestedListName = "",
+  activeFilterCriteria = null,
 }: BulkAddToListModalProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -44,7 +52,16 @@ export function BulkAddToListModal({
   // Crear nueva lista al vuelo
   const [newName, setNewName] = useState(suggestedListName);
   const [newPublic, setNewPublic] = useState(true);
+  const [newAuto, setNewAuto] = useState(false);
   const [creating, setCreating] = useState(false);
+  const canCreateAuto = useMemo(
+    () => hasActiveListFilters(activeFilterCriteria),
+    [activeFilterCriteria]
+  );
+  const filterChips = useMemo(
+    () => summarizeListFilterCriteria(activeFilterCriteria),
+    [activeFilterCriteria]
+  );
 
   // Resultado final con acceso directo a la guía compartida
   const [doneResult, setDoneResult] = useState<{
@@ -60,6 +77,7 @@ export function BulkAddToListModal({
     setShowPicker(false);
     setDoneResult(null);
     setNewName(suggestedListName);
+    setNewAuto(false);
     setLoading(true);
     getMyListsAction()
       .then(setLists)
@@ -116,8 +134,29 @@ export function BulkAddToListModal({
   }
 
   async function handleAddToExisting(list: UserPlaceListSummary) {
-    if (savingId || targetIds.length === 0) return;
+    if (savingId || (!newAuto && targetIds.length === 0)) return;
     setSavingId(list.id);
+
+    if (newAuto && canCreateAuto) {
+      const updated = await updateListAction(list.id, {
+        isAuto: true,
+        filterCriteria: activeFilterCriteria,
+      });
+      setSavingId(null);
+      if (updated?.error) {
+        toast(updated.error, { kind: "error" });
+        return;
+      }
+      toast(t("lists.filters_saved_toast"), { kind: "success" });
+      setDoneResult({
+        listName: list.name,
+        shareSlug: list.isPublic ? list.shareSlug : null,
+        addedCount: places.length,
+        skippedCount: 0,
+      });
+      return;
+    }
+
     const res = await addPlacesToListAction(list.id, targetIds);
     setSavingId(null);
     if (res?.error) {
@@ -138,15 +177,29 @@ export function BulkAddToListModal({
   async function handleCreateAndAdd(e: React.FormEvent) {
     e.preventDefault();
     const clean = newName.trim();
-    if (!clean || creating || targetIds.length === 0) return;
+    if (!clean || creating || (!newAuto && targetIds.length === 0)) return;
     setCreating(true);
     const created = await createListAction({
       name: clean,
       isPublic: newPublic,
+      isAuto: Boolean(newAuto && canCreateAuto),
+      filterCriteria: canCreateAuto ? activeFilterCriteria : null,
     });
     if (created?.error || !created.list) {
       setCreating(false);
       toast(created?.error || "Error", { kind: "error" });
+      return;
+    }
+
+    if (newAuto && canCreateAuto) {
+      setCreating(false);
+      showResultToast(created.list.name, places.length, 0);
+      setDoneResult({
+        listName: created.list.name,
+        shareSlug: created.list.isPublic ? created.list.shareSlug : null,
+        addedCount: places.length,
+        skippedCount: 0,
+      });
       return;
     }
 
@@ -260,8 +313,9 @@ export function BulkAddToListModal({
             </div>
           ) : (
             <>
-              {/* Ajuste opcional de selección */}
-              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-800/40 overflow-hidden">
+              {/* Ajuste opcional de selección (solo en modo manual) */}
+              {!newAuto && (
+                <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800 bg-[#f8f9ff] dark:bg-slate-800/40 overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setShowPicker((v) => !v)}
@@ -328,6 +382,39 @@ export function BulkAddToListModal({
                   </div>
                 )}
               </div>
+              )}
+
+              {/* Opción global de Autolista (aplica tanto a lista nueva como existente) */}
+              {canCreateAuto && (
+                <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-900/50 space-y-1.5">
+                  <label className="flex items-start gap-2 text-xs font-bold text-indigo-900 dark:text-indigo-200 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={newAuto}
+                      onChange={(e) => setNewAuto(e.target.checked)}
+                      className="rounded accent-indigo-600 w-4 h-4 mt-0.5 shrink-0"
+                    />
+                    <span>
+                      <span className="block">{t("lists.auto_toggle_label")}</span>
+                      <span className="block text-[10px] font-normal text-indigo-700/80 dark:text-indigo-300/80 mt-0.5">
+                        {t("lists.auto_toggle_hint")}
+                      </span>
+                    </span>
+                  </label>
+                  {filterChips.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-0.5">
+                      {filterChips.map((chip) => (
+                        <span
+                          key={chip}
+                          className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-800/60 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Crear lista nueva al vuelo */}
               <form
@@ -356,13 +443,17 @@ export function BulkAddToListModal({
                   </label>
                   <button
                     type="submit"
-                    disabled={creating || newName.trim().length < 2 || targetIds.length === 0}
+                    disabled={creating || newName.trim().length < 2 || (!newAuto && targetIds.length === 0)}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
                   >
-                    <span className="material-symbols-outlined text-sm leading-none">add</span>
+                    <span className="material-symbols-outlined text-sm leading-none">
+                      {newAuto ? "bolt" : "add"}
+                    </span>
                     <span>
                       {creating
                         ? t("common.loading")
+                        : newAuto
+                        ? `${t("lists.create_short")} (⚡ Auto)`
                         : t("lists.bulk_create_and_add", { count: String(targetIds.length) })}
                     </span>
                   </button>
@@ -393,26 +484,45 @@ export function BulkAddToListModal({
                         <button
                           key={l.id}
                           type="button"
-                          disabled={Boolean(savingId) || targetIds.length === 0}
+                          disabled={Boolean(savingId) || (!newAuto && targetIds.length === 0)}
                           onClick={() => handleAddToExisting(l)}
                           className="w-full p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-orange-400 hover:bg-orange-50/40 dark:hover:bg-orange-950/20 flex items-center justify-between gap-2 text-left transition cursor-pointer disabled:opacity-50"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <span className="material-symbols-outlined text-base text-orange-600 shrink-0 leading-none">
-                              {l.isPublic ? "public" : "bookmark"}
+                              {l.isAuto ? "bolt" : l.isPublic ? "public" : "bookmark"}
                             </span>
                             <div className="min-w-0">
-                              <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                                {l.name}
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                                  {l.name}
+                                </span>
+                                {l.isAuto && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[9px] font-bold shrink-0">
+                                    ⚡ Auto
+                                  </span>
+                                )}
                               </div>
                               <div className="text-[10px] text-slate-400">
                                 {t("lists.places_count", { count: String(l.placesCount) })}
-                                {pendingCount > 0 ? ` · +${pendingCount}` : ""}
+                                {!newAuto && pendingCount > 0 ? ` · +${pendingCount}` : ""}
                               </div>
                             </div>
                           </div>
-                          <span className="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 text-[11px] font-bold shrink-0">
-                            {isSaving ? "..." : pendingCount > 0 ? `+${pendingCount}` : "✓"}
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${
+                              newAuto && canCreateAuto
+                                ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300"
+                                : "bg-orange-50 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300"
+                            }`}
+                          >
+                            {isSaving
+                              ? "..."
+                              : newAuto && canCreateAuto
+                              ? "⚡ Auto"
+                              : pendingCount > 0
+                              ? `+${pendingCount}`
+                              : "✓"}
                           </span>
                         </button>
                       );

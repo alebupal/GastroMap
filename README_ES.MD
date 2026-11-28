@@ -1,6 +1,6 @@
 # GastroMap 🍽️
 
-[![Version](https://img.shields.io/badge/version-0.2.7-blue.svg)](https://github.com/alebupal/GastroMap/releases)
+[![Version](https://img.shields.io/badge/version-0.2.8-blue.svg)](https://github.com/alebupal/GastroMap/releases)
 [![Docker Hub](https://img.shields.io/docker/pulls/alebupal/gastromap.svg)](https://hub.docker.com/r/alebupal/gastromap/)
 [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-orange.svg)](https://www.paypal.me/alebupal)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -33,7 +33,7 @@ Diseñada con un enfoque **mobile-first** e instalable como **PWA**, permite añ
 * **🌍 Espacios Independientes, Grupos de Amigos, Mapa Personal y Guías:**
   * Despliegue autohospedado bajo servidor propio (Docker), con **registro público abierto** (`/register`) o **modo cerrado por invitación** configurable desde `/admin > Sistema y Auditoría`.
   * **Arquitectura Multi-Espacio 100 % aislada**: Cada usuario dispone de **🏠 Mi Mapa Personal** (privado) y puede crear (desde plantilla vacía, planes base o clonando otro grupo) o unirse a múltiples **🍻 Grupos de amigos** mediante enlaces mágicos (`/groups/join/[token]`) con aprobación opcional del administrador. Cada grupo funciona como su propia app independiente con sus propios sitios, planes, etiquetas, listas, **panel de administración de grupo (`/group-admin`)** con **cesión de propiedad y salida segura del grupo**, reasignación de autoría y cuenta fantasma **`👻 @usuario_eliminado`**, copia/movimiento masivo de sitios entre espacios con detección de duplicados y **Deshacer**, **Papelera (30 días)** y pestaña **Salud de datos**. Además, dispone de vista combinada **🌍 Todos mis sitios** y buscador rápido de grupos en la cabecera.
-  * **Listas / Guías personales compartibles**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales) **añadiendo de golpe todos los resultados de un filtro («A lista») o seleccionando varios locales por lote desde *Mis listas***, ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
+  * **Listas / Guías personales compartibles y Autolistas**: Agrupa locales en colecciones temáticas (viajes, rutas de tapas, planes especiales) **añadiendo de golpe todos los resultados de un filtro («A lista»), activando listas ⚡ autoalimentadas por reglas (ciudad, categoría, etiquetas, precio) o administrando varios locales a la vez en tabla desde *Mis listas***, ordénalos a tu gusto y activa un **enlace público de solo lectura** (`/guide/[slug]`) con mapa interactivo y ruta en Google Maps para compartirlo con amigos sin que tengan que registrarse.
   * Notas personales privadas y comentarios colaborativos en cada ficha de establecimiento. Los autores y administradores del grupo gestionan sus sitios.
 
 * **📊 Estadísticas Personales, «Wrapped» Anual y Panel Admin Escalable (`/admin`):**

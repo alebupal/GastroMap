@@ -5,6 +5,13 @@ Todos los cambios notables de este proyecto serán documentados en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto se adhiere a [Versionado Semántico (SemVer)](https://semver.org/lang/es/).
 
+## [0.2.8] - 2026-11-28
+
+### 🔖 Autolistas Dinámicas y Tabla de Administración de Listas
+- **Listas Autoalimentadas por Filtros (`isAuto` + `filterCriteria`)**: Al crear una lista desde el filtro del explorador («A lista») o desde *Mis listas y guías*, puedes activarla como **Autoalimentada** (p. ej. *Tenerife + Tapas + #comida canaria*). Cualquier sitio nuevo o editado que cumpla esas reglas entra automáticamente en la lista y en su guía pública (`/guide/[slug]`), pudiendo pasarla a manual en cualquier momento conservando sus paradas.
+- **Editor de Filtros de Autolista (`ListsModal`)**: Permite editar en vivo ciudad, país, categorías, etiquetas, precios y texto con vista previa del recuento de coincidencias.
+- **Interfaz Tipo Tabla para Administrar Sitios (`ListsModal`)**: Tabla con buscador, filtros por ciudad/categoría/estado (*Todos / En la lista / Fuera*), botones *Marcar/Desmarcar visibles* y guardado conjunto (`syncListPlacesAction`) para añadir y quitar varios locales a la vez.
+
 ## [0.2.7] - 2026-11-27
 
 ### 📱 Móvil y Listas

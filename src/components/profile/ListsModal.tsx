@@ -4,17 +4,25 @@ import { useState, useEffect, useMemo } from "react";
 import {
   getMyListsAction,
   getListItemsAction,
-  getListCandidatePlacesAction,
+  getListEditorDataAction,
   createListAction,
   updateListAction,
   deleteListAction,
   togglePlaceInListAction,
-  addPlacesToListAction,
+  syncListPlacesAction,
   reorderListItemsAction,
   type UserPlaceListSummary,
   type ListPlaceItemDetail,
-  type ListCandidatePlace,
+  type ListEditorData,
 } from "@/lib/actions/lists";
+import {
+  hasActiveListFilters,
+  matchesListFilterCriteria,
+  summarizeListFilterCriteria,
+  type ListFilterCriteria,
+} from "@/lib/list-filters";
+import { resolveFilterCity, parseCityCountry } from "@/lib/location";
+import { OccasionIcon } from "@/components/ui/OccasionIcon";
 import { copyText } from "@/lib/clipboard";
 import { useT } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/Toast";
@@ -25,6 +33,8 @@ interface ListsModalProps {
   onClose: () => void;
 }
 
+const PRICE_OPTIONS = ["€", "€€", "€€€", "€€€€"];
+
 export function ListsModal({ isOpen, onClose }: ListsModalProps) {
   const { t } = useT();
   const { toast } = useToast();
@@ -33,7 +43,7 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
   const [lists, setLists] = useState<UserPlaceListSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Crear nueva lista
+  // Crear nueva lista manual básica
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newPublic, setNewPublic] = useState(true);
@@ -50,14 +60,24 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
   const [editDesc, setEditDesc] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Selector múltiple en lote dentro de una lista
-  const [pickerListId, setPickerListId] = useState<string | null>(null);
-  const [candidatesByList, setCandidatesByList] = useState<Record<string, ListCandidatePlace[]>>({});
-  const [loadingCandidatesId, setLoadingCandidatesId] = useState<string | null>(null);
-  const [pickerSearch, setPickerSearch] = useState("");
-  const [pickerCity, setPickerCity] = useState("");
-  const [pickerSelected, setPickerSelected] = useState<Set<string>>(new Set());
-  const [savingBulkId, setSavingBulkId] = useState<string | null>(null);
+  // Datos compartidos del editor (candidatos + taxonomía del espacio)
+  const [editorDataByList, setEditorDataByList] = useState<Record<string, ListEditorData>>({});
+  const [loadingEditorId, setLoadingEditorId] = useState<string | null>(null);
+
+  // Modo 1: Tabla de administración masiva (añadir/quitar varios a la vez)
+  const [tableListId, setTableListId] = useState<string | null>(null);
+  const [tableSearch, setTableSearch] = useState("");
+  const [tableCity, setTableCity] = useState("");
+  const [tableOccasion, setTableOccasion] = useState("");
+  const [tableStatus, setTableStatus] = useState<"all" | "in" | "out">("all");
+  const [draftSelectedIds, setDraftSelectedIds] = useState<Set<string>>(new Set());
+  const [savingTableId, setSavingTableId] = useState<string | null>(null);
+
+  // Modo 2: Editor de filtros de autolista
+  const [filterListId, setFilterListId] = useState<string | null>(null);
+  const [draftIsAuto, setDraftIsAuto] = useState(false);
+  const [draftCriteria, setDraftCriteria] = useState<ListFilterCriteria>({});
+  const [savingFilterId, setSavingFilterId] = useState<string | null>(null);
 
   async function loadLists() {
     setLoading(true);
@@ -66,6 +86,20 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
       setLists(data);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function ensureEditorData(listId: string): Promise<ListEditorData | null> {
+    if (editorDataByList[listId]) return editorDataByList[listId];
+    setLoadingEditorId(listId);
+    try {
+      const data = await getListEditorDataAction(listId);
+      if (data) {
+        setEditorDataByList((prev) => ({ ...prev, [listId]: data }));
+      }
+      return data;
+    } finally {
+      setLoadingEditorId(null);
     }
   }
 
@@ -84,32 +118,68 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  const activePickerCandidates = useMemo(() => {
-    if (!pickerListId) {
-      return {
-        cities: [] as string[],
-        filtered: [] as ListCandidatePlace[],
-        selectableIds: [] as string[],
-      };
-    }
-    const activeList = lists.find((l) => l.id === pickerListId);
-    const existingSet = new Set(activeList?.placeIds || []);
-    const all = candidatesByList[pickerListId] || [];
-    const cities = Array.from(
-      new Set(all.map((p) => (p.city || "").trim()).filter(Boolean))
-    ).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
-    const q = pickerSearch.trim().toLowerCase();
-    const filtered = all.filter((p) => {
-      if (pickerCity && (p.city || "").trim() !== pickerCity) return false;
+  const activeTableView = useMemo(() => {
+    if (!tableListId) return null;
+    const list = lists.find((l) => l.id === tableListId);
+    const data = editorDataByList[tableListId];
+    if (!list || !data) return null;
+
+    const savedSet = new Set(list.placeIds);
+    const q = tableSearch.trim().toLowerCase();
+
+    const rows = data.candidates.filter((p) => {
+      const isSaved = savedSet.has(p.id);
+      if (tableStatus === "in" && !isSaved) return false;
+      if (tableStatus === "out" && isSaved) return false;
+      if (tableCity && resolveFilterCity(p.city, p.address, p.country) !== tableCity) return false;
+      if (tableOccasion && !p.occasions.includes(tableOccasion)) return false;
       if (q) {
-        const hay = `${p.name} ${p.city || ""} ${p.address || ""}`.toLowerCase();
+        const hay = `${p.name} ${p.city || ""} ${p.address || ""} ${p.tags.join(" ")}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-    const selectableIds = filtered.filter((p) => !existingSet.has(p.id)).map((p) => p.id);
-    return { cities, filtered, selectableIds };
-  }, [pickerListId, lists, candidatesByList, pickerSearch, pickerCity]);
+
+    let addCount = 0;
+    let remCount = 0;
+    for (const id of draftSelectedIds) {
+      if (!savedSet.has(id)) addCount++;
+    }
+    for (const id of savedSet) {
+      if (!draftSelectedIds.has(id)) remCount++;
+    }
+
+    return { list, data, rows, savedSet, addCount, remCount };
+  }, [
+    tableListId,
+    lists,
+    editorDataByList,
+    tableSearch,
+    tableCity,
+    tableOccasion,
+    tableStatus,
+    draftSelectedIds,
+  ]);
+
+  const activeFilterPreviewCount = useMemo(() => {
+    if (!filterListId) return 0;
+    const data = editorDataByList[filterListId];
+    if (!data || !hasActiveListFilters(draftCriteria)) return 0;
+    return data.candidates.filter((p) =>
+      matchesListFilterCriteria(
+        {
+          name: p.name,
+          city: p.city,
+          country: p.country,
+          address: p.address,
+          priceRange: p.priceRange,
+          occasions: p.occasions,
+          tags: p.tags,
+        },
+        draftCriteria
+      )
+    ).length;
+  }, [filterListId, editorDataByList, draftCriteria]);
 
   if (!isOpen) return null;
 
@@ -136,9 +206,13 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
   async function handleToggleExpand(listId: string) {
     if (expandedId === listId) {
       setExpandedId(null);
+      setTableListId(null);
+      setFilterListId(null);
       return;
     }
     setExpandedId(listId);
+    setTableListId(null);
+    setFilterListId(null);
     setLoadingItemsId(listId);
     try {
       const items = await getListItemsAction(listId);
@@ -252,60 +326,84 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
 
-  async function handleOpenBulkPicker(listId: string) {
-    if (pickerListId === listId) {
-      setPickerListId(null);
+  async function handleOpenTable(list: UserPlaceListSummary) {
+    if (tableListId === list.id) {
+      setTableListId(null);
       return;
     }
-    setPickerListId(listId);
-    setPickerSearch("");
-    setPickerCity("");
-    setPickerSelected(new Set());
-    if (!candidatesByList[listId]) {
-      setLoadingCandidatesId(listId);
-      try {
-        const candidates = await getListCandidatePlacesAction(listId);
-        setCandidatesByList((prev) => ({ ...prev, [listId]: candidates }));
-      } finally {
-        setLoadingCandidatesId(null);
-      }
-    }
+    setFilterListId(null);
+    setTableListId(list.id);
+    setTableSearch("");
+    setTableCity("");
+    setTableOccasion("");
+    setTableStatus("all");
+    setDraftSelectedIds(new Set(list.placeIds));
+    await ensureEditorData(list.id);
   }
 
-  async function handleConfirmBulkPicker(list: UserPlaceListSummary) {
-    const ids = Array.from(pickerSelected);
-    if (ids.length === 0 || savingBulkId) return;
-    setSavingBulkId(list.id);
-    const res = await addPlacesToListAction(list.id, ids);
-    setSavingBulkId(null);
+  async function handleSaveTable(list: UserPlaceListSummary) {
+    if (savingTableId) return;
+    setSavingTableId(list.id);
+    const res = await syncListPlacesAction(list.id, Array.from(draftSelectedIds));
+    setSavingTableId(null);
     if (res?.error) {
       toast(res.error, { kind: "error" });
       return;
     }
-    const addedCount = res.addedCount ?? 0;
-    const skippedCount = res.skippedCount ?? 0;
-    if (addedCount === 0) {
-      toast(t("lists.bulk_already_all_toast", { name: list.name }), { kind: "info" });
-    } else if (skippedCount > 0) {
-      toast(
-        t("lists.bulk_added_with_skipped_toast", {
-          added: String(addedCount),
-          name: list.name,
-          skipped: String(skippedCount),
-        }),
-        { kind: "success" }
-      );
-    } else {
-      toast(
-        t("lists.bulk_added_toast", {
-          added: String(addedCount),
-          name: list.name,
-        }),
-        { kind: "success" }
-      );
+    toast(
+      t("lists.table_saved_toast", {
+        add: String(res.addedCount ?? 0),
+        rem: String(res.removedCount ?? 0),
+      }),
+      { kind: "success" }
+    );
+    setTableListId(null);
+    const [freshItems] = await Promise.all([getListItemsAction(list.id), loadLists()]);
+    setItemsByList((prev) => ({ ...prev, [list.id]: freshItems }));
+  }
+
+  async function handleOpenFilterEditor(list: UserPlaceListSummary) {
+    if (filterListId === list.id) {
+      setFilterListId(null);
+      return;
     }
-    setPickerListId(null);
-    setPickerSelected(new Set());
+    setTableListId(null);
+    setFilterListId(list.id);
+    setDraftIsAuto(list.isAuto);
+    setDraftCriteria(list.filterCriteria || {});
+    await ensureEditorData(list.id);
+  }
+
+  function toggleCriteriaItem(
+    key: "selectedCities" | "selectedCountries" | "selectedOccasions" | "selectedTags" | "selectedPrices",
+    value: string
+  ) {
+    setDraftCriteria((prev) => {
+      const current = prev[key] || [];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      return { ...prev, [key]: next };
+    });
+  }
+
+  async function handleSaveFilterConfig(list: UserPlaceListSummary) {
+    if (draftIsAuto && !hasActiveListFilters(draftCriteria)) {
+      toast(t("lists.filter_no_criteria_error"), { kind: "error" });
+      return;
+    }
+    setSavingFilterId(list.id);
+    const res = await updateListAction(list.id, {
+      isAuto: draftIsAuto,
+      filterCriteria: draftCriteria,
+    });
+    setSavingFilterId(null);
+    if (res?.error) {
+      toast(res.error, { kind: "error" });
+      return;
+    }
+    toast(t("lists.filters_saved_toast"), { kind: "success" });
+    setFilterListId(null);
     const [freshItems] = await Promise.all([getListItemsAction(list.id), loadLists()]);
     setItemsByList((prev) => ({ ...prev, [list.id]: freshItems }));
   }
@@ -322,7 +420,7 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
         ref={sheet.sheetRef}
         style={sheet.sheetStyle}
         {...sheet.sheetHandlers}
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden gm-modal-in"
+        className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border-t sm:border border-slate-200/80 dark:border-slate-800 flex flex-col max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden gm-modal-in"
       >
         <SheetHandle {...sheet.handleHandlers} />
 
@@ -359,20 +457,22 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
             onSubmit={handleCreate}
             className="p-3.5 rounded-2xl bg-[#f8f9ff] dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 space-y-2.5"
           >
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder={t("lists.name_placeholder")}
-              className="w-full px-3.5 py-2.5 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 font-semibold"
-            />
-            <input
-              type="text"
-              value={newDesc}
-              onChange={(e) => setNewDesc(e.target.value)}
-              placeholder={t("lists.desc_placeholder")}
-              className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder={t("lists.name_placeholder")}
+                className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40 font-semibold"
+              />
+              <input
+                type="text"
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                placeholder={t("lists.desc_placeholder")}
+                className="w-full px-3.5 py-2 rounded-xl text-base sm:text-xs bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+              />
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5">
               <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
                 <input
@@ -420,6 +520,10 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                 const isEditing = editingId === l.id;
                 const items = itemsByList[l.id] || [];
                 const isCopied = copiedId === l.id;
+                const criteriaChips = l.isAuto ? summarizeListFilterCriteria(l.filterCriteria) : [];
+                const isTableOpen = tableListId === l.id;
+                const isFilterOpen = filterListId === l.id;
+                const editorData = editorDataByList[l.id];
 
                 return (
                   <div
@@ -469,7 +573,7 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                         >
                           <div className="w-9 h-9 rounded-xl bg-orange-100/90 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined text-lg leading-none">
-                              {l.isPublic ? "public" : "bookmark"}
+                              {l.isAuto ? "bolt" : l.isPublic ? "public" : "bookmark"}
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
@@ -486,55 +590,78 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                               >
                                 {l.isPublic ? t("lists.public_badge") : t("lists.private_badge")}
                               </span>
+                              {l.isAuto && (
+                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold">
+                                  <span className="material-symbols-outlined text-[11px] leading-none">
+                                    bolt
+                                  </span>
+                                  <span>{t("lists.auto_badge")}</span>
+                                </span>
+                              )}
+                              <span className="text-[11px] font-semibold text-slate-400">
+                                · {t("lists.places_count", { count: String(l.placesCount) })}
+                              </span>
                             </div>
                             {l.description && (
-                              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">
                                 {l.description}
                               </p>
                             )}
-                            <p className="text-[11px] font-semibold text-orange-600 dark:text-orange-400 mt-1 inline-flex items-center gap-1">
-                              <span>{t("lists.places_count", { count: l.placesCount })}</span>
-                              <span className="material-symbols-outlined text-sm leading-none">
-                                {isExpanded ? "expand_less" : "expand_more"}
-                              </span>
-                            </p>
+                            {criteriaChips.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-1.5">
+                                {criteriaChips.map((chip) => (
+                                  <span
+                                    key={chip}
+                                    className="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-indigo-200/70 dark:border-indigo-800/60 text-[10px] font-semibold text-indigo-700 dark:text-indigo-300"
+                                  >
+                                    {chip}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </button>
 
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingId(l.id);
-                              setEditName(l.name);
-                              setEditDesc(l.description || "");
-                            }}
-                            className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-slate-700 rounded-full transition cursor-pointer"
-                            title={t("common.edit")}
-                          >
-                            <span className="material-symbols-outlined text-base leading-none">edit</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(l)}
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-full transition cursor-pointer"
-                            title={t("common.delete")}
-                          >
-                            <span className="material-symbols-outlined text-base leading-none">delete</span>
-                          </button>
-                        </div>
+                        {l.canManage && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingId(l.id);
+                                setEditName(l.name);
+                                setEditDesc(l.description || "");
+                              }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-orange-600 hover:bg-white dark:hover:bg-slate-900 transition cursor-pointer"
+                              title={t("common.edit")}
+                            >
+                              <span className="material-symbols-outlined text-base leading-none">
+                                edit
+                              </span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(l)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white dark:hover:bg-slate-900 transition cursor-pointer"
+                              title={t("common.delete")}
+                            >
+                              <span className="material-symbols-outlined text-base leading-none">
+                                delete
+                              </span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {/* Barra de enlace público y acciones rápidas */}
-                    <div className="pt-2.5 border-t border-slate-200/70 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-2">
+                    {/* Barra de acciones públicas / enlace */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/60 dark:border-slate-700/50">
                       <button
                         type="button"
                         onClick={() => handleTogglePublic(l)}
-                        className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-orange-600 cursor-pointer transition"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-orange-600 cursor-pointer"
                       >
-                        <span className="material-symbols-outlined text-sm leading-none">
-                          {l.isPublic ? "link_off" : "link"}
+                        <span className="material-symbols-outlined text-base leading-none">
+                          {l.isPublic ? "lock" : "public"}
                         </span>
                         <span>
                           {l.isPublic ? t("lists.disable_public_link") : t("lists.enable_public_link")}
@@ -549,7 +676,9 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-400 text-[11px] font-bold transition"
                           >
-                            <span className="material-symbols-outlined text-sm leading-none">open_in_new</span>
+                            <span className="material-symbols-outlined text-sm leading-none">
+                              open_in_new
+                            </span>
                             <span>{t("lists.open_guide")}</span>
                           </a>
                           <button
@@ -573,159 +702,554 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                             title={t("lists.share_guide")}
                             aria-label={t("lists.share_guide")}
                           >
-                            <span className="material-symbols-outlined text-sm leading-none">share</span>
+                            <span className="material-symbols-outlined text-sm leading-none">
+                              share
+                            </span>
                           </button>
                         </div>
                       )}
                     </div>
 
-                    {/* Paradas desplegadas */}
+                    {/* Paradas y herramientas avanzadas desplegadas */}
                     {isExpanded && (
-                      <div className="pt-2 space-y-2">
-                        <div className="flex items-center justify-end">
-                          <button
-                            type="button"
-                            onClick={() => handleOpenBulkPicker(l.id)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
-                              pickerListId === l.id
-                                ? "bg-indigo-600 text-white"
-                                : "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60 hover:bg-indigo-100"
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-sm leading-none">
-                              {pickerListId === l.id ? "close" : "playlist_add"}
-                            </span>
-                            <span>{t("lists.bulk_picker_open")}</span>
-                          </button>
-                        </div>
-
-                        {pickerListId === l.id && (
-                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 space-y-2.5">
-                            <div className="flex flex-col sm:flex-row gap-2">
-                              <input
-                                type="text"
-                                value={pickerSearch}
-                                onChange={(e) => setPickerSearch(e.target.value)}
-                                placeholder={t("lists.bulk_picker_search")}
-                                className="flex-1 px-3 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                              />
-                              {activePickerCandidates.cities.length > 0 && (
-                                <select
-                                  value={pickerCity}
-                                  onChange={(e) => setPickerCity(e.target.value)}
-                                  className="px-2.5 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
+                      <div className="pt-2 space-y-2.5">
+                        {l.canManage && (
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {!l.isAuto && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenTable(l)}
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                                    isTableOpen
+                                      ? "bg-orange-600 text-white"
+                                      : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-orange-400"
+                                  }`}
                                 >
-                                  <option value="">{t("lists.bulk_picker_all_cities")}</option>
-                                  {activePickerCandidates.cities.map((c) => (
-                                    <option key={c} value={c}>
-                                      {c}
-                                    </option>
-                                  ))}
-                                </select>
+                                  <span className="material-symbols-outlined text-sm leading-none">
+                                    table_chart
+                                  </span>
+                                  <span>{t("lists.table_manage_btn")}</span>
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenFilterEditor(l)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                                  isFilterOpen
+                                    ? "bg-indigo-600 text-white"
+                                    : "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800/60 hover:bg-indigo-100"
+                                }`}
+                              >
+                                <span className="material-symbols-outlined text-sm leading-none">
+                                  tune
+                                </span>
+                                <span>{t("lists.edit_filters_btn")}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* PANEL 1: Editor de filtros de autolista */}
+                        {isFilterOpen && (
+                          <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+                            {/* Selector de modo: Autoalimentada vs Manual */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+                              <div className="inline-flex p-1 rounded-full bg-[#f2f3ff] dark:bg-slate-800 gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setDraftIsAuto(true)}
+                                  className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer inline-flex items-center gap-1 ${
+                                    draftIsAuto
+                                      ? "bg-indigo-600 text-white shadow-xs"
+                                      : "text-slate-600 dark:text-slate-300"
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-xs leading-none">
+                                    bolt
+                                  </span>
+                                  <span>{t("lists.mode_auto")}</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setDraftIsAuto(false)}
+                                  className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                                    !draftIsAuto
+                                      ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xs"
+                                      : "text-slate-600 dark:text-slate-300"
+                                  }`}
+                                >
+                                  {t("lists.mode_manual")}
+                                </button>
+                              </div>
+
+                              {draftIsAuto && (
+                                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                                  {t("lists.auto_live_count", {
+                                    count: String(activeFilterPreviewCount),
+                                  })}
+                                </span>
                               )}
                             </div>
 
-                            {loadingCandidatesId === l.id ? (
-                              <div className="h-20 rounded-xl gm-shimmer" />
-                            ) : activePickerCandidates.filtered.length === 0 ? (
-                              <p className="text-[11px] text-slate-400 text-center py-2">
-                                {t("lists.bulk_picker_empty")}
+                            {loadingEditorId === l.id ? (
+                              <div className="h-24 rounded-xl gm-shimmer" />
+                            ) : !draftIsAuto ? (
+                              <p className="text-xs text-slate-500 dark:text-slate-400 py-1">
+                                En modo <strong className="text-slate-700 dark:text-slate-200">{t("lists.mode_manual")}</strong> tú eliges los sitios manualmente desde la tabla o desde cada tarjeta. Selecciona <strong className="text-indigo-600 dark:text-indigo-400">⚡ {t("lists.mode_auto")}</strong> arriba para definir reglas automáticas.
                               </p>
                             ) : (
-                              <>
-                                <div className="flex items-center justify-between gap-2 text-[11px] font-semibold">
-                                  <button
-                                    type="button"
-                                    disabled={activePickerCandidates.selectableIds.length === 0}
-                                    onClick={() =>
-                                      setPickerSelected(new Set(activePickerCandidates.selectableIds))
-                                    }
-                                    className="text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer disabled:opacity-40"
-                                  >
-                                    {t("lists.bulk_picker_select_visible", {
-                                      count: String(activePickerCandidates.selectableIds.length),
-                                    })}
-                                  </button>
-                                  {pickerSelected.size > 0 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => setPickerSelected(new Set())}
-                                      className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                                    >
-                                      {t("lists.bulk_picker_clear")}
-                                    </button>
+                              editorData && (
+                                <div className="space-y-3">
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                    {t("lists.auto_toggle_hint")}
+                                  </p>
+
+                                  {/* Texto opcional */}
+                                  <div className="space-y-1">
+                                    <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                      {t("lists.filter_text_label")}
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={draftCriteria.textSearch || ""}
+                                      onChange={(e) =>
+                                        setDraftCriteria((prev) => ({
+                                          ...prev,
+                                          textSearch: e.target.value,
+                                        }))
+                                      }
+                                      placeholder={t("lists.filter_text_placeholder")}
+                                      className="w-full px-3 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                    />
+                                  </div>
+
+                                  {/* Ciudades */}
+                                  {editorData.cities.length > 0 && (
+                                    <div className="space-y-1">
+                                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                        {t("lists.filter_cities_label")}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                                        {editorData.cities.map((c) => {
+                                          const active = (draftCriteria.selectedCities || []).includes(c);
+                                          return (
+                                            <button
+                                              key={c}
+                                              type="button"
+                                              onClick={() => toggleCriteriaItem("selectedCities", c)}
+                                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
+                                                active
+                                                  ? "bg-indigo-600 border-indigo-600 text-white"
+                                                  : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                                              }`}
+                                            >
+                                              {c}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
                                   )}
+
+                                  {/* Países (si hay > 1) */}
+                                  {editorData.countries.length > 1 && (
+                                    <div className="space-y-1">
+                                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                        {t("lists.filter_countries_label")}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {editorData.countries.map((co) => {
+                                          const active = (draftCriteria.selectedCountries || []).includes(co);
+                                          return (
+                                            <button
+                                              key={co}
+                                              type="button"
+                                              onClick={() => toggleCriteriaItem("selectedCountries", co)}
+                                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
+                                                active
+                                                  ? "bg-indigo-600 border-indigo-600 text-white"
+                                                  : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                                              }`}
+                                            >
+                                              {co}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Categorías / Planes */}
+                                  {editorData.occasions.length > 0 && (
+                                    <div className="space-y-1">
+                                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                        {t("lists.filter_occasions_label")}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {editorData.occasions.map((occ) => {
+                                          const active = (draftCriteria.selectedOccasions || []).includes(
+                                            occ.id
+                                          );
+                                          return (
+                                            <button
+                                              key={occ.id}
+                                              type="button"
+                                              onClick={() =>
+                                                toggleCriteriaItem("selectedOccasions", occ.id)
+                                              }
+                                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
+                                                active
+                                                  ? "bg-orange-600 border-orange-600 text-white"
+                                                  : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                                              }`}
+                                            >
+                                              <OccasionIcon icon={occ.icon} msClassName="text-[13px]" />
+                                              <span>{occ.name}</span>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Etiquetas */}
+                                  {editorData.tags.length > 0 && (
+                                    <div className="space-y-1">
+                                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                        {t("lists.filter_tags_label")}
+                                      </span>
+                                      <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                                        {editorData.tags.map((tag) => {
+                                          const active = (draftCriteria.selectedTags || []).includes(tag);
+                                          return (
+                                            <button
+                                              key={tag}
+                                              type="button"
+                                              onClick={() => toggleCriteriaItem("selectedTags", tag)}
+                                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
+                                                active
+                                                  ? "bg-emerald-600 border-emerald-600 text-white"
+                                                  : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                                              }`}
+                                            >
+                                              #{tag}
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Precios */}
+                                  <div className="space-y-1">
+                                    <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                      {t("lists.filter_prices_label")}
+                                    </span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {PRICE_OPTIONS.map((price) => {
+                                        const active = (draftCriteria.selectedPrices || []).includes(
+                                          price
+                                        );
+                                        return (
+                                          <button
+                                            key={price}
+                                            type="button"
+                                            onClick={() =>
+                                              toggleCriteriaItem("selectedPrices", price)
+                                            }
+                                            className={`px-3 py-1 rounded-full text-[11px] font-bold transition cursor-pointer border ${
+                                              active
+                                                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white"
+                                                : "bg-[#f8f9ff] dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+                                            }`}
+                                          >
+                                            {price}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+
+                            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                              <button
+                                type="button"
+                                onClick={() => setFilterListId(null)}
+                                className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                              >
+                                {t("common.cancel")}
+                              </button>
+                              <button
+                                type="button"
+                                disabled={savingFilterId === l.id}
+                                onClick={() => handleSaveFilterConfig(l)}
+                                className="px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
+                              >
+                                {savingFilterId === l.id
+                                  ? t("common.loading")
+                                  : t("lists.save_filters_btn")}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* PANEL 2: Tabla de administración masiva (añadir/quitar varios a la vez) */}
+                        {isTableOpen && (
+                          <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-orange-200/80 dark:border-orange-900/50 space-y-2.5">
+                            {loadingEditorId === l.id || !activeTableView ? (
+                              <div className="h-32 rounded-xl gm-shimmer" />
+                            ) : (
+                              <>
+                                {/* Filtros de tabla */}
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                                  <input
+                                    type="text"
+                                    value={tableSearch}
+                                    onChange={(e) => setTableSearch(e.target.value)}
+                                    placeholder={t("lists.bulk_picker_search")}
+                                    className="sm:col-span-2 px-3 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                  />
+                                  <select
+                                    value={tableCity}
+                                    onChange={(e) => setTableCity(e.target.value)}
+                                    className="px-2.5 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
+                                  >
+                                    <option value="">{t("lists.bulk_picker_all_cities")}</option>
+                                    {activeTableView.data.cities.map((c) => (
+                                      <option key={c} value={c}>
+                                        {c}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <select
+                                    value={tableOccasion}
+                                    onChange={(e) => setTableOccasion(e.target.value)}
+                                    className="px-2.5 py-1.5 rounded-xl text-base sm:text-xs bg-[#f8f9ff] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none"
+                                  >
+                                    <option value="">{t("lists.table_all_occasions")}</option>
+                                    {activeTableView.data.occasions.map((o) => (
+                                      <option key={o.id} value={o.id}>
+                                        {o.name}
+                                      </option>
+                                    ))}
+                                  </select>
                                 </div>
 
-                                <div className="max-h-44 overflow-y-auto space-y-1 pr-0.5">
-                                  {activePickerCandidates.filtered.map((cand) => {
-                                    const alreadyIn = l.placeIds.includes(cand.id);
-                                    const checked = alreadyIn || pickerSelected.has(cand.id);
-                                    return (
-                                      <label
-                                        key={cand.id}
-                                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-xs ${
-                                          alreadyIn
-                                            ? "bg-slate-50 dark:bg-slate-800/40 border-slate-200/50 dark:border-slate-800 opacity-60 cursor-not-allowed"
-                                            : "bg-[#f8f9ff] dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-700 cursor-pointer hover:border-indigo-300"
+                                <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                                  <div className="inline-flex p-0.5 rounded-full bg-[#f2f3ff] dark:bg-slate-800 gap-0.5">
+                                    {(
+                                      [
+                                        { key: "all", label: t("lists.table_filter_all") },
+                                        { key: "in", label: t("lists.table_filter_in") },
+                                        { key: "out", label: t("lists.table_filter_out") },
+                                      ] as const
+                                    ).map((tab) => (
+                                      <button
+                                        key={tab.key}
+                                        type="button"
+                                        onClick={() => setTableStatus(tab.key)}
+                                        className={`px-2.5 py-1 rounded-full font-bold transition cursor-pointer ${
+                                          tableStatus === tab.key
+                                            ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+                                            : "text-slate-600 dark:text-slate-300"
                                         }`}
                                       >
-                                        <input
-                                          type="checkbox"
-                                          disabled={alreadyIn}
-                                          checked={checked}
-                                          onChange={() => {
-                                            setPickerSelected((prev) => {
-                                              const next = new Set(prev);
-                                              if (next.has(cand.id)) next.delete(cand.id);
-                                              else next.add(cand.id);
-                                              return next;
-                                            });
-                                          }}
-                                          className="rounded accent-indigo-600 w-3.5 h-3.5 shrink-0"
-                                        />
-                                        <span className="font-semibold text-slate-800 dark:text-slate-100 truncate flex-1">
-                                          {cand.name}
-                                        </span>
-                                        {cand.city && (
-                                          <span className="text-[10px] text-slate-400 truncate max-w-[100px]">
-                                            {cand.city}
-                                          </span>
-                                        )}
-                                        {alreadyIn && (
-                                          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                                            {t("lists.bulk_picker_already_in")}
-                                          </span>
-                                        )}
-                                      </label>
-                                    );
-                                  })}
+                                        {tab.label}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                  <div className="flex items-center gap-3 font-semibold">
+                                    <button
+                                      type="button"
+                                      disabled={activeTableView.rows.length === 0}
+                                      onClick={() => {
+                                        setDraftSelectedIds((prev) => {
+                                          const next = new Set(prev);
+                                          for (const r of activeTableView.rows) next.add(r.id);
+                                          return next;
+                                        });
+                                      }}
+                                      className="text-orange-600 hover:underline cursor-pointer disabled:opacity-40"
+                                    >
+                                      {t("lists.table_check_visible")} ({activeTableView.rows.length})
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={activeTableView.rows.length === 0}
+                                      onClick={() => {
+                                        setDraftSelectedIds((prev) => {
+                                          const next = new Set(prev);
+                                          for (const r of activeTableView.rows) next.delete(r.id);
+                                          return next;
+                                        });
+                                      }}
+                                      className="text-slate-500 hover:underline cursor-pointer disabled:opacity-40"
+                                    >
+                                      {t("lists.table_uncheck_visible")}
+                                    </button>
+                                  </div>
                                 </div>
 
-                                <div className="flex justify-end pt-1">
-                                  <button
-                                    type="button"
-                                    disabled={pickerSelected.size === 0 || savingBulkId === l.id}
-                                    onClick={() => handleConfirmBulkPicker(l)}
-                                    className="px-3.5 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
-                                  >
-                                    {savingBulkId === l.id
-                                      ? t("common.loading")
-                                      : t("lists.bulk_picker_add_selected", {
-                                          count: String(pickerSelected.size),
+                                {/* Tabla */}
+                                <div className="border border-slate-200/70 dark:border-slate-800 rounded-xl overflow-hidden">
+                                  <div className="max-h-64 overflow-y-auto overflow-x-auto">
+                                    <table className="w-full text-left border-collapse text-xs">
+                                      <thead className="sticky top-0 bg-[#f8f9ff] dark:bg-slate-800 text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200/70 dark:border-slate-700 z-10">
+                                        <tr>
+                                          <th className="py-2 px-2.5 w-8"></th>
+                                          <th className="py-2 px-2 font-bold">{t("lists.table_col_place")}</th>
+                                          <th className="py-2 px-2 font-bold">{t("lists.table_col_city")}</th>
+                                          <th className="py-2 px-2 font-bold hidden sm:table-cell">
+                                            {t("lists.table_col_price")}
+                                          </th>
+                                          <th className="py-2 px-2.5 font-bold text-right">
+                                            {t("lists.table_col_status")}
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        {activeTableView.rows.length === 0 ? (
+                                          <tr>
+                                            <td
+                                              colSpan={5}
+                                              className="py-6 text-center text-slate-400 text-[11px]"
+                                            >
+                                              {t("lists.bulk_picker_empty")}
+                                            </td>
+                                          </tr>
+                                        ) : (
+                                          activeTableView.rows.map((row) => {
+                                            const checked = draftSelectedIds.has(row.id);
+                                            const wasSaved = activeTableView.savedSet.has(row.id);
+                                            const cityDisplay = parseCityCountry(
+                                              row.city,
+                                              row.address
+                                            ).city;
+                                            return (
+                                              <tr
+                                                key={row.id}
+                                                onClick={() => {
+                                                  setDraftSelectedIds((prev) => {
+                                                    const next = new Set(prev);
+                                                    if (next.has(row.id)) next.delete(row.id);
+                                                    else next.add(row.id);
+                                                    return next;
+                                                  });
+                                                }}
+                                                className={`cursor-pointer transition ${
+                                                  checked
+                                                    ? "bg-orange-50/40 dark:bg-orange-950/20"
+                                                    : "hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                                                }`}
+                                              >
+                                                <td className="py-2 px-2.5">
+                                                  <input
+                                                    type="checkbox"
+                                                    checked={checked}
+                                                    onChange={() => {}}
+                                                    className="rounded accent-orange-600 w-3.5 h-3.5 pointer-events-none"
+                                                  />
+                                                </td>
+                                                <td className="py-2 px-2">
+                                                  <div className="font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                                                    {row.name}
+                                                  </div>
+                                                  {row.tags.length > 0 && (
+                                                    <div className="text-[10px] text-slate-400 truncate max-w-[180px]">
+                                                      {row.tags
+                                                        .slice(0, 3)
+                                                        .map((tg) => `#${tg}`)
+                                                        .join(" ")}
+                                                    </div>
+                                                  )}
+                                                </td>
+                                                <td className="py-2 px-2 text-slate-600 dark:text-slate-300">
+                                                  {cityDisplay || "—"}
+                                                </td>
+                                                <td className="py-2 px-2 text-emerald-700 dark:text-emerald-400 font-bold hidden sm:table-cell">
+                                                  {row.priceRange}
+                                                </td>
+                                                <td className="py-2 px-2.5 text-right whitespace-nowrap">
+                                                  {checked && !wasSaved ? (
+                                                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold">
+                                                      +Añadir
+                                                    </span>
+                                                  ) : !checked && wasSaved ? (
+                                                    <span className="px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-[10px] font-bold">
+                                                      -Quitar
+                                                    </span>
+                                                  ) : checked ? (
+                                                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold">
+                                                      {t("lists.table_status_in")}
+                                                    </span>
+                                                  ) : (
+                                                    <span className="text-[10px] text-slate-400">
+                                                      {t("lists.table_status_out")}
+                                                    </span>
+                                                  )}
+                                                </td>
+                                              </tr>
+                                            );
+                                          })
+                                        )}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+
+                                {/* Pie de tabla */}
+                                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                                    {activeTableView.addCount > 0 || activeTableView.remCount > 0
+                                      ? t("lists.table_pending_changes", {
+                                          add: String(activeTableView.addCount),
+                                          rem: String(activeTableView.remCount),
+                                        })
+                                      : t("lists.places_count", {
+                                          count: String(draftSelectedIds.size),
                                         })}
-                                  </button>
+                                  </span>
+
+                                  <div className="flex items-center gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setTableListId(null)}
+                                      className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                                    >
+                                      {t("common.cancel")}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={
+                                        savingTableId === l.id ||
+                                        (activeTableView.addCount === 0 &&
+                                          activeTableView.remCount === 0)
+                                      }
+                                      onClick={() => handleSaveTable(l)}
+                                      className="px-4 py-1.5 rounded-full bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-40"
+                                    >
+                                      {savingTableId === l.id
+                                        ? t("common.loading")
+                                        : t("lists.table_save_changes")}
+                                    </button>
+                                  </div>
                                 </div>
                               </>
                             )}
                           </div>
                         )}
 
+                        {/* Paradas actuales de la lista */}
                         {loadingItemsId === l.id ? (
                           <div className="h-12 rounded-xl gm-shimmer" />
                         ) : items.length === 0 ? (
                           <p className="text-[11px] text-slate-400 italic text-center py-2">
-                            {t("lists.no_places_in_list")}
+                            {l.isAuto ? t("lists.auto_empty_hint") : t("lists.no_places_in_list")}
                           </p>
                         ) : (
                           items.map((item, idx) => (
@@ -749,40 +1273,42 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                <button
-                                  type="button"
-                                  disabled={idx === 0}
-                                  onClick={() => handleMoveItem(l.id, idx, -1)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-25 cursor-pointer"
-                                  aria-label="Subir"
-                                >
-                                  <span className="material-symbols-outlined text-sm leading-none">
-                                    arrow_upward
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  disabled={idx === items.length - 1}
-                                  onClick={() => handleMoveItem(l.id, idx, 1)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-25 cursor-pointer"
-                                  aria-label="Bajar"
-                                >
-                                  <span className="material-symbols-outlined text-sm leading-none">
-                                    arrow_downward
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemovePlace(l.id, item.placeId)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 cursor-pointer"
-                                  title={t("lists.remove_place")}
-                                >
-                                  <span className="material-symbols-outlined text-sm leading-none">
-                                    close
-                                  </span>
-                                </button>
-                              </div>
+                              {!l.isAuto && (
+                                <div className="flex items-center gap-0.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    disabled={idx === 0}
+                                    onClick={() => handleMoveItem(l.id, idx, -1)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-25 cursor-pointer"
+                                    aria-label="Subir"
+                                  >
+                                    <span className="material-symbols-outlined text-sm leading-none">
+                                      arrow_upward
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={idx === items.length - 1}
+                                    onClick={() => handleMoveItem(l.id, idx, 1)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-25 cursor-pointer"
+                                    aria-label="Bajar"
+                                  >
+                                    <span className="material-symbols-outlined text-sm leading-none">
+                                      arrow_downward
+                                    </span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemovePlace(l.id, item.placeId)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 cursor-pointer"
+                                    title={t("lists.remove_place")}
+                                  >
+                                    <span className="material-symbols-outlined text-sm leading-none">
+                                      close
+                                    </span>
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ))
                         )}
