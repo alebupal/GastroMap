@@ -795,8 +795,11 @@ export function ListsModal({ isOpen, onClose }: ListsModalProps) {
 
                             {loadingEditorId === l.id ? (
                               <div className="h-24 rounded-xl gm-shimmer" />
+                            ) : !draftIsAuto ? (
+                              <p className="text-xs text-slate-500 dark:text-slate-400 py-1">
+                                En modo <strong className="text-slate-700 dark:text-slate-200">{t("lists.mode_manual")}</strong> tú eliges los sitios manualmente desde la tabla o desde cada tarjeta. Selecciona <strong className="text-indigo-600 dark:text-indigo-400">⚡ {t("lists.mode_auto")}</strong> arriba para definir reglas automáticas.
+                              </p>
                             ) : (
-                              draftIsAuto &&
                               editorData && (
                                 <div className="space-y-3">
                                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
